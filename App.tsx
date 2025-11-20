@@ -216,27 +216,49 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (globalError) {
-      const timer = setTimeout(() => setGlobalError(null), 5000);
+      const timer = setTimeout(() => setGlobalError(null), 3000);
       return () => clearTimeout(timer);
     }
   }, [globalError]);
 
+  // Helper function for SpeechSynthesis
+  const playSystemVoice = useCallback((text: string, lang: string) => {
+      if (!('speechSynthesis' in window)) {
+          setGlobalError(t('audioPlaybackError'));
+          return;
+      }
+
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+      
+      // Try to find a good voice
+      const voices = window.speechSynthesis.getVoices();
+      
+      // Priority: Google voices > Matching Lang > Default
+      const preferredVoice = 
+          voices.find(v => v.lang === lang && v.name.includes('Google')) || 
+          voices.find(v => v.lang === lang && !v.localService) ||
+          voices.find(v => v.lang === lang);
+
+      if (preferredVoice) {
+          utterance.voice = preferredVoice;
+      }
+
+      // Adjust rate slightly for clarity
+      utterance.rate = 0.9;
+
+      window.speechSynthesis.speak(utterance);
+  }, [t]);
+
   const handlePlayAudio = useCallback(
     (text: string, lang: string) => {
+      // 1. Check if offline strictly
       if (!isOnline) {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang; 
-            const voices = window.speechSynthesis.getVoices();
-            const nativeVoice = voices.find(v => v.lang === lang);
-            if (nativeVoice) {
-                utterance.voice = nativeVoice;
-            }
-            window.speechSynthesis.speak(utterance);
-            setGlobalError(t('usingOfflineVoice'));
-        } else {
-            setGlobalError(t('audioUnavailableOffline'));
-        }
+        playSystemVoice(text, lang);
+        setGlobalError(t('usingOfflineVoice'));
         return;
       }
 
@@ -250,23 +272,32 @@ const App: React.FC = () => {
           audioLang = 'es-US';
       }
 
-      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${audioLang}&client=tw-ob&q=${encodeURIComponent(text)}`;
+      // Use 'gtx' client instead of 'tw-ob' which is often blocked on hosted environments
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${audioLang}&client=gtx&q=${encodeURIComponent(text)}`;
+      
       const audio = new Audio(url);
       audioRef.current = audio;
+      
       audio.onerror = (e) => {
-        console.error("Google TTS playback error", e);
-        if ('speechSynthesis' in window) {
-             const utterance = new SpeechSynthesisUtterance(text);
-             utterance.lang = lang;
-             window.speechSynthesis.speak(utterance);
-             setGlobalError(t('usingOfflineVoice'));
-        } else {
+        console.warn("Google TTS blocked/failed, falling back to system voice", e);
+        // Fallback silently if online, without showing the "Offline" error
+        playSystemVoice(text, lang);
+        
+        // Only show error if we genuinely couldn't play anything
+        if (!('speechSynthesis' in window)) {
              setGlobalError(t('audioPlaybackError'));
+        } else {
+             // Optional: Inform user we are using system voice if desired, but not "Offline"
+             // setGlobalError(t('usingSystemVoice')); 
         }
       };
-      audio.play().catch((err) => console.error("Play failed", err));
+
+      audio.play().catch((err) => {
+          console.error("Play failed", err);
+          playSystemVoice(text, lang);
+      });
     },
-    [isOnline, t],
+    [isOnline, t, playSystemVoice],
   );
 
   const handlePlayPhrase = useCallback((phraseType: 'ask' | 'want', item: TranslationItem) => {
@@ -392,37 +423,39 @@ const App: React.FC = () => {
       const isPanelOpen = activeTab === 'favorites' || activeTab === 'list';
 
       return (
-          <div className="bg-gray-100 min-h-screen font-sans flex justify-center">
-            <div className="w-full max-w-md bg-white text-gray-800 shadow-2xl flex flex-col h-screen relative overflow-hidden">
+          <div className="bg-gray-100 min-h-screen font-sans flex justify-center w-full">
+            <div className="w-full bg-white text-gray-800 shadow-2xl flex flex-col h-screen relative overflow-hidden">
                  <header className={`p-6 pb-10 ${currentTheme.color} text-white shadow-md rounded-b-3xl z-30 transition-colors duration-300 relative`}>
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <p className="text-sm opacity-80">{t('welcomeBack')}</p>
-                            <h1 className="text-2xl font-bold">{t('hubTitle')}</h1>
+                    <div className="max-w-7xl mx-auto w-full">
+                        <div className="flex justify-between items-center mb-4">
+                            <div>
+                                <p className="text-sm opacity-80">{t('welcomeBack')}</p>
+                                <h1 className="text-2xl font-bold">{t('hubTitle')}</h1>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div 
-                        className={`p-3 rounded-xl text-white text-sm flex items-center gap-2 shadow-sm cursor-pointer transition-all ${
-                            userPlan === 'free' 
-                            ? 'bg-white/20 hover:bg-white/30' 
-                            : 'bg-gradient-to-r from-yellow-400 to-yellow-600 hover:opacity-90 shadow-md'
-                        }`}
-                        onClick={() => setIsMenuOpen(true)}
-                    >
-                        {userPlan !== 'free' && <CrownIcon className="w-4 h-4" />}
-                        <span className="font-bold uppercase tracking-wider flex-1">
-                            {t('planLabel')} - {t(userPlan === 'free' ? 'planFree' : (userPlan === 'premium' ? 'planPremium' : 'planMaster'))}
-                        </span>
-                        {userPlan === 'free' && (
-                             <span className="text-xs opacity-80 underline">{t('unlockExperience')}</span>
-                        )}
+                        
+                        <div 
+                            className={`p-3 rounded-xl text-white text-sm flex items-center gap-2 shadow-sm cursor-pointer transition-all ${
+                                userPlan === 'free' 
+                                ? 'bg-white/20 hover:bg-white/30' 
+                                : 'bg-gradient-to-r from-yellow-400 to-yellow-600 hover:opacity-90 shadow-md'
+                            }`}
+                            onClick={() => setIsMenuOpen(true)}
+                        >
+                            {userPlan !== 'free' && <CrownIcon className="w-4 h-4" />}
+                            <span className="font-bold uppercase tracking-wider flex-1">
+                                {t('planLabel')} - {t(userPlan === 'free' ? 'planFree' : (userPlan === 'premium' ? 'planPremium' : 'planMaster'))}
+                            </span>
+                            {userPlan === 'free' && (
+                                <span className="text-xs opacity-80 underline">{t('unlockExperience')}</span>
+                            )}
+                        </div>
                     </div>
                  </header>
 
-                 <main className="flex-1 p-6 overflow-y-auto pb-32">
+                 <main className="flex-1 p-6 overflow-y-auto pb-32 w-full max-w-7xl mx-auto">
                     <h2 className="text-lg font-bold text-gray-700 mb-4">{t('hubSubtitle')}</h2>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                         {modules.map((mod) => (
                             <button 
                                 key={mod.id}
@@ -455,7 +488,7 @@ const App: React.FC = () => {
 
                  {/* Sliding Panel */}
                  <div 
-                    className={`absolute inset-x-0 bottom-0 bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-40 transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col overflow-hidden border-t border-gray-100`}
+                    className={`absolute inset-x-0 bottom-0 bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-40 transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col overflow-hidden border-t border-gray-100 max-w-7xl mx-auto w-full left-0 right-0`}
                     style={{ 
                         top: '11rem', 
                         bottom: '0',
@@ -469,7 +502,7 @@ const App: React.FC = () => {
                             onClick={() => handleTabChange('home')}
                           ></div>
                           {panelTitle && (
-                              <div className="flex items-center justify-between w-full px-6 pb-3">
+                              <div className="flex items-center justify-between w-full px-6 pb-3 max-w-7xl mx-auto">
                                   <div className="w-9"></div> 
                                   <h2 className="text-xl font-bold uppercase tracking-widest text-center text-white shadow-sm">
                                       {panelTitle}
@@ -484,12 +517,15 @@ const App: React.FC = () => {
                           )}
                       </div>
                       <div className="flex-1 overflow-y-auto px-4 pb-32 pt-4 bg-white">
-                          {panelContent}
+                          <div className="max-w-7xl mx-auto">
+                            {panelContent}
+                          </div>
                       </div>
                  </div>
 
                  {/* Navigation Bar */}
-                 <nav className={`absolute bottom-0 w-full ${currentTheme.color} grid grid-cols-3 h-20 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.15)] items-end pb-0 transition-all duration-300`}>
+                 <nav className={`absolute bottom-0 w-full ${currentTheme.color} z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.15)]`}>
+                    <div className="max-w-7xl mx-auto grid grid-cols-3 h-20 items-end pb-0 transition-all duration-300">
                       {/* Favorites Tab */}
                       <button 
                           onClick={() => handleTabChange('favorites')}
@@ -549,6 +585,7 @@ const App: React.FC = () => {
                               {t('shoppingListLabel')}
                           </span>
                       </button>
+                    </div>
                  </nav>
             </div>
             
@@ -583,7 +620,7 @@ const App: React.FC = () => {
   }
   
   return (
-    <div className="bg-gray-100 min-h-screen font-sans flex justify-center">
+    <div className="bg-gray-100 min-h-screen font-sans flex justify-center w-full">
         
         {globalError && (
             <div className="fixed top-0 left-0 right-0 p-3 text-center text-sm shadow-lg flex justify-between items-center z-[100] bg-yellow-400 text-black max-w-md mx-auto">
@@ -630,7 +667,7 @@ const App: React.FC = () => {
             )}
 
             {activeModule !== 'supermarket' && activeModule !== null && AVAILABLE_MODULES.includes(activeModule) && (
-                <div className="w-full max-w-md bg-white text-gray-800 shadow-2xl flex flex-col h-screen relative">
+                <div className="w-full bg-white text-gray-800 shadow-2xl flex flex-col h-screen relative">
                     <header className={`p-4 ${currentTheme.color} text-white flex items-center justify-between shadow-md transition-colors duration-300`}>
                         <button onClick={() => handleModuleSelect(null)} className="p-2 bg-white/20 rounded-full">
                             <HomeIcon className="w-5 h-5" />
@@ -700,9 +737,16 @@ const MenuModal: React.FC<{
     const [paymentCountry, setPaymentCountry] = useState<'cl' | 'br'>('cl');
     const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
 
+    // Desktop/Tablet Layout logic:
+    // On larger screens, we don't switch steps, we show side-by-side.
+    // Selecting a plan on desktop just updates the state, doesn't change 'step'.
+    
     const handlePlanSelect = (plan: 'premium' | 'master') => {
         setSelectedPlan(plan);
-        setStep('checkout');
+        // Only switch step on mobile
+        if (window.innerWidth < 768) {
+            setStep('checkout');
+        }
     };
 
     const handleSubscribe = (plan: 'free' | 'premium' | 'master') => {
@@ -752,221 +796,262 @@ const MenuModal: React.FC<{
         return paymentCountry === 'br' ? 'BRL' : 'CLP';
     };
 
+    // Desktop: Plan cards styling based on selection
+    const getPlanCardStyle = (plan: 'premium' | 'master') => {
+        const isSelected = selectedPlan === plan;
+        if (plan === 'premium') {
+            return `bg-gradient-to-r from-[#c83745] to-[#e65c6a] rounded-xl p-4 shadow-md text-white relative overflow-hidden cursor-pointer transition-all hover:shadow-lg ${isSelected ? 'ring-4 ring-offset-2 ring-[#c83745] scale-[1.02]' : 'opacity-90 hover:opacity-100 hover:scale-[1.01]'}`;
+        }
+        return `bg-gray-900 rounded-xl p-4 shadow-md text-white border border-gray-700 cursor-pointer transition-all hover:shadow-lg ${isSelected ? 'ring-4 ring-offset-2 ring-gray-600 scale-[1.02]' : 'opacity-90 hover:opacity-100 hover:scale-[1.01]'}`;
+    };
+
     return (
-        <div className="absolute inset-0 z-50 bg-gray-100 flex flex-col animate-fade-in">
-            <div className={`${theme.color} p-4 pt-6 text-white shadow-lg flex items-center justify-between transition-colors duration-300`}>
-              <h2 className="text-2xl font-bold">{step === 'checkout' ? t('subscriptionCheckout') : t('menu')}</h2>
-              <button onClick={() => {
-                  if(step === 'checkout') setStep('plans');
-                  else onClose();
-              }} className="p-2 bg-white/20 rounded-full hover:bg-white/30">
-                {step === 'checkout' ? <ChevronDownIcon className="w-6 h-6 rotate-90" /> : <XIcon className="w-6 h-6" />}
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
-              
-              {step === 'plans' && (
-                <>
-                  {activeModule && (
-                      <button 
-                        onClick={() => onSelectModule(null)}
-                        className={`w-full bg-white border-2 ${theme.textColor.replace('text', 'border')} ${theme.textColor} font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm hover:bg-gray-50 transition-colors`}
-                      >
-                          <HomeIcon className="w-5 h-5" />
-                          {t('changeModule')}
-                      </button>
-                  )}
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
+            
+            {/* Modal Content - Responsive Width */}
+            <div className="relative w-full h-full md:h-auto md:max-h-[90vh] max-w-md md:max-w-5xl bg-gray-100 flex flex-col shadow-2xl md:rounded-2xl overflow-hidden animate-fade-in z-10">
+                
+                <div className={`${theme.color} p-4 pt-6 text-white shadow-lg flex items-center justify-between transition-colors duration-300 shrink-0`}>
+                    <h2 className="text-2xl font-bold">
+                        <span className="md:hidden">{step === 'checkout' ? t('subscriptionCheckout') : t('menu')}</span>
+                        <span className="hidden md:inline">{t('menu')} & {t('subscriptionCheckout')}</span>
+                    </h2>
+                    <button onClick={() => {
+                        if(step === 'checkout' && window.innerWidth < 768) setStep('plans');
+                        else onClose();
+                    }} className="p-2 bg-white/20 rounded-full hover:bg-white/30">
+                        {step === 'checkout' ? <ChevronDownIcon className="w-6 h-6 rotate-90 md:hidden" /> : null}
+                        <XIcon className={`w-6 h-6 ${step === 'checkout' ? 'hidden md:block' : ''}`} />
+                    </button>
+                </div>
 
-                  <section>
-                    <h3 className="text-gray-800 font-bold text-lg mb-3 flex items-center gap-2">
-                      <RocketIcon className={`w-5 h-5 ${theme.textColor}`} />
-                      {t('plans')}
-                    </h3>
-                    <div className="space-y-4">
-                      <div className={`bg-white rounded-xl p-4 shadow-sm border-2 relative ${userPlan === 'free' ? 'border-gray-400' : 'border-transparent'}`}>
-                        {userPlan === 'free' && (
-                            <div className="absolute top-3 right-3 bg-gray-200 text-gray-600 text-xs font-bold px-2 py-1 rounded">
-                              {t('currentPlan')}
-                            </div>
-                        )}
-                        <h4 className="text-xl font-bold text-gray-800">{t('planFree')}</h4>
-                        <p className="text-gray-500 text-sm mt-1">{t('planFreeDesc')}</p>
-                        <button onClick={() => { setUserPlan('free'); onClose(); }} className="mt-4 w-full bg-gray-200 text-gray-900 font-bold py-3 rounded-xl border border-gray-300 hover:bg-gray-300 transition-colors">
-                            {t('stayOnFree')}
-                        </button>
-                      </div>
+                <div className="flex-1 overflow-y-auto md:overflow-hidden">
+                    <div className="flex flex-col md:grid md:grid-cols-12 h-full">
+                        
+                        {/* LEFT COLUMN: PLANS (Always visible on desktop, visible on mobile if step is plans) */}
+                        <div className={`p-4 space-y-6 md:col-span-7 md:overflow-y-auto md:p-8 ${step === 'checkout' ? 'hidden md:block' : 'block'}`}>
+                             {activeModule && (
+                                <button 
+                                    onClick={() => onSelectModule(null)}
+                                    className={`w-full bg-white border-2 ${theme.textColor.replace('text', 'border')} ${theme.textColor} font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm hover:bg-gray-50 transition-colors`}
+                                >
+                                    <HomeIcon className="w-5 h-5" />
+                                    {t('changeModule')}
+                                </button>
+                            )}
 
-                      <div className={`bg-gradient-to-r from-[#c83745] to-[#e65c6a] rounded-xl p-4 shadow-md text-white relative overflow-hidden ${userPlan === 'premium' ? 'ring-4 ring-[#c83745]/30' : ''}`}>
-                        <div className="absolute -right-4 -top-4 bg-white/20 w-24 h-24 rounded-full blur-xl"></div>
-                        {userPlan === 'premium' && (
-                            <div className="absolute top-3 right-3 bg-white text-[#c83745] text-xs font-bold px-2 py-1 rounded shadow">
-                              {t('currentPlan')}
-                            </div>
-                        )}
-                        <h4 className="text-xl font-bold flex items-center gap-2">
-                          {t('planPremium')}
-                          <CrownIcon className="w-5 h-5 fill-current text-yellow-300" />
-                        </h4>
-                        <p className="text-white/90 text-sm mt-1">{t('planPremiumDesc')}</p>
-                        <p className="text-white font-bold text-lg mt-2">{t('priceTraveler')}</p>
-                        {userPlan !== 'premium' && (
-                            <button onClick={() => handlePlanSelect('premium')} className="mt-4 w-full bg-white text-[#c83745] font-bold py-2 rounded-lg shadow hover:bg-gray-50 transition-colors">
-                              {t('subscribe')}
-                            </button>
-                        )}
-                      </div>
+                            <section>
+                                <h3 className="text-gray-800 font-bold text-lg mb-3 flex items-center gap-2">
+                                <RocketIcon className={`w-5 h-5 ${theme.textColor}`} />
+                                {t('plans')}
+                                </h3>
+                                <div className="space-y-4">
+                                    <div className={`bg-white rounded-xl p-4 shadow-sm border-2 relative ${userPlan === 'free' ? 'border-gray-400' : 'border-transparent'}`}>
+                                        {userPlan === 'free' && (
+                                            <div className="absolute top-3 right-3 bg-gray-200 text-gray-600 text-xs font-bold px-2 py-1 rounded">
+                                            {t('currentPlan')}
+                                            </div>
+                                        )}
+                                        <h4 className="text-xl font-bold text-gray-800">{t('planFree')}</h4>
+                                        <p className="text-gray-500 text-sm mt-1">{t('planFreeDesc')}</p>
+                                        <button onClick={() => { setUserPlan('free'); onClose(); }} className="mt-4 w-full bg-gray-200 text-gray-900 font-bold py-3 rounded-xl border border-gray-300 hover:bg-gray-300 transition-colors">
+                                            {t('stayOnFree')}
+                                        </button>
+                                    </div>
 
-                      <div className={`bg-gray-900 rounded-xl p-4 shadow-md text-white border border-gray-700 ${userPlan === 'master' ? 'ring-4 ring-gray-500/50' : ''}`}>
-                        {userPlan === 'master' && (
-                            <div className="absolute top-3 right-3 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded shadow">
-                              {t('currentPlan')}
-                            </div>
-                        )}
-                        <h4 className="text-xl font-bold text-yellow-400">{t('planMaster')}</h4>
-                        <p className="text-gray-400 text-sm mt-1">{t('planMasterDesc')}</p>
-                        <p className="text-white font-bold text-lg mt-2">{t('priceMaster')}</p>
-                          {userPlan !== 'master' && (
-                            <button onClick={() => handlePlanSelect('master')} className="mt-4 w-full bg-gray-700 text-white font-bold py-2 rounded-lg hover:bg-gray-600 transition-colors border border-gray-600">
-                              {t('subscribe')}
-                            </button>
-                          )}
-                      </div>
+                                    <div 
+                                        className={getPlanCardStyle('premium')}
+                                        onClick={() => handlePlanSelect('premium')}
+                                    >
+                                        <div className="absolute -right-4 -top-4 bg-white/20 w-24 h-24 rounded-full blur-xl"></div>
+                                        {(userPlan === 'premium' || selectedPlan === 'premium') && (
+                                            <div className="absolute top-3 right-3 bg-white text-[#c83745] text-xs font-bold px-2 py-1 rounded shadow flex items-center gap-1">
+                                                {userPlan === 'premium' ? t('currentPlan') : <CheckIcon className="w-3 h-3" />}
+                                            </div>
+                                        )}
+                                        <h4 className="text-xl font-bold flex items-center gap-2">
+                                            {t('planPremium')}
+                                            <CrownIcon className="w-5 h-5 fill-current text-yellow-300" />
+                                        </h4>
+                                        <p className="text-white/90 text-sm mt-1">{t('planPremiumDesc')}</p>
+                                        <p className="text-white font-bold text-lg mt-2">{t('priceTraveler')}</p>
+                                        {userPlan !== 'premium' && (
+                                            <div className="mt-4 w-full bg-white text-[#c83745] font-bold py-2 rounded-lg shadow hover:bg-gray-50 transition-colors text-center">
+                                                {t('subscribe')}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div 
+                                        className={getPlanCardStyle('master')}
+                                        onClick={() => handlePlanSelect('master')}
+                                    >
+                                        {(userPlan === 'master' || selectedPlan === 'master') && (
+                                            <div className="absolute top-3 right-3 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded shadow flex items-center gap-1">
+                                                {userPlan === 'master' ? t('currentPlan') : <CheckIcon className="w-3 h-3" />}
+                                            </div>
+                                        )}
+                                        <h4 className="text-xl font-bold text-yellow-400">{t('planMaster')}</h4>
+                                        <p className="text-gray-400 text-sm mt-1">{t('planMasterDesc')}</p>
+                                        <p className="text-white font-bold text-lg mt-2">{t('priceMaster')}</p>
+                                        {userPlan !== 'master' && (
+                                            <div className="mt-4 w-full bg-gray-700 text-white font-bold py-2 rounded-lg hover:bg-gray-600 transition-colors border border-gray-600 text-center">
+                                                {t('subscribe')}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                        {/* RIGHT COLUMN: CHECKOUT (Hidden on mobile unless step is checkout, Always visible on desktop) */}
+                        <div className={`bg-gray-50 border-l border-gray-200 p-4 space-y-4 md:col-span-5 md:overflow-y-auto md:p-8 flex flex-col ${step === 'checkout' ? 'block' : 'hidden md:flex'}`}>
+                             
+                             <h3 className="text-gray-800 font-bold text-lg mb-3 hidden md:block">{t('subscriptionCheckout')}</h3>
+
+                             {!selectedPlan ? (
+                                 <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-center p-8 border-2 border-dashed border-gray-300 rounded-xl">
+                                     <ShoppingBagIcon className="w-12 h-12 mb-2 opacity-30" />
+                                     <p>{t('simulateSub')}</p>
+                                 </div>
+                             ) : (
+                                <div className="space-y-4 animate-fade-in">
+                                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                                        <h4 className="text-gray-500 text-xs uppercase font-bold mb-3">{t('billingCountry')}</h4>
+                                        <div className="flex flex-wrap gap-3">
+                                            <button 
+                                                onClick={() => { setPaymentCountry('cl'); setPaymentMethod(null); }}
+                                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border-2 transition-all ${paymentCountry === 'cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 grayscale'}`}
+                                            >
+                                                <img src="https://flagcdn.com/cl.svg" alt="Chile" className="w-6 h-4 rounded shadow-sm" />
+                                                <span className={`text-sm font-bold ${paymentCountry === 'cl' ? 'text-gray-800' : 'text-gray-500'}`}>Chile</span>
+                                            </button>
+                                            <button 
+                                                onClick={() => { setPaymentCountry('br'); setPaymentMethod(null); }}
+                                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border-2 transition-all ${paymentCountry === 'br' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 grayscale'}`}
+                                            >
+                                                <img src="https://flagcdn.com/br.svg" alt="Brazil" className="w-6 h-4 rounded shadow-sm" />
+                                                <span className={`text-sm font-bold ${paymentCountry === 'br' ? 'text-gray-800' : 'text-gray-500'}`}>Brasil</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                                        <h4 className="text-gray-500 text-xs uppercase font-bold mb-1">{t('totalToPay')}</h4>
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <span className="text-sm text-gray-500 mr-2">{t(selectedPlan === 'premium' ? 'planPremium' : 'planMaster')}</span>
+                                                <span className="text-2xl font-bold text-gray-800">
+                                                    {getPriceDisplay()}
+                                                </span>
+                                            </div>
+                                            <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">{getCurrencyCode()}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 className="text-gray-800 font-bold mb-3">{t('selectPaymentMethod')}</h4>
+                                        <div className="space-y-3">
+                                            
+                                            {paymentCountry === 'cl' && (
+                                                <>
+                                                    <button 
+                                                        onClick={() => setPaymentMethod('debit_cl')}
+                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'debit_cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                                    >
+                                                        <div className="bg-orange-500 p-2 rounded text-white flex-shrink-0">
+                                                            <CreditCardIcon className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <p className="font-bold text-gray-800 text-sm">{t('methodDebit')}</p>
+                                                            <p className="text-xs text-gray-500">Webpay / Redcompra / Cuenta RUT</p>
+                                                        </div>
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => setPaymentMethod('credit_cl')}
+                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'credit_cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                                    >
+                                                        <div className="bg-blue-600 p-2 rounded text-white flex-shrink-0">
+                                                            <CreditCardIcon className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <p className="font-bold text-gray-800 text-sm">{t('methodCredit')}</p>
+                                                            <p className="text-xs text-gray-500">Visa / Mastercard / Amex</p>
+                                                        </div>
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => setPaymentMethod('mercadopago_cl')}
+                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'mercadopago_cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                                    >
+                                                        <div className="bg-blue-400 p-2 rounded text-white flex-shrink-0">
+                                                            <QrCodeIcon className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <p className="font-bold text-gray-800 text-sm">{t('methodMercadoPago')}</p>
+                                                            <p className="text-xs text-gray-500">App / QR / Saldo</p>
+                                                        </div>
+                                                    </button>
+                                                </>
+                                            )}
+
+                                            {paymentCountry === 'br' && (
+                                                <>
+                                                    <button 
+                                                        onClick={() => setPaymentMethod('pix')}
+                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'pix' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                                    >
+                                                        <div className="bg-teal-600 p-2 rounded text-white flex-shrink-0">
+                                                            <PixIcon className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <p className="font-bold text-gray-800 text-sm">{t('methodPix')}</p>
+                                                            <p className="text-xs text-gray-500">Aprovação imediata</p>
+                                                        </div>
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => setPaymentMethod('credit_br')}
+                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'credit_br' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                                    >
+                                                        <div className="bg-blue-600 p-2 rounded text-white flex-shrink-0">
+                                                            <CreditCardIcon className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <p className="font-bold text-gray-800 text-sm">{t('methodCredit')}</p>
+                                                            <p className="text-xs text-gray-500">Até 12x sem juros</p>
+                                                        </div>
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => setPaymentMethod('boleto')}
+                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'boleto' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                                    >
+                                                        <div className="bg-gray-600 p-2 rounded text-white flex-shrink-0">
+                                                            <BarcodeIcon className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <p className="font-bold text-gray-800 text-sm">{t('methodBoleto')}</p>
+                                                            <p className="text-xs text-gray-500">Aprovação em 1-2 dias úteis</p>
+                                                        </div>
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <button 
+                                        disabled={!paymentMethod}
+                                        onClick={() => handleSubscribe(selectedPlan)}
+                                        className={`w-full py-4 rounded-xl font-bold text-white shadow-lg mt-8 transition-all ${paymentMethod ? 'bg-[#c83745] hover:bg-[#b02a36]' : 'bg-gray-300 cursor-not-allowed'}`}
+                                    >
+                                        {t('payNow')}
+                                    </button>
+                                </div>
+                             )}
+                        </div>
                     </div>
-                  </section>
-                </>
-              )}
-
-              {step === 'checkout' && selectedPlan && (
-                  <div className="space-y-4">
-                      
-                      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                         <h4 className="text-gray-500 text-xs uppercase font-bold mb-3">{t('billingCountry')}</h4>
-                         <div className="flex flex-wrap gap-3">
-                            <button 
-                                onClick={() => { setPaymentCountry('cl'); setPaymentMethod(null); }}
-                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border-2 transition-all ${paymentCountry === 'cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 grayscale'}`}
-                            >
-                                <img src="https://flagcdn.com/cl.svg" alt="Chile" className="w-6 h-4 rounded shadow-sm" />
-                                <span className={`text-sm font-bold ${paymentCountry === 'cl' ? 'text-gray-800' : 'text-gray-500'}`}>Chile</span>
-                            </button>
-                            <button 
-                                onClick={() => { setPaymentCountry('br'); setPaymentMethod(null); }}
-                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border-2 transition-all ${paymentCountry === 'br' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 grayscale'}`}
-                            >
-                                <img src="https://flagcdn.com/br.svg" alt="Brazil" className="w-6 h-4 rounded shadow-sm" />
-                                <span className={`text-sm font-bold ${paymentCountry === 'br' ? 'text-gray-800' : 'text-gray-500'}`}>Brasil</span>
-                            </button>
-                         </div>
-                      </div>
-
-                      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                          <h4 className="text-gray-500 text-xs uppercase font-bold mb-1">{t('totalToPay')}</h4>
-                          <div className="flex justify-between items-center">
-                              <span className="text-2xl font-bold text-gray-800">
-                                  {getPriceDisplay()}
-                              </span>
-                              <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">{getCurrencyCode()}</span>
-                          </div>
-                      </div>
-                      
-                      <div>
-                          <h4 className="text-gray-800 font-bold mb-3">{t('selectPaymentMethod')}</h4>
-                          <div className="space-y-3">
-                              
-                              {paymentCountry === 'cl' && (
-                                  <>
-                                    <button 
-                                        onClick={() => setPaymentMethod('debit_cl')}
-                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'debit_cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white'}`}
-                                    >
-                                        <div className="bg-orange-500 p-2 rounded text-white flex-shrink-0">
-                                            <CreditCardIcon className="w-6 h-6" />
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-bold text-gray-800 text-sm">{t('methodDebit')}</p>
-                                            <p className="text-xs text-gray-500">Webpay / Redcompra / Cuenta RUT</p>
-                                        </div>
-                                    </button>
-                                    <button 
-                                        onClick={() => setPaymentMethod('credit_cl')}
-                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'credit_cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white'}`}
-                                    >
-                                        <div className="bg-blue-600 p-2 rounded text-white flex-shrink-0">
-                                            <CreditCardIcon className="w-6 h-6" />
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-bold text-gray-800 text-sm">{t('methodCredit')}</p>
-                                            <p className="text-xs text-gray-500">Visa / Mastercard / Amex</p>
-                                        </div>
-                                    </button>
-                                    <button 
-                                        onClick={() => setPaymentMethod('mercadopago_cl')}
-                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'mercadopago_cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white'}`}
-                                    >
-                                        <div className="bg-blue-400 p-2 rounded text-white flex-shrink-0">
-                                            <QrCodeIcon className="w-6 h-6" />
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-bold text-gray-800 text-sm">{t('methodMercadoPago')}</p>
-                                            <p className="text-xs text-gray-500">App / QR / Saldo</p>
-                                        </div>
-                                    </button>
-                                  </>
-                              )}
-
-                              {paymentCountry === 'br' && (
-                                  <>
-                                    <button 
-                                        onClick={() => setPaymentMethod('pix')}
-                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'pix' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white'}`}
-                                    >
-                                        <div className="bg-teal-600 p-2 rounded text-white flex-shrink-0">
-                                            <PixIcon className="w-6 h-6" />
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-bold text-gray-800 text-sm">{t('methodPix')}</p>
-                                            <p className="text-xs text-gray-500">Aprovação imediata</p>
-                                        </div>
-                                    </button>
-                                    <button 
-                                        onClick={() => setPaymentMethod('credit_br')}
-                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'credit_br' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white'}`}
-                                    >
-                                        <div className="bg-blue-600 p-2 rounded text-white flex-shrink-0">
-                                            <CreditCardIcon className="w-6 h-6" />
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-bold text-gray-800 text-sm">{t('methodCredit')}</p>
-                                            <p className="text-xs text-gray-500">Até 12x sem juros</p>
-                                        </div>
-                                    </button>
-                                    <button 
-                                        onClick={() => setPaymentMethod('boleto')}
-                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'boleto' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white'}`}
-                                    >
-                                        <div className="bg-gray-600 p-2 rounded text-white flex-shrink-0">
-                                            <BarcodeIcon className="w-6 h-6" />
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-bold text-gray-800 text-sm">{t('methodBoleto')}</p>
-                                            <p className="text-xs text-gray-500">Aprovação em 1-2 dias úteis</p>
-                                        </div>
-                                    </button>
-                                  </>
-                              )}
-                          </div>
-                      </div>
-                      <button 
-                          disabled={!paymentMethod}
-                          onClick={() => handleSubscribe(selectedPlan)}
-                          className={`w-full py-4 rounded-xl font-bold text-white shadow-lg mt-8 transition-all ${paymentMethod ? 'bg-[#c83745] hover:bg-[#b02a36]' : 'bg-gray-300 cursor-not-allowed'}`}
-                      >
-                          {t('payNow')}
-                      </button>
-                  </div>
-              )}
+                </div>
             </div>
-          </div>
+        </div>
     )
 }
 

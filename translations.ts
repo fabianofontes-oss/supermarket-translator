@@ -1,5 +1,6 @@
 
 
+
 const enUS = {
   welcomeBack: 'Welcome back',
   hubTitle: 'Translator Hub',
@@ -77,6 +78,7 @@ const enUS = {
   lockedAudio: 'Upgrade to Premium to hear audio',
   audioUnavailableOffline: 'Audio is unavailable offline',
   usingOfflineVoice: 'Offline: Using system voice',
+  usingSystemVoice: 'Using system voice',
   audioPlaybackError: 'Error playing audio',
   freePhrasesLimit: 'Free Phrases: ',
   
@@ -210,6 +212,7 @@ const ptBR = {
   lockedAudio: 'Assine Premium para ouvir áudio',
   audioUnavailableOffline: 'Áudio indisponível offline',
   usingOfflineVoice: 'Offline: Usando voz do sistema',
+  usingSystemVoice: 'Usando voz do sistema',
   audioPlaybackError: 'Erro ao reproduzir áudio',
   freePhrasesLimit: 'Frases Grátis: ',
 
@@ -343,6 +346,7 @@ const esCL = {
   lockedAudio: 'Suscríbete a Premium para escuchar audio',
   audioUnavailableOffline: 'Audio no disponible offline',
   usingOfflineVoice: 'Offline: Usando voz del sistema',
+  usingSystemVoice: 'Usando voz del sistema',
   audioPlaybackError: 'Error al reproducir audio',
   freePhrasesLimit: 'Frases Gratis: ',
 
