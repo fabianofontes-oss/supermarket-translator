@@ -25,8 +25,8 @@ interface ModuleLayoutProps {
   countries: Country[];
   LanguagePairSelect: React.FC<any>;
 
-  activeTab: 'home' | 'search' | 'favorites' | 'list' | 'language';
-  onTabChange: (tab: 'home' | 'search' | 'favorites' | 'list' | 'language') => void;
+  activeTab: 'home' | 'search' | 'favorites' | 'list';
+  onTabChange: (tab: 'home' | 'search' | 'favorites' | 'list') => void;
   
   favoritesCount: number;
   listCount: number;
@@ -41,6 +41,7 @@ interface ModuleLayoutProps {
 
   isSearchActive: boolean;
   onToggleSearch: () => void;
+  onOpenLanguageModal: () => void;
 }
 
 export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
@@ -67,10 +68,11 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
   panelContent,
   panelTitle,
   isSearchActive,
-  onToggleSearch
+  onToggleSearch,
+  onOpenLanguageModal
 }) => {
   
-  const isPanelOpen = activeTab === 'favorites' || activeTab === 'list' || activeTab === 'language';
+  const isPanelOpen = activeTab === 'favorites' || activeTab === 'list';
 
   return (
     <div className="w-full max-w-md bg-white text-gray-800 shadow-2xl flex flex-col h-[100dvh] relative overflow-hidden font-sans mx-auto">
@@ -220,17 +222,17 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
            {/* Center Language Selector Panel Trigger */}
            <div className="relative h-full w-full flex justify-center pointer-events-none">
                 <button
-                    onClick={() => onTabChange(activeTab === 'language' ? 'home' : 'language')}
-                    className={`w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform transition-all duration-300 hover:scale-105 cursor-pointer absolute bottom-8 z-50 pointer-events-auto shadow-xl ${activeTab === 'language' ? 'ring-4 ring-white/40 scale-105' : ''}`}
+                    onClick={onOpenLanguageModal}
+                    className={`w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform transition-all duration-300 hover:scale-105 cursor-pointer absolute bottom-8 z-50 pointer-events-auto shadow-xl`}
                     style={{ borderColor: theme.hex }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full z-30 pointer-events-none"></div>
                     <div className="absolute inset-0 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] z-20 pointer-events-none"></div>
                     
                     <img
-                    src={`https://flagcdn.com/${targetCountry.code}.svg`}
+                    src={targetCountry.image}
                     alt={targetCountry.name}
-                    className="w-full h-full object-cover z-10"
+                    className="w-full h-full object-cover"
                     />
                 </button>
            </div>

@@ -30,8 +30,8 @@ interface SupermarketModuleProps {
   handlePlayPhrase: (phraseType: 'ask' | 'want', item: TranslationItemType) => void;
 
   // State & Handlers from App.tsx
-  activeTab: 'home' | 'search' | 'favorites' | 'list' | 'language';
-  onTabChange: (tab: 'home' | 'search' | 'favorites' | 'list' | 'language') => void;
+  activeTab: 'home' | 'search' | 'favorites' | 'list';
+  onTabChange: (tab: 'home' | 'search' | 'favorites' | 'list') => void;
   isSearchActive: boolean;
   onToggleSearch: () => void;
   favorites: TranslationItemType[];
@@ -42,6 +42,7 @@ interface SupermarketModuleProps {
   panelContent: React.ReactNode;
   expandedItemKey: string | null;
   setExpandedItemKey: (key: string | null) => void;
+  onOpenLanguageModal: () => void;
 }
 
 const FREE_PHRASE_LIMIT = 8;
@@ -73,7 +74,8 @@ export default function SupermarketModule({
   toggleShoppingListItem,
   panelContent,
   expandedItemKey,
-  setExpandedItemKey
+  setExpandedItemKey,
+  onOpenLanguageModal
 }: SupermarketModuleProps) {
   
   const [selectedCategory, setSelectedCategory] = useState<Category>(() => {
@@ -377,7 +379,7 @@ export default function SupermarketModule({
   );
 
   const subCategoryContent = useMemo(() => {
-      if (activeTab === 'favorites' || activeTab === 'list' || activeTab === 'language') {
+      if (activeTab === 'favorites' || activeTab === 'list') {
           return null;
       }
       return (
@@ -402,7 +404,6 @@ export default function SupermarketModule({
   let panelTitle;
   if (activeTab === 'favorites') panelTitle = t('favorites');
   else if (activeTab === 'list') panelTitle = t('shoppingListLabel');
-  else if (activeTab === 'language') panelTitle = t('languageSettings');
 
   return (
     <ModuleLayout
@@ -429,6 +430,7 @@ export default function SupermarketModule({
         subCategorySlot={subCategoryContent}
         panelContent={panelContent}
         panelTitle={panelTitle}
+        onOpenLanguageModal={onOpenLanguageModal}
     >
         <div className="space-y-4 pb-4">
             {isSearchActive && searchResults.length === 0 && <p className="text-center text-gray-400 mt-10">{t('noItemsFoundFor')}</p>}
@@ -487,6 +489,7 @@ export default function SupermarketModule({
                                                 isConversationLocked={userPlan === 'free'}
                                                 theme={theme}
                                                 isPhrase={true}
+                                                onOpenPlan={onOpenMenu}
                                             />
                                         );
                                     })}
@@ -520,6 +523,7 @@ export default function SupermarketModule({
                     isConversationLocked={userPlan === 'free'}
                     theme={theme}
                     isPhrase={false}
+                    onOpenPlan={onOpenMenu}
                     />
                 );
             })}

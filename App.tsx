@@ -28,7 +28,10 @@ import {
   ShoppingBagIcon,
   CartIcon,
   PixIcon,
-  BarcodeIcon
+  BarcodeIcon,
+  CheckIcon,
+  StarIconSolid,
+  ShoppingBagIconSolid
 } from './components/Icons';
 import { useListManager } from './hooks/useListManager';
 import { FavoritesPanel } from './components/FavoritesPanel';
@@ -39,7 +42,7 @@ import { LanguagePanel } from './components/LanguagePanel';
 const SupermarketModule = React.lazy(() => import('./modules/SupermarketModule'));
 
 type ActiveModule = 'supermarket' | 'pharmacy' | 'restaurant' | 'transport' | 'hotel' | 'bank' | 'gym' | 'hospital' | 'shopping' | 'fuel' | 'school' | 'mechanic' | 'pet' | 'police' | 'post' | null;
-type ActiveTab = 'home' | 'search' | 'favorites' | 'list' | 'language';
+type ActiveTab = 'home' | 'search' | 'favorites' | 'list';
 
 // Module Configuration with Colors
 const MODULE_THEMES: Record<string, { color: string; lightColor: string; cardBg: string; borderColor: string; icon: any; textColor: string; hex: string }> = {
@@ -126,6 +129,9 @@ const App: React.FC = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userPlan, setUserPlan] = useState<'free' | 'premium' | 'master'>('free');
+  
+  // Popup state for Language
+  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
 
   // Module-specific UI state
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
@@ -309,13 +315,59 @@ const App: React.FC = () => {
       }
       setActiveTab(tab);
       
-      if (tab === 'home' || tab === 'favorites' || tab === 'list' || tab === 'language') {
+      if (tab === 'home' || tab === 'favorites' || tab === 'list') {
           setIsSearchActive(false);
       } else if (tab === 'search') {
           setIsSearchActive(true);
       }
   };
 
+
+  // --- RENDER MODULES ---
+  let panelContent = null;
+  let panelTitle = null;
+
+  if (activeTab === 'favorites') {
+    panelTitle = t('favorites');
+    panelContent = <FavoritesPanel 
+        favorites={favorites} 
+        t={t}
+        onPlayAudio={handlePlayAudio}
+        onPlayPhrase={handlePlayPhrase}
+        nativeCountry={nativeCountry}
+        targetCountry={targetCountry}
+        shoppingList={shoppingList}
+        checkedItems={checkedItems}
+        expandedItemKey={expandedItemKey}
+        setExpandedItemKey={setExpandedItemKey}
+        toggleShoppingListItem={toggleShoppingListItem}
+        toggleFavorite={toggleFavorite}
+        isSpeakerLocked={!currentLimits.allowAudio}
+        isConversationLocked={userPlan === 'free'}
+        theme={currentTheme}
+        onOpenPlan={() => setIsMenuOpen(true)}
+    />
+  } else if (activeTab === 'list') {
+      panelTitle = t('shoppingListLabel');
+      panelContent = <ShoppingListPanel 
+          shoppingList={shoppingList}
+          favorites={favorites}
+          t={t}
+          onPlayAudio={handlePlayAudio}
+          onPlayPhrase={handlePlayPhrase}
+          nativeCountry={nativeCountry}
+          targetCountry={targetCountry}
+          checkedItems={checkedItems}
+          expandedItemKey={expandedItemKey}
+          setExpandedItemKey={setExpandedItemKey}
+          toggleShoppingListItem={toggleShoppingListItem}
+          toggleFavorite={toggleFavorite}
+          isSpeakerLocked={!currentLimits.allowAudio}
+          isConversationLocked={userPlan === 'free'}
+          theme={currentTheme}
+          onOpenPlan={() => setIsMenuOpen(true)}
+      />
+  }
 
   // --- RENDER HUB (LANDING PAGE) ---
   if (activeModule === null) {
@@ -337,24 +389,17 @@ const App: React.FC = () => {
            }
       });
 
+      const isPanelOpen = activeTab === 'favorites' || activeTab === 'list';
+
       return (
           <div className="bg-gray-100 min-h-screen font-sans flex justify-center">
             <div className="w-full max-w-md bg-white text-gray-800 shadow-2xl flex flex-col h-screen relative overflow-hidden">
-                 <header className={`p-6 ${currentTheme.color} text-white shadow-md rounded-b-3xl z-10 transition-colors duration-300`}>
+                 <header className={`p-6 pb-10 ${currentTheme.color} text-white shadow-md rounded-b-3xl z-30 transition-colors duration-300 relative`}>
                     <div className="flex justify-between items-center mb-4">
                         <div>
                             <p className="text-sm opacity-80">{t('welcomeBack')}</p>
                             <h1 className="text-2xl font-bold">{t('hubTitle')}</h1>
                         </div>
-                        <LanguagePairSelect
-                            nativeCountry={nativeCountry}
-                            targetCountry={targetCountry}
-                            onNativeChange={setNativeCountry}
-                            onTargetChange={setTargetCountry}
-                            options={COUNTRIES}
-                            t={t}
-                            alignment="right"
-                         />
                     </div>
                     
                     <div 
@@ -373,9 +418,9 @@ const App: React.FC = () => {
                              <span className="text-xs opacity-80 underline">{t('unlockExperience')}</span>
                         )}
                     </div>
-                    
                  </header>
-                 <main className="flex-1 p-6 overflow-y-auto">
+
+                 <main className="flex-1 p-6 overflow-y-auto pb-32">
                     <h2 className="text-lg font-bold text-gray-700 mb-4">{t('hubSubtitle')}</h2>
                     <div className="grid grid-cols-3 gap-4">
                         {modules.map((mod) => (
@@ -407,7 +452,119 @@ const App: React.FC = () => {
                         ))}
                     </div>
                  </main>
+
+                 {/* Sliding Panel */}
+                 <div 
+                    className={`absolute inset-x-0 bottom-0 bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-40 transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col overflow-hidden border-t border-gray-100`}
+                    style={{ 
+                        top: '11rem', 
+                        bottom: '0',
+                        transform: isPanelOpen ? 'translateY(0)' : 'translateY(100%)'
+                    }}
+                  >
+                      {/* Panel Header */}
+                      <div className={`w-full flex flex-col items-center pt-3 pb-2 relative transition-colors duration-300 ${panelTitle ? currentTheme.color : 'bg-white'}`}>
+                          <div 
+                            className={`w-12 h-1.5 rounded-full cursor-pointer mb-3 ${panelTitle ? 'bg-white/30' : 'bg-gray-200'}`} 
+                            onClick={() => handleTabChange('home')}
+                          ></div>
+                          {panelTitle && (
+                              <div className="flex items-center justify-between w-full px-6 pb-3">
+                                  <div className="w-9"></div> 
+                                  <h2 className="text-xl font-bold uppercase tracking-widest text-center text-white shadow-sm">
+                                      {panelTitle}
+                                  </h2>
+                                  <button 
+                                    onClick={() => handleTabChange('home')}
+                                    className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-white"
+                                  >
+                                    <XIcon className="w-5 h-5" />
+                                  </button>
+                              </div>
+                          )}
+                      </div>
+                      <div className="flex-1 overflow-y-auto px-4 pb-32 pt-4 bg-white">
+                          {panelContent}
+                      </div>
+                 </div>
+
+                 {/* Navigation Bar */}
+                 <nav className={`absolute bottom-0 w-full ${currentTheme.color} grid grid-cols-3 h-20 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.15)] items-end pb-0 transition-all duration-300`}>
+                      {/* Favorites Tab */}
+                      <button 
+                          onClick={() => handleTabChange('favorites')}
+                          className={`flex flex-col justify-end items-center w-full transition-all duration-300 cursor-pointer relative overflow-hidden group ${
+                              activeTab === 'favorites' 
+                              ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10' 
+                              : 'h-20 pb-6 translate-y-2 opacity-80 hover:opacity-100'
+                          }`}
+                      >
+                          <div className="relative mb-1 transition-transform duration-300 group-hover:scale-110">
+                              <StarIconSolid className={`w-7 h-7 transition-colors duration-300 ${activeTab === 'favorites' ? currentTheme.textColor : 'text-white'}`} />
+                              {favorites.length > 0 && activeTab !== 'favorites' && (
+                                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full ring-2 ring-red-600/50 shadow-sm"></span>
+                              )}
+                          </div>
+                          <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 px-2 text-center leading-tight ${activeTab === 'favorites' ? currentTheme.textColor : 'text-white'}`}>
+                              {t('favorites')}
+                          </span>
+                      </button>
+
+                      {/* Center Language Selector Panel Trigger */}
+                      <div className="relative h-full w-full flex justify-center pointer-events-none">
+                            <button
+                                onClick={() => setIsLanguageModalOpen(true)}
+                                className={`w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform transition-all duration-300 hover:scale-105 cursor-pointer absolute bottom-8 z-50 pointer-events-auto shadow-xl`}
+                                style={{ borderColor: currentTheme.hex }}
+                            >
+                                <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full z-30 pointer-events-none"></div>
+                                <div className="absolute inset-0 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] z-20 pointer-events-none"></div>
+                                
+                                <img
+                                src={targetCountry.image}
+                                alt={targetCountry.name}
+                                className="w-full h-full object-cover z-10"
+                                />
+                            </button>
+                      </div>
+
+                      {/* Shopping List Tab */}
+                      <button 
+                          onClick={() => handleTabChange('list')}
+                          className={`flex flex-col justify-end items-center w-full transition-all duration-300 cursor-pointer relative overflow-hidden group ${
+                              activeTab === 'list' 
+                              ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10' 
+                              : 'h-20 pb-6 translate-y-2 opacity-80 hover:opacity-100'
+                          }`}
+                      >
+                          <div className="relative mb-1 transition-transform duration-300 group-hover:scale-110">
+                              <ShoppingBagIconSolid className={`w-7 h-7 transition-colors duration-300 ${activeTab === 'list' ? currentTheme.textColor : 'text-white'}`} />
+                              {shoppingList.length > 0 && (
+                                  <span className={`absolute -top-2 -right-2 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[9px] font-bold shadow-sm transition-colors ${activeTab === 'list' ? 'bg-red-600 text-white' : 'bg-white text-red-600'}`}>
+                                  {shoppingList.length}
+                                  </span>
+                              )}
+                          </div>
+                          <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 px-1 text-center leading-tight ${activeTab === 'list' ? currentTheme.textColor : 'text-white'}`}>
+                              {t('shoppingListLabel')}
+                          </span>
+                      </button>
+                 </nav>
             </div>
+            
+            {/* Global Language Modal */}
+            <LanguagePanel 
+                 isOpen={isLanguageModalOpen}
+                 onClose={() => setIsLanguageModalOpen(false)}
+                 nativeCountry={nativeCountry}
+                 targetCountry={targetCountry}
+                 onNativeChange={setNativeCountry}
+                 onTargetChange={setTargetCountry}
+                 options={COUNTRIES}
+                 t={t}
+                 theme={currentTheme}
+            />
+
             {isMenuOpen && (
                 <MenuModal 
                    t={t} 
@@ -423,56 +580,6 @@ const App: React.FC = () => {
             )}
           </div>
       );
-  }
-
-  // --- RENDER MODULES ---
-  let panelContent = null;
-  if (activeTab === 'favorites') {
-    panelContent = <FavoritesPanel 
-        favorites={favorites} 
-        t={t}
-        onPlayAudio={handlePlayAudio}
-        onPlayPhrase={handlePlayPhrase}
-        nativeCountry={nativeCountry}
-        targetCountry={targetCountry}
-        shoppingList={shoppingList}
-        checkedItems={checkedItems}
-        expandedItemKey={expandedItemKey}
-        setExpandedItemKey={setExpandedItemKey}
-        toggleShoppingListItem={toggleShoppingListItem}
-        toggleFavorite={toggleFavorite}
-        isSpeakerLocked={!currentLimits.allowAudio}
-        isConversationLocked={userPlan === 'free'}
-        theme={currentTheme}
-    />
-  } else if (activeTab === 'list') {
-      panelContent = <ShoppingListPanel 
-          shoppingList={shoppingList}
-          favorites={favorites}
-          t={t}
-          onPlayAudio={handlePlayAudio}
-          onPlayPhrase={handlePlayPhrase}
-          nativeCountry={nativeCountry}
-          targetCountry={targetCountry}
-          checkedItems={checkedItems}
-          expandedItemKey={expandedItemKey}
-          setExpandedItemKey={setExpandedItemKey}
-          toggleShoppingListItem={toggleShoppingListItem}
-          toggleFavorite={toggleFavorite}
-          isSpeakerLocked={!currentLimits.allowAudio}
-          isConversationLocked={userPlan === 'free'}
-          theme={currentTheme}
-      />
-  } else if (activeTab === 'language') {
-      panelContent = <LanguagePanel 
-          nativeCountry={nativeCountry}
-          targetCountry={targetCountry}
-          onNativeChange={setNativeCountry}
-          onTargetChange={setTargetCountry}
-          options={COUNTRIES}
-          t={t}
-          theme={currentTheme}
-      />
   }
   
   return (
@@ -518,6 +625,7 @@ const App: React.FC = () => {
                     panelContent={panelContent}
                     expandedItemKey={expandedItemKey}
                     setExpandedItemKey={setExpandedItemKey}
+                    onOpenLanguageModal={() => setIsLanguageModalOpen(true)}
                 />
             )}
 
@@ -543,6 +651,19 @@ const App: React.FC = () => {
             )}
         </Suspense>
         
+        {/* Global Language Modal */}
+        <LanguagePanel 
+             isOpen={isLanguageModalOpen}
+             onClose={() => setIsLanguageModalOpen(false)}
+             nativeCountry={nativeCountry}
+             targetCountry={targetCountry}
+             onNativeChange={setNativeCountry}
+             onTargetChange={setTargetCountry}
+             options={COUNTRIES}
+             t={t}
+             theme={currentTheme}
+        />
+
         {isMenuOpen && (
           <MenuModal 
             t={t} 
@@ -883,18 +1004,15 @@ const LanguagePairSelect: React.FC<{
         <div key={opt.code} className="relative flex flex-col items-center group">
              <button
                 onClick={onClick}
-                className={`rounded-full cursor-pointer w-12 h-12 flex items-center justify-center transition-all duration-300 relative overflow-hidden border-[3px] bg-slate-800 ${
+                className={`rounded-full cursor-pointer w-12 h-12 flex items-center justify-center transition-all duration-300 relative overflow-hidden border-[3px] bg-white ${
                     isSelected 
                     ? 'border-slate-800 shadow-lg scale-110 z-10 ring-2 ring-offset-1 ring-slate-400 grayscale-0 opacity-100' 
                     : 'border-gray-300 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 hover:scale-105'
                 }`}
                 title={opt.name}
             >
-                <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/50 to-transparent rounded-t-full z-30 pointer-events-none"></div>
-                <div className="absolute inset-0 rounded-full shadow-[inset_0_0_5px_rgba(0,0,0,0.4)] z-20 pointer-events-none"></div>
-                
                 <img
-                    src={`https://flagcdn.com/${opt.code}.svg`}
+                    src={opt.image}
                     alt={opt.name}
                     className="w-full h-full object-cover z-10"
                 />
@@ -920,7 +1038,7 @@ const LanguagePairSelect: React.FC<{
         <div className="absolute inset-0 rounded-full shadow-[inset_0_0_15px_rgba(0,0,0,0.6)] z-20 pointer-events-none"></div>
         
         <img
-          src={`https://flagcdn.com/${targetCountry.code}.svg`}
+          src={targetCountry.image}
           alt={targetCountry.name}
           className="w-full h-full object-cover z-10"
         />

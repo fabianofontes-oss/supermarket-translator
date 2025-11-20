@@ -1,8 +1,11 @@
 
 import React from 'react';
 import type { Country } from '../types';
+import { XIcon } from './Icons';
 
 interface LanguagePanelProps {
+  isOpen: boolean;
+  onClose: () => void;
   nativeCountry: Country;
   targetCountry: Country;
   onNativeChange: (country: Country) => void;
@@ -13,6 +16,8 @@ interface LanguagePanelProps {
 }
 
 export const LanguagePanel: React.FC<LanguagePanelProps> = ({
+  isOpen,
+  onClose,
   nativeCountry,
   targetCountry,
   onNativeChange,
@@ -21,66 +26,81 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
   t,
   theme
 }) => {
+  if (!isOpen) return null;
 
-  const renderOption = (opt: Country, section: 'native' | 'target') => {
-    const isSelected = section === 'native' ? nativeCountry.code === opt.code : targetCountry.code === opt.code;
-    const onClick = () => section === 'native' ? onNativeChange(opt) : onTargetChange(opt);
-
-    return (
-      <button
-        key={`${section}-${opt.code}`}
-        onClick={onClick}
-        className={`flex flex-col items-center gap-2 group w-full transition-all duration-300 relative z-0`}
-      >
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-all relative overflow-hidden border-[3px] ${
-          isSelected 
-            ? `border-slate-800 shadow-lg scale-110 ring-4 ${section === 'native' ? 'ring-slate-300/50' : ''} z-10` 
-            : `border-gray-300 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 hover:scale-105 ${section === 'native' ? 'hover:border-slate-400' : 'hover:border-[#c83745]/50'}`
-        } bg-slate-200`}
-        style={isSelected && section === 'target' ? { borderColor: theme.hex, boxShadow: `0 4px 15px ${theme.hex}40`, '--tw-ring-color': `${theme.hex}40` } as any : {}}
-        >
-            <img
-                src={`https://flagcdn.com/${opt.code}.svg`}
-                alt={opt.name}
-                className="w-full h-full object-cover"
-            />
-        </div>
-        <span className={`text-xs font-bold uppercase text-center truncate w-full px-1 ${isSelected ? (section === 'native' ? 'text-slate-900' : theme.textColor) : 'text-gray-400'}`}>
-            {opt.name}
-        </span>
-      </button>
-    );
-  };
+  const renderFlagButton = (
+    opt: Country,
+    isSelected: boolean,
+    onClick: () => void,
+    ringColorClass: string
+  ) => (
+    <button
+      key={opt.code}
+      onClick={onClick}
+      className={`relative group flex items-center justify-center p-1 rounded-full transition-all duration-300 ${
+        isSelected
+          ? `bg-white shadow-xl scale-110 z-10 ring-2 ring-offset-1 ${ringColorClass}`
+          : 'hover:bg-white/40 hover:scale-105 opacity-80 hover:opacity-100 grayscale hover:grayscale-0'
+      }`}
+      title={opt.name}
+    >
+      <img
+        src={opt.image}
+        alt={opt.name}
+        className="w-10 h-10 object-contain drop-shadow-md"
+      />
+    </button>
+  );
 
   return (
-    <div className="flex flex-col -mx-4 -mt-4 min-h-[calc(100%+4rem)] relative z-[9999]">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
       
-      {/* Native Language Section - Blue/Slate Theme */}
-      <div className="bg-slate-100 pb-6 pt-2 border-b border-slate-200">
-        <div className="bg-slate-800 text-white py-3 px-6 flex items-center gap-3 shadow-sm mb-6 mx-0">
-             <div className="bg-white text-slate-800 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm shrink-0">1</div>
-             <h3 className="font-bold text-sm uppercase tracking-wider truncate">
-                {t('myLanguage')}
-            </h3>
-        </div>
+      <div className="relative w-full max-w-[16rem] bg-white rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[80vh] overflow-y-auto animate-expand-up no-scrollbar">
         
-        <div className="grid grid-cols-3 gap-x-4 gap-y-6 px-6">
-            {options.map((opt) => renderOption(opt, 'native'))}
-        </div>
-      </div>
+        {/* Close Button */}
+        <button 
+            onClick={onClose} 
+            className="absolute top-1.5 right-1.5 p-1 bg-black/10 rounded-full text-white z-50 hover:bg-black/30 backdrop-blur-md transition-colors"
+        >
+            <XIcon className="w-3.5 h-3.5" />
+        </button>
 
-      {/* Target Country Section - Pink/Theme Theme */}
-      <div className="bg-red-50 flex-1 pb-32 pt-2">
-        <div className={`${theme.color} text-white py-3 px-6 flex items-center gap-3 shadow-sm mb-6 mx-0`}>
-             <div className="bg-white text-[#c83745] w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm shrink-0" style={{ color: theme.hex }}>2</div>
-             <h3 className="font-bold text-sm uppercase tracking-wider truncate">
-                {t('iAmIn')}
-            </h3>
+        {/* Top Section: Native Language (Blue Theme) */}
+        <div className="bg-slate-100 flex flex-col shrink-0">
+             <div className="bg-slate-700 text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2">
+                {t('myLanguage')}...
+             </div>
+             {/* Optimized padding and gap for small screens */}
+             <div className="p-3 grid grid-cols-3 gap-3 justify-items-center">
+                {options.map((opt) => 
+                    renderFlagButton(
+                        opt, 
+                        nativeCountry.code === opt.code, 
+                        () => onNativeChange(opt),
+                        'ring-slate-600'
+                    )
+                )}
+             </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-x-4 gap-y-6 px-6">
-            {options.map((opt) => renderOption(opt, 'target'))}
+        {/* Bottom Section: Target Location (Red Theme) */}
+        <div className="bg-red-50 flex flex-col relative shrink-0 flex-1">
+             <div className="bg-[#c83745] text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2">
+                {t('iAmIn')}...
+             </div>
+             <div className="p-3 grid grid-cols-3 gap-3 pb-6 justify-items-center">
+                 {options.map((opt) => 
+                    renderFlagButton(
+                        opt, 
+                        targetCountry.code === opt.code, 
+                        () => onTargetChange(opt),
+                        'ring-[#c83745]'
+                    )
+                 )}
+             </div>
         </div>
+
       </div>
     </div>
   );

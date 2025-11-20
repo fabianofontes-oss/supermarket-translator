@@ -1,5 +1,4 @@
 
-
 import type { Category, Country } from './types';
 import { groceryData } from './modules/supermarket/data/groceryData';
 import { beveragesData } from './modules/supermarket/data/beveragesData';
@@ -60,15 +59,15 @@ export const CATEGORIES: Category[] = [
 
 
 export const COUNTRIES: Country[] = [
-    { name: "Brasil", lang: "pt-BR", flag: "🇧🇷", code: "br" },
-    { name: "Chile", lang: "es-CL", flag: "🇨🇱", code: "cl" },
-    { name: "Argentina", lang: "es-AR", flag: "🇦🇷", code: "ar" },
-    { name: "Reino Unido", lang: "en-GB", flag: "🇬🇧", code: "gb" },
-    { name: "Estados Unidos", lang: "en-US", flag: "🇺🇸", code: "us" },
-    { name: "Portugal", lang: "pt-PT", flag: "🇵🇹", code: "pt" },
-    { name: "Espanha", lang: "es-ES", flag: "🇪🇸", code: "es" },
-    { name: "França", lang: "fr-FR", flag: "🇫🇷", code: "fr" },
-    { name: "Itália", lang: "it-IT", flag: "🇮🇹", code: "it" },
+    { name: "Brasil", lang: "pt-BR", flag: "🇧🇷", code: "br", image: "https://cdn-icons-png.flaticon.com/512/197/197386.png" },
+    { name: "Chile", lang: "es-CL", flag: "🇨🇱", code: "cl", image: "https://cdn-icons-png.flaticon.com/512/197/197586.png" },
+    { name: "Argentina", lang: "es-AR", flag: "🇦🇷", code: "ar", image: "https://cdn-icons-png.flaticon.com/512/197/197573.png" },
+    { name: "Reino Unido", lang: "en-GB", flag: "🇬🇧", code: "gb", image: "https://cdn-icons-png.flaticon.com/512/197/197374.png" },
+    { name: "Estados Unidos", lang: "en-US", flag: "🇺🇸", code: "us", image: "https://cdn-icons-png.flaticon.com/512/197/197484.png" },
+    { name: "Portugal", lang: "pt-PT", flag: "🇵🇹", code: "pt", image: "https://cdn-icons-png.flaticon.com/512/197/197463.png" },
+    { name: "Espanha", lang: "es-ES", flag: "🇪🇸", code: "es", image: "https://cdn-icons-png.flaticon.com/512/197/197593.png" },
+    { name: "França", lang: "fr-FR", flag: "🇫🇷", code: "fr", image: "https://cdn-icons-png.flaticon.com/512/197/197560.png" },
+    { name: "Itália", lang: "it-IT", flag: "🇮🇹", code: "it", image: "https://cdn-icons-png.flaticon.com/512/197/197626.png" },
 ];
 
 // Pre-populated data for offline-first experience

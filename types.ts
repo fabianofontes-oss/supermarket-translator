@@ -1,3 +1,4 @@
+
 export interface Category {
   name: string;
   subCategories: string[];
@@ -8,6 +9,7 @@ export interface Country {
   lang: string;
   flag: string;
   code: string;
+  image: string;
 }
 
 export interface TranslationItem {

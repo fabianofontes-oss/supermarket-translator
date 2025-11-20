@@ -30,6 +30,7 @@ interface TranslationItemProps {
   isConversationLocked: boolean;
   theme: { color: string; textColor: string };
   isPhrase?: boolean;
+  onOpenPlan: () => void;
 }
 
 export const TranslationItem: React.FC<TranslationItemProps> = ({
@@ -51,7 +52,8 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
   isSpeakerLocked,
   isConversationLocked,
   theme,
-  isPhrase = false
+  isPhrase = false,
+  onOpenPlan
 }) => {
   // If locked, use a light red background
   const getButtonClasses = (locked: boolean) => 
@@ -90,12 +92,16 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
   ) => {
     const handleClick = (e: React.MouseEvent) => {
       e.stopPropagation();
+      
+      if (locked) {
+        onOpenPlan();
+        return;
+      }
+
       if (phraseType === 'listen') {
         onPlayAudio(item.translated_term, targetCountry.lang);
       } else {
-        if (!locked) {
-            onPlayPhrase(phraseType, item);
-        }
+        onPlayPhrase(phraseType, item);
       }
     };
 
@@ -127,12 +133,11 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
         <div className="flex justify-between items-center">
              <div className="flex items-center gap-3 overflow-hidden">
                 {/* 3D Flag Button Effect */}
-                <div className="w-7 h-7 rounded-full border-2 border-slate-600 shadow-sm overflow-hidden relative flex-shrink-0 bg-slate-800">
-                  <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/50 to-transparent rounded-t-full z-20 pointer-events-none"></div>
+                <div className="w-7 h-7 rounded-full border border-slate-300 shadow-sm overflow-hidden relative flex-shrink-0 bg-white">
                   <img
-                    src={`https://flagcdn.com/${nativeCountry.code}.svg`}
+                    src={nativeCountry.image}
                     alt={nativeCountry.name}
-                    className="w-full h-full object-cover z-10"
+                    className="w-full h-full object-cover"
                     loading="lazy"
                     decoding="async"
                   />
@@ -155,12 +160,11 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
         <div className="flex justify-between items-center">
             <div className="flex items-center gap-3 overflow-hidden flex-1">
                  {/* 3D Flag Button Effect */}
-                 <div className="w-7 h-7 rounded-full border-2 border-slate-600 shadow-sm overflow-hidden relative flex-shrink-0 bg-slate-800">
-                    <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/50 to-transparent rounded-t-full z-20 pointer-events-none"></div>
+                 <div className="w-7 h-7 rounded-full border border-slate-300 shadow-sm overflow-hidden relative flex-shrink-0 bg-white">
                     <img
-                      src={`https://flagcdn.com/${targetCountry.code}.svg`}
+                      src={targetCountry.image}
                       alt={targetCountry.name}
-                      className="w-full h-full object-cover z-10"
+                      className="w-full h-full object-cover"
                       loading="lazy"
                       decoding="async"
                     />
