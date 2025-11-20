@@ -1,56 +1,70 @@
-const CACHE_NAME = 'supermarket-guide-v3';
+const CACHE_VERSION = "v4"; // Aumente sempre que fizer deploy
+const CACHE_NAME = `supermarket-guide-${CACHE_VERSION}`;
+
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/vite.svg'
+  '/vite.svg',
 ];
 
-// Install event - cache core static assets
-self.addEventListener('install', (e) => {
-  self.skipWaiting();
-  e.waitUntil(
+// INSTALL — Cacheia os arquivos e força atualização
+self.addEventListener('install', (event) => {
+  self.skipWaiting(); // força instalar imediatamente
+
+  event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
     })
   );
 });
 
-// Activate event - clean up old caches and claim clients
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keyList) => {
+// ACTIVATE — Remove caches antigos e assume controle imediato
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
       return Promise.all(
-        keyList.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
       );
-    }).then(() => self.clients.claim())
+    })
   );
+
+  self.clients.claim(); // força assumir clientes abertos
 });
 
-// Fetch event - Stale-While-Revalidate strategy
-self.addEventListener('fetch', (e) => {
-  // Skip cross-origin requests (like Google TTS or flags) from caching to avoid opaque response issues initially
-  if (!e.request.url.startsWith(self.location.origin)) {
+// FETCH — Stale-While-Revalidate + fallback offline
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // Evita problemas com requests externos (Google TTS, bandeiras, etc.)
+  if (!request.url.startsWith(self.location.origin)) {
     return;
   }
 
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      // Return cached response if available
-      const fetchPromise = fetch(e.request).then((networkResponse) => {
-        // Update cache with new response
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-            const responseToCache = networkResponse.clone();
+  event.respondWith(
+    caches.match(request).then((cachedResponse) => {
+      const fetchPromise = fetch(request)
+        .then((networkResponse) => {
+          // Cache apenas respostas válidas
+          if (
+            networkResponse &&
+            networkResponse.status === 200 &&
+            networkResponse.type === "basic"
+          ) {
+            const responseClone = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => {
-                cache.put(e.request, responseToCache);
+              cache.put(request, responseClone);
             });
-        }
-        return networkResponse;
-      });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // fallback offline
+          return cachedResponse;
+        });
 
+      // retorna cache ou rede
       return cachedResponse || fetchPromise;
     })
   );
