@@ -10,15 +10,22 @@ import { butcherData } from './modules/supermarket/data/butcherData';
 import { refrigeratedData } from './modules/supermarket/data/refrigeratedData';
 import { phrasesData } from './modules/supermarket/data/phrasesData';
 
+// Pharmacy Data Imports
+import { painFeverData, coldFluData, allergyData, digestiveData, chronicData } from './modules/pharmacy/data/medicineData';
+import { firstAidData } from './modules/pharmacy/data/firstAidData';
+import { skinData, intimateData } from './modules/pharmacy/data/cosmeticsData';
+
+// Restaurant Data Imports
+import { startersData, mainDishData, drinksData, dessertData, restaurantPhrasesData } from './modules/restaurant/data/restaurantData';
+
 // --- REGISTRY OF IMPLEMENTED MODULES ---
-// Add a module key here ONLY when you have created its corresponding module file and logic.
-// This prevents users from accessing empty placeholders.
 export const AVAILABLE_MODULES = [
     'supermarket', 
-    // 'pharmacy', // Uncomment when PharmacyModule is ready
+    'pharmacy', 
+    'restaurant',
 ];
 
-export const CATEGORIES: Category[] = [
+export const SUPERMARKET_CATEGORIES: Category[] = [
   {
     name: "produce",
     subCategories: ["fruits", "greens", "vegetables", "spices"],
@@ -57,6 +64,66 @@ export const CATEGORIES: Category[] = [
   }
 ];
 
+export const CATEGORIES = SUPERMARKET_CATEGORIES; // Alias for existing code compatibility
+
+export const PHARMACY_CATEGORIES: Category[] = [
+  {
+    name: "chronic",
+    subCategories: ["bloodPressure", "cholesterol", "diabetes", "generalHealth"],
+  },
+  {
+    name: "painFever",
+    subCategories: ["mildPain", "moderatePain", "musclePain", "fever"],
+  },
+  {
+    name: "coldFlu",
+    subCategories: ["nasalCongestion", "dryCough", "chestCough", "fluSymptoms"],
+  },
+  {
+    name: "allergy",
+    subCategories: ["rhinitis", "skinAllergy", "eyeAllergy", "allergySpray"],
+  },
+  {
+    name: "stomach",
+    subCategories: ["heartburn", "constipation", "diarrhea", "nausea"],
+  },
+  {
+    name: "firstAid",
+    subCategories: ["dressings", "antiseptics", "burns", "bruises"],
+  },
+  {
+    name: "skin",
+    subCategories: ["healing", "acne", "hydration", "sunProtection"],
+  },
+  {
+    name: "intimate",
+    subCategories: ["feminineCare", "condoms", "lubricants", "rapidTests"],
+  }
+];
+
+export const RESTAURANT_CATEGORIES: Category[] = [
+  {
+    name: "starters",
+    subCategories: ["appetizers"],
+  },
+  {
+    name: "mainDishes",
+    subCategories: ["meat", "fish", "pasta"],
+  },
+  {
+    name: "drinks",
+    subCategories: ["nonAlcoholic", "alcoholic"],
+  },
+  {
+    name: "desserts",
+    subCategories: ["sweets"],
+  },
+  {
+    name: "phrases",
+    subCategories: ["table", "ordering", "dietary", "paying"],
+  }
+];
+
 
 export const COUNTRIES: Country[] = [
     { name: "Brasil", lang: "pt-BR", flag: "🇧🇷", code: "br", image: "https://cdn-icons-png.flaticon.com/512/197/197386.png" },
@@ -71,7 +138,9 @@ export const COUNTRIES: Country[] = [
 ];
 
 // Pre-populated data for offline-first experience
+// Merged data from all modules
 export const PREPOPULATED_TRANSLATIONS: Record<string, Record<string, { source_term: string; image: string; translations: Record<string, string>; gender_pt: 'm' | 'f'; phonetics?: Record<string, string> }[]>> = {
+  // Supermarket
   produce: produceData,
   butcher: butcherData,
   refrigerated: refrigeratedData,
@@ -80,5 +149,22 @@ export const PREPOPULATED_TRANSLATIONS: Record<string, Record<string, { source_t
   bakery: bakeryData,
   personalHygiene: hygieneData,
   homeCleaning: cleaningData,
-  phrases: phrasesData
+  
+  // Pharmacy
+  chronic: chronicData,
+  painFever: painFeverData,
+  coldFlu: coldFluData,
+  allergy: allergyData,
+  stomach: digestiveData,
+  firstAid: firstAidData,
+  skin: skinData,
+  intimate: intimateData,
+
+  // Restaurant
+  starters: startersData,
+  mainDishes: mainDishData,
+  drinks: drinksData,
+  desserts: dessertData,
+
+  phrases: { ...phrasesData, ...restaurantPhrasesData }
 };

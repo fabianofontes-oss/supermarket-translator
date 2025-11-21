@@ -81,8 +81,16 @@ const enUS = {
   usingSystemVoice: 'Using system voice',
   audioPlaybackError: 'Error playing audio',
   freePhrasesLimit: 'Free Phrases: ',
+  installApp: 'Install App',
+  installAppDesc: 'Install for offline access and faster access.',
+  install: 'Install',
+  notNow: 'Not now',
+  iosStep1: 'Tap the Share button',
+  iosStep2: 'Select "Add to Home Screen"',
+  productNotAvailable: 'Product not available in this country',
+  safeAlternative: 'Safe Alternative',
   
-  // Categories
+  // Supermarket Categories
   produce: 'Produce',
   butcher: 'Butcher',
   refrigerated: 'Refrigerated',
@@ -93,7 +101,23 @@ const enUS = {
   homeCleaning: 'Home Cleaning',
   phrases: 'Useful Phrases',
 
-  // SubCategories
+  // Pharmacy Categories
+  chronic: 'Chronic/Continuous',
+  painFever: 'Pain & Fever',
+  coldFlu: 'Cold & Flu',
+  allergy: 'Allergy',
+  stomach: 'Stomach & Gut',
+  firstAid: 'First Aid',
+  skin: 'Skin Care',
+  intimate: 'Intimate Health',
+
+  // Restaurant Categories
+  starters: 'Starters',
+  mainDishes: 'Main Dishes',
+  drinks: 'Drinks',
+  desserts: 'Desserts',
+
+  // Supermarket SubCategories
   fruits: 'Fruits',
   greens: 'Greens',
   vegetables: 'Vegetables',
@@ -132,7 +156,53 @@ const enUS = {
   details: 'Product Details',
   services: 'Store Services',
   social: 'Social Interactions',
-  location: 'Location & Directions'
+  location: 'Location & Directions',
+
+  // Pharmacy SubCategories
+  bloodPressure: 'Blood Pressure',
+  cholesterol: 'Cholesterol',
+  diabetes: 'Diabetes',
+  generalHealth: 'General Health',
+  mildPain: 'Mild Pain',
+  moderatePain: 'Moderate Pain',
+  musclePain: 'Muscle Pain',
+  fever: 'Fever',
+  nasalCongestion: 'Nasal Congestion',
+  dryCough: 'Dry Cough',
+  chestCough: 'Chest Cough',
+  fluSymptoms: 'Flu Symptoms',
+  rhinitis: 'Rhinitis',
+  skinAllergy: 'Skin Allergy',
+  eyeAllergy: 'Eye Allergy',
+  allergySpray: 'Nasal Sprays',
+  heartburn: 'Heartburn/Reflux',
+  constipation: 'Constipation',
+  diarrhea: 'Diarrhea',
+  nausea: 'Nausea',
+  dressings: 'Dressings',
+  antiseptics: 'Antiseptics',
+  burns: 'Burns',
+  bruises: 'Bruises',
+  healing: 'Healing/Scarring',
+  acne: 'Acne',
+  hydration: 'Hydration',
+  sunProtection: 'Sun Protection',
+  feminineCare: 'Feminine Care',
+  condoms: 'Condoms',
+  lubricants: 'Lubricants',
+  rapidTests: 'Rapid Tests',
+
+  // Restaurant SubCategories
+  appetizers: 'Appetizers',
+  meat: 'Meat',
+  pasta: 'Pasta',
+  nonAlcoholic: 'Non-Alcoholic',
+  alcoholic: 'Alcoholic',
+  sweets: 'Sweets',
+  table: 'Table',
+  ordering: 'Ordering',
+  dietary: 'Dietary Restrictions',
+  paying: 'Paying the Bill',
 };
 
 const ptBR = {
@@ -215,8 +285,16 @@ const ptBR = {
   usingSystemVoice: 'Usando voz do sistema',
   audioPlaybackError: 'Erro ao reproduzir áudio',
   freePhrasesLimit: 'Frases Grátis: ',
+  installApp: 'Instalar App',
+  installAppDesc: 'Instale para acesso offline e mais rápido.',
+  install: 'Instalar',
+  notNow: 'Agora não',
+  iosStep1: 'Toque no botão Compartilhar',
+  iosStep2: 'Escolha "Adicionar à Tela de Início"',
+  productNotAvailable: 'Produto não disponível neste país',
+  safeAlternative: 'Alternativa Segura',
 
-  // Categories
+  // Supermarket Categories
   produce: 'Hortifruti',
   butcher: 'Açougue',
   refrigerated: 'Refrigerados',
@@ -227,7 +305,23 @@ const ptBR = {
   homeCleaning: 'Limpeza',
   phrases: 'Frases Úteis',
 
-  // Subcategories
+  // Pharmacy Categories
+  chronic: 'Uso Contínuo',
+  painFever: 'Dor e Febre',
+  coldFlu: 'Gripe e Resfriado',
+  allergy: 'Alergia',
+  stomach: 'Estômago e Intestino',
+  firstAid: 'Primeiros Socorros',
+  skin: 'Pele e Dermatologia',
+  intimate: 'Saúde Íntima',
+
+  // Restaurant Categories
+  starters: 'Entradas',
+  mainDishes: 'Pratos Principais',
+  drinks: 'Bebidas',
+  desserts: 'Sobremesas',
+
+  // Supermarket Subcategories
   fruits: 'Frutas',
   greens: 'Verduras',
   vegetables: 'Legumes',
@@ -266,7 +360,53 @@ const ptBR = {
   details: 'Detalhes do Produto',
   services: 'Serviços da Loja',
   social: 'Interação Social',
-  location: 'Localização Externa'
+  location: 'Localização Externa',
+
+  // Pharmacy Subcategories
+  bloodPressure: 'Pressão Alta',
+  cholesterol: 'Colesterol',
+  diabetes: 'Diabetes',
+  generalHealth: 'Saúde Geral',
+  mildPain: 'Dor Leve',
+  moderatePain: 'Dor Moderada',
+  musclePain: 'Dor Muscular',
+  fever: 'Febre / Mal-estar',
+  nasalCongestion: 'Congestão Nasal',
+  dryCough: 'Tosse Seca',
+  chestCough: 'Tosse com Catarro',
+  fluSymptoms: 'Sintomas de Gripe',
+  rhinitis: 'Rinite / Alergia',
+  skinAllergy: 'Alergia na Pele',
+  eyeAllergy: 'Alergia nos Olhos',
+  allergySpray: 'Sprays Antialérgicos',
+  heartburn: 'Azia / Refluxo',
+  constipation: 'Intestino Preso',
+  diarrhea: 'Diarreia',
+  nausea: 'Náusea / Enjoo',
+  dressings: 'Curativos',
+  antiseptics: 'Antissépticos',
+  burns: 'Queimaduras Leves',
+  bruises: 'Hematomas',
+  healing: 'Cicatrizantes',
+  acne: 'Acne / Oleosidade',
+  hydration: 'Hidratação',
+  sunProtection: 'Proteção Solar',
+  feminineCare: 'Íntimo Feminino',
+  condoms: 'Íntimo Masculino',
+  lubricants: 'Lubrificantes',
+  rapidTests: 'Testes Rápidos',
+
+  // Restaurant Subcategories
+  appetizers: 'Aperitivos',
+  meat: 'Carne',
+  pasta: 'Massas',
+  nonAlcoholic: 'Sem Álcool',
+  alcoholic: 'Alcoólicas',
+  sweets: 'Doces',
+  table: 'Mesa',
+  ordering: 'Pedindo',
+  dietary: 'Restrições',
+  paying: 'Pagamento',
 };
 
 const esCL = {
@@ -287,7 +427,7 @@ const esCL = {
   moduleMechanic: 'Mecánico',
   modulePet: 'Mascotas',
   modulePolice: 'Policía',
-  modulePost: 'Correos',
+  modulePost: 'Correios',
   planFree: 'Plan Gratis',
   planPremium: 'Viajero',
   planMaster: 'Maestro',
@@ -349,8 +489,16 @@ const esCL = {
   usingSystemVoice: 'Usando voz del sistema',
   audioPlaybackError: 'Error al reproducir audio',
   freePhrasesLimit: 'Frases Gratis: ',
+  installApp: 'Instalar App',
+  installAppDesc: 'Instalar para acceso offline y más rápido.',
+  install: 'Instalar',
+  notNow: 'Ahora no',
+  iosStep1: 'Toca el botón Compartir',
+  iosStep2: 'Elige "Agregar a Inicio"',
+  productNotAvailable: 'Producto no disponible en este país',
+  safeAlternative: 'Alternativa Segura',
 
-  // Categories
+  // Supermarket Categories
   produce: 'Frutas y Verduras',
   butcher: 'Carnicería',
   refrigerated: 'Refrigerados',
@@ -361,10 +509,26 @@ const esCL = {
   homeCleaning: 'Limpeza',
   phrases: 'Frases Úteis',
 
-  // Subcategories
+  // Pharmacy Categories
+  chronic: 'Uso Continuo',
+  painFever: 'Dolor y Fiebre',
+  coldFlu: 'Resfrío y Gripe',
+  allergy: 'Alergia',
+  stomach: 'Estómago e Intestino',
+  firstAid: 'Primeros Auxilios',
+  skin: 'Piel y Dermatología',
+  intimate: 'Salud Íntima',
+
+  // Restaurant Categories
+  starters: 'Entradas',
+  mainDishes: 'Platos Principales',
+  drinks: 'Bebidas',
+  desserts: 'Postres',
+
+  // Supermarket Subcategories
   fruits: 'Frutas',
   greens: 'Verduras',
-  vegetables: 'Vegetales',
+  vegetables: 'Vegetables',
   spices: 'Especias',
   beef: 'Vacuno',
   pork: 'Cerdo',
@@ -400,7 +564,53 @@ const esCL = {
   details: 'Detalles del Producto',
   services: 'Serviços de Tienda',
   social: 'Interacción Social',
-  location: 'Ubicación y Direcciones'
+  location: 'Ubicación y Direcciones',
+
+  // Pharmacy Subcategories
+  bloodPressure: 'Presión Alta',
+  cholesterol: 'Colesterol',
+  diabetes: 'Diabetes',
+  generalHealth: 'Salud General',
+  mildPain: 'Dolor Leve',
+  moderatePain: 'Dolor Moderado',
+  musclePain: 'Dolor Muscular',
+  fever: 'Fiebre / Malestar',
+  nasalCongestion: 'Congestión Nasal',
+  dryCough: 'Tos Seca',
+  chestCough: 'Tos con Flema',
+  fluSymptoms: 'Síntomas de Gripe',
+  rhinitis: 'Rinitis / Alergia',
+  skinAllergy: 'Alergia en la Piel',
+  eyeAllergy: 'Alergia en los Ojos',
+  allergySpray: 'Spray Antialérgico',
+  heartburn: 'Acidez / Reflujo',
+  constipation: 'Estreñimiento',
+  diarrhea: 'Diarrea',
+  nausea: 'Náusea / Mareo',
+  dressings: 'Apósitos / Curitas',
+  antiseptics: 'Antisépticos',
+  burns: 'Quemaduras Leves',
+  bruises: 'Moretones',
+  healing: 'Cicatrizantes',
+  acne: 'Acné / Grasa',
+  hydration: 'Hidratación',
+  sunProtection: 'Proteção Solar',
+  feminineCare: 'Íntimo Femenino',
+  condoms: 'Íntimo Masculino',
+  lubricants: 'Lubricantes',
+  rapidTests: 'Tests Rápidos',
+
+  // Restaurant Subcategories
+  appetizers: 'Aperitivos',
+  meat: 'Carne',
+  pasta: 'Pastas',
+  nonAlcoholic: 'Sin Alcohol',
+  alcoholic: 'Alcohólicas',
+  sweets: 'Dulces',
+  table: 'Mesa',
+  ordering: 'Ordenando',
+  dietary: 'Restricciones',
+  paying: 'La cuenta',
 };
 
 export const translations = {

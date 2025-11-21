@@ -1,659 +1,443 @@
 
-import React, { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { CATEGORIES, COUNTRIES, AVAILABLE_MODULES } from './constants';
+import { COUNTRIES } from './constants';
+import type { Country, TranslationItem } from './types';
+import SupermarketModule from './modules/SupermarketModule';
+import PharmacyModule from './modules/PharmacyModule';
+import RestaurantModule from './modules/RestaurantModule';
 import { translations } from './translations';
-import type { Category, Country, TranslationItem } from './types';
-import {
-  XIcon,
-  ChevronDownIcon,
-  RocketIcon,
-  PillIcon,
-  TruckIcon,
-  UtensilsIcon,
-  CrownIcon,
-  HomeIcon,
-  BankIcon,
-  DumbbellIcon,
-  HospitalIcon,
-  BedIcon,
-  FuelIcon,
-  SchoolIcon,
-  WrenchIcon,
-  PawIcon,
-  ShieldCheckIcon,
-  EnvelopeIcon,
-  CreditCardIcon,
-  QrCodeIcon,
-  ShoppingBagIcon,
-  CartIcon,
-  PixIcon,
-  BarcodeIcon,
-  CheckIcon,
-  StarIconSolid,
-  ShoppingBagIconSolid
-} from './components/Icons';
 import { useListManager } from './hooks/useListManager';
+import { LanguagePanel } from './components/LanguagePanel';
 import { FavoritesPanel } from './components/FavoritesPanel';
 import { ShoppingListPanel } from './components/ShoppingListPanel';
-import { LanguagePanel } from './components/LanguagePanel';
+import { playSound } from './utils/soundUtils';
+import { 
+    XIcon, 
+    ShareIcon, 
+    PlusSquareIcon,
+    ShoppingBagIcon,
+    PillIcon,
+    UtensilsIcon,
+    TruckIcon,
+    BedIcon,
+    BankIcon,
+    DumbbellIcon,
+    HospitalIcon,
+    FuelIcon,
+    SchoolIcon,
+    WrenchIcon,
+    PawIcon,
+    ShieldCheckIcon,
+    EnvelopeIcon,
+    ShoppingBagIconSolid,
+    CrownIcon,
+    CheckIcon,
+    CreditCardIcon,
+    PixIcon,
+    BarcodeIcon,
+    QrCodeIcon
+} from './components/Icons';
 
-// Lazy Load Modules for Performance
-const SupermarketModule = React.lazy(() => import('./modules/SupermarketModule'));
-
-type ActiveModule = 'supermarket' | 'pharmacy' | 'restaurant' | 'transport' | 'hotel' | 'bank' | 'gym' | 'hospital' | 'shopping' | 'fuel' | 'school' | 'mechanic' | 'pet' | 'police' | 'post' | null;
-type ActiveTab = 'home' | 'search' | 'favorites' | 'list';
-
-// Module Configuration with Colors
-const MODULE_THEMES: Record<string, { color: string; lightColor: string; cardBg: string; borderColor: string; icon: any; textColor: string; hex: string }> = {
-    supermarket: { color: 'bg-[#c83745]', lightColor: 'bg-red-100', cardBg: 'bg-red-50', borderColor: 'border-red-100', textColor: 'text-[#c83745]', icon: ShoppingBagIcon, hex: '#c83745' },
-    pharmacy: { color: 'bg-cyan-600', lightColor: 'bg-cyan-100', cardBg: 'bg-cyan-50', borderColor: 'border-cyan-100', textColor: 'text-cyan-600', icon: PillIcon, hex: '#0891b2' },
-    restaurant: { color: 'bg-orange-500', lightColor: 'bg-orange-100', cardBg: 'bg-orange-50', borderColor: 'border-orange-100', textColor: 'text-orange-600', icon: UtensilsIcon, hex: '#f97316' },
-    transport: { color: 'bg-amber-500', lightColor: 'bg-amber-100', cardBg: 'bg-amber-50', borderColor: 'border-amber-100', textColor: 'text-amber-600', icon: TruckIcon, hex: '#f59e0b' },
-    hotel: { color: 'bg-indigo-600', lightColor: 'bg-indigo-100', cardBg: 'bg-indigo-50', borderColor: 'border-indigo-100', textColor: 'text-indigo-600', icon: BedIcon, hex: '#4f46e5' },
-    bank: { color: 'bg-slate-700', lightColor: 'bg-slate-200', cardBg: 'bg-slate-100', borderColor: 'border-slate-200', textColor: 'text-slate-700', icon: BankIcon, hex: '#334155' },
-    gym: { color: 'bg-emerald-600', lightColor: 'bg-emerald-100', cardBg: 'bg-emerald-50', borderColor: 'border-emerald-100', textColor: 'text-emerald-600', icon: DumbbellIcon, hex: '#059669' },
-    hospital: { color: 'bg-rose-600', lightColor: 'bg-rose-100', cardBg: 'bg-rose-50', borderColor: 'border-rose-100', textColor: 'text-rose-600', icon: HospitalIcon, hex: '#e11d48' },
-    shopping: { color: 'bg-pink-500', lightColor: 'bg-pink-100', cardBg: 'bg-pink-50', borderColor: 'border-pink-100', textColor: 'text-pink-600', icon: CartIcon, hex: '#ec4899' },
-    fuel: { color: 'bg-blue-700', lightColor: 'bg-blue-100', cardBg: 'bg-blue-50', borderColor: 'border-blue-100', textColor: 'text-blue-700', icon: FuelIcon, hex: '#1d4ed8' },
-    school: { color: 'bg-teal-600', lightColor: 'bg-teal-100', cardBg: 'bg-teal-50', borderColor: 'border-teal-100', textColor: 'text-teal-600', icon: SchoolIcon, hex: '#0d9488' },
-    mechanic: { color: 'bg-zinc-600', lightColor: 'bg-zinc-200', cardBg: 'bg-zinc-100', borderColor: 'border-zinc-200', textColor: 'text-zinc-600', icon: WrenchIcon, hex: '#52525b' },
-    pet: { color: 'bg-lime-600', lightColor: 'bg-lime-100', cardBg: 'bg-lime-50', borderColor: 'border-lime-100', textColor: 'text-lime-600', icon: PawIcon, hex: '#65a30d' },
-    police: { color: 'bg-blue-900', lightColor: 'bg-blue-200', cardBg: 'bg-blue-50', borderColor: 'border-blue-200', textColor: 'text-blue-900', icon: ShieldCheckIcon, hex: '#1e3a8a' },
-    post: { color: 'bg-yellow-500', lightColor: 'bg-yellow-100', cardBg: 'bg-yellow-50', borderColor: 'border-yellow-100', textColor: 'text-yellow-600', icon: EnvelopeIcon, hex: '#eab308' },
+const SUPERMARKET_THEME = {
+  color: 'bg-red-600',
+  textColor: 'text-red-600',
+  hex: '#dc2626',
+  borderColor: 'border-red-600'
 };
 
-const getInitialCountries = (): { native: Country; target: Country } => {
-  let native = COUNTRIES.find((c) => c.code === 'us')!;
+const PHARMACY_THEME = {
+  color: 'bg-emerald-600',
+  textColor: 'text-emerald-600',
+  hex: '#059669',
+  borderColor: 'border-emerald-600'
+};
 
-  if (typeof navigator !== 'undefined' && navigator.language) {
-    const browserLang = navigator.language.split('-')[0].toLowerCase();
-    const langMap: Record<string, string> = {
-      pt: 'br',
-      en: 'us',
-      es: 'cl',
-      fr: 'fr',
-      it: 'it',
+const RESTAURANT_THEME = {
+  color: 'bg-orange-600',
+  textColor: 'text-orange-600',
+  hex: '#ea580c',
+  borderColor: 'border-orange-600'
+};
+
+export default function App() {
+    // Navigation State
+    const [currentModule, setCurrentModule] = useState<'supermarket' | 'pharmacy' | 'restaurant' | null>(null);
+
+    const [nativeCountry, setNativeCountry] = useState<Country>(COUNTRIES.find(c => c.code === 'br') || COUNTRIES[0]);
+    const [targetCountry, setTargetCountry] = useState<Country>(COUNTRIES.find(c => c.code === 'us') || COUNTRIES[4]);
+    
+    // PWA Install State
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [showInstallModal, setShowInstallModal] = useState(false);
+    const [isIOS, setIsIOS] = useState(false);
+    const [isStandalone, setIsStandalone] = useState(false);
+
+    // Module State
+    const [activeTab, setActiveTab] = useState<'home' | 'search' | 'favorites' | 'list'>('home');
+    const [isSearchActive, setIsSearchActive] = useState(false);
+    const [expandedItemKey, setExpandedItemKey] = useState<string | null>(null);
+    const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
+
+    // Use distinct list managers for each module to keep lists separate
+    const supermarketLists = useListManager('supermarket');
+    const pharmacyLists = useListManager('pharmacy');
+    const restaurantLists = useListManager('restaurant');
+
+    // Helper to get current lists based on active module
+    const getCurrentLists = () => {
+        if (currentModule === 'pharmacy') return pharmacyLists;
+        if (currentModule === 'restaurant') return restaurantLists;
+        return supermarketLists;
     };
-    const defaultCountryCode = langMap[browserLang];
-    if (defaultCountryCode) {
-      const foundCountry = COUNTRIES.find((c) => c.code === defaultCountryCode);
-      if (foundCountry) native = foundCountry;
-    }
-  } else {
-    native = COUNTRIES.find((c) => c.code === 'br')!;
-  }
 
-  const target =
-    native.code === 'br'
-      ? COUNTRIES.find((c) => c.code === 'cl')!
-      : COUNTRIES.find((c) => c.code === 'br')!;
+    const { 
+        shoppingList, 
+        checkedItems, 
+        favorites, 
+        toggleShoppingListItem, 
+        toggleFavorite 
+    } = getCurrentLists();
 
-  return { native, target };
-};
-
-const initialCountries = getInitialCountries();
-
-const useOnlineStatus = () => {
-  const [isOnline, setIsOnline] = useState(
-    typeof navigator !== 'undefined' ? navigator.onLine : true,
-  );
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+    const t = (key: string) => {
+        const lang = nativeCountry.lang || 'en-US';
+        // @ts-ignore
+        const terms = translations[lang] || translations['en-US'];
+        return terms[key] || key;
     };
-  }, []);
-  return isOnline;
-};
 
-const LoadingSpinner = () => (
-    <div className="w-full h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#c83745]"></div>
-    </div>
-);
+    // Reset tab state when switching modules
+    useEffect(() => {
+        setActiveTab('home');
+        setIsSearchActive(false);
+        setExpandedItemKey(null);
+    }, [currentModule]);
 
-const App: React.FC = () => {
-  const isOnline = useOnlineStatus();
-  const [activeModule, setActiveModule] = useState<ActiveModule>(null);
-  const [nativeCountry, setNativeCountry] = useState<Country>(initialCountries.native);
-  const [targetCountry, setTargetCountry] = useState<Country>(initialCountries.target);
-  const [globalError, setGlobalError] = useState<string | null>(null);
-  
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+    // PWA Install Logic
+    useEffect(() => {
+        // Check if already installed
+        const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+        setIsStandalone(isStandaloneMode);
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userPlan, setUserPlan] = useState<'free' | 'premium' | 'master'>('free');
-  
-  // Popup state for Language
-  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
+        // Detect iOS
+        const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+        setIsIOS(isIosDevice);
 
-  // Module-specific UI state
-  const [activeTab, setActiveTab] = useState<ActiveTab>('home');
-  const [isSearchActive, setIsSearchActive] = useState(false);
-  const [expandedItemKey, setExpandedItemKey] = useState<string | null>(null);
-
-  // Determine current theme based on active module
-  const currentTheme = useMemo(() => {
-      if (!activeModule) return MODULE_THEMES['supermarket']; 
-      return MODULE_THEMES[activeModule] || MODULE_THEMES['supermarket'];
-  }, [activeModule]);
-
-  // Plan Restrictions
-  const PLAN_LIMITS = {
-      free: {
-          allowedCategories: ['produce', 'butcher', 'phrases'],
-          allowAudio: true,
-      },
-      premium: {
-          allowedCategories: CATEGORIES.map(c => c.name),
-          allowAudio: true,
-      },
-      master: {
-          allowedCategories: CATEGORIES.map(c => c.name),
-          allowAudio: true,
-      }
-  };
-
-  const currentLimits = PLAN_LIMITS[userPlan];
-
-  // Initialize list manager based on active module to scope storage
-  const { 
-    shoppingList, 
-    checkedItems, 
-    favorites, 
-    toggleShoppingListItem, 
-    toggleCheckedItem, 
-    toggleFavorite 
-  } = useListManager(activeModule || ''); 
-
-
-  const t = useCallback(
-    (key: string): string => {
-      const lang = nativeCountry.lang as keyof typeof translations;
-      const langSet = translations[lang] || translations['en-US'];
-      return langSet[key as keyof typeof langSet] || key;
-    },
-    [nativeCountry],
-  );
-
-  // Module Management
-  useEffect(() => {
-      const savedModule = localStorage.getItem('activeModule');
-      if (savedModule && MODULE_THEMES[savedModule] && AVAILABLE_MODULES.includes(savedModule)) {
-          setActiveModule(savedModule as ActiveModule);
-      }
-      const savedPlan = localStorage.getItem('userPlan');
-      if (savedPlan && (savedPlan === 'free' || savedPlan === 'premium' || savedPlan === 'master')) {
-           setUserPlan(savedPlan as 'free' | 'premium' | 'master');
-      }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('userPlan', userPlan);
-  }, [userPlan]);
-
-  const handleModuleSelect = (moduleName: ActiveModule) => {
-      if (moduleName === null) {
-          setActiveModule(null);
-          localStorage.removeItem('activeModule');
-          return;
-      }
-      
-      if (!AVAILABLE_MODULES.includes(moduleName)) {
-          return;
-      }
-
-      setActiveModule(moduleName);
-      localStorage.setItem('activeModule', moduleName);
-      setIsMenuOpen(false);
-  };
-
-  useEffect(() => {
-    if (globalError) {
-      const timer = setTimeout(() => setGlobalError(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [globalError]);
-
-  // Helper function for SpeechSynthesis
-  const playSystemVoice = useCallback((text: string, lang: string) => {
-      if (!('speechSynthesis' in window)) {
-          setGlobalError(t('audioPlaybackError'));
-          return;
-      }
-
-      // Cancel any ongoing speech
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang;
-      
-      // Try to find a good voice
-      const voices = window.speechSynthesis.getVoices();
-      
-      // Priority: Google voices > Matching Lang > Default
-      const preferredVoice = 
-          voices.find(v => v.lang === lang && v.name.includes('Google')) || 
-          voices.find(v => v.lang === lang && !v.localService) ||
-          voices.find(v => v.lang === lang);
-
-      if (preferredVoice) {
-          utterance.voice = preferredVoice;
-      }
-
-      // Adjust rate slightly for clarity
-      utterance.rate = 0.9;
-
-      window.speechSynthesis.speak(utterance);
-  }, [t]);
-
-  const handlePlayAudio = useCallback(
-    (text: string, lang: string) => {
-      // 1. Check if offline strictly
-      if (!isOnline) {
-        playSystemVoice(text, lang);
-        setGlobalError(t('usingOfflineVoice'));
-        return;
-      }
-
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-
-      let audioLang = lang;
-      if (lang === 'es-CL' || lang === 'es-AR') {
-          audioLang = 'es-US';
-      }
-
-      // Use 'gtx' client instead of 'tw-ob' which is often blocked on hosted environments
-      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${audioLang}&client=gtx&q=${encodeURIComponent(text)}`;
-      
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      
-      audio.onerror = (e) => {
-        console.warn("Google TTS blocked/failed, falling back to system voice", e);
-        // Fallback silently if online, without showing the "Offline" error
-        playSystemVoice(text, lang);
-        
-        // Only show error if we genuinely couldn't play anything
-        if (!('speechSynthesis' in window)) {
-             setGlobalError(t('audioPlaybackError'));
-        } else {
-             // Optional: Inform user we are using system voice if desired, but not "Offline"
-             // setGlobalError(t('usingSystemVoice')); 
-        }
-      };
-
-      audio.play().catch((err) => {
-          console.error("Play failed", err);
-          playSystemVoice(text, lang);
-      });
-    },
-    [isOnline, t, playSystemVoice],
-  );
-
-  const handlePlayPhrase = useCallback((phraseType: 'ask' | 'want', item: TranslationItem) => {
-      // Removed explicit restriction based on free plan here, logic is now handled by UI locking
-      const lang = targetCountry.lang;
-       let phrase = '';
-      if (phraseType === 'want') {
-        if (lang === 'pt-BR' || lang === 'pt-PT') {
-          const article = item.gender_pt === 'f' ? 'a ' : item.gender_pt === 'm' ? 'o ' : '';
-          phrase = `Vou levar ${article}${item.key}, por favor.`;
-        } else {
-          const phrases: Record<string, string> = {
-            'es-CL': `Llevaré ${item.translated_term}, por favor.`,
-            'es-AR': `Llevaré ${item.translated_term}, por favor.`,
-            'es-ES': `Me llevaré ${item.translated_term}, por favor.`,
-            'en-GB': `I'll take ${item.translated_term}, please.`,
-            'en-US': `I'll take ${item.translated_term}, please.`,
-            'fr-FR': `Je vais prendre ${item.translated_term}, s'il vous plaît.`,
-            'it-IT': `Prendo ${item.translated_term}, per favore.`,
-          };
-          phrase = phrases[lang] || `I'll take ${item.translated_term}, please.`;
-        }
-      } else { 
-        const phraseTemplates: Record<string, string> = {
-          'pt-BR': `Com licença, você tem ${item.translated_term}?`,
-          'pt-PT': `Com licença, tem ${item.translated_term}?`,
-          'es-CL': `Disculpe, ¿tiene ${item.translated_term}?`,
-          'es-AR': `Disculpe, ¿tiene ${item.translated_term}?`,
-          'es-ES': `Perdone, ¿tiene ${item.translated_term}?`,
-          'en-GB': `Excuse me, do you have ${item.translated_term}?`,
-          'en-US': `Excuse me, do you have ${item.translated_term}?`,
-          'fr-FR': `Excusez-moi, avez-vous ${item.translated_term} ?`,
-          'it-IT': `Mi scusi, ha ${item.translated_term}?`,
+        // Capture install prompt (Android/Desktop)
+        const handleBeforeInstallPrompt = (e: any) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+            // Show modal only if not already installed and not recently dismissed
+            if (!isStandaloneMode && !localStorage.getItem('installDismissed')) {
+                setShowInstallModal(true);
+            }
         };
-        phrase = phraseTemplates[lang] || `Do you have ${item.translated_term}?`;
-      }
-      handlePlayAudio(phrase, lang);
-    },
-    [handlePlayAudio, targetCountry],
-  );
 
-  const handleTabChange = (tab: ActiveTab) => {
-      if (tab === activeTab) {
-          setActiveTab('home');
-          return;
-      }
-      setActiveTab(tab);
-      
-      if (tab === 'home' || tab === 'favorites' || tab === 'list') {
-          setIsSearchActive(false);
-      } else if (tab === 'search') {
-          setIsSearchActive(true);
-      }
-  };
+        // Show iOS modal if not installed and not dismissed
+        if (isIosDevice && !isStandaloneMode && !localStorage.getItem('installDismissed')) {
+             // Small delay to not be intrusive immediately
+             setTimeout(() => setShowInstallModal(true), 3000);
+        }
 
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-  // --- RENDER MODULES ---
-  let panelContent = null;
-  let panelTitle = null;
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        };
+    }, []);
 
-  if (activeTab === 'favorites') {
-    panelTitle = t('favorites');
-    panelContent = <FavoritesPanel 
-        favorites={favorites} 
-        t={t}
-        onPlayAudio={handlePlayAudio}
-        onPlayPhrase={handlePlayPhrase}
-        nativeCountry={nativeCountry}
-        targetCountry={targetCountry}
-        shoppingList={shoppingList}
-        checkedItems={checkedItems}
-        expandedItemKey={expandedItemKey}
-        setExpandedItemKey={setExpandedItemKey}
-        toggleShoppingListItem={toggleShoppingListItem}
-        toggleFavorite={toggleFavorite}
-        isSpeakerLocked={!currentLimits.allowAudio}
-        isConversationLocked={userPlan === 'free'}
-        theme={currentTheme}
-        onOpenPlan={() => setIsMenuOpen(true)}
-    />
-  } else if (activeTab === 'list') {
-      panelTitle = t('shoppingListLabel');
-      panelContent = <ShoppingListPanel 
-          shoppingList={shoppingList}
-          favorites={favorites}
-          t={t}
-          onPlayAudio={handlePlayAudio}
-          onPlayPhrase={handlePlayPhrase}
-          nativeCountry={nativeCountry}
-          targetCountry={targetCountry}
-          checkedItems={checkedItems}
-          expandedItemKey={expandedItemKey}
-          setExpandedItemKey={setExpandedItemKey}
-          toggleShoppingListItem={toggleShoppingListItem}
-          toggleFavorite={toggleFavorite}
-          isSpeakerLocked={!currentLimits.allowAudio}
-          isConversationLocked={userPlan === 'free'}
-          theme={currentTheme}
-          onOpenPlan={() => setIsMenuOpen(true)}
-      />
-  }
+    const handleInstallClick = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                setDeferredPrompt(null);
+                setShowInstallModal(false);
+                playSound('success');
+            }
+        }
+    };
 
-  // --- RENDER HUB (LANDING PAGE) ---
-  if (activeModule === null) {
-      const modules = Object.keys(MODULE_THEMES).map(key => {
-           const theme = MODULE_THEMES[key];
-           const isImplemented = AVAILABLE_MODULES.includes(key);
-           
-           const isLocked = !isImplemented; 
+    const handleDismissInstall = () => {
+        setShowInstallModal(false);
+        localStorage.setItem('installDismissed', 'true');
+    };
 
-           return {
-               id: key,
-               icon: <theme.icon className="w-8 h-8" />,
-               label: t(key === 'supermarket' ? 'supermarketGuide' : `module${key.charAt(0).toUpperCase() + key.slice(1)}`),
-               color: `${theme.lightColor} ${theme.textColor}`,
-               cardBg: theme.cardBg,
-               borderColor: theme.borderColor,
-               locked: isLocked,
-               isComingSoon: !isImplemented
-           }
-      });
+    // FULL ACCESS
+    const currentLimits = {
+        allowedCategories: [], // Not used anymore
+        allowAudio: true
+    };
 
-      const isPanelOpen = activeTab === 'favorites' || activeTab === 'list';
+    // Robust Audio Handling
+    const handlePlayAudio = (text: string, lang: string) => {
+        // 1. Try Online Google TTS (Higher Quality)
+        if (navigator.onLine) {
+            try {
+                const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&total=1&idx=0&textlen=${text.length}&client=gtx`);
+                audio.play().catch(e => {
+                    console.warn("Online audio failed, falling back to system voice", e);
+                    playSystemVoice(text, lang);
+                });
+            } catch (e) {
+                playSystemVoice(text, lang);
+            }
+        } else {
+            // 2. Fallback to System Voice (Offline)
+            playSystemVoice(text, lang);
+        }
+    };
 
-      return (
-          <div className="bg-gray-100 min-h-screen font-sans flex justify-center w-full">
-            <div className="w-full bg-white text-gray-800 shadow-2xl flex flex-col h-screen relative overflow-hidden">
-                 <header className={`p-6 pb-10 ${currentTheme.color} text-white shadow-md rounded-b-3xl z-30 transition-colors duration-300 relative`}>
-                    <div className="max-w-7xl mx-auto w-full">
-                        <div className="flex justify-between items-center mb-4">
-                            <div>
-                                <p className="text-sm opacity-80">{t('welcomeBack')}</p>
-                                <h1 className="text-2xl font-bold">{t('hubTitle')}</h1>
-                            </div>
-                        </div>
-                        
-                        <div 
-                            className={`p-3 rounded-xl text-white text-sm flex items-center gap-2 shadow-sm cursor-pointer transition-all ${
-                                userPlan === 'free' 
-                                ? 'bg-white/20 hover:bg-white/30' 
-                                : 'bg-gradient-to-r from-yellow-400 to-yellow-600 hover:opacity-90 shadow-md'
-                            }`}
-                            onClick={() => setIsMenuOpen(true)}
-                        >
-                            {userPlan !== 'free' && <CrownIcon className="w-4 h-4" />}
-                            <span className="font-bold uppercase tracking-wider flex-1">
-                                {t('planLabel')} - {t(userPlan === 'free' ? 'planFree' : (userPlan === 'premium' ? 'planPremium' : 'planMaster'))}
-                            </span>
-                            {userPlan === 'free' && (
-                                <span className="text-xs opacity-80 underline">{t('unlockExperience')}</span>
-                            )}
-                        </div>
-                    </div>
-                 </header>
+    const playSystemVoice = (text: string, lang: string) => {
+        const synth = window.speechSynthesis;
+        // Cancel any ongoing speech
+        synth.cancel();
 
-                 <main className="flex-1 p-6 overflow-y-auto pb-32 w-full max-w-7xl mx-auto">
-                    <h2 className="text-lg font-bold text-gray-700 mb-4">{t('hubSubtitle')}</h2>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
-                        {modules.map((mod) => (
-                            <button 
-                                key={mod.id}
-                                onClick={() => !mod.locked && handleModuleSelect(mod.id as ActiveModule)}
-                                className={`flex flex-col items-center gap-2 p-3 rounded-2xl shadow-sm border aspect-square justify-center group relative overflow-hidden ${mod.locked ? 'cursor-not-allowed bg-gray-50 border-gray-100' : `${mod.cardBg} ${mod.borderColor} hover:shadow-md transition-all hover:scale-105`}`}
-                            >
-                                <div className={`flex flex-col items-center gap-2 w-full h-full justify-center ${mod.locked ? 'filter blur-[2px] opacity-50 grayscale' : ''}`}>
-                                    <div className={`p-3 rounded-full ${mod.color} ${!mod.locked && 'group-hover:brightness-110 transition-all'}`}>
-                                        {mod.icon}
-                                    </div>
-                                    <span className="text-xs font-bold text-gray-600 text-center leading-tight">{mod.label}</span>
-                                </div>
-                                {mod.locked && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-                                        {mod.isComingSoon ? (
-                                            <div className="bg-gray-800/80 text-white text-[10px] px-2 py-1 rounded-full font-bold shadow-sm backdrop-blur-sm">
-                                                {t('comingSoon')}
-                                            </div>
-                                        ) : (
-                                            <div className="bg-white p-2 rounded-full shadow-md ring-1 ring-red-200 flex items-center justify-center">
-                                                <span className="text-xl">🔒</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                 </main>
-
-                 {/* Sliding Panel */}
-                 <div 
-                    className={`absolute inset-x-0 bottom-0 bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-40 transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col overflow-hidden border-t border-gray-100 max-w-7xl mx-auto w-full left-0 right-0`}
-                    style={{ 
-                        top: '11rem', 
-                        bottom: '0',
-                        transform: isPanelOpen ? 'translateY(0)' : 'translateY(100%)'
-                    }}
-                  >
-                      {/* Panel Header */}
-                      <div className={`w-full flex flex-col items-center pt-3 pb-2 relative transition-colors duration-300 ${panelTitle ? currentTheme.color : 'bg-white'}`}>
-                          <div 
-                            className={`w-12 h-1.5 rounded-full cursor-pointer mb-3 ${panelTitle ? 'bg-white/30' : 'bg-gray-200'}`} 
-                            onClick={() => handleTabChange('home')}
-                          ></div>
-                          {panelTitle && (
-                              <div className="flex items-center justify-between w-full px-6 pb-3 max-w-7xl mx-auto">
-                                  <div className="w-9"></div> 
-                                  <h2 className="text-xl font-bold uppercase tracking-widest text-center text-white shadow-sm">
-                                      {panelTitle}
-                                  </h2>
-                                  <button 
-                                    onClick={() => handleTabChange('home')}
-                                    className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-white"
-                                  >
-                                    <XIcon className="w-5 h-5" />
-                                  </button>
-                              </div>
-                          )}
-                      </div>
-                      <div className="flex-1 overflow-y-auto px-4 pb-32 pt-4 bg-white">
-                          <div className="max-w-7xl mx-auto">
-                            {panelContent}
-                          </div>
-                      </div>
-                 </div>
-
-                 {/* Navigation Bar */}
-                 <nav className={`absolute bottom-0 w-full ${currentTheme.color} z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.15)]`}>
-                    <div className="max-w-7xl mx-auto grid grid-cols-3 h-20 items-end pb-0 transition-all duration-300">
-                      {/* Favorites Tab */}
-                      <button 
-                          onClick={() => handleTabChange('favorites')}
-                          className={`flex flex-col justify-end items-center w-full transition-all duration-300 cursor-pointer relative overflow-hidden group ${
-                              activeTab === 'favorites' 
-                              ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10' 
-                              : 'h-20 pb-6 translate-y-2 opacity-80 hover:opacity-100'
-                          }`}
-                      >
-                          <div className="relative mb-1 transition-transform duration-300 group-hover:scale-110">
-                              <StarIconSolid className={`w-7 h-7 transition-colors duration-300 ${activeTab === 'favorites' ? currentTheme.textColor : 'text-white'}`} />
-                              {favorites.length > 0 && activeTab !== 'favorites' && (
-                                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full ring-2 ring-red-600/50 shadow-sm"></span>
-                              )}
-                          </div>
-                          <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 px-2 text-center leading-tight ${activeTab === 'favorites' ? currentTheme.textColor : 'text-white'}`}>
-                              {t('favorites')}
-                          </span>
-                      </button>
-
-                      {/* Center Language Selector Panel Trigger */}
-                      <div className="relative h-full w-full flex justify-center pointer-events-none">
-                            <button
-                                onClick={() => setIsLanguageModalOpen(true)}
-                                className={`w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform transition-all duration-300 hover:scale-105 cursor-pointer absolute bottom-8 z-50 pointer-events-auto shadow-xl`}
-                                style={{ borderColor: currentTheme.hex }}
-                            >
-                                <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full z-30 pointer-events-none"></div>
-                                <div className="absolute inset-0 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] z-20 pointer-events-none"></div>
-                                
-                                <img
-                                src={targetCountry.image}
-                                alt={targetCountry.name}
-                                className="w-full h-full object-cover z-10"
-                                />
-                            </button>
-                      </div>
-
-                      {/* Shopping List Tab */}
-                      <button 
-                          onClick={() => handleTabChange('list')}
-                          className={`flex flex-col justify-end items-center w-full transition-all duration-300 cursor-pointer relative overflow-hidden group ${
-                              activeTab === 'list' 
-                              ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10' 
-                              : 'h-20 pb-6 translate-y-2 opacity-80 hover:opacity-100'
-                          }`}
-                      >
-                          <div className="relative mb-1 transition-transform duration-300 group-hover:scale-110">
-                              <ShoppingBagIconSolid className={`w-7 h-7 transition-colors duration-300 ${activeTab === 'list' ? currentTheme.textColor : 'text-white'}`} />
-                              {shoppingList.length > 0 && (
-                                  <span className={`absolute -top-2 -right-2 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[9px] font-bold shadow-sm transition-colors ${activeTab === 'list' ? 'bg-red-600 text-white' : 'bg-white text-red-600'}`}>
-                                  {shoppingList.length}
-                                  </span>
-                              )}
-                          </div>
-                          <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 px-1 text-center leading-tight ${activeTab === 'list' ? currentTheme.textColor : 'text-white'}`}>
-                              {t('shoppingListLabel')}
-                          </span>
-                      </button>
-                    </div>
-                 </nav>
-            </div>
-            
-            {/* Global Language Modal */}
-            <LanguagePanel 
-                 isOpen={isLanguageModalOpen}
-                 onClose={() => setIsLanguageModalOpen(false)}
-                 nativeCountry={nativeCountry}
-                 targetCountry={targetCountry}
-                 onNativeChange={setNativeCountry}
-                 onTargetChange={setTargetCountry}
-                 options={COUNTRIES}
-                 t={t}
-                 theme={currentTheme}
-            />
-
-            {isMenuOpen && (
-                <MenuModal 
-                   t={t} 
-                   userPlan={userPlan} 
-                   setUserPlan={setUserPlan} 
-                   onClose={() => setIsMenuOpen(false)}
-                   activeModule={null}
-                   onSelectModule={handleModuleSelect}
-                   currentLimits={currentLimits}
-                   openCategory={null}
-                   theme={currentTheme}
-                />
-            )}
-          </div>
-      );
-  }
-  
-  return (
-    <div className="bg-gray-100 min-h-screen font-sans flex justify-center w-full">
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
         
-        {globalError && (
-            <div className="fixed top-0 left-0 right-0 p-3 text-center text-sm shadow-lg flex justify-between items-center z-[100] bg-yellow-400 text-black max-w-md mx-auto">
-              <span>{globalError}</span>
-              <button onClick={() => { setGlobalError(null); }}>
-                <XIcon className="w-5 h-5" />
-              </button>
-            </div>
-        )}
+        // Try to find a better voice if possible
+        const voices = synth.getVoices();
+        // Prefer "Google" voices on Android/Chrome as they sound better
+        const preferredVoice = voices.find(v => v.lang === lang && v.name.includes('Google'));
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
 
-        <Suspense fallback={<LoadingSpinner />}>
-            {activeModule === 'supermarket' && (
-                <SupermarketModule 
+        synth.speak(utterance);
+    };
+
+    // Initialize voices early to avoid empty list issue on first click
+    useEffect(() => {
+        window.speechSynthesis.getVoices();
+    }, []);
+
+    const handlePlayPhrase = (type: 'ask' | 'want', item: TranslationItem) => {
+        const langBase = targetCountry.lang.split('-')[0].toLowerCase();
+        const itemName = item.translated_term;
+        
+        let phrase = itemName;
+
+        const templates: Record<string, { ask: (s: string) => string, want: (s: string) => string }> = {
+            'en': { 
+                ask: (s) => `Excuse me, where is the ${s}?`, 
+                want: (s) => `I would like ${s}, please.` 
+            },
+            'es': { 
+                ask: (s) => `Disculpe, ¿dónde está ${s}?`, 
+                want: (s) => `Quiero ${s}, por favor.` 
+            },
+            'pt': { 
+                ask: (s) => `Com licença, onde está ${s}?`, 
+                want: (s) => `Eu queria ${s}, por favor.` 
+            },
+            'fr': { 
+                ask: (s) => `Excusez-moi, où est ${s}?`, 
+                want: (s) => `Je voudrais ${s}, s'il vous plaît.` 
+            },
+            'it': { 
+                ask: (s) => `Scusi, dov'è ${s}?`, 
+                want: (s) => `Vorrei ${s}, per favore.` 
+            },
+        };
+
+        const tpl = templates[langBase];
+        if (tpl) {
+            phrase = type === 'ask' ? tpl.ask(itemName.toLowerCase()) : tpl.want(itemName.toLowerCase());
+        } else {
+             // Fallback
+             phrase = type === 'ask' ? `${itemName}?` : `${itemName}, please.`;
+        }
+        
+        handlePlayAudio(phrase, targetCountry.lang);
+    };
+
+    // Search Toggle Logic
+    const handleToggleSearch = () => {
+        playSound('toggle');
+        if (isSearchActive) {
+            setIsSearchActive(false);
+            setActiveTab('home');
+        } else {
+            setIsSearchActive(true);
+            setActiveTab('search');
+        }
+    };
+
+    let panelContent: React.ReactNode = null;
+    let currentTheme;
+    if (currentModule === 'pharmacy') currentTheme = PHARMACY_THEME;
+    else if (currentModule === 'restaurant') currentTheme = RESTAURANT_THEME;
+    else currentTheme = SUPERMARKET_THEME;
+
+    if (activeTab === 'favorites') {
+        panelContent = <FavoritesPanel 
+            favorites={favorites}
+            t={t}
+            onPlayAudio={handlePlayAudio}
+            onPlayPhrase={handlePlayPhrase}
+            nativeCountry={nativeCountry}
+            targetCountry={targetCountry}
+            shoppingList={shoppingList}
+            checkedItems={checkedItems}
+            expandedItemKey={expandedItemKey}
+            setExpandedItemKey={setExpandedItemKey}
+            toggleShoppingListItem={toggleShoppingListItem}
+            toggleFavorite={toggleFavorite}
+            isSpeakerLocked={false}
+            isConversationLocked={false}
+            theme={currentTheme}
+            onOpenPlan={() => {}}
+        />;
+    } else if (activeTab === 'list') {
+        panelContent = <ShoppingListPanel 
+            shoppingList={shoppingList}
+            favorites={favorites}
+            checkedItems={checkedItems}
+            t={t}
+            onPlayAudio={handlePlayAudio}
+            onPlayPhrase={handlePlayPhrase}
+            nativeCountry={nativeCountry}
+            targetCountry={targetCountry}
+            expandedItemKey={expandedItemKey}
+            setExpandedItemKey={setExpandedItemKey}
+            toggleShoppingListItem={toggleShoppingListItem}
+            toggleFavorite={toggleFavorite}
+            isSpeakerLocked={false}
+            isConversationLocked={false}
+            theme={currentTheme}
+            onOpenPlan={() => {}}
+        />;
+    }
+
+    // --- HUB RENDER ---
+    const renderHub = () => {
+        const modules = [
+            { id: 'supermarket', name: t('supermarketGuide'), icon: ShoppingBagIcon, active: true, color: 'bg-red-50 text-red-600 border-red-200' },
+            { id: 'pharmacy', name: t('modulePharmacy'), icon: PillIcon, active: true, color: 'bg-emerald-50 text-emerald-600 border-emerald-200' },
+            { id: 'restaurant', name: t('moduleRestaurant'), icon: UtensilsIcon, active: true, color: 'bg-orange-50 text-orange-600 border-orange-200' },
+            { id: 'transport', name: t('moduleTransport'), icon: TruckIcon, active: false },
+            { id: 'hotel', name: t('moduleHotel'), icon: BedIcon, active: false },
+            { id: 'bank', name: t('moduleBank'), icon: BankIcon, active: false },
+            { id: 'gym', name: t('moduleGym'), icon: DumbbellIcon, active: false },
+            { id: 'hospital', name: t('moduleHospital'), icon: HospitalIcon, active: false },
+            { id: 'shopping', name: t('moduleShopping'), icon: ShoppingBagIconSolid, active: false },
+            { id: 'fuel', name: t('moduleFuel'), icon: FuelIcon, active: false },
+            { id: 'school', name: t('moduleSchool'), icon: SchoolIcon, active: false },
+            { id: 'mechanic', name: t('moduleMechanic'), icon: WrenchIcon, active: false },
+            { id: 'pet', name: t('modulePet'), icon: PawIcon, active: false },
+            { id: 'police', name: t('modulePolice'), icon: ShieldCheckIcon, active: false },
+            { id: 'post', name: t('modulePost'), icon: EnvelopeIcon, active: false },
+        ];
+
+        return (
+            <div className="min-h-[100dvh] bg-slate-50 flex flex-col">
+                {/* Hub Header */}
+                <div className="bg-[#c83745] text-white pb-8 pt-12 px-6 rounded-b-[3rem] shadow-lg relative z-10">
+                    <div className="max-w-5xl mx-auto">
+                         <div className="flex justify-between items-start mb-4">
+                            <div>
+                                <p className="text-white/80 text-sm font-medium mb-1">{t('welcomeBack')}</p>
+                                <h1 className="text-3xl font-extrabold tracking-tight">{t('hubTitle')}</h1>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+
+                {/* Modules Grid */}
+                <div className="flex-1 px-4 -mt-6 pb-12 overflow-y-auto">
+                    <div className="max-w-5xl mx-auto">
+                        <h2 className="text-gray-800 font-bold text-lg mb-4 px-2">{t('hubSubtitle')}</h2>
+                        
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {modules.map((mod) => (
+                                <button
+                                    key={mod.id}
+                                    onClick={() => {
+                                        if (mod.active) {
+                                            playSound('click');
+                                            setCurrentModule(mod.id as any);
+                                        } else {
+                                            playSound('lock');
+                                        }
+                                    }}
+                                    disabled={!mod.active}
+                                    className={`
+                                        aspect-square rounded-3xl flex flex-col items-center justify-center p-4 transition-all duration-200 relative overflow-hidden
+                                        ${mod.active 
+                                            ? 'bg-white shadow-md hover:shadow-xl hover:scale-[1.02] active:scale-95 cursor-pointer border-2 border-transparent' 
+                                            : 'bg-slate-100/50 border border-slate-100 cursor-default opacity-60'
+                                        }
+                                    `}
+                                    style={mod.active && mod.id === 'pharmacy' ? { borderColor: '#10b981' } : mod.active && mod.id === 'restaurant' ? { borderColor: '#f97316' } : mod.active ? { borderColor: '#fecaca' } : {}}
+                                >
+                                    <div className={`
+                                        w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-colors
+                                        ${mod.active 
+                                            ? (mod.id === 'pharmacy' ? 'bg-emerald-50 text-emerald-600' : mod.id === 'restaurant' ? 'bg-orange-50 text-orange-600' : 'bg-red-50 text-[#c83745]') 
+                                            : 'bg-slate-200 text-slate-400'
+                                        }
+                                    `}>
+                                        <mod.icon className="w-7 h-7" />
+                                    </div>
+                                    <span className={`text-sm font-bold text-center leading-tight ${mod.active ? 'text-gray-800' : 'text-gray-400'}`}>
+                                        {mod.name}
+                                    </span>
+                                    
+                                    {!mod.active && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[1px]">
+                                            <span className="bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded-full">
+                                                {t('comingSoon')}
+                                            </span>
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Bottom Language Trigger (Hub) */}
+                <div className="p-6 flex justify-center relative z-20">
+                     <button
+                        onClick={() => { playSound('pop'); setIsLanguageModalOpen(true); }}
+                        className="w-16 h-16 rounded-full border-4 border-white shadow-xl bg-[#c83745] flex items-center justify-center overflow-hidden active:scale-95 transition-transform"
+                    >
+                        <img src={targetCountry.image} alt={targetCountry.name} className="w-full h-full object-cover opacity-90" />
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+    // Render Logic
+    const renderModule = () => {
+        if (currentModule === 'supermarket') {
+            return (
+                <SupermarketModule
                     nativeCountry={nativeCountry}
                     targetCountry={targetCountry}
-                    userPlan={userPlan}
+                    userPlan="master"
                     t={t}
-                    onOpenMenu={() => setIsMenuOpen(true)}
-                    onGoHome={() => handleModuleSelect(null)}
-                    theme={currentTheme}
-                    isOnline={isOnline}
+                    onOpenMenu={() => {}}
+                    onGoHome={() => {
+                        setIsSearchActive(false);
+                        setActiveTab('home');
+                        setCurrentModule(null);
+                    }}
+                    theme={SUPERMARKET_THEME}
+                    isOnline={navigator.onLine}
                     currentLimits={currentLimits}
-                    LanguagePairSelect={LanguagePairSelect}
+                    LanguagePairSelect={() => null}
                     setNativeCountry={setNativeCountry}
                     setTargetCountry={setTargetCountry}
                     countries={COUNTRIES}
                     handlePlayAudio={handlePlayAudio}
                     handlePlayPhrase={handlePlayPhrase}
-                    // State and handlers from App.tsx
                     activeTab={activeTab}
-                    onTabChange={handleTabChange}
+                    onTabChange={setActiveTab}
                     isSearchActive={isSearchActive}
-                    onToggleSearch={() => setIsSearchActive(!isSearchActive)}
+                    onToggleSearch={handleToggleSearch}
                     favorites={favorites}
                     shoppingList={shoppingList}
                     checkedItems={checkedItems}
@@ -662,497 +446,149 @@ const App: React.FC = () => {
                     panelContent={panelContent}
                     expandedItemKey={expandedItemKey}
                     setExpandedItemKey={setExpandedItemKey}
-                    onOpenLanguageModal={() => setIsLanguageModalOpen(true)}
+                    onOpenLanguageModal={() => { playSound('pop'); setIsLanguageModalOpen(true); }}
                 />
-            )}
-
-            {activeModule !== 'supermarket' && activeModule !== null && AVAILABLE_MODULES.includes(activeModule) && (
-                <div className="w-full bg-white text-gray-800 shadow-2xl flex flex-col h-screen relative">
-                    <header className={`p-4 ${currentTheme.color} text-white flex items-center justify-between shadow-md transition-colors duration-300`}>
-                        <button onClick={() => handleModuleSelect(null)} className="p-2 bg-white/20 rounded-full">
-                            <HomeIcon className="w-5 h-5" />
-                        </button>
-                        <h1 className="font-bold text-lg">{t(`module${activeModule.charAt(0).toUpperCase() + activeModule.slice(1)}`)}</h1>
-                        <div className="w-9"></div>
-                    </header>
-                    <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                        {React.createElement(currentTheme.icon, { className: `w-20 h-20 ${currentTheme.textColor} opacity-20 mb-4` })}
-                        <RocketIcon className="w-16 h-16 text-gray-300 mb-4" />
-                        <h2 className="text-xl font-bold text-gray-700">{t('comingSoon')}</h2>
-                        <p className="text-gray-500 mt-2">This module is enabled but content is loading...</p>
-                        <button onClick={() => handleModuleSelect(null)} className={`mt-8 px-6 py-3 rounded-full ${currentTheme.color} text-white font-bold shadow-lg`}>
-                            {t('changeModule')}
-                        </button>
-                    </main>
-                </div>
-            )}
-        </Suspense>
-        
-        {/* Global Language Modal */}
-        <LanguagePanel 
-             isOpen={isLanguageModalOpen}
-             onClose={() => setIsLanguageModalOpen(false)}
-             nativeCountry={nativeCountry}
-             targetCountry={targetCountry}
-             onNativeChange={setNativeCountry}
-             onTargetChange={setTargetCountry}
-             options={COUNTRIES}
-             t={t}
-             theme={currentTheme}
-        />
-
-        {isMenuOpen && (
-          <MenuModal 
-            t={t} 
-            userPlan={userPlan} 
-            setUserPlan={setUserPlan} 
-            onClose={() => setIsMenuOpen(false)} 
-            activeModule={activeModule}
-            onSelectModule={handleModuleSelect}
-            currentLimits={currentLimits}
-            openCategory={null}
-            theme={currentTheme}
-          />
-        )}
-
-    </div>
-  );
-};
-
-// --- SHARED COMPONENTS ---
-
-const MenuModal: React.FC<{ 
-    t: any; 
-    userPlan: any; 
-    setUserPlan: any; 
-    onClose: any;
-    activeModule: ActiveModule;
-    onSelectModule: (mod: ActiveModule) => void;
-    currentLimits: any;
-    openCategory: any;
-    theme: { color: string; textColor: string };
-}> = ({ t, userPlan, setUserPlan, onClose, activeModule, onSelectModule, currentLimits, theme }) => {
-    const [step, setStep] = useState<'plans' | 'checkout'>('plans');
-    const [selectedPlan, setSelectedPlan] = useState<'premium' | 'master' | null>(null);
-    const [paymentCountry, setPaymentCountry] = useState<'cl' | 'br'>('cl');
-    const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
-
-    // Desktop/Tablet Layout logic:
-    // On larger screens, we don't switch steps, we show side-by-side.
-    // Selecting a plan on desktop just updates the state, doesn't change 'step'.
-    
-    const handlePlanSelect = (plan: 'premium' | 'master') => {
-        setSelectedPlan(plan);
-        // Only switch step on mobile
-        if (window.innerWidth < 768) {
-            setStep('checkout');
+            );
+        } else if (currentModule === 'pharmacy') {
+            return (
+                <PharmacyModule
+                    nativeCountry={nativeCountry}
+                    targetCountry={targetCountry}
+                    userPlan="master"
+                    t={t}
+                    onOpenMenu={() => {}}
+                    onGoHome={() => {
+                        setIsSearchActive(false);
+                        setActiveTab('home');
+                        setCurrentModule(null);
+                    }}
+                    theme={PHARMACY_THEME}
+                    isOnline={navigator.onLine}
+                    currentLimits={currentLimits}
+                    LanguagePairSelect={() => null}
+                    setNativeCountry={setNativeCountry}
+                    setTargetCountry={setTargetCountry}
+                    countries={COUNTRIES}
+                    handlePlayAudio={handlePlayAudio}
+                    handlePlayPhrase={handlePlayPhrase}
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                    isSearchActive={isSearchActive}
+                    onToggleSearch={handleToggleSearch}
+                    favorites={favorites}
+                    shoppingList={shoppingList}
+                    checkedItems={checkedItems}
+                    toggleFavorite={toggleFavorite}
+                    toggleShoppingListItem={toggleShoppingListItem}
+                    panelContent={panelContent}
+                    expandedItemKey={expandedItemKey}
+                    setExpandedItemKey={setExpandedItemKey}
+                    onOpenLanguageModal={() => { playSound('pop'); setIsLanguageModalOpen(true); }}
+                />
+            );
+        } else if (currentModule === 'restaurant') {
+            return (
+                <RestaurantModule
+                    nativeCountry={nativeCountry}
+                    targetCountry={targetCountry}
+                    userPlan="master"
+                    t={t}
+                    onOpenMenu={() => {}}
+                    onGoHome={() => {
+                        setIsSearchActive(false);
+                        setActiveTab('home');
+                        setCurrentModule(null);
+                    }}
+                    theme={RESTAURANT_THEME}
+                    isOnline={navigator.onLine}
+                    currentLimits={currentLimits}
+                    LanguagePairSelect={() => null}
+                    setNativeCountry={setNativeCountry}
+                    setTargetCountry={setTargetCountry}
+                    countries={COUNTRIES}
+                    handlePlayAudio={handlePlayAudio}
+                    handlePlayPhrase={handlePlayPhrase}
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                    isSearchActive={isSearchActive}
+                    onToggleSearch={handleToggleSearch}
+                    favorites={favorites}
+                    shoppingList={shoppingList}
+                    checkedItems={checkedItems}
+                    toggleFavorite={toggleFavorite}
+                    toggleShoppingListItem={toggleShoppingListItem}
+                    panelContent={panelContent}
+                    expandedItemKey={expandedItemKey}
+                    setExpandedItemKey={setExpandedItemKey}
+                    onOpenLanguageModal={() => { playSound('pop'); setIsLanguageModalOpen(true); }}
+                />
+            );
         }
-    };
-
-    const handleSubscribe = (plan: 'free' | 'premium' | 'master') => {
-        setUserPlan(plan);
-        // Celebrate
-        const duration = 1.5 * 1000;
-        const animationEnd = Date.now() + duration;
-        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
-        const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
-        const interval: any = setInterval(function() {
-        const timeLeft = animationEnd - Date.now();
-        if (timeLeft <= 0) {
-            return clearInterval(interval);
-        }
-        const particleCount = 50 * (timeLeft / duration);
-        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-        }, 250);
-        
-        confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        zIndex: 9999,
-        colors: ['#c83745', '#fbbf24', '#ffffff'] 
-        });
-
-        setTimeout(() => {
-            onClose();
-        }, 1500);
-    };
-
-    const getPriceDisplay = () => {
-        if (!selectedPlan) return '';
-        if (paymentCountry === 'br') {
-            return selectedPlan === 'premium' ? t('priceTravelerBR').split('/')[0] : t('priceMasterBR').split('/')[0];
-        }
-        if (paymentCountry === 'cl') {
-            const price = selectedPlan === 'premium' ? t('priceTravelerCL') : t('priceMasterCL');
-            // Ensure we only get the price part if it has /month
-            return price.split('/')[0];
-        }
-        return selectedPlan === 'premium' ? t('priceTraveler').split('/')[0] : t('priceMaster').split('/')[0];
-    };
-
-    const getCurrencyCode = () => {
-        return paymentCountry === 'br' ? 'BRL' : 'CLP';
-    };
-
-    // Desktop: Plan cards styling based on selection
-    const getPlanCardStyle = (plan: 'premium' | 'master') => {
-        const isSelected = selectedPlan === plan;
-        if (plan === 'premium') {
-            return `bg-gradient-to-r from-[#c83745] to-[#e65c6a] rounded-xl p-4 shadow-md text-white relative overflow-hidden cursor-pointer transition-all hover:shadow-lg ${isSelected ? 'ring-4 ring-offset-2 ring-[#c83745] scale-[1.02]' : 'opacity-90 hover:opacity-100 hover:scale-[1.01]'}`;
-        }
-        return `bg-gray-900 rounded-xl p-4 shadow-md text-white border border-gray-700 cursor-pointer transition-all hover:shadow-lg ${isSelected ? 'ring-4 ring-offset-2 ring-gray-600 scale-[1.02]' : 'opacity-90 hover:opacity-100 hover:scale-[1.01]'}`;
+        return renderHub();
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center">
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
-            
-            {/* Modal Content - Responsive Width */}
-            <div className="relative w-full h-full md:h-auto md:max-h-[90vh] max-w-md md:max-w-5xl bg-gray-100 flex flex-col shadow-2xl md:rounded-2xl overflow-hidden animate-fade-in z-10">
-                
-                <div className={`${theme.color} p-4 pt-6 text-white shadow-lg flex items-center justify-between transition-colors duration-300 shrink-0`}>
-                    <h2 className="text-2xl font-bold">
-                        <span className="md:hidden">{step === 'checkout' ? t('subscriptionCheckout') : t('menu')}</span>
-                        <span className="hidden md:inline">{t('menu')} & {t('subscriptionCheckout')}</span>
-                    </h2>
-                    <button onClick={() => {
-                        if(step === 'checkout' && window.innerWidth < 768) setStep('plans');
-                        else onClose();
-                    }} className="p-2 bg-white/20 rounded-full hover:bg-white/30">
-                        {step === 'checkout' ? <ChevronDownIcon className="w-6 h-6 rotate-90 md:hidden" /> : null}
-                        <XIcon className={`w-6 h-6 ${step === 'checkout' ? 'hidden md:block' : ''}`} />
-                    </button>
-                </div>
+        <>
+            {renderModule()}
 
-                <div className="flex-1 overflow-y-auto md:overflow-hidden">
-                    <div className="flex flex-col md:grid md:grid-cols-12 h-full">
+             <LanguagePanel 
+                isOpen={isLanguageModalOpen}
+                onClose={() => { playSound('soft'); setIsLanguageModalOpen(false); }}
+                nativeCountry={nativeCountry}
+                targetCountry={targetCountry}
+                onNativeChange={setNativeCountry}
+                onTargetChange={setTargetCountry}
+                options={COUNTRIES}
+                t={t}
+                theme={currentTheme}
+            />
+
+            {/* INSTALL APP MODAL */}
+            {showInstallModal && (
+                <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 flex justify-center animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-md border border-gray-100 relative">
+                        <button onClick={handleDismissInstall} className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600">
+                            <XIcon className="w-5 h-5" />
+                        </button>
                         
-                        {/* LEFT COLUMN: PLANS (Always visible on desktop, visible on mobile if step is plans) */}
-                        <div className={`p-4 space-y-6 md:col-span-7 md:overflow-y-auto md:p-8 ${step === 'checkout' ? 'hidden md:block' : 'block'}`}>
-                             {activeModule && (
-                                <button 
-                                    onClick={() => onSelectModule(null)}
-                                    className={`w-full bg-white border-2 ${theme.textColor.replace('text', 'border')} ${theme.textColor} font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm hover:bg-gray-50 transition-colors`}
-                                >
-                                    <HomeIcon className="w-5 h-5" />
-                                    {t('changeModule')}
-                                </button>
-                            )}
-
-                            <section>
-                                <h3 className="text-gray-800 font-bold text-lg mb-3 flex items-center gap-2">
-                                <RocketIcon className={`w-5 h-5 ${theme.textColor}`} />
-                                {t('plans')}
-                                </h3>
-                                <div className="space-y-4">
-                                    <div className={`bg-white rounded-xl p-4 shadow-sm border-2 relative ${userPlan === 'free' ? 'border-gray-400' : 'border-transparent'}`}>
-                                        {userPlan === 'free' && (
-                                            <div className="absolute top-3 right-3 bg-gray-200 text-gray-600 text-xs font-bold px-2 py-1 rounded">
-                                            {t('currentPlan')}
-                                            </div>
-                                        )}
-                                        <h4 className="text-xl font-bold text-gray-800">{t('planFree')}</h4>
-                                        <p className="text-gray-500 text-sm mt-1">{t('planFreeDesc')}</p>
-                                        <button onClick={() => { setUserPlan('free'); onClose(); }} className="mt-4 w-full bg-gray-200 text-gray-900 font-bold py-3 rounded-xl border border-gray-300 hover:bg-gray-300 transition-colors">
-                                            {t('stayOnFree')}
+                        <div className="flex items-start gap-4">
+                            <div className="bg-red-100 p-3 rounded-xl shrink-0">
+                                <img src="/vite.svg" alt="App Icon" className="w-8 h-8" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-bold text-gray-800 text-lg">{t('installApp')}</h3>
+                                <p className="text-sm text-gray-500 leading-tight mt-1">{t('installAppDesc')}</p>
+                                
+                                {isIOS ? (
+                                    <div className="mt-3 space-y-2 bg-gray-50 p-3 rounded-lg text-sm">
+                                        <div className="flex items-center gap-2 text-gray-600">
+                                            1. {t('iosStep1')} <ShareIcon className="w-4 h-4 text-blue-500 inline" />
+                                        </div>
+                                        <div className="flex items-center gap-2 text-gray-600">
+                                            2. {t('iosStep2')} <PlusSquareIcon className="w-4 h-4 text-gray-500 inline" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="mt-4 flex gap-3">
+                                        <button 
+                                            onClick={handleInstallClick}
+                                            className="flex-1 bg-red-600 text-white py-2 rounded-lg font-bold text-sm shadow-md hover:bg-red-700 transition-colors"
+                                        >
+                                            {t('install')}
+                                        </button>
+                                        <button 
+                                            onClick={handleDismissInstall}
+                                            className="px-4 py-2 text-gray-400 font-medium text-sm hover:text-gray-600"
+                                        >
+                                            {t('notNow')}
                                         </button>
                                     </div>
-
-                                    <div 
-                                        className={getPlanCardStyle('premium')}
-                                        onClick={() => handlePlanSelect('premium')}
-                                    >
-                                        <div className="absolute -right-4 -top-4 bg-white/20 w-24 h-24 rounded-full blur-xl"></div>
-                                        {(userPlan === 'premium' || selectedPlan === 'premium') && (
-                                            <div className="absolute top-3 right-3 bg-white text-[#c83745] text-xs font-bold px-2 py-1 rounded shadow flex items-center gap-1">
-                                                {userPlan === 'premium' ? t('currentPlan') : <CheckIcon className="w-3 h-3" />}
-                                            </div>
-                                        )}
-                                        <h4 className="text-xl font-bold flex items-center gap-2">
-                                            {t('planPremium')}
-                                            <CrownIcon className="w-5 h-5 fill-current text-yellow-300" />
-                                        </h4>
-                                        <p className="text-white/90 text-sm mt-1">{t('planPremiumDesc')}</p>
-                                        <p className="text-white font-bold text-lg mt-2">{t('priceTraveler')}</p>
-                                        {userPlan !== 'premium' && (
-                                            <div className="mt-4 w-full bg-white text-[#c83745] font-bold py-2 rounded-lg shadow hover:bg-gray-50 transition-colors text-center">
-                                                {t('subscribe')}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div 
-                                        className={getPlanCardStyle('master')}
-                                        onClick={() => handlePlanSelect('master')}
-                                    >
-                                        {(userPlan === 'master' || selectedPlan === 'master') && (
-                                            <div className="absolute top-3 right-3 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded shadow flex items-center gap-1">
-                                                {userPlan === 'master' ? t('currentPlan') : <CheckIcon className="w-3 h-3" />}
-                                            </div>
-                                        )}
-                                        <h4 className="text-xl font-bold text-yellow-400">{t('planMaster')}</h4>
-                                        <p className="text-gray-400 text-sm mt-1">{t('planMasterDesc')}</p>
-                                        <p className="text-white font-bold text-lg mt-2">{t('priceMaster')}</p>
-                                        {userPlan !== 'master' && (
-                                            <div className="mt-4 w-full bg-gray-700 text-white font-bold py-2 rounded-lg hover:bg-gray-600 transition-colors border border-gray-600 text-center">
-                                                {t('subscribe')}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
-
-                        {/* RIGHT COLUMN: CHECKOUT (Hidden on mobile unless step is checkout, Always visible on desktop) */}
-                        <div className={`bg-gray-50 border-l border-gray-200 p-4 space-y-4 md:col-span-5 md:overflow-y-auto md:p-8 flex flex-col ${step === 'checkout' ? 'block' : 'hidden md:flex'}`}>
-                             
-                             <h3 className="text-gray-800 font-bold text-lg mb-3 hidden md:block">{t('subscriptionCheckout')}</h3>
-
-                             {!selectedPlan ? (
-                                 <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-center p-8 border-2 border-dashed border-gray-300 rounded-xl">
-                                     <ShoppingBagIcon className="w-12 h-12 mb-2 opacity-30" />
-                                     <p>{t('simulateSub')}</p>
-                                 </div>
-                             ) : (
-                                <div className="space-y-4 animate-fade-in">
-                                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                                        <h4 className="text-gray-500 text-xs uppercase font-bold mb-3">{t('billingCountry')}</h4>
-                                        <div className="flex flex-wrap gap-3">
-                                            <button 
-                                                onClick={() => { setPaymentCountry('cl'); setPaymentMethod(null); }}
-                                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border-2 transition-all ${paymentCountry === 'cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 grayscale'}`}
-                                            >
-                                                <img src="https://flagcdn.com/cl.svg" alt="Chile" className="w-6 h-4 rounded shadow-sm" />
-                                                <span className={`text-sm font-bold ${paymentCountry === 'cl' ? 'text-gray-800' : 'text-gray-500'}`}>Chile</span>
-                                            </button>
-                                            <button 
-                                                onClick={() => { setPaymentCountry('br'); setPaymentMethod(null); }}
-                                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border-2 transition-all ${paymentCountry === 'br' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 grayscale'}`}
-                                            >
-                                                <img src="https://flagcdn.com/br.svg" alt="Brazil" className="w-6 h-4 rounded shadow-sm" />
-                                                <span className={`text-sm font-bold ${paymentCountry === 'br' ? 'text-gray-800' : 'text-gray-500'}`}>Brasil</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                                        <h4 className="text-gray-500 text-xs uppercase font-bold mb-1">{t('totalToPay')}</h4>
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <span className="text-sm text-gray-500 mr-2">{t(selectedPlan === 'premium' ? 'planPremium' : 'planMaster')}</span>
-                                                <span className="text-2xl font-bold text-gray-800">
-                                                    {getPriceDisplay()}
-                                                </span>
-                                            </div>
-                                            <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">{getCurrencyCode()}</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div>
-                                        <h4 className="text-gray-800 font-bold mb-3">{t('selectPaymentMethod')}</h4>
-                                        <div className="space-y-3">
-                                            
-                                            {paymentCountry === 'cl' && (
-                                                <>
-                                                    <button 
-                                                        onClick={() => setPaymentMethod('debit_cl')}
-                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'debit_cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                                    >
-                                                        <div className="bg-orange-500 p-2 rounded text-white flex-shrink-0">
-                                                            <CreditCardIcon className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="text-left">
-                                                            <p className="font-bold text-gray-800 text-sm">{t('methodDebit')}</p>
-                                                            <p className="text-xs text-gray-500">Webpay / Redcompra / Cuenta RUT</p>
-                                                        </div>
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => setPaymentMethod('credit_cl')}
-                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'credit_cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                                    >
-                                                        <div className="bg-blue-600 p-2 rounded text-white flex-shrink-0">
-                                                            <CreditCardIcon className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="text-left">
-                                                            <p className="font-bold text-gray-800 text-sm">{t('methodCredit')}</p>
-                                                            <p className="text-xs text-gray-500">Visa / Mastercard / Amex</p>
-                                                        </div>
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => setPaymentMethod('mercadopago_cl')}
-                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'mercadopago_cl' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                                    >
-                                                        <div className="bg-blue-400 p-2 rounded text-white flex-shrink-0">
-                                                            <QrCodeIcon className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="text-left">
-                                                            <p className="font-bold text-gray-800 text-sm">{t('methodMercadoPago')}</p>
-                                                            <p className="text-xs text-gray-500">App / QR / Saldo</p>
-                                                        </div>
-                                                    </button>
-                                                </>
-                                            )}
-
-                                            {paymentCountry === 'br' && (
-                                                <>
-                                                    <button 
-                                                        onClick={() => setPaymentMethod('pix')}
-                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'pix' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                                    >
-                                                        <div className="bg-teal-600 p-2 rounded text-white flex-shrink-0">
-                                                            <PixIcon className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="text-left">
-                                                            <p className="font-bold text-gray-800 text-sm">{t('methodPix')}</p>
-                                                            <p className="text-xs text-gray-500">Aprovação imediata</p>
-                                                        </div>
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => setPaymentMethod('credit_br')}
-                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'credit_br' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                                    >
-                                                        <div className="bg-blue-600 p-2 rounded text-white flex-shrink-0">
-                                                            <CreditCardIcon className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="text-left">
-                                                            <p className="font-bold text-gray-800 text-sm">{t('methodCredit')}</p>
-                                                            <p className="text-xs text-gray-500">Até 12x sem juros</p>
-                                                        </div>
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => setPaymentMethod('boleto')}
-                                                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${paymentMethod === 'boleto' ? 'border-[#c83745] bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                                    >
-                                                        <div className="bg-gray-600 p-2 rounded text-white flex-shrink-0">
-                                                            <BarcodeIcon className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="text-left">
-                                                            <p className="font-bold text-gray-800 text-sm">{t('methodBoleto')}</p>
-                                                            <p className="text-xs text-gray-500">Aprovação em 1-2 dias úteis</p>
-                                                        </div>
-                                                    </button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <button 
-                                        disabled={!paymentMethod}
-                                        onClick={() => handleSubscribe(selectedPlan)}
-                                        className={`w-full py-4 rounded-xl font-bold text-white shadow-lg mt-8 transition-all ${paymentMethod ? 'bg-[#c83745] hover:bg-[#b02a36]' : 'bg-gray-300 cursor-not-allowed'}`}
-                                    >
-                                        {t('payNow')}
-                                    </button>
-                                </div>
-                             )}
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    )
-}
-
-const LanguagePairSelect: React.FC<{
-  nativeCountry: Country;
-  targetCountry: Country;
-  onNativeChange: (country: Country) => void;
-  onTargetChange: (country: Country) => void;
-  options: Country[];
-  t: (key: string) => string;
-  alignment?: 'center' | 'right';
-  triggerClassName?: string;
-  style?: React.CSSProperties;
-}> = ({ nativeCountry, targetCountry, onNativeChange, onTargetChange, options, t, alignment = 'center', triggerClassName, style }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  
-  // Countries that are not fully supported yet
-  const comingSoonCodes = ['us', 'pt', 'es', 'fr', 'it'];
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const renderOption = (opt: Country, isSelected: boolean, onClick: () => void) => {
-      const isComingSoon = comingSoonCodes.includes(opt.code);
-
-      return (
-        <div key={opt.code} className="relative flex flex-col items-center group">
-             <button
-                onClick={onClick}
-                className={`rounded-full cursor-pointer w-12 h-12 flex items-center justify-center transition-all duration-300 relative overflow-hidden border-[3px] bg-white ${
-                    isSelected 
-                    ? 'border-slate-800 shadow-lg scale-110 z-10 ring-2 ring-offset-1 ring-slate-400 grayscale-0 opacity-100' 
-                    : 'border-gray-300 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 hover:scale-105'
-                }`}
-                title={opt.name}
-            >
-                <img
-                    src={opt.image}
-                    alt={opt.name}
-                    className="w-full h-full object-cover z-10"
-                />
-            </button>
-            {isComingSoon && (
-                <div className="absolute -bottom-2 z-20 bg-gray-800 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow-sm border border-gray-600 pointer-events-none whitespace-nowrap">
-                    Em breve
-                </div>
             )}
-        </div>
-      );
-  };
-
-  return (
-    <div className="relative z-[60]" ref={dropdownRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={triggerClassName || "w-20 h-20 rounded-full border-[5px] border-slate-800 shadow-2xl relative overflow-hidden transform transition-transform hover:scale-105 bg-slate-800 group"}
-        style={style}
-      >
-        <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/60 to-transparent rounded-t-full z-30 pointer-events-none"></div>
-        
-        <div className="absolute inset-0 rounded-full shadow-[inset_0_0_15px_rgba(0,0,0,0.6)] z-20 pointer-events-none"></div>
-        
-        <img
-          src={targetCountry.image}
-          alt={targetCountry.name}
-          className="w-full h-full object-cover z-10"
-        />
-      </button>
-      {isOpen && (
-        <div className={`absolute z-[70] top-full mt-3 w-80 bg-white rounded-xl shadow-2xl flex flex-col ring-1 ring-black/5 animate-expand-down origin-top ${alignment === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
-          <div className={`absolute -top-2 w-4 h-4 bg-slate-700 rotate-45 ${alignment === 'right' ? 'right-6' : 'left-1/2 -translate-x-1/2'} z-0`}></div>
-
-          <div className="bg-slate-100 rounded-t-xl z-10 relative overflow-hidden">
-            <div className="bg-slate-700 text-white p-2 px-4 font-bold text-sm uppercase tracking-wider flex items-center shadow-sm relative z-10">
-                {t('myLanguage')}...
-            </div>
-            <div className="p-4 grid grid-cols-4 gap-x-2 gap-y-4">
-              {options.map((opt) => renderOption(opt, nativeCountry.code === opt.code, () => onNativeChange(opt)))}
-            </div>
-          </div>
-
-          <div className="bg-red-50 rounded-b-xl z-10 relative overflow-hidden">
-             <div className="bg-[#c83745] text-white p-2 px-4 font-bold text-sm uppercase tracking-wider flex items-center shadow-sm relative z-10">
-                {t('iAmIn')}...
-            </div>
-            <div className="p-4 grid grid-cols-4 gap-x-2 gap-y-4">
-               {options.map((opt) => renderOption(opt, targetCountry.code === opt.code, () => onTargetChange(opt)))}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default App;
+        </>
+    );
+}
