@@ -15,14 +15,10 @@ import { painFeverData, coldFluData, allergyData, digestiveData, chronicData } f
 import { firstAidData } from './modules/pharmacy/data/firstAidData';
 import { skinData, intimateData } from './modules/pharmacy/data/cosmeticsData';
 
-// Restaurant Data Imports
-import { startersData, mainDishData, drinksData, dessertData, restaurantPhrasesData } from './modules/restaurant/data/restaurantData';
-
 // --- REGISTRY OF IMPLEMENTED MODULES ---
 export const AVAILABLE_MODULES = [
     'supermarket', 
-    'pharmacy', 
-    'restaurant',
+    'pharmacy',
 ];
 
 export const SUPERMARKET_CATEGORIES: Category[] = [
@@ -101,30 +97,6 @@ export const PHARMACY_CATEGORIES: Category[] = [
   }
 ];
 
-export const RESTAURANT_CATEGORIES: Category[] = [
-  {
-    name: "starters",
-    subCategories: ["appetizers"],
-  },
-  {
-    name: "mainDishes",
-    subCategories: ["meat", "fish", "pasta"],
-  },
-  {
-    name: "drinks",
-    subCategories: ["nonAlcoholic", "alcoholic"],
-  },
-  {
-    name: "desserts",
-    subCategories: ["sweets"],
-  },
-  {
-    name: "phrases",
-    subCategories: ["table", "ordering", "dietary", "paying"],
-  }
-];
-
-
 export const COUNTRIES: Country[] = [
     { name: "Brasil", lang: "pt-BR", flag: "🇧🇷", code: "br", image: "https://cdn-icons-png.flaticon.com/512/197/197386.png" },
     { name: "Chile", lang: "es-CL", flag: "🇨🇱", code: "cl", image: "https://cdn-icons-png.flaticon.com/512/197/197586.png" },
@@ -160,11 +132,5 @@ export const PREPOPULATED_TRANSLATIONS: Record<string, Record<string, { source_t
   skin: skinData,
   intimate: intimateData,
 
-  // Restaurant
-  starters: startersData,
-  mainDishes: mainDishData,
-  drinks: drinksData,
-  desserts: dessertData,
-
-  phrases: { ...phrasesData, ...restaurantPhrasesData }
+  phrases: phrasesData
 };

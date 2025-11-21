@@ -5,17 +5,11 @@ import { COUNTRIES } from './constants';
 import type { Country, TranslationItem } from './types';
 import SupermarketModule from './modules/SupermarketModule';
 import PharmacyModule from './modules/PharmacyModule';
-import RestaurantModule from './modules/RestaurantModule';
 import { translations } from './translations';
 import { useListManager } from './hooks/useListManager';
 import { LanguagePanel } from './components/LanguagePanel';
-import { FavoritesPanel } from './components/FavoritesPanel';
-import { ShoppingListPanel } from './components/ShoppingListPanel';
 import { playSound } from './utils/soundUtils';
 import { 
-    XIcon, 
-    ShareIcon, 
-    PlusSquareIcon,
     ShoppingBagIcon,
     PillIcon,
     UtensilsIcon,
@@ -31,12 +25,7 @@ import {
     ShieldCheckIcon,
     EnvelopeIcon,
     ShoppingBagIconSolid,
-    CrownIcon,
-    CheckIcon,
-    CreditCardIcon,
-    PixIcon,
-    BarcodeIcon,
-    QrCodeIcon
+    StarIcon
 } from './components/Icons';
 
 const SUPERMARKET_THEME = {
@@ -53,16 +42,9 @@ const PHARMACY_THEME = {
   borderColor: 'border-emerald-600'
 };
 
-const RESTAURANT_THEME = {
-  color: 'bg-orange-600',
-  textColor: 'text-orange-600',
-  hex: '#ea580c',
-  borderColor: 'border-orange-600'
-};
-
 export default function App() {
     // Navigation State
-    const [currentModule, setCurrentModule] = useState<'supermarket' | 'pharmacy' | 'restaurant' | null>(null);
+    const [currentModule, setCurrentModule] = useState<'supermarket' | 'pharmacy' | null>(null);
 
     const [nativeCountry, setNativeCountry] = useState<Country>(COUNTRIES.find(c => c.code === 'br') || COUNTRIES[0]);
     const [targetCountry, setTargetCountry] = useState<Country>(COUNTRIES.find(c => c.code === 'us') || COUNTRIES[4]);
@@ -82,12 +64,10 @@ export default function App() {
     // Use distinct list managers for each module to keep lists separate
     const supermarketLists = useListManager('supermarket');
     const pharmacyLists = useListManager('pharmacy');
-    const restaurantLists = useListManager('restaurant');
 
     // Helper to get current lists based on active module
     const getCurrentLists = () => {
         if (currentModule === 'pharmacy') return pharmacyLists;
-        if (currentModule === 'restaurant') return restaurantLists;
         return supermarketLists;
     };
 
@@ -163,9 +143,9 @@ export default function App() {
         localStorage.setItem('installDismissed', 'true');
     };
 
-    // FULL ACCESS
+    // FULL ACCESS (No Plans)
     const currentLimits = {
-        allowedCategories: [], // Not used anymore
+        allowedCategories: [], 
         allowAudio: true
     };
 
@@ -213,11 +193,9 @@ export default function App() {
     }, []);
 
     const handlePlayPhrase = (type: 'ask' | 'want', item: TranslationItem) => {
-        const langBase = targetCountry.lang.split('-')[0].toLowerCase();
         const itemName = item.translated_term;
         
-        let phrase = itemName;
-
+        // Simple templates for phrases
         const templates: Record<string, { ask: (s: string) => string, want: (s: string) => string }> = {
             'en': { 
                 ask: (s) => `Excuse me, where is the ${s}?`, 
@@ -235,357 +213,230 @@ export default function App() {
                 ask: (s) => `Excusez-moi, où est ${s}?`, 
                 want: (s) => `Je voudrais ${s}, s'il vous plaît.` 
             },
-            'it': { 
-                ask: (s) => `Scusi, dov'è ${s}?`, 
-                want: (s) => `Vorrei ${s}, per favore.` 
-            },
+            'it': {
+                ask: (s) => `Scusi, dov'è ${s}?`,
+                want: (s) => `Vorrei ${s}, per favore.`
+            }
         };
 
-        const tpl = templates[langBase];
-        if (tpl) {
-            phrase = type === 'ask' ? tpl.ask(itemName.toLowerCase()) : tpl.want(itemName.toLowerCase());
-        } else {
-             // Fallback
-             phrase = type === 'ask' ? `${itemName}?` : `${itemName}, please.`;
-        }
+        const langBase = targetCountry.lang.split('-')[0];
+        const template = templates[langBase] || templates['en'];
+        const textToPlay = type === 'ask' ? template.ask(itemName) : template.want(itemName);
         
-        handlePlayAudio(phrase, targetCountry.lang);
+        handlePlayAudio(textToPlay, targetCountry.lang);
     };
 
-    // Search Toggle Logic
-    const handleToggleSearch = () => {
-        playSound('toggle');
-        if (isSearchActive) {
-            setIsSearchActive(false);
-            setActiveTab('home');
-        } else {
-            setIsSearchActive(true);
-            setActiveTab('search');
-        }
-    };
+    // --- Render Functions ---
 
-    let panelContent: React.ReactNode = null;
-    let currentTheme;
-    if (currentModule === 'pharmacy') currentTheme = PHARMACY_THEME;
-    else if (currentModule === 'restaurant') currentTheme = RESTAURANT_THEME;
-    else currentTheme = SUPERMARKET_THEME;
+    // Language Selector Component (Passed to Modules)
+    const LanguagePairSelect = () => null; // Placeholder if modules need it, but we use the panel now
 
-    if (activeTab === 'favorites') {
-        panelContent = <FavoritesPanel 
-            favorites={favorites}
-            t={t}
-            onPlayAudio={handlePlayAudio}
-            onPlayPhrase={handlePlayPhrase}
-            nativeCountry={nativeCountry}
-            targetCountry={targetCountry}
-            shoppingList={shoppingList}
-            checkedItems={checkedItems}
-            expandedItemKey={expandedItemKey}
-            setExpandedItemKey={setExpandedItemKey}
-            toggleShoppingListItem={toggleShoppingListItem}
-            toggleFavorite={toggleFavorite}
-            isSpeakerLocked={false}
-            isConversationLocked={false}
-            theme={currentTheme}
-            onOpenPlan={() => {}}
-        />;
-    } else if (activeTab === 'list') {
-        panelContent = <ShoppingListPanel 
-            shoppingList={shoppingList}
-            favorites={favorites}
-            checkedItems={checkedItems}
-            t={t}
-            onPlayAudio={handlePlayAudio}
-            onPlayPhrase={handlePlayPhrase}
-            nativeCountry={nativeCountry}
-            targetCountry={targetCountry}
-            expandedItemKey={expandedItemKey}
-            setExpandedItemKey={setExpandedItemKey}
-            toggleShoppingListItem={toggleShoppingListItem}
-            toggleFavorite={toggleFavorite}
-            isSpeakerLocked={false}
-            isConversationLocked={false}
-            theme={currentTheme}
-            onOpenPlan={() => {}}
-        />;
-    }
-
-    // --- HUB RENDER ---
-    const renderHub = () => {
-        const modules = [
-            { id: 'supermarket', name: t('supermarketGuide'), icon: ShoppingBagIcon, active: true, color: 'bg-red-50 text-red-600 border-red-200' },
-            { id: 'pharmacy', name: t('modulePharmacy'), icon: PillIcon, active: true, color: 'bg-emerald-50 text-emerald-600 border-emerald-200' },
-            { id: 'restaurant', name: t('moduleRestaurant'), icon: UtensilsIcon, active: true, color: 'bg-orange-50 text-orange-600 border-orange-200' },
-            { id: 'transport', name: t('moduleTransport'), icon: TruckIcon, active: false },
-            { id: 'hotel', name: t('moduleHotel'), icon: BedIcon, active: false },
-            { id: 'bank', name: t('moduleBank'), icon: BankIcon, active: false },
-            { id: 'gym', name: t('moduleGym'), icon: DumbbellIcon, active: false },
-            { id: 'hospital', name: t('moduleHospital'), icon: HospitalIcon, active: false },
-            { id: 'shopping', name: t('moduleShopping'), icon: ShoppingBagIconSolid, active: false },
-            { id: 'fuel', name: t('moduleFuel'), icon: FuelIcon, active: false },
-            { id: 'school', name: t('moduleSchool'), icon: SchoolIcon, active: false },
-            { id: 'mechanic', name: t('moduleMechanic'), icon: WrenchIcon, active: false },
-            { id: 'pet', name: t('modulePet'), icon: PawIcon, active: false },
-            { id: 'police', name: t('modulePolice'), icon: ShieldCheckIcon, active: false },
-            { id: 'post', name: t('modulePost'), icon: EnvelopeIcon, active: false },
-        ];
-
-        return (
-            <div className="min-h-[100dvh] bg-slate-50 flex flex-col">
-                {/* Hub Header */}
-                <div className="bg-[#c83745] text-white pb-8 pt-12 px-6 rounded-b-[3rem] shadow-lg relative z-10">
-                    <div className="max-w-5xl mx-auto">
-                         <div className="flex justify-between items-start mb-4">
-                            <div>
-                                <p className="text-white/80 text-sm font-medium mb-1">{t('welcomeBack')}</p>
-                                <h1 className="text-3xl font-extrabold tracking-tight">{t('hubTitle')}</h1>
-                            </div>
-                         </div>
-                    </div>
-                </div>
-
-                {/* Modules Grid */}
-                <div className="flex-1 px-4 -mt-6 pb-12 overflow-y-auto">
-                    <div className="max-w-5xl mx-auto">
-                        <h2 className="text-gray-800 font-bold text-lg mb-4 px-2">{t('hubSubtitle')}</h2>
-                        
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            {modules.map((mod) => (
-                                <button
-                                    key={mod.id}
-                                    onClick={() => {
-                                        if (mod.active) {
-                                            playSound('click');
-                                            setCurrentModule(mod.id as any);
-                                        } else {
-                                            playSound('lock');
-                                        }
-                                    }}
-                                    disabled={!mod.active}
-                                    className={`
-                                        aspect-square rounded-3xl flex flex-col items-center justify-center p-4 transition-all duration-200 relative overflow-hidden
-                                        ${mod.active 
-                                            ? 'bg-white shadow-md hover:shadow-xl hover:scale-[1.02] active:scale-95 cursor-pointer border-2 border-transparent' 
-                                            : 'bg-slate-100/50 border border-slate-100 cursor-default opacity-60'
-                                        }
-                                    `}
-                                    style={mod.active && mod.id === 'pharmacy' ? { borderColor: '#10b981' } : mod.active && mod.id === 'restaurant' ? { borderColor: '#f97316' } : mod.active ? { borderColor: '#fecaca' } : {}}
-                                >
-                                    <div className={`
-                                        w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-colors
-                                        ${mod.active 
-                                            ? (mod.id === 'pharmacy' ? 'bg-emerald-50 text-emerald-600' : mod.id === 'restaurant' ? 'bg-orange-50 text-orange-600' : 'bg-red-50 text-[#c83745]') 
-                                            : 'bg-slate-200 text-slate-400'
-                                        }
-                                    `}>
-                                        <mod.icon className="w-7 h-7" />
-                                    </div>
-                                    <span className={`text-sm font-bold text-center leading-tight ${mod.active ? 'text-gray-800' : 'text-gray-400'}`}>
-                                        {mod.name}
-                                    </span>
-                                    
-                                    {!mod.active && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[1px]">
-                                            <span className="bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded-full">
-                                                {t('comingSoon')}
-                                            </span>
+    const renderContent = () => {
+        switch (currentModule) {
+            case 'supermarket':
+                return (
+                    <SupermarketModule
+                        nativeCountry={nativeCountry}
+                        targetCountry={targetCountry}
+                        userPlan={'master'}
+                        t={t}
+                        onOpenMenu={() => {}}
+                        onGoHome={() => setCurrentModule(null)}
+                        theme={SUPERMARKET_THEME}
+                        isOnline={navigator.onLine}
+                        currentLimits={currentLimits}
+                        LanguagePairSelect={LanguagePairSelect}
+                        setNativeCountry={setNativeCountry}
+                        setTargetCountry={setTargetCountry}
+                        countries={COUNTRIES}
+                        handlePlayAudio={handlePlayAudio}
+                        handlePlayPhrase={handlePlayPhrase}
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
+                        isSearchActive={isSearchActive}
+                        onToggleSearch={() => setIsSearchActive(!isSearchActive)}
+                        favorites={favorites}
+                        shoppingList={shoppingList}
+                        checkedItems={checkedItems}
+                        toggleFavorite={toggleFavorite}
+                        toggleShoppingListItem={toggleShoppingListItem}
+                        panelContent={
+                            activeTab === 'favorites' ? (
+                                <div className="mt-2">
+                                    {/* Favorites Panel Content would go here if extracted */}
+                                </div>
+                            ) : null
+                        }
+                        expandedItemKey={expandedItemKey}
+                        setExpandedItemKey={setExpandedItemKey}
+                        onOpenLanguageModal={() => setIsLanguageModalOpen(true)}
+                    />
+                );
+            case 'pharmacy':
+                return (
+                    <PharmacyModule
+                        nativeCountry={nativeCountry}
+                        targetCountry={targetCountry}
+                        userPlan={'master'}
+                        t={t}
+                        onOpenMenu={() => {}}
+                        onGoHome={() => setCurrentModule(null)}
+                        theme={PHARMACY_THEME}
+                        isOnline={navigator.onLine}
+                        currentLimits={currentLimits}
+                        LanguagePairSelect={LanguagePairSelect}
+                        setNativeCountry={setNativeCountry}
+                        setTargetCountry={setTargetCountry}
+                        countries={COUNTRIES}
+                        handlePlayAudio={handlePlayAudio}
+                        handlePlayPhrase={handlePlayPhrase}
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
+                        isSearchActive={isSearchActive}
+                        onToggleSearch={() => setIsSearchActive(!isSearchActive)}
+                        favorites={favorites}
+                        shoppingList={shoppingList}
+                        checkedItems={checkedItems}
+                        toggleFavorite={toggleFavorite}
+                        toggleShoppingListItem={toggleShoppingListItem}
+                        panelContent={null}
+                        expandedItemKey={expandedItemKey}
+                        setExpandedItemKey={setExpandedItemKey}
+                        onOpenLanguageModal={() => setIsLanguageModalOpen(true)}
+                    />
+                );
+            default:
+                return (
+                    <div className="min-h-screen bg-gray-50 flex flex-col">
+                        {/* Header */}
+                        <header className="bg-white shadow-sm pt-12 pb-6 px-6 sticky top-0 z-10">
+                            <div className="flex justify-between items-center mb-4">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-800">{t('hubTitle')}</h1>
+                                    <p className="text-gray-500 text-sm">{t('hubSubtitle')}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={() => setIsLanguageModalOpen(true)} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                                        <div className="flex items-center -space-x-2">
+                                            <img src={nativeCountry.image} alt={nativeCountry.name} className="w-6 h-6 rounded-full border border-white" />
+                                            <img src={targetCountry.image} alt={targetCountry.name} className="w-6 h-6 rounded-full border border-white" />
                                         </div>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-                
-                {/* Bottom Language Trigger (Hub) */}
-                <div className="p-6 flex justify-center relative z-20">
-                     <button
-                        onClick={() => { playSound('pop'); setIsLanguageModalOpen(true); }}
-                        className="w-16 h-16 rounded-full border-4 border-white shadow-xl bg-[#c83745] flex items-center justify-center overflow-hidden active:scale-95 transition-transform"
-                    >
-                        <img src={targetCountry.image} alt={targetCountry.name} className="w-full h-full object-cover opacity-90" />
-                    </button>
-                </div>
-            </div>
-        );
-    };
+                                    </button>
+                                </div>
+                            </div>
+                        </header>
 
-    // Render Logic
-    const renderModule = () => {
-        if (currentModule === 'supermarket') {
-            return (
-                <SupermarketModule
-                    nativeCountry={nativeCountry}
-                    targetCountry={targetCountry}
-                    userPlan="master"
-                    t={t}
-                    onOpenMenu={() => {}}
-                    onGoHome={() => {
-                        setIsSearchActive(false);
-                        setActiveTab('home');
-                        setCurrentModule(null);
-                    }}
-                    theme={SUPERMARKET_THEME}
-                    isOnline={navigator.onLine}
-                    currentLimits={currentLimits}
-                    LanguagePairSelect={() => null}
-                    setNativeCountry={setNativeCountry}
-                    setTargetCountry={setTargetCountry}
-                    countries={COUNTRIES}
-                    handlePlayAudio={handlePlayAudio}
-                    handlePlayPhrase={handlePlayPhrase}
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    isSearchActive={isSearchActive}
-                    onToggleSearch={handleToggleSearch}
-                    favorites={favorites}
-                    shoppingList={shoppingList}
-                    checkedItems={checkedItems}
-                    toggleFavorite={toggleFavorite}
-                    toggleShoppingListItem={toggleShoppingListItem}
-                    panelContent={panelContent}
-                    expandedItemKey={expandedItemKey}
-                    setExpandedItemKey={setExpandedItemKey}
-                    onOpenLanguageModal={() => { playSound('pop'); setIsLanguageModalOpen(true); }}
-                />
-            );
-        } else if (currentModule === 'pharmacy') {
-            return (
-                <PharmacyModule
-                    nativeCountry={nativeCountry}
-                    targetCountry={targetCountry}
-                    userPlan="master"
-                    t={t}
-                    onOpenMenu={() => {}}
-                    onGoHome={() => {
-                        setIsSearchActive(false);
-                        setActiveTab('home');
-                        setCurrentModule(null);
-                    }}
-                    theme={PHARMACY_THEME}
-                    isOnline={navigator.onLine}
-                    currentLimits={currentLimits}
-                    LanguagePairSelect={() => null}
-                    setNativeCountry={setNativeCountry}
-                    setTargetCountry={setTargetCountry}
-                    countries={COUNTRIES}
-                    handlePlayAudio={handlePlayAudio}
-                    handlePlayPhrase={handlePlayPhrase}
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    isSearchActive={isSearchActive}
-                    onToggleSearch={handleToggleSearch}
-                    favorites={favorites}
-                    shoppingList={shoppingList}
-                    checkedItems={checkedItems}
-                    toggleFavorite={toggleFavorite}
-                    toggleShoppingListItem={toggleShoppingListItem}
-                    panelContent={panelContent}
-                    expandedItemKey={expandedItemKey}
-                    setExpandedItemKey={setExpandedItemKey}
-                    onOpenLanguageModal={() => { playSound('pop'); setIsLanguageModalOpen(true); }}
-                />
-            );
-        } else if (currentModule === 'restaurant') {
-            return (
-                <RestaurantModule
-                    nativeCountry={nativeCountry}
-                    targetCountry={targetCountry}
-                    userPlan="master"
-                    t={t}
-                    onOpenMenu={() => {}}
-                    onGoHome={() => {
-                        setIsSearchActive(false);
-                        setActiveTab('home');
-                        setCurrentModule(null);
-                    }}
-                    theme={RESTAURANT_THEME}
-                    isOnline={navigator.onLine}
-                    currentLimits={currentLimits}
-                    LanguagePairSelect={() => null}
-                    setNativeCountry={setNativeCountry}
-                    setTargetCountry={setTargetCountry}
-                    countries={COUNTRIES}
-                    handlePlayAudio={handlePlayAudio}
-                    handlePlayPhrase={handlePlayPhrase}
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    isSearchActive={isSearchActive}
-                    onToggleSearch={handleToggleSearch}
-                    favorites={favorites}
-                    shoppingList={shoppingList}
-                    checkedItems={checkedItems}
-                    toggleFavorite={toggleFavorite}
-                    toggleShoppingListItem={toggleShoppingListItem}
-                    panelContent={panelContent}
-                    expandedItemKey={expandedItemKey}
-                    setExpandedItemKey={setExpandedItemKey}
-                    onOpenLanguageModal={() => { playSound('pop'); setIsLanguageModalOpen(true); }}
-                />
-            );
+                        {/* Module Grid */}
+                        <main className="flex-1 p-6 overflow-y-auto">
+                            <div className="grid grid-cols-2 gap-4 mb-20">
+                                {/* Supermarket Module */}
+                                <button 
+                                    onClick={() => { playSound('click'); setCurrentModule('supermarket'); }}
+                                    className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center gap-3 hover:shadow-md transition-all active:scale-95"
+                                >
+                                    <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                                        <ShoppingBagIconSolid className="w-7 h-7" />
+                                    </div>
+                                    <span className="font-bold text-gray-700 text-sm">{t('supermarketGuide')}</span>
+                                </button>
+
+                                {/* Pharmacy Module */}
+                                <button 
+                                    onClick={() => { playSound('click'); setCurrentModule('pharmacy'); }}
+                                    className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center gap-3 hover:shadow-md transition-all active:scale-95"
+                                >
+                                    <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                        <PillIcon className="w-7 h-7" />
+                                    </div>
+                                    <span className="font-bold text-gray-700 text-sm">{t('modulePharmacy')}</span>
+                                </button>
+
+                                {/* Inactive Modules (Coming Soon) */}
+                                {[
+                                    { icon: UtensilsIcon, label: 'moduleRestaurant', color: 'orange' },
+                                    { icon: TruckIcon, label: 'moduleTransport', color: 'blue' },
+                                    { icon: BedIcon, label: 'moduleHotel', color: 'indigo' },
+                                    { icon: BankIcon, label: 'moduleBank', color: 'green' },
+                                    { icon: DumbbellIcon, label: 'moduleGym', color: 'purple' },
+                                    { icon: HospitalIcon, label: 'moduleHospital', color: 'red' },
+                                    { icon: ShoppingBagIcon, label: 'moduleShopping', color: 'pink' },
+                                    { icon: FuelIcon, label: 'moduleFuel', color: 'yellow' },
+                                    { icon: SchoolIcon, label: 'moduleSchool', color: 'cyan' },
+                                    { icon: WrenchIcon, label: 'moduleMechanic', color: 'slate' },
+                                    { icon: PawIcon, label: 'modulePet', color: 'orange' },
+                                    { icon: ShieldCheckIcon, label: 'modulePolice', color: 'blue' },
+                                    { icon: EnvelopeIcon, label: 'modulePost', color: 'yellow' },
+                                ].map((mod, idx) => (
+                                    <button 
+                                        key={idx}
+                                        className="bg-gray-50 p-5 rounded-2xl border border-gray-100 flex flex-col items-center gap-3 opacity-60"
+                                        disabled
+                                    >
+                                        <div className={`w-14 h-14 rounded-full bg-${mod.color}-100 flex items-center justify-center text-${mod.color}-500 grayscale`}>
+                                            <mod.icon className="w-7 h-7" />
+                                        </div>
+                                        <span className="font-medium text-gray-400 text-sm">{t(mod.label)}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </main>
+                    </div>
+                );
         }
-        return renderHub();
     };
 
     return (
         <>
-            {renderModule()}
+            {renderContent()}
 
-             <LanguagePanel 
+            <LanguagePanel
                 isOpen={isLanguageModalOpen}
-                onClose={() => { playSound('soft'); setIsLanguageModalOpen(false); }}
+                onClose={() => setIsLanguageModalOpen(false)}
                 nativeCountry={nativeCountry}
                 targetCountry={targetCountry}
                 onNativeChange={setNativeCountry}
                 onTargetChange={setTargetCountry}
                 options={COUNTRIES}
                 t={t}
-                theme={currentTheme}
+                theme={currentModule === 'pharmacy' ? PHARMACY_THEME : SUPERMARKET_THEME}
             />
 
-            {/* INSTALL APP MODAL */}
+            {/* PWA Install Modal */}
             {showInstallModal && (
-                <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 flex justify-center animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-md border border-gray-100 relative">
-                        <button onClick={handleDismissInstall} className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600">
-                            <XIcon className="w-5 h-5" />
-                        </button>
-                        
-                        <div className="flex items-start gap-4">
-                            <div className="bg-red-100 p-3 rounded-xl shrink-0">
-                                <img src="/vite.svg" alt="App Icon" className="w-8 h-8" />
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl transform transition-all animate-slide-up">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-3 bg-red-100 rounded-xl">
+                                <ShoppingBagIconSolid className="w-8 h-8 text-red-600" />
                             </div>
-                            <div className="flex-1">
-                                <h3 className="font-bold text-gray-800 text-lg">{t('installApp')}</h3>
-                                <p className="text-sm text-gray-500 leading-tight mt-1">{t('installAppDesc')}</p>
-                                
-                                {isIOS ? (
-                                    <div className="mt-3 space-y-2 bg-gray-50 p-3 rounded-lg text-sm">
-                                        <div className="flex items-center gap-2 text-gray-600">
-                                            1. {t('iosStep1')} <ShareIcon className="w-4 h-4 text-blue-500 inline" />
-                                        </div>
-                                        <div className="flex items-center gap-2 text-gray-600">
-                                            2. {t('iosStep2')} <PlusSquareIcon className="w-4 h-4 text-gray-500 inline" />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="mt-4 flex gap-3">
-                                        <button 
-                                            onClick={handleInstallClick}
-                                            className="flex-1 bg-red-600 text-white py-2 rounded-lg font-bold text-sm shadow-md hover:bg-red-700 transition-colors"
-                                        >
-                                            {t('install')}
-                                        </button>
-                                        <button 
-                                            onClick={handleDismissInstall}
-                                            className="px-4 py-2 text-gray-400 font-medium text-sm hover:text-gray-600"
-                                        >
-                                            {t('notNow')}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                            <button onClick={handleDismissInstall} className="text-gray-400 hover:text-gray-600 p-1">
+                                <span className="text-2xl">&times;</span>
+                            </button>
                         </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">{t('installApp')}</h3>
+                        <p className="text-gray-600 mb-6">{t('installAppDesc')}</p>
+                        
+                        {isIOS ? (
+                            <div className="bg-gray-50 rounded-xl p-4 mb-4 text-sm text-gray-700 space-y-2">
+                                <p className="flex items-center gap-2">1. {t('iosStep1')} <span className="text-blue-500"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg></span></p>
+                                <p className="flex items-center gap-2">2. {t('iosStep2')} <span className="text-gray-900 font-bold">+</span></p>
+                            </div>
+                        ) : (
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={handleDismissInstall}
+                                    className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+                                >
+                                    {t('notNow')}
+                                </button>
+                                <button 
+                                    onClick={handleInstallClick}
+                                    className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 transition-colors"
+                                >
+                                    {t('install')}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

@@ -73,7 +73,7 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({
             {Object.entries(groupedFavorites).map(([category, items]) => (
                 <div key={category}>
                     <h2 className={`text-sm font-bold ${theme.textColor} uppercase tracking-wider mb-3 pb-2 border-b border-gray-100`}>{t(category)}</h2>
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {items.map(item => (
                             <TranslationItem
                                 key={item.key}
@@ -86,8 +86,6 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({
                                 isChecked={checkedItems.has(item.key)}
                                 isFavorite={true}
                                 isExpanded={expandedItemKey === item.key}
-                                // FIX: The functional update `(prev) => ...` was causing a TypeScript error.
-                                // Replaced with a direct value update based on the `expandedItemKey` prop.
                                 onToggleExpand={() => setExpandedItemKey(expandedItemKey === item.key ? null : item.key)}
                                 onToggleShoppingListItem={toggleShoppingListItem}
                                 onToggleFavorite={toggleFavorite}

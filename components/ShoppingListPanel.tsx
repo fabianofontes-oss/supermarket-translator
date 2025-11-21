@@ -83,7 +83,7 @@ export const ShoppingListPanel: React.FC<ShoppingListPanelProps> = ({
                 {Object.entries(subCategories).map(([subCategory, items]) => (
                 <div key={subCategory} className="mb-4">
                     <h4 className="text-xs font-bold text-gray-400 mb-3 ml-1 uppercase">{t(subCategory)}</h4>
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {items.map((item) => {
                            return (
                              <TranslationItem
@@ -97,8 +97,6 @@ export const ShoppingListPanel: React.FC<ShoppingListPanelProps> = ({
                                 isChecked={false} // This feature is simplified out
                                 isFavorite={favorites.some((i) => i.key === item.key)}
                                 isExpanded={expandedItemKey === item.key}
-                                // FIX: The functional update `(prev) => ...` was causing a TypeScript error.
-                                // Replaced with a direct value update based on the `expandedItemKey` prop.
                                 onToggleExpand={() => setExpandedItemKey(expandedItemKey === item.key ? null : item.key)}
                                 onToggleShoppingListItem={toggleShoppingListItem}
                                 onToggleFavorite={toggleFavorite}

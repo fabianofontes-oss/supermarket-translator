@@ -1,6 +1,4 @@
 
-
-
 const enUS = {
   welcomeBack: 'Welcome back',
   hubTitle: 'Translator Hub',
@@ -111,12 +109,6 @@ const enUS = {
   skin: 'Skin Care',
   intimate: 'Intimate Health',
 
-  // Restaurant Categories
-  starters: 'Starters',
-  mainDishes: 'Main Dishes',
-  drinks: 'Drinks',
-  desserts: 'Desserts',
-
   // Supermarket SubCategories
   fruits: 'Fruits',
   greens: 'Greens',
@@ -191,18 +183,6 @@ const enUS = {
   condoms: 'Condoms',
   lubricants: 'Lubricants',
   rapidTests: 'Rapid Tests',
-
-  // Restaurant SubCategories
-  appetizers: 'Appetizers',
-  meat: 'Meat',
-  pasta: 'Pasta',
-  nonAlcoholic: 'Non-Alcoholic',
-  alcoholic: 'Alcoholic',
-  sweets: 'Sweets',
-  table: 'Table',
-  ordering: 'Ordering',
-  dietary: 'Dietary Restrictions',
-  paying: 'Paying the Bill',
 };
 
 const ptBR = {
@@ -315,12 +295,6 @@ const ptBR = {
   skin: 'Pele e Dermatologia',
   intimate: 'Saúde Íntima',
 
-  // Restaurant Categories
-  starters: 'Entradas',
-  mainDishes: 'Pratos Principais',
-  drinks: 'Bebidas',
-  desserts: 'Sobremesas',
-
   // Supermarket Subcategories
   fruits: 'Frutas',
   greens: 'Verduras',
@@ -395,18 +369,6 @@ const ptBR = {
   condoms: 'Íntimo Masculino',
   lubricants: 'Lubrificantes',
   rapidTests: 'Testes Rápidos',
-
-  // Restaurant Subcategories
-  appetizers: 'Aperitivos',
-  meat: 'Carne',
-  pasta: 'Massas',
-  nonAlcoholic: 'Sem Álcool',
-  alcoholic: 'Alcoólicas',
-  sweets: 'Doces',
-  table: 'Mesa',
-  ordering: 'Pedindo',
-  dietary: 'Restrições',
-  paying: 'Pagamento',
 };
 
 const esCL = {
@@ -519,12 +481,6 @@ const esCL = {
   skin: 'Piel y Dermatología',
   intimate: 'Salud Íntima',
 
-  // Restaurant Categories
-  starters: 'Entradas',
-  mainDishes: 'Platos Principales',
-  drinks: 'Bebidas',
-  desserts: 'Postres',
-
   // Supermarket Subcategories
   fruits: 'Frutas',
   greens: 'Verduras',
@@ -599,18 +555,6 @@ const esCL = {
   condoms: 'Íntimo Masculino',
   lubricants: 'Lubricantes',
   rapidTests: 'Tests Rápidos',
-
-  // Restaurant Subcategories
-  appetizers: 'Aperitivos',
-  meat: 'Carne',
-  pasta: 'Pastas',
-  nonAlcoholic: 'Sin Alcohol',
-  alcoholic: 'Alcohólicas',
-  sweets: 'Dulces',
-  table: 'Mesa',
-  ordering: 'Ordenando',
-  dietary: 'Restricciones',
-  paying: 'La cuenta',
 };
 
 export const translations = {

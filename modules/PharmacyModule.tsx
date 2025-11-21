@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { SUPERMARKET_CATEGORIES, PREPOPULATED_TRANSLATIONS } from '../constants';
+import { PHARMACY_CATEGORIES, PREPOPULATED_TRANSLATIONS } from '../constants';
 import type { Category, Country, TranslationItem as TranslationItemType } from '../types';
 import {
   SearchIcon,
@@ -14,7 +14,7 @@ import { useVoiceSearch } from '../hooks/useVoiceSearch';
 import { mapTranslationItem } from '../utils/itemHelpers';
 import { playSound } from '../utils/soundUtils';
 
-interface SupermarketModuleProps {
+interface PharmacyModuleProps {
   nativeCountry: Country;
   targetCountry: Country;
   userPlan: 'free' | 'premium' | 'master';
@@ -49,22 +49,15 @@ interface SupermarketModuleProps {
 
 // Pastel colors for inactive tabs to look like file folders
 const FOLDER_COLORS = [
-    'bg-orange-100 text-orange-900 border-orange-200',
-    'bg-amber-100 text-amber-900 border-amber-200',
-    'bg-yellow-100 text-yellow-900 border-yellow-200',
-    'bg-lime-100 text-lime-900 border-lime-200',
     'bg-emerald-100 text-emerald-900 border-emerald-200',
     'bg-teal-100 text-teal-900 border-teal-200',
     'bg-cyan-100 text-cyan-900 border-cyan-200',
     'bg-sky-100 text-sky-900 border-sky-200',
+    'bg-blue-100 text-blue-900 border-blue-200',
     'bg-indigo-100 text-indigo-900 border-indigo-200',
-    'bg-violet-100 text-violet-900 border-violet-200',
-    'bg-fuchsia-100 text-fuchsia-900 border-fuchsia-200',
-    'bg-pink-100 text-pink-900 border-pink-200',
-    'bg-rose-100 text-rose-900 border-rose-200',
 ];
 
-export default function SupermarketModule({
+export default function PharmacyModule({
   nativeCountry,
   targetCountry,
   userPlan,
@@ -93,25 +86,25 @@ export default function SupermarketModule({
   expandedItemKey,
   setExpandedItemKey,
   onOpenLanguageModal
-}: SupermarketModuleProps) {
+}: PharmacyModuleProps) {
   
   const [selectedCategory, setSelectedCategory] = useState<Category>(() => {
     try {
-      const savedCatName = localStorage.getItem('supermarket_lastCategory');
+      const savedCatName = localStorage.getItem('pharmacy_lastCategory');
       if (savedCatName) {
-        const found = SUPERMARKET_CATEGORIES.find(c => c.name === savedCatName);
+        const found = PHARMACY_CATEGORIES.find(c => c.name === savedCatName);
         if (found) return found;
       }
     } catch (e) { console.error("Error loading category from storage", e); }
-    return SUPERMARKET_CATEGORIES[0];
+    return PHARMACY_CATEGORIES[0];
   });
 
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>(() => {
     try {
-        const savedSub = localStorage.getItem('supermarket_lastSubCategory');
+        const savedSub = localStorage.getItem('pharmacy_lastSubCategory');
         if (savedSub) return savedSub;
     } catch (e) { console.error("Error loading subcategory from storage", e); }
-    return SUPERMARKET_CATEGORIES[0].subCategories[0];
+    return PHARMACY_CATEGORIES[0].subCategories[0];
   });
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -132,13 +125,13 @@ export default function SupermarketModule({
   // Effects
   useEffect(() => {
     if (selectedCategory.name !== 'favorites') {
-        localStorage.setItem('supermarket_lastCategory', selectedCategory.name);
+        localStorage.setItem('pharmacy_lastCategory', selectedCategory.name);
     }
   }, [selectedCategory]);
 
   useEffect(() => {
     if (selectedSubCategory) {
-        localStorage.setItem('supermarket_lastSubCategory', selectedSubCategory);
+        localStorage.setItem('pharmacy_lastSubCategory', selectedSubCategory);
     }
   }, [selectedSubCategory]);
 
@@ -197,9 +190,9 @@ export default function SupermarketModule({
       const term = searchTerm.trim().toLowerCase();
 
       for (const categoryName in PREPOPULATED_TRANSLATIONS) {
-        // Check if allowed in Supermarket (or if it's a supermarket category)
-        const isSupermarketCategory = SUPERMARKET_CATEGORIES.some(c => c.name === categoryName);
-        if (!isSupermarketCategory) continue;
+        // Check if the category exists in Pharmacy categories
+        const isPharmacyCategory = PHARMACY_CATEGORIES.some(c => c.name === categoryName);
+        if (!isPharmacyCategory) continue;
 
         for (const subCategoryName in PREPOPULATED_TRANSLATIONS[categoryName]) {
             PREPOPULATED_TRANSLATIONS[categoryName][subCategoryName]
@@ -230,7 +223,7 @@ export default function SupermarketModule({
     onTabChange('home');
     
     playSound('click');
-    const newCategory = SUPERMARKET_CATEGORIES.find((c) => c.name === categoryKey);
+    const newCategory = PHARMACY_CATEGORIES.find((c) => c.name === categoryKey);
     if (newCategory) {
       setSelectedCategory(newCategory);
     }
@@ -239,10 +232,6 @@ export default function SupermarketModule({
   const handleSubCategoryClick = (sub: string, index: number) => {
       playSound('page-turn'); // Paper sound
       setSelectedSubCategory(sub);
-      if (selectedCategory.name === 'phrases') {
-          const element = document.getElementById(`section-${sub}`);
-          if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
       
       // Scroll the clicked tab into view and center it
       if (tabsContainerRef.current) {
@@ -267,7 +256,7 @@ export default function SupermarketModule({
                 placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setExpandedItemKey(null); }}
-                className="w-full bg-white text-gray-800 rounded-xl py-3 pl-10 pr-20 text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-shadow h-12"
+                className="w-full bg-white text-gray-800 rounded-xl py-3 pl-10 pr-20 text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-shadow h-12"
             />
             
             <div className="absolute right-1.5 flex items-center gap-1">
@@ -290,7 +279,7 @@ export default function SupermarketModule({
                 {/* Microphone Button - Enhanced Visibility */}
                 <button 
                     onClick={() => { playSound('click'); startListening(); }} 
-                    className={`p-2 rounded-full transition-all shadow-sm border ${isListening ? 'bg-red-600 text-white scale-110 border-red-700 animate-pulse' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'}`}
+                    className={`p-2 rounded-full transition-all shadow-sm border ${isListening ? 'bg-emerald-600 text-white scale-110 border-emerald-700 animate-pulse' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'}`}
                 >
                     <MicrophoneIcon className="w-5 h-5" />
                 </button>
@@ -315,8 +304,7 @@ export default function SupermarketModule({
 
         {isCategoryDropdownOpen && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white text-gray-800 rounded-xl shadow-2xl overflow-hidden z-50 max-h-[60vh] overflow-y-auto ring-1 ring-black/5 animate-fade-in origin-top">
-                {SUPERMARKET_CATEGORIES.map((c) => {
-                    const isPhrases = c.name === 'phrases';
+                {PHARMACY_CATEGORIES.map((c) => {
                     const isSelected = selectedCategory.name === c.name;
                     
                     return (
@@ -324,11 +312,10 @@ export default function SupermarketModule({
                             key={c.name}
                             onClick={() => { handleCategoryChange(c.name); setIsCategoryDropdownOpen(false); }}
                             className={`w-full px-5 py-3 flex items-center justify-between text-left border-b border-gray-50 last:border-0 transition-all ${
-                                isPhrases ? 'bg-gray-900 text-white hover:bg-gray-800' : 
-                                isSelected ? 'bg-red-50 text-[#c83745]' : 'hover:bg-gray-50'
+                                isSelected ? 'bg-emerald-50 text-emerald-600' : 'hover:bg-gray-50'
                             }`}
                         >
-                            <span className={`text-sm ${isSelected || isPhrases ? 'font-bold' : 'font-medium text-gray-600'} ${isPhrases ? 'text-white' : ''}`}>{t(c.name)}</span>
+                            <span className={`text-sm ${isSelected ? 'font-bold' : 'font-medium text-gray-600'}`}>{t(c.name)}</span>
                         </button>
                     )
                 })}
@@ -383,7 +370,7 @@ export default function SupermarketModule({
 
   return (
     <ModuleLayout
-        title={t('supermarketGuide')}
+        title={t('modulePharmacy')}
         theme={theme}
         userPlan={'master'}
         t={t}
@@ -411,56 +398,8 @@ export default function SupermarketModule({
         <div className="space-y-4">
             {isSearchActive && searchResults.length === 0 && <p className="text-center text-gray-400 mt-10">{t('noItemsFoundFor')}</p>}
             
-            {selectedCategory.name === 'phrases' && !isSearchActive && (
-                 <div className="space-y-6 max-w-3xl mx-auto">
-                    {selectedCategory.subCategories.map((sub) => {
-                        const subCategoryItems = PREPOPULATED_TRANSLATIONS['phrases']?.[sub] || [];
-                        if (subCategoryItems.length === 0) return null;
-
-                        return (
-                            <div key={sub} id={`section-${sub}`} className="scroll-mt-40 bg-white rounded-3xl p-5 shadow-sm border border-gray-50">
-                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2 ml-1">
-                                    {t(sub)}
-                                </h3>
-                                <div className="space-y-3">
-                                    {subCategoryItems.map((rawItem) => {
-                                        const item = mapTranslationItem(rawItem, 'phrases', sub, nativeCountry, targetCountry);
-                                        return (
-                                            <TranslationItem
-                                                key={item.key}
-                                                item={item}
-                                                onPlayAudio={handlePlayAudioWrapper}
-                                                onPlayPhrase={handlePlayPhraseWrapper}
-                                                nativeCountry={nativeCountry}
-                                                targetCountry={targetCountry}
-                                                isInShoppingList={shoppingList.some((i) => i.key === item.key)}
-                                                isChecked={checkedItems.has(item.key)}
-                                                isFavorite={favorites.some((i) => i.key === item.key)}
-                                                isExpanded={expandedItemKey === item.key}
-                                                onToggleExpand={() => handleToggleExpandWrapper(item.key)}
-                                                onToggleShoppingListItem={toggleShoppingListItem}
-                                                onToggleFavorite={toggleFavorite}
-                                                highlighted={false}
-                                                onHighlightDone={() => {}}
-                                                t={t}
-                                                isSpeakerLocked={false} 
-                                                isConversationLocked={false}
-                                                theme={theme}
-                                                isPhrase={true}
-                                                onOpenPlan={onOpenMenu}
-                                                isPharmacy={false}
-                                            />
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-
-            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-4 ${selectedCategory.name === 'phrases' && !isSearchActive ? 'hidden' : ''}`}>
-                {(isSearchActive || selectedCategory.name !== 'phrases') && searchResults.map((item) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-4">
+                {searchResults.map((item) => {
                     return (
                         <TranslationItem
                         key={item.key}
@@ -484,7 +423,7 @@ export default function SupermarketModule({
                         theme={theme}
                         isPhrase={false}
                         onOpenPlan={onOpenMenu}
-                        isPharmacy={false}
+                        isPharmacy={true}
                         />
                     );
                 })}

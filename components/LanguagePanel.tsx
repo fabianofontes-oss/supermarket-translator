@@ -1,7 +1,8 @@
 
 import React from 'react';
 import type { Country } from '../types';
-import { XIcon } from './Icons';
+import { XIcon, CheckIcon } from './Icons';
+import { playSound } from '../utils/soundUtils';
 
 interface LanguagePanelProps {
   isOpen: boolean;
@@ -28,6 +29,11 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const handleClose = () => {
+      playSound('pop');
+      onClose();
+  };
+
   const renderFlagButton = (
     opt: Country,
     isSelected: boolean,
@@ -36,7 +42,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
   ) => (
     <button
       key={opt.code}
-      onClick={onClick}
+      onClick={() => { playSound('click'); onClick(); }}
       className={`relative group flex items-center justify-center p-1 rounded-full transition-all duration-300 ${
         isSelected
           ? `bg-white shadow-xl scale-110 z-10 ring-2 ring-offset-1 ${ringColorClass}`
@@ -54,13 +60,13 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={handleClose}></div>
       
-      <div className="relative w-full max-w-[16rem] bg-white rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[80vh] overflow-y-auto animate-expand-up no-scrollbar">
+      <div className="relative w-full max-w-[16rem] bg-white rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[85vh] overflow-y-auto animate-expand-up no-scrollbar">
         
         {/* Close Button */}
         <button 
-            onClick={onClose} 
+            onClick={handleClose} 
             className="absolute top-1.5 right-1.5 p-1 bg-black/10 rounded-full text-white z-50 hover:bg-black/30 backdrop-blur-md transition-colors"
         >
             <XIcon className="w-3.5 h-3.5" />
@@ -89,7 +95,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
              <div className="bg-[#c83745] text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2">
                 {t('iAmIn')}...
              </div>
-             <div className="p-3 grid grid-cols-3 gap-3 pb-6 justify-items-center">
+             <div className="p-3 grid grid-cols-3 gap-3 pb-2 justify-items-center">
                  {options.map((opt) => 
                     renderFlagButton(
                         opt, 
@@ -98,6 +104,17 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
                         'ring-[#c83745]'
                     )
                  )}
+             </div>
+
+             {/* OK Button */}
+             <div className="px-3 pb-3 pt-1 mt-auto">
+                <button
+                    onClick={handleClose}
+                    className="w-full py-2 rounded-xl bg-[#c83745] text-white font-bold shadow-md hover:bg-[#b02a36] active:scale-95 transition-all flex items-center justify-center gap-2 ring-1 ring-white/20"
+                >
+                    <span>OK</span>
+                    <CheckIcon className="w-4 h-4 stroke-[3]" />
+                </button>
              </div>
         </div>
 
