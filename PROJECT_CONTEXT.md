@@ -157,7 +157,7 @@ Ao reiniciar o chat, peça para:
 *   Passado, presente e futuro entraram como um segundo seletor no cartão da frase, ao lado do de afirmação/pergunta/negação. Módulo separado duplicaria a lista de pronomes e a de verbos.
 *   Espanhol usa o **pretérito perfecto** ("he querido"), que é o passado que se ouve na Espanha, e o **futuro perifrástico** ("voy a querer"), muito mais falado que "querré".
 *   `pastForms` e `futureForms` guardam as seis formas por idioma, como `forms`. Uniforme, sem composição a errar.
-*   Os dois seletores têm **formas diferentes de propósito**, porque são dimensões diferentes: o tempo é um seletor único dentro de um trilho afundado, o tipo de frase são botões soltos e arredondados. Iguais, davam a impressão de ser a mesma escolha.
+*   Os dois seletores têm **forma e rótulo diferentes**, porque são dimensões diferentes: QUANDO é um seletor único dentro de um trilho afundado, COMO são botões soltos e arredondados. Os rótulos seguem o padrão de palavra interrogativa das outras seções (QUEM, VERBO, O QUÊ).
 *   Regras por idioma no `buildPhrase`: francês abraça só o auxiliar ("je n'ai pas voulu") e não elide o sujeito antes da negação; lituano cola o "ne" na primeira palavra; árabe nega passado com "ما" e futuro com "لن" mais o presente; inglês troca o auxiliar por tempo (did / will).
 
 ### Medidas: seis tabelas

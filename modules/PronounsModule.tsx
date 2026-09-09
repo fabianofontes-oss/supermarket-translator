@@ -126,6 +126,7 @@ export default function PronounsModule({
               Tipo de frase: botões soltos e arredondados, sem trilho.
             */}
             <div className="mt-3 pt-3 border-t border-white/20">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1.5">{t('pronWhen')}</h3>
               <div className="flex gap-1 rounded-xl bg-black/20 p-1">
                 {TENSES.map((tn) => (
                   <button
@@ -140,7 +141,8 @@ export default function PronounsModule({
               </div>
             </div>
 
-            <div className="mt-2.5 flex gap-2">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/60 mt-3 mb-1.5">{t('pronHow')}</h3>
+            <div className="flex gap-2">
               {MOODS.map((m) => (
                 <button
                   key={m}
