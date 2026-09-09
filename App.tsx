@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { COUNTRIES, SUPERMARKET_CATEGORIES, PHARMACY_CATEGORIES } from './constants';
 import type { Country, TranslationItem } from './types';
-import CatalogModule from './modules/CatalogModule';
-import LocationModule from './modules/LocationModule';
-import DirectionsModule from './modules/DirectionsModule';
-import NumbersModule from './modules/NumbersModule';
-import BodyModule from './modules/BodyModule';
-import CafeModule from './modules/CafeModule';
-import PronounsModule from './modules/PronounsModule';
-import SizesModule from './modules/SizesModule';
+// Cada módulo vira um pedaço próprio: abrir o hub não baixa o catálogo
+// inteiro nem os dados dos outros oito módulos.
+const CatalogModule = lazy(() => import('./modules/CatalogModule'));
+const LocationModule = lazy(() => import('./modules/LocationModule'));
+const DirectionsModule = lazy(() => import('./modules/DirectionsModule'));
+const NumbersModule = lazy(() => import('./modules/NumbersModule'));
+const BodyModule = lazy(() => import('./modules/BodyModule'));
+const CafeModule = lazy(() => import('./modules/CafeModule'));
+const PronounsModule = lazy(() => import('./modules/PronounsModule'));
+const SizesModule = lazy(() => import('./modules/SizesModule'));
 import { translations } from './translations';
 import { useListManager } from './hooks/useListManager';
 import { LanguagePanel } from './components/LanguagePanel';
@@ -47,13 +49,13 @@ export interface Theme { color: string; textColor: string; hex: string; borderCo
 
 const THEMES: Record<ModuleKey, Theme> = {
   supermarket: { color: 'bg-red-600',     textColor: 'text-red-600',     hex: '#dc2626', borderColor: 'border-red-600' },
-  pharmacy:    { color: 'bg-emerald-600', textColor: 'text-emerald-600', hex: '#059669', borderColor: 'border-emerald-600' },
+  pharmacy:    { color: 'bg-emerald-700', textColor: 'text-emerald-700', hex: '#047857', borderColor: 'border-emerald-700' },
   location:    { color: 'bg-blue-600',    textColor: 'text-blue-600',    hex: '#2563eb', borderColor: 'border-blue-600' },
-  directions:  { color: 'bg-amber-600',   textColor: 'text-amber-600',   hex: '#d97706', borderColor: 'border-amber-600' },
+  directions:  { color: 'bg-amber-700',   textColor: 'text-amber-700',   hex: '#b45309', borderColor: 'border-amber-700' },
   numbers:     { color: 'bg-violet-600',  textColor: 'text-violet-600',  hex: '#7c3aed', borderColor: 'border-violet-600' },
   body:        { color: 'bg-rose-600',    textColor: 'text-rose-600',    hex: '#e11d48', borderColor: 'border-rose-600' },
   cafe:        { color: 'bg-orange-800',  textColor: 'text-orange-800',  hex: '#9a3412', borderColor: 'border-orange-800' },
-  pronouns:    { color: 'bg-teal-600',    textColor: 'text-teal-600',    hex: '#0d9488', borderColor: 'border-teal-600' },
+  pronouns:    { color: 'bg-teal-700',    textColor: 'text-teal-700',    hex: '#0f766e', borderColor: 'border-teal-700' },
   sizes:       { color: 'bg-indigo-600',  textColor: 'text-indigo-600',  hex: '#4f46e5', borderColor: 'border-indigo-600' },
 };
 
@@ -61,13 +63,13 @@ const THEMES: Record<ModuleKey, Theme> = {
 // needsCatalog: depende dos 1.351 itens traduzidos; fica bloqueado para países só de origem (uk, ar).
 const ACTIVE_MODULES: { key: ModuleKey; labelKey: string; icon: React.FC<{ className?: string }>; iconClass: string; needsCatalog?: boolean }[] = [
   { key: 'supermarket', labelKey: 'supermarketGuide', icon: ShoppingBagIconSolid, iconClass: 'bg-red-100 text-red-600', needsCatalog: true },
-  { key: 'pharmacy',    labelKey: 'modulePharmacy',   icon: PillIcon,             iconClass: 'bg-emerald-100 text-emerald-600', needsCatalog: true },
+  { key: 'pharmacy',    labelKey: 'modulePharmacy',   icon: PillIcon,             iconClass: 'bg-emerald-100 text-emerald-700', needsCatalog: true },
   { key: 'location',    labelKey: 'moduleLocation',   icon: MapPinIcon,           iconClass: 'bg-blue-100 text-blue-600' },
-  { key: 'directions',  labelKey: 'moduleDirections', icon: SignpostIcon,         iconClass: 'bg-amber-100 text-amber-600' },
+  { key: 'directions',  labelKey: 'moduleDirections', icon: SignpostIcon,         iconClass: 'bg-amber-100 text-amber-700' },
   { key: 'numbers',     labelKey: 'moduleNumbers',    icon: NumbersIcon,          iconClass: 'bg-violet-100 text-violet-600' },
   { key: 'body',        labelKey: 'moduleBody',       icon: BodyIcon,             iconClass: 'bg-rose-100 text-rose-600' },
   { key: 'cafe',        labelKey: 'moduleCafe',       icon: CafeIcon,             iconClass: 'bg-orange-100 text-orange-800' },
-  { key: 'pronouns',    labelKey: 'modulePronouns',   icon: PronounsIcon,         iconClass: 'bg-teal-100 text-teal-600' },
+  { key: 'pronouns',    labelKey: 'modulePronouns',   icon: PronounsIcon,         iconClass: 'bg-teal-100 text-teal-700' },
   { key: 'sizes',       labelKey: 'moduleSizes',      icon: SizesIcon,            iconClass: 'bg-indigo-100 text-indigo-600' },
 ];
 
@@ -305,8 +307,8 @@ export default function App() {
                       <div className={`w-14 h-14 rounded-full flex items-center justify-center ${mod.iconClass} ${blocked ? 'grayscale' : ''}`}>
                         <mod.icon className="w-7 h-7" />
                       </div>
-                      <span className={`text-sm ${blocked ? 'font-medium text-gray-400' : 'font-bold text-gray-700'}`}>{t(mod.labelKey)}</span>
-                      {blocked && <span className="text-[10px] uppercase tracking-wider text-gray-400 -mt-2">{t('comingSoon')}</span>}
+                      <span className={`text-sm ${blocked ? 'font-medium text-gray-500' : 'font-bold text-gray-700'}`}>{t(mod.labelKey)}</span>
+                      {blocked && <span className="text-[10px] uppercase tracking-wider text-gray-500 -mt-2">{t('comingSoon')}</span>}
                     </button>
                   );
                 })}
@@ -320,7 +322,7 @@ export default function App() {
                     <div className={`w-14 h-14 rounded-full flex items-center justify-center grayscale ${mod.iconClass}`}>
                       <mod.icon className="w-7 h-7" />
                     </div>
-                    <span className="font-medium text-gray-400 text-sm">{t(mod.labelKey)}</span>
+                    <span className="font-medium text-gray-500 text-sm">{t(mod.labelKey)}</span>
                   </button>
                 ))}
               </div>
@@ -333,7 +335,9 @@ export default function App() {
 
   return (
     <>
-      {renderContent()}
+      <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+        {renderContent()}
+      </Suspense>
 
       <LanguagePanel
         isOpen={isLanguageModalOpen}
@@ -355,7 +359,7 @@ export default function App() {
               <div className="p-3 bg-red-100 rounded-xl">
                 <ShoppingBagIconSolid className="w-8 h-8 text-red-600" />
               </div>
-              <button onClick={handleDismissInstall} className="text-gray-400 hover:text-gray-600 p-1">
+              <button onClick={handleDismissInstall} className="text-gray-500 hover:text-gray-600 p-1">
                 <span className="text-2xl">&times;</span>
               </button>
             </div>

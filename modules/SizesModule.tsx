@@ -104,13 +104,13 @@ export default function SizesModule({
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
             <div className="flex items-center justify-center gap-4">
               <div className="text-center flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
                   {t('sizeYours')} · {SYSTEM_LABEL[fromSystem]}
                 </p>
                 <p className="text-4xl font-extrabold text-gray-700 tabular-nums">{mySize}</p>
               </div>
 
-              <span className="text-2xl text-gray-300 flex-shrink-0">→</span>
+              <span className="text-2xl text-gray-400 flex-shrink-0">→</span>
 
               <div className="text-center flex-1">
                 <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: theme.hex }}>
@@ -121,19 +121,19 @@ export default function SizesModule({
             </div>
 
             {table.extraLabel && row.extra && (
-              <p className="text-center text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100">
+              <p className="text-center text-xs text-gray-500 mt-3 pt-3 border-t border-gray-100">
                 {table.extraLabel[showNative ? native : target]}: <span className="font-bold text-gray-600">{row.extra}</span>
               </p>
             )}
 
             {sameSystem && (
-              <p className="text-center text-xs text-gray-400 mt-3">{t('sizeSameSystem')}</p>
+              <p className="text-center text-xs text-gray-500 mt-3">{t('sizeSameSystem')}</p>
             )}
           </div>
 
           {/* Escolha do tamanho */}
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">
               {t('sizeYours')} · {SYSTEM_LABEL[fromSystem]}
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -162,7 +162,7 @@ export default function SizesModule({
             <div className="flex items-start gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-xl font-bold leading-snug" dir="auto">{question}</p>
-                {showNative && <p className="text-sm text-white/75 mt-1 leading-snug" dir="auto">{questionNative}</p>}
+                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{questionNative}</p>}
               </div>
               <button onClick={() => speak(question)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={t('locListen')}>
                 <SpeakerIcon className="w-6 h-6" />
@@ -172,10 +172,10 @@ export default function SizesModule({
 
           {/* Tabela completa */}
           <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{t('sizeTable')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('sizeTable')}</h2>
             <table className="w-full text-sm tabular-nums">
               <thead>
-                <tr className="text-[10px] uppercase tracking-wider text-gray-400">
+                <tr className="text-[10px] uppercase tracking-wider text-gray-500">
                   {(['BR', 'EU', 'UK', 'US'] as const).map((sys) => (
                     <th key={sys} className="py-1 font-bold text-left">{sys}</th>
                   ))}
@@ -193,7 +193,7 @@ export default function SizesModule({
                     {(['BR', 'EU', 'UK', 'US'] as const).map((sys) => (
                       <td key={sys} className="py-1.5">{r[sys]}</td>
                     ))}
-                    {table.extraLabel && <td className="py-1.5 text-gray-400">{r.extra}</td>}
+                    {table.extraLabel && <td className="py-1.5 text-gray-500">{r.extra}</td>}
                   </tr>
                 ))}
               </tbody>
@@ -202,14 +202,14 @@ export default function SizesModule({
 
           {/* Frases */}
           <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{t('sizePhrases')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('sizePhrases')}</h2>
             <ul className="divide-y divide-gray-100">
               {SIZE_QUESTIONS.map((q, i) => (
                 <li key={i}>
                   <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left">
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
-                      {showNative && <p className="text-xs text-gray-400 leading-snug" dir="auto">{q[native]}</p>}
+                      {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
                     </div>
                     <SpeakerIcon className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
                   </button>

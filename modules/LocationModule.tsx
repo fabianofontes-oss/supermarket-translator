@@ -186,7 +186,7 @@ export default function LocationModule({
               <div className="flex-1 min-w-0">
                 <p className="text-xl font-bold leading-snug">{sentence}</p>
                 {showNative && (
-                  <p className="text-sm text-white/75 mt-1 leading-snug" dir="auto">{sentenceNative}</p>
+                  <p className="text-sm text-white mt-1 leading-snug" dir="auto">{sentenceNative}</p>
                 )}
               </div>
               <button
@@ -202,7 +202,7 @@ export default function LocationModule({
             <div className="mt-3 pt-3 border-t border-white/20 flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <p className="font-semibold leading-snug">{question}</p>
-                {showNative && <p className="text-xs text-white/70 leading-snug" dir="auto">{questionNative}</p>}
+                {showNative && <p className="text-xs text-white leading-snug" dir="auto">{questionNative}</p>}
               </div>
               <button
                 onClick={() => speak(question)}
@@ -216,7 +216,7 @@ export default function LocationModule({
 
           {/* Relações */}
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('locRelation')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('locRelation')}</h2>
             <div className="grid grid-cols-3 gap-2">
               {LOC_RELATIONS.map((rel) => {
                 const active = rel.key === relation.key;
@@ -231,7 +231,7 @@ export default function LocationModule({
                     <MiniPosition relKey={rel.key} active={active} hex={theme.hex} />
                     <span className="text-sm font-bold leading-tight text-center">{rel.labels[target]}</span>
                     {showNative && (
-                      <span className={`text-[11px] leading-tight text-center ${active ? 'text-white/75' : 'text-gray-400'}`} dir="auto">
+                      <span className={`text-[11px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">
                         {rel.labels[native]}
                       </span>
                     )}
@@ -280,8 +280,8 @@ interface ObjectRowProps {
 
 const ObjectRow: React.FC<ObjectRowProps> = ({ title, selected, onPick, target, native, showNative, theme }) => (
   <section>
-    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">
-      {title} <span className="text-gray-300">·</span> <span className="text-gray-500 normal-case tracking-normal">{selected.emoji} {nounPhrase(target, selected)}</span>
+    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">
+      {title} <span className="text-gray-400">·</span> <span className="text-gray-500 normal-case tracking-normal">{selected.emoji} {nounPhrase(target, selected)}</span>
     </h2>
     <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
       {LOC_OBJECTS.map((obj) => {
@@ -297,7 +297,7 @@ const ObjectRow: React.FC<ObjectRowProps> = ({ title, selected, onPick, target, 
             <span className="text-3xl leading-none mb-1">{obj.emoji}</span>
             <span className="text-xs font-bold leading-tight text-center truncate w-full">{obj.names[target].n}</span>
             {showNative && (
-              <span className={`text-[10px] leading-tight text-center truncate w-full ${active ? 'text-white/75' : 'text-gray-400'}`} dir="auto">
+              <span className={`text-[10px] leading-tight text-center truncate w-full ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">
                 {obj.names[native].n}
               </span>
             )}

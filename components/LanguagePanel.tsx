@@ -61,6 +61,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
       <img
         src={opt.image}
         alt={opt.name}
+        loading="lazy"
         className="w-10 h-10 rounded-full object-cover drop-shadow-md"
       />
     </button>

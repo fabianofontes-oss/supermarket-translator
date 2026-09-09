@@ -138,7 +138,7 @@ export default function BodyModule({
             <div className="flex items-start gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-xl font-bold leading-snug" dir="auto">{sentence}</p>
-                {showNative && <p className="text-sm text-white/75 mt-1 leading-snug" dir="auto">{sentenceNative}</p>}
+                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{sentenceNative}</p>}
               </div>
               <button onClick={() => speak(sentence)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={t('locListen')}>
                 <SpeakerIcon className="w-6 h-6" />
@@ -148,7 +148,7 @@ export default function BodyModule({
 
           {/* Sintoma localizado */}
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('bodyWhereHurts')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('bodyWhereHurts')}</h2>
             <div className="grid grid-cols-4 gap-2">
               {LOCAL_SYMPTOMS.map((s) => {
                 const active = s.key === symptom.key;
@@ -156,7 +156,7 @@ export default function BodyModule({
                   <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}>
                     <span className="text-xl leading-none">{s.emoji}</span>
                     <span className="text-[11px] font-bold leading-tight text-center" dir="auto">{s.labels[target]}</span>
-                    {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white/75' : 'text-gray-400'}`} dir="auto">{s.labels[native]}</span>}
+                    {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{s.labels[native]}</span>}
                   </button>
                 );
               })}
@@ -165,7 +165,7 @@ export default function BodyModule({
 
           {/* Partes do corpo */}
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('bodyPart')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('bodyPart')}</h2>
             <div className="flex flex-wrap gap-2">
               {BODY_PARTS.map((p) => (
                 <button key={p.key} onClick={() => pickPart(p)} className={chip(p.key === part.key && !partsDimmed, partsDimmed)}>
@@ -178,7 +178,7 @@ export default function BodyModule({
 
           {/* Sintomas gerais */}
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('bodyHowFeel')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('bodyHowFeel')}</h2>
             <div className="grid grid-cols-4 gap-2">
               {GENERAL_SYMPTOMS.map((s) => {
                 const active = s.key === symptom.key;
@@ -186,7 +186,7 @@ export default function BodyModule({
                   <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}>
                     <span className="text-xl leading-none">{s.emoji}</span>
                     <span className="text-[11px] font-bold leading-tight text-center" dir="auto">{s.labels[target]}</span>
-                    {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white/75' : 'text-gray-400'}`} dir="auto">{s.labels[native]}</span>}
+                    {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{s.labels[native]}</span>}
                   </button>
                 );
               })}
@@ -195,7 +195,7 @@ export default function BodyModule({
 
           {/* Duração */}
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('bodyDuration')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('bodyDuration')}</h2>
             <div className="flex flex-wrap gap-2">
               {DURATIONS.map((d) => (
                 <button key={d.key} onClick={() => pickDuration(d)} className={chip(duration?.key === d.key)}>
@@ -207,14 +207,14 @@ export default function BodyModule({
 
           {/* Frases da farmácia */}
           <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{t('bodyPhrases')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('bodyPhrases')}</h2>
             <ul className="divide-y divide-gray-100">
               {BODY_QUESTIONS.map((q, i) => (
                 <li key={i}>
                   <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left">
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
-                      {showNative && <p className="text-xs text-gray-400 leading-snug" dir="auto">{q[native]}</p>}
+                      {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
                     </div>
                     <SpeakerIcon className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
                   </button>

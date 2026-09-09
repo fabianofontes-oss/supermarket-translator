@@ -62,7 +62,7 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({
     if (favorites.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-12 opacity-50">
-                <StarIcon className="w-16 h-16 text-gray-300 mb-4" />
+                <StarIcon className="w-16 h-16 text-gray-400 mb-4" />
                 <p className="text-center text-gray-500">{t('noFavoritesYet')}</p>
             </div>
         );

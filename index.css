@@ -30,6 +30,34 @@ body {
 }
 
 /*
+ * Foco visível. O app tinha só o padrão do navegador, que some sobre os
+ * cabeçalhos coloridos. Anel branco com halo escuro funciona sobre os dois.
+ */
+:where(a, button, input, select, textarea, [role='button'], [tabindex]):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 0;
+  box-shadow: 0 0 0 5px #111827;
+  border-radius: inherit;
+}
+
+/*
+ * Amplia a área de toque sem mexer no desenho. O botão continua com 40px,
+ * mas o dedo acerta em 44px, que é o mínimo de Apple e Android.
+ */
+.hit {
+  position: relative;
+}
+.hit::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+/*
  * Botões e chips: o gesto mais repetido do app.
  * Propriedades explícitas em vez de `all`, para não animar sombra e borda,
  * que forçam repintura. 150ms é a faixa de retorno de toque.

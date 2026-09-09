@@ -71,7 +71,7 @@ export const ShoppingListPanel: React.FC<ShoppingListPanelProps> = ({
     if (shoppingList.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-12 opacity-50">
-                <ShoppingBagIcon className="w-16 h-16 text-gray-300 mb-4" />
+                <ShoppingBagIcon className="w-16 h-16 text-gray-400 mb-4" />
                 <p className="text-center text-gray-500">{t('listIsEmpty')}</p>
             </div>
         );
@@ -84,7 +84,7 @@ export const ShoppingListPanel: React.FC<ShoppingListPanelProps> = ({
                 <h3 className={`font-bold text-sm ${theme.textColor} uppercase tracking-wider mb-3 pb-2 border-b border-gray-100`}>{t(category)}</h3>
                 {Object.entries(subCategories).map(([subCategory, items]) => (
                 <div key={subCategory} className="mb-4">
-                    <h4 className="text-xs font-bold text-gray-400 mb-3 ml-1 uppercase">{t(subCategory)}</h4>
+                    <h4 className="text-xs font-bold text-gray-500 mb-3 ml-1 uppercase">{t(subCategory)}</h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {items.map((item) => {
                            return (

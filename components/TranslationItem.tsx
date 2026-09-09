@@ -60,7 +60,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
   isPharmacy = false
 }) => {
   const getButtonClasses = (locked: boolean) => 
-    `p-1.5 rounded-full transition-colors duration-200 ${
+    `hit p-2 rounded-full transition-colors duration-200 ${
       locked 
         ? 'bg-red-50 hover:bg-red-100' 
         : `hover:bg-gray-100 text-gray-500 hover:${theme.textColor}`
@@ -222,7 +222,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     playSound(isFavorite ? 'click' : 'success');
                     onToggleFavorite(item);
                 }}
-                className="p-1 rounded-full flex-shrink-0 -mr-1 text-gray-400 hover:text-gray-500"
+                className="p-1 rounded-full flex-shrink-0 -mr-1 text-gray-500 hover:text-gray-500"
                 title={t('favorites')}
             >
                 <StarIcon className={`w-6 h-6 ${isFavorite ? 'text-yellow-400 fill-current' : ''}`} />
@@ -251,7 +251,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     </p>
                 </div>
             </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               {renderButton(
                 'listen',
                 <SpeakerIcon className={baseIconClasses} />,
@@ -299,7 +299,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     {/* Generic Name (Target Country) */}
                     {!pharmacyInfo.isNotSold && (
                         <div>
-                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Nome Genérico / Princípio Ativo</p>
+                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">Nome Genérico / Princípio Ativo</p>
                             <p className="text-lg font-bold text-gray-800 leading-tight">{pharmacyInfo.generic}</p>
                         </div>
                     )}
@@ -307,7 +307,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     {/* Brands List */}
                     {!pharmacyInfo.isNotSold && pharmacyInfo.brands.length > 0 && (
                         <div>
-                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-2">Marcas nas Prateleiras</p>
+                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-2">Marcas nas Prateleiras</p>
                             <div className="flex flex-wrap gap-2">
                                 {pharmacyInfo.brands.slice(0, 5).map((brand, idx) => (
                                     <span key={idx} className="px-3 py-1 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 shadow-sm font-medium">
@@ -362,7 +362,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     <div className="flex items-center gap-4 flex-1">
                     {item.phonetic && (
                         <div className="text-left">
-                        <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">{t('pronunciation')}</p>
+                        <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">{t('pronunciation')}</p>
                         <p className="text-gray-800 font-mono text-lg">{item.phonetic}</p>
                         </div>
                     )}

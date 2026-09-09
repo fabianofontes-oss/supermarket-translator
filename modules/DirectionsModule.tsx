@@ -172,7 +172,7 @@ export default function DirectionsModule({
 
           {/* BOTÕES DE PASSO */}
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('dirSteps')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('dirSteps')}</h2>
             <div className="grid grid-cols-4 gap-2">
               {DIR_STEPS.map((s) => {
                 const enabled = canApply(s);
@@ -182,12 +182,12 @@ export default function DirectionsModule({
                     disabled={!enabled}
                     onClick={() => addStep(s)}
                     className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
-                      enabled ? 'bg-white border-gray-100 text-gray-700 hover:border-gray-300' : 'bg-gray-50 border-gray-100 text-gray-300 opacity-60'
+                      enabled ? 'bg-white border-gray-100 text-gray-700 hover:border-gray-300' : 'bg-gray-50 border-gray-100 text-gray-400 opacity-60'
                     }`}
                   >
                     <span className="text-2xl leading-none">{s.icon}</span>
                     <span className="text-[11px] font-bold leading-tight text-center">{s.labels[target]}</span>
-                    {showNative && <span className="text-[10px] leading-tight text-center text-gray-400" dir="auto">{s.labels[native]}</span>}
+                    {showNative && <span className="text-[10px] leading-tight text-center text-gray-500" dir="auto">{s.labels[native]}</span>}
                   </button>
                 );
               })}
@@ -197,7 +197,7 @@ export default function DirectionsModule({
           {/* PERCURSO (frases) */}
           <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-white/80">{t('dirRoute')}</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-white">{t('dirRoute')}</h2>
               <div className="flex gap-2">
                 {steps.length > 0 && (
                   <>
@@ -209,7 +209,7 @@ export default function DirectionsModule({
             </div>
 
             {steps.length === 0 ? (
-              <p className="text-white/80 text-sm py-3">{t('dirEmpty')}</p>
+              <p className="text-white text-sm py-3">{t('dirEmpty')}</p>
             ) : (
               <ol className="space-y-2">
                 {steps.map((s, i) => (
@@ -217,7 +217,7 @@ export default function DirectionsModule({
                     <span className="w-6 h-6 rounded-full bg-white/25 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold leading-snug">{s.phrases[target]}</p>
-                      {showNative && <p className="text-xs text-white/75 leading-snug" dir="auto">{s.phrases[native]}</p>}
+                      {showNative && <p className="text-xs text-white leading-snug" dir="auto">{s.phrases[native]}</p>}
                     </div>
                     <button onClick={() => speak(s.phrases[target])} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 flex-shrink-0" aria-label={t('locListen')}>
                       <SpeakerIcon className="w-4 h-4" />
@@ -240,7 +240,7 @@ export default function DirectionsModule({
 
           {/* BÚSSOLA */}
           <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">{t('dirCompass')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">{t('dirCompass')}</h2>
             <div className="flex items-center gap-4">
               <svg viewBox="0 0 120 120" className="w-32 h-32 flex-shrink-0">
                 <circle cx={60} cy={60} r={54} fill="#f8fafc" stroke="#e2e8f0" strokeWidth={2} />
@@ -272,7 +272,7 @@ export default function DirectionsModule({
                         className={`rounded-xl border px-2 py-1.5 text-left tap active:scale-95 ${active ? `${theme.color} border-transparent text-white` : 'bg-white border-gray-100 text-gray-700'}`}
                       >
                         <div className="text-sm font-bold leading-tight">{c.names[target]}</div>
-                        {showNative && <div className={`text-[10px] leading-tight ${active ? 'text-white/75' : 'text-gray-400'}`} dir="auto">{c.names[native]}</div>}
+                        {showNative && <div className={`text-[10px] leading-tight ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{c.names[native]}</div>}
                       </button>
                     );
                   })}
@@ -281,7 +281,7 @@ export default function DirectionsModule({
                   <SpeakerIcon className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold leading-snug">{headingSentence(target, compass)}</p>
-                    {showNative && <p className="text-[11px] text-gray-400 leading-snug" dir="auto">{headingSentence(native, compass)}</p>}
+                    {showNative && <p className="text-[11px] text-gray-500 leading-snug" dir="auto">{headingSentence(native, compass)}</p>}
                   </div>
                 </button>
               </div>
@@ -290,14 +290,14 @@ export default function DirectionsModule({
 
           {/* PERGUNTAS */}
           <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{t('dirQuestions')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('dirQuestions')}</h2>
             <ul className="divide-y divide-gray-100">
               {DIR_QUESTIONS.map((q, i) => (
                 <li key={i}>
                   <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left">
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold leading-snug">{q[target]}</p>
-                      {showNative && <p className="text-xs text-gray-400 leading-snug" dir="auto">{q[native]}</p>}
+                      {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
                     </div>
                     <SpeakerIcon className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
                   </button>
@@ -326,7 +326,7 @@ interface VocabGroupProps {
 
 const VocabGroup: React.FC<VocabGroupProps> = ({ title, items, target, native, showNative, onSpeak }) => (
   <section>
-    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{title}</h2>
+    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{title}</h2>
     <div className="grid grid-cols-2 gap-2">
       {items.map((v, i) => (
         <button
@@ -337,7 +337,7 @@ const VocabGroup: React.FC<VocabGroupProps> = ({ title, items, target, native, s
           <span className="text-2xl leading-none flex-shrink-0">{v.emoji}</span>
           <div className="min-w-0">
             <p className="text-sm font-bold leading-tight">{v.names[target]}</p>
-            {showNative && <p className="text-[11px] text-gray-400 leading-tight" dir="auto">{v.names[native]}</p>}
+            {showNative && <p className="text-[11px] text-gray-500 leading-tight" dir="auto">{v.names[native]}</p>}
           </div>
         </button>
       ))}

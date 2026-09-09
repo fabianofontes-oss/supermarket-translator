@@ -163,6 +163,15 @@ Ao reiniciar o chat, peça para:
 ### Medidas: seis tabelas
 *   Além de calçado, roupa feminina e masculina, entraram **calça** (cintura, com polegadas em UK e EUA), **sutiã** (banda BR, EU e UK/EUA mais medida abaixo do busto) e **roupa infantil** (idade BR, altura EU).
 
+### Acessibilidade e desempenho (audit)
+*   **Contraste:** zero falhas nas nove telas. `text-gray-400` virou `gray-500` (4,83:1); sobre fundo colorido o texto que precisa ser lido usa **branco cheio**, e a hierarquia vem de tamanho e peso, porque opacidade de branco não alcança 4,5:1 nos temas médios.
+*   **Temas:** Farmácia, Direções e Pronomes reprovavam com texto branco (3,19 a 3,77). Passaram para o tom 700: 5,48, 5,02 e 5,47.
+*   **Foco:** o app não tinha estilo próprio e um lugar removia o do navegador. Agora anel branco com halo escuro, visível sobre claro e sobre colorido, só em `:focus-visible`.
+*   **Alvo de toque:** classe `.hit` estende a área para 44px por pseudo-elemento, sem mexer no desenho. Botões dos cards subiram de 36 para 40px com espaçamento maior.
+*   **Nome acessível:** botões só de ícone (início, busca, limpar, microfone) ganharam `aria-label`.
+*   **Divisão do pacote:** cada módulo virou um pedaço próprio com `lazy`, e o catálogo saiu de `constants.ts` para `data/catalog.ts`. O pedaço inicial caiu de **908 KB para 282 KB**; os 452 KB do catálogo só carregam ao abrir Supermercado ou Farmácia.
+*   Ordem de títulos corrigida nos Pronomes, e bandeiras do painel com carregamento adiado.
+
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.351 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

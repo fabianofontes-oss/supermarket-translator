@@ -101,7 +101,8 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
             {/* Left: Home Button */}
             <button
                 onClick={handleGoHome}
-                className="p-2 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex-shrink-0 z-20 text-white hover:bg-white/20 transition-colors"
+                aria-label={t('a11yHome')}
+                className="hit p-2 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex-shrink-0 z-20 text-white hover:bg-white/20 transition-colors"
             >
                 <HomeIcon className="w-5 h-5" />
             </button>
@@ -120,7 +121,8 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
             <div className="flex-shrink-0 z-20">
                 <button
                     onClick={handleToggleSearch}
-                    className={`p-2 rounded-full tap active:scale-95 ${isSearchActive ? 'bg-white text-current shadow-lg' : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'}`}
+                    aria-label={t('searchLabel')}
+                    className={`hit p-2 rounded-full tap active:scale-95 ${isSearchActive ? 'bg-white text-current shadow-lg' : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'}`}
                     style={{ color: isSearchActive ? theme.hex : 'white' }}
                 >
                     <SearchIcon className="w-5 h-5" />

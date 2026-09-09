@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { PREPOPULATED_TRANSLATIONS } from '../constants';
+import { PREPOPULATED_TRANSLATIONS } from '../data/catalog';
 import type { Category, Country, TranslationItem as TranslationItemType } from '../types';
 import { SearchIcon, ChevronDownIcon, MicrophoneIcon, XIcon } from '../components/Icons';
 import { TranslationItem } from '../components/TranslationItem';
@@ -242,14 +242,14 @@ export default function CatalogModule({
   const searchBarContent = (
     <div className="px-4 pb-2 pt-1">
       <div className="relative group flex items-center max-w-3xl mx-auto w-full">
-        <SearchIcon className="absolute left-3 w-5 h-5 text-gray-400 pointer-events-none z-10" />
+        <SearchIcon className="absolute left-3 w-5 h-5 text-gray-500 pointer-events-none z-10" />
         <input
           ref={searchInputRef}
           type="text"
           placeholder={t('searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => { setSearchTerm(e.target.value); setExpandedItemKey(null); }}
-          className="w-full bg-white text-gray-800 rounded-xl py-3 pl-10 pr-20 text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-black/10 transition-shadow h-12"
+          className="w-full bg-white text-gray-800 rounded-xl py-3 pl-10 pr-20 text-sm shadow-md focus:ring-2 focus:ring-black/10 transition-shadow h-12"
         />
         <div className="absolute right-1.5 flex items-center gap-1">
           <button
@@ -262,13 +262,15 @@ export default function CatalogModule({
                 onToggleSearch();
               }
             }}
-            className="p-2 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            aria-label={t('dirClear')}
+            className="hit p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-600 transition-colors"
           >
             <XIcon className="w-5 h-5" />
           </button>
           <button
             onClick={() => { playSound('click'); startListening(); }}
-            className={`p-2 rounded-full tap shadow-sm border ${isListening ? `${theme.color} text-white scale-110 border-transparent animate-pulse` : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'}`}
+            aria-label={t('a11yVoice')}
+            className={`hit p-2 rounded-full tap shadow-sm border ${isListening ? `${theme.color} text-white scale-110 border-transparent animate-pulse` : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'}`}
           >
             <MicrophoneIcon className="w-5 h-5" />
           </button>
@@ -287,7 +289,7 @@ export default function CatalogModule({
           <span className="text-3xl font-extrabold text-white tracking-tight drop-shadow-sm truncate">
             {t(selectedCategory.name)}
           </span>
-          <ChevronDownIcon className={`w-4 h-4 text-white/70 transition-transform duration-300 flex-shrink-0 ${isCategoryDropdownOpen ? 'rotate-180' : 'group-hover:translate-y-0.5'}`} />
+          <ChevronDownIcon className={`w-4 h-4 text-white transition-transform duration-300 flex-shrink-0 ${isCategoryDropdownOpen ? 'rotate-180' : 'group-hover:translate-y-0.5'}`} />
         </div>
       </button>
 
@@ -423,7 +425,7 @@ export default function CatalogModule({
     >
       <div className="space-y-4">
         {isSearchActive && searchResults.length === 0 && (
-          <p className="text-center text-gray-400 mt-10">{t('noItemsFoundFor')}</p>
+          <p className="text-center text-gray-500 mt-10">{t('noItemsFoundFor')}</p>
         )}
 
         {showPhraseSections && (
@@ -433,7 +435,7 @@ export default function CatalogModule({
               if (subCategoryItems.length === 0) return null;
               return (
                 <div key={sub} id={`section-${sub}`} className="scroll-mt-40 bg-white rounded-3xl p-5 shadow-sm border border-gray-50">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2 ml-1">
+                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2 ml-1">
                     {t(sub)}
                   </h3>
                   <div className="space-y-3">

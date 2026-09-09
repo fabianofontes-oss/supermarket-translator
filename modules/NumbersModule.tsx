@@ -251,7 +251,7 @@ export default function NumbersModule({
 
             {tab === 'time' && (
               <div className="ml-4 text-center">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">{t('numOnSigns')}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">{t('numOnSigns')}</p>
                 <p className="text-3xl font-extrabold tabular-nums whitespace-nowrap" style={{ color: theme.hex }}>{clockDisplay}</p>
 
                 <div className="mt-2 inline-flex rounded-lg bg-gray-100 p-0.5">
@@ -259,7 +259,7 @@ export default function NumbersModule({
                     <button
                       key={String(twelve)}
                       onClick={() => { playSound('toggle'); setTwelveHour(twelve); }}
-                      className={`tap rounded-md px-2 py-1 text-[10px] font-bold ${twelveHour === twelve ? 'bg-white shadow-sm' : 'text-gray-400'}`}
+                      className={`tap rounded-md px-2 py-1 text-[10px] font-bold ${twelveHour === twelve ? 'bg-white shadow-sm' : 'text-gray-600'}`}
                       style={twelveHour === twelve ? { color: theme.hex } : undefined}
                     >
                       {twelve ? 'AM/PM' : '24h'}
@@ -303,7 +303,7 @@ export default function NumbersModule({
             <div className="flex items-start gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-xl font-bold leading-snug" dir="auto">{sentence}</p>
-                {showNative && <p className="text-sm text-white/75 mt-1 leading-snug" dir="auto">{sentenceNative}</p>}
+                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{sentenceNative}</p>}
               </div>
               <button onClick={() => speak(sentence)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={t('locListen')}>
                 <SpeakerIcon className="w-6 h-6" />
@@ -312,8 +312,8 @@ export default function NumbersModule({
 
             {shortPrice && (
               <button onClick={() => speak(shortPrice)} className="mt-3 pt-3 border-t border-white/20 w-full flex items-center gap-2 text-left">
-                <SpeakerIcon className="w-4 h-4 flex-shrink-0 text-white/70" />
-                <span className="text-xs text-white/70">{t('numAlsoSaid')}:</span>
+                <SpeakerIcon className="w-4 h-4 flex-shrink-0 text-white" />
+                <span className="text-xs text-white">{t('numAlsoSaid')}:</span>
                 <span className="font-bold" dir="auto">{shortPrice}</span>
               </button>
             )}
@@ -323,7 +323,7 @@ export default function NumbersModule({
           {tab === 'time' && (
             <>
               <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('numHour')}</h2>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numHour')}</h2>
                 <div className="grid grid-cols-6 gap-2">
                   {HOURS.map((h) => (
                     <button key={h} onClick={() => { playSound('click'); setHour(h); }} className={`${chip(hour === h)} tabular-nums`}>
@@ -333,7 +333,7 @@ export default function NumbersModule({
                 </div>
               </section>
               <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('numMinute')}</h2>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numMinute')}</h2>
                 <div className="grid grid-cols-6 gap-2">
                   {MINUTES.map((m) => (
                     <button key={m} onClick={() => { playSound('click'); setMinute(m); }} className={chip(minute === m)}>
@@ -348,10 +348,10 @@ export default function NumbersModule({
           {(tab === 'price' || tab === 'number') && (
             <section>
               <div className="flex items-center justify-between mb-2 px-1">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">
                   {tab === 'price' ? t('numTypePrice') : t('numTypeNumber')}
                 </h2>
-                <button onClick={pressClear} className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-gray-600">
+                <button onClick={pressClear} className="text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-gray-600">
                   {t('dirClear')}
                 </button>
               </div>
@@ -367,7 +367,7 @@ export default function NumbersModule({
                   <button onClick={pressComma} disabled={hasComma} className={`rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold active:scale-95 transition-transform shadow-sm ${hasComma ? 'text-gray-200' : 'text-gray-700'}`}>,</button>
                 )}
                 <button onClick={() => pressDigit(0)} className="rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold text-gray-700 active:scale-95 transition-transform shadow-sm">0</button>
-                <button onClick={pressBack} className="rounded-2xl bg-white border border-gray-100 py-3 text-xl font-bold text-gray-400 active:scale-95 transition-transform shadow-sm">←</button>
+                <button onClick={pressBack} className="rounded-2xl bg-white border border-gray-100 py-3 text-xl font-bold text-gray-500 active:scale-95 transition-transform shadow-sm">←</button>
               </div>
             </section>
           )}
@@ -375,7 +375,7 @@ export default function NumbersModule({
           {tab === 'date' && (
             <>
               <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('numDay')}</h2>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numDay')}</h2>
                 <div className="grid grid-cols-7 gap-1.5">
                   {DAYS.map((d) => (
                     <button key={d} onClick={() => { playSound('click'); setDay(d); }} className={`rounded-lg py-2 text-sm font-bold tap active:scale-95 border ${day === d ? `${theme.color} text-white border-transparent` : 'bg-white text-gray-700 border-gray-100'}`}>
@@ -385,7 +385,7 @@ export default function NumbersModule({
                 </div>
               </section>
               <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('numMonth')}</h2>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numMonth')}</h2>
                 <div className="grid grid-cols-3 gap-2">
                   {MONTHS[target].map((m, i) => (
                     <button key={m} onClick={() => { playSound('click'); setMonth(i); }} className={`${chip(month === i)} truncate`}>{m}</button>
@@ -397,14 +397,14 @@ export default function NumbersModule({
 
           {/* Perguntas */}
           <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{t('numAsk')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('numAsk')}</h2>
             <ul className="divide-y divide-gray-100">
               {NUM_QUESTIONS.map((q, i) => (
                 <li key={i}>
                   <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left">
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
-                      {showNative && <p className="text-xs text-gray-400 leading-snug" dir="auto">{q[native]}</p>}
+                      {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
                     </div>
                     <SpeakerIcon className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
                   </button>
