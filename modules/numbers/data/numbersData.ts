@@ -33,6 +33,9 @@ const UK_H = ['', 'сто', 'двісті', 'триста', 'чотириста'
 
 const AR_U = ['صفر', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
 const AR_T = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+const LT_U = ['nulis', 'vienas', 'du', 'trys', 'keturi', 'penki', 'šeši', 'septyni', 'aštuoni', 'devyni', 'dešimt', 'vienuolika', 'dvylika', 'trylika', 'keturiolika', 'penkiolika', 'šešiolika', 'septyniolika', 'aštuoniolika', 'devyniolika'];
+const LT_T = ['', '', 'dvidešimt', 'trisdešimt', 'keturiasdešimt', 'penkiasdešimt', 'šešiasdešimt', 'septyniasdešimt', 'aštuoniasdešimt', 'devyniasdešimt'];
+
 const AR_H = ['', 'مئة', 'مئتان', 'ثلاثمئة', 'أربعمئة', 'خمسمئة', 'ستمئة', 'سبعمئة', 'ثمانمئة', 'تسعمئة'];
 
 // --- abaixo de 100 ---
@@ -40,6 +43,7 @@ const es100 = (n: number): string => (n < 30 ? ES_U[n] : ES_T[Math.floor(n / 10)
 const pt100 = (n: number): string => (n < 20 ? PT_U[n] : PT_T[Math.floor(n / 10)] + (n % 10 ? ` e ${PT_U[n % 10]}` : ''));
 const en100 = (n: number): string => (n < 20 ? EN_U[n] : EN_T[Math.floor(n / 10)] + (n % 10 ? `-${EN_U[n % 10]}` : ''));
 const uk100 = (n: number): string => (n < 20 ? UK_U[n] : UK_T[Math.floor(n / 10)] + (n % 10 ? ` ${UK_U[n % 10]}` : ''));
+const lt100 = (n: number): string => (n < 20 ? LT_U[n] : LT_T[Math.floor(n / 10)] + (n % 10 ? ` ${LT_U[n % 10]}` : ''));
 const ar100 = (n: number): string => (n < 20 ? AR_U[n] : (n % 10 ? `${AR_U[n % 10]} و` : '') + AR_T[Math.floor(n / 10)]);
 
 const fr100 = (n: number): string => {
@@ -111,8 +115,22 @@ const ar1000 = (n: number): string => {
   return AR_H[h] + (r ? ` و${ar100(r)}` : '');
 };
 
+const lt1000 = (n: number): string => {
+  if (n < 100) return lt100(n);
+  const h = Math.floor(n / 100), r = n % 100;
+  return (h === 1 ? 'šimtas' : `${LT_U[h]} šimtai`) + (r ? ` ${lt100(r)}` : '');
+};
+
+/** Lituano flexiona o substantivo contado: 1 euras, 2-9 eurai, 10+ eurų. */
+const ltPlural = (n: number, one: string, few: string, many: string): string => {
+  const last2 = n % 100, last = n % 10;
+  if (last === 1 && last2 !== 11) return one;
+  if (last >= 2 && last <= 9 && (last2 < 11 || last2 > 19)) return few;
+  return many;
+};
+
 const BELOW_1000: Record<LangCode, (n: number) => string> = {
-  es: es1000, pt: pt1000, en: en1000, fr: fr1000, it: it1000, uk: uk1000, ar: ar1000,
+  es: es1000, pt: pt1000, en: en1000, fr: fr1000, it: it1000, uk: uk1000, ar: ar1000, lt: lt1000,
 };
 
 /** Número por extenso, de 0 a 999.999. */
@@ -129,6 +147,7 @@ export const numberToWords = (lang: LangCode, n: number): string => {
     case 'fr': head = t === 1 ? 'mille' : `${below(t)} mille`; break;
     case 'it': head = t === 1 ? 'mille' : `${below(t)}mila`; break;
     case 'uk': head = t === 1 ? 'тисяча' : t === 2 ? 'дві тисячі' : t < 5 ? `${below(t)} тисячі` : `${below(t)} тисяч`; break;
+    case 'lt': head = t === 1 ? 'tūkstantis' : `${below(t)} ${ltPlural(t, 'tūkstantis', 'tūkstančiai', 'tūkstančių')}`; break;
     default:   head = t === 1 ? 'ألف' : t === 2 ? 'ألفان' : `${below(t)} آلاف`; break;
   }
   if (!r) return head;
@@ -150,6 +169,8 @@ const PT_HOUR = (h: number) => (h === 1 ? 'uma' : h === 2 ? 'duas' : pt100(h));
 const UK_HOUR = ['', 'перша', 'друга', 'третя', 'четверта', "п'ята", 'шоста', 'сьома', 'восьма', "дев'ята", 'десята', 'одинадцята', 'дванадцята'];
 const UK_HOUR_ACC = ['', 'першу', 'другу', 'третю', 'четверту', "п'яту", 'шосту', 'сьому', 'восьму', "дев'яту", 'десяту', 'одинадцяту', 'дванадцяту'];
 const AR_HOUR = ['', 'الواحدة', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة', 'السادسة', 'السابعة', 'الثامنة', 'التاسعة', 'العاشرة', 'الحادية عشرة', 'الثانية عشرة'];
+
+const LT_HOUR = ['', 'pirma', 'antra', 'trečia', 'ketvirta', 'penkta', 'šešta', 'septinta', 'aštunta', 'devinta', 'dešimta', 'vienuolikta', 'dvylikta'];
 
 const to12 = (h: number) => (h % 12 === 0 ? 12 : h % 12);
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -211,6 +232,11 @@ export const buildTime = (lang: LangCode, h: number, m: number): string => {
       if (m === 45) return `За чверть ${UK_HOUR[nxt]}.`;
       return `${cap(UK_HOUR[cur])} ${uk100(m)}.`;
     }
+    case 'lt': {
+      if (m === 0) return `${cap(LT_HOUR[cur])} valanda.`;
+      return `${cap(LT_HOUR[cur])} valanda ${lt100(m)}.`;
+    }
+
     default: {
       if (m === 0) return `الساعة ${AR_HOUR[cur]}.`;
       if (m === 15) return `${AR_HOUR[cur]} والربع.`;
@@ -260,6 +286,13 @@ export const buildPrice = (lang: LangCode, totalCents: number): string => {
       const euros = `${uk1000(e)} євро`;
       return c ? `${euros} ${uk100(c)}.` : `${euros}.`;
     }
+    case 'lt': {
+      const cents = `${lt1000(c)} ${ltPlural(c, 'centas', 'centai', 'centų')}`;
+      if (e === 0) return `${cents}.`;
+      const euros = `${lt1000(e)} ${ltPlural(e, 'euras', 'eurai', 'eurų')}`;
+      return c ? `${euros} ir ${cents}.` : `${euros}.`;
+    }
+
     default: {
       if (e === 0) return `${ar1000(c)} سنت.`;
       const euros = e === 1 ? 'يورو واحد' : `${ar1000(e)} يورو`;
@@ -290,7 +323,7 @@ export const buildPriceShort = (lang: LangCode, totalCents: number): string | nu
 
 /** Palavra da vírgula decimal. */
 export const DECIMAL_WORD: Text = {
-  es: 'coma', pt: 'vírgula', en: 'point', fr: 'virgule', it: 'virgola', uk: 'кома', ar: 'فاصلة',
+  es: 'coma', pt: 'vírgula', en: 'point', fr: 'virgule', it: 'virgola', uk: 'кома', lt: 'kablelis', ar: 'فاصلة',
 };
 
 /**
@@ -323,7 +356,7 @@ export const MONTHS: Record<LangCode, string[]> = {
   fr: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
   it: ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
   uk: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'],
-  ar: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+  lt: ['sausio', 'vasario', 'kovo', 'balandžio', 'gegužės', 'birželio', 'liepos', 'rugpjūčio', 'rugsėjo', 'spalio', 'lapkričio', 'gruodžio'], ar: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
 };
 
 const EN_ORD = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth', 'eighteenth', 'nineteenth', 'twentieth', 'twenty-first', 'twenty-second', 'twenty-third', 'twenty-fourth', 'twenty-fifth', 'twenty-sixth', 'twenty-seventh', 'twenty-eighth', 'twenty-ninth', 'thirtieth', 'thirty-first'];
@@ -338,6 +371,7 @@ export const buildDate = (lang: LangCode, day: number, month: number): string =>
     case 'fr': return `Le ${day === 1 ? 'premier' : fr100(day)} ${M}.`;
     case 'it': return `Il ${day === 1 ? 'primo' : it100(day)} ${M}.`;
     case 'uk': return `${day} ${M}.`;
+    case 'lt': return `${M} ${day} d.`;
     default:   return `${day} ${M}.`;
   }
 };
@@ -346,14 +380,14 @@ export const buildDate = (lang: LangCode, day: number, month: number): string =>
 // PERGUNTAS ÚTEIS
 // ---------------------------------------------------------------------------
 export const NUM_QUESTIONS: Text[] = [
-  { es: '¿Cuánto cuesta?', pt: 'Quanto custa?', en: 'How much is it?', fr: 'Combien ça coûte ?', it: 'Quanto costa?', uk: 'Скільки коштує?', ar: 'كم الثمن؟' },
-  { es: '¿Qué hora es?', pt: 'Que horas são?', en: 'What time is it?', fr: 'Quelle heure est-il ?', it: 'Che ore sono?', uk: 'Котра година?', ar: 'كم الساعة؟' },
-  { es: '¿Puede repetirlo más despacio?', pt: 'Pode repetir mais devagar?', en: 'Can you say it more slowly?', fr: 'Pouvez-vous répéter plus lentement ?', it: 'Può ripetere più lentamente?', uk: 'Можете повторити повільніше?', ar: 'هل يمكنك التكرار ببطء؟' },
-  { es: '¿Me lo puede escribir?', pt: 'Pode escrever para mim?', en: 'Can you write it down?', fr: 'Pouvez-vous me l\'écrire ?', it: 'Me lo può scrivere?', uk: 'Можете написати?', ar: 'هل يمكنك كتابته؟' },
-  { es: '¿A qué hora abren?', pt: 'A que horas abre?', en: 'What time do you open?', fr: 'À quelle heure ouvrez-vous ?', it: 'A che ora aprite?', uk: 'О котрій відкриваєте?', ar: 'في أي ساعة تفتحون؟' },
-  { es: '¿A qué hora cierran?', pt: 'A que horas fecha?', en: 'What time do you close?', fr: 'À quelle heure fermez-vous ?', it: 'A che ora chiudete?', uk: 'О котрій зачиняєте?', ar: 'في أي ساعة تغلقون؟' },
-  { es: '¿Aceptan tarjeta?', pt: 'Aceitam cartão?', en: 'Do you take cards?', fr: 'Acceptez-vous la carte ?', it: 'Accettate la carta?', uk: 'Приймаєте картку?', ar: 'هل تقبلون البطاقة؟' },
-  { es: '¿Tiene cambio?', pt: 'Tem troco?', en: 'Do you have change?', fr: 'Avez-vous de la monnaie ?', it: 'Ha da cambiare?', uk: 'У вас є решта?', ar: 'هل لديك فكة؟' },
+  { es: '¿Cuánto cuesta?', pt: 'Quanto custa?', en: 'How much is it?', fr: 'Combien ça coûte ?', it: 'Quanto costa?', uk: 'Скільки коштує?', lt: 'Kiek kainuoja?', ar: 'كم الثمن؟' },
+  { es: '¿Qué hora es?', pt: 'Que horas são?', en: 'What time is it?', fr: 'Quelle heure est-il ?', it: 'Che ore sono?', uk: 'Котра година?', lt: 'Kelinta valanda?', ar: 'كم الساعة؟' },
+  { es: '¿Puede repetirlo más despacio?', pt: 'Pode repetir mais devagar?', en: 'Can you say it more slowly?', fr: 'Pouvez-vous répéter plus lentement ?', it: 'Può ripetere più lentamente?', uk: 'Можете повторити повільніше?', lt: 'Ar galite pakartoti lėčiau?', ar: 'هل يمكنك التكرار ببطء؟' },
+  { es: '¿Me lo puede escribir?', pt: 'Pode escrever para mim?', en: 'Can you write it down?', fr: 'Pouvez-vous me l\'écrire ?', it: 'Me lo può scrivere?', uk: 'Можете написати?', lt: 'Ar galite užrašyti?', ar: 'هل يمكنك كتابته؟' },
+  { es: '¿A qué hora abren?', pt: 'A que horas abre?', en: 'What time do you open?', fr: 'À quelle heure ouvrez-vous ?', it: 'A che ora aprite?', uk: 'О котрій відкриваєте?', lt: 'Kada atidarote?', ar: 'في أي ساعة تفتحون؟' },
+  { es: '¿A qué hora cierran?', pt: 'A que horas fecha?', en: 'What time do you close?', fr: 'À quelle heure fermez-vous ?', it: 'A che ora chiudete?', uk: 'О котрій зачиняєте?', lt: 'Kada uždarote?', ar: 'في أي ساعة تغلقون؟' },
+  { es: '¿Aceptan tarjeta?', pt: 'Aceitam cartão?', en: 'Do you take cards?', fr: 'Acceptez-vous la carte ?', it: 'Accettate la carta?', uk: 'Приймаєте картку?', lt: 'Ar priimate korteles?', ar: 'هل تقبلون البطاقة؟' },
+  { es: '¿Tiene cambio?', pt: 'Tem troco?', en: 'Do you have change?', fr: 'Avez-vous de la monnaie ?', it: 'Ha da cambiare?', uk: 'У вас є решта?', lt: 'Ar turite grąžos?', ar: 'هل لديك فكة؟' },
 ];
 
 // Presets rápidos de preço, em centavos.

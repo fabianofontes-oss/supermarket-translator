@@ -127,7 +127,15 @@ Ao reiniciar o chat, peça para:
 *   **Café e tapas** (`CafeModule.tsx`, marrom): copo ou xícara desenhado com a proporção de café, leite, água, leite condensado, licor ou gelo. Nove bebidas com o nome local por país e uma explicação na língua de quem lê, porque tradução literal não serve aqui. Sete modificadores entram na frase do pedido ("un cortado en vaso sin azúcar"). Dez porções explicadas: tapa, pincho, ración, media ración, montadito, menú del día, primero, segundo, para picar, caña.
 *   **Eu, você, ele** (`PronounsModule.tsx`, verde-azulado): 8 pronomes vezes 7 verbos vezes complemento, em afirmação, pergunta e negação. Marca "formal" em usted/ustedes e "Espanha" em vosotros, com aviso explicando a armadilha. O campo `altPerson` resolve o fato de que inglês, francês, ucraniano e árabe conjugam o tratamento formal na 2ª pessoa, enquanto espanhol e italiano usam a 3ª. Ucraniano e árabe têm formas vazias para "ser", porque dispensam a cópula no presente, e o árabe nega frase nominal com "ليس" conjugado.
 *   **Medidas** (`SizesModule.tsx`, índigo): conversor de calçado, roupa feminina e masculina entre Brasil, Europa, Reino Unido e EUA. A numeração de origem vem do país nativo e a de destino do país-alvo. Espanhol e francês distinguem calçado ("número", "pointure") de roupa ("talla", "taille"). Traz aviso de que a numeração varia por marca.
-*   Nenhum dos três depende do catálogo: funcionam em ucraniano e árabe.
+*   Nenhum dos três depende do catálogo: funcionam em ucraniano, árabe e lituano.
+
+### Lituano (lt)
+*   Sétimo idioma, também `originOnly`: aparece só em "Eu falo".
+*   Gramática coberta: genitivo depois de "norėti" e das preposições de lugar, instrumental depois de "po", acusativo depois de "priešais" e de "skauda", locativo para "patinimas". O campo `cases` ganhou `acc`.
+*   Negação cola no verbo (`noriu` vira `nenoriu`), com `yra` virando `nėra`.
+*   "Precisar" pede sujeito no dativo: `dativeIn` no verbo e `dative` no pronome geram "Man reikia gydytojo".
+*   "Jūs" formal conjuga na 2ª pessoa do plural, como o francês.
+*   Números flexionam o substantivo contado (1 euras, 2-9 eurai, 10+ eurų) via `ltPlural`. Tamanho de roupa usa algarismo, porque declinar o ordinal seria frágil.
 
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.351 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.

@@ -109,6 +109,7 @@ export const COUNTRIES: Country[] = [
     { name: "Itália", lang: "it-IT", flag: "🇮🇹", code: "it", image: "/flags/it.svg" },
     { name: "Ucrânia", lang: "uk-UA", flag: "🇺🇦", code: "ua", image: "/flags/ua.svg", originOnly: true },
     { name: "Marrocos", lang: "ar-MA", flag: "🇲🇦", code: "ma", image: "/flags/ma.svg", originOnly: true },
+    { name: "Lituânia", lang: "lt-LT", flag: "🇱🇹", code: "lt", image: "/flags/lt.svg", originOnly: true },
 ];
 
 // Pre-populated data for offline-first experience

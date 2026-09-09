@@ -38,8 +38,8 @@ export interface SizeTable {
 export const SIZE_TABLES: SizeTable[] = [
   {
     key: 'shoes', emoji: '👟', kind: 'shoe',
-    labels: { es: 'calzado', pt: 'calçado', en: 'shoes', fr: 'chaussures', it: 'scarpe', uk: 'взуття', ar: 'الأحذية' },
-    extraLabel: { es: 'cm', pt: 'cm', en: 'cm', fr: 'cm', it: 'cm', uk: 'см', ar: 'سم' },
+    labels: { es: 'calzado', pt: 'calçado', en: 'shoes', fr: 'chaussures', it: 'scarpe', uk: 'взуття', lt: 'avalynė', ar: 'الأحذية' },
+    extraLabel: { es: 'cm', pt: 'cm', en: 'cm', fr: 'cm', it: 'cm', uk: 'см', lt: 'cm', ar: 'سم' },
     rows: [
       { BR: '33', EU: '34', UK: '2',    US: '3',    extra: '21,5' },
       { BR: '34', EU: '35', UK: '2,5',  US: '3,5',  extra: '22' },
@@ -58,8 +58,8 @@ export const SIZE_TABLES: SizeTable[] = [
   },
   {
     key: 'women', emoji: '👗', kind: 'clothes',
-    labels: { es: 'ropa de mujer', pt: 'roupa feminina', en: "women's clothing", fr: 'vêtements femme', it: 'abbigliamento donna', uk: 'жіночий одяг', ar: 'ملابس نسائية' },
-    extraLabel: { es: 'letra', pt: 'letra', en: 'letter', fr: 'lettre', it: 'lettera', uk: 'літера', ar: 'حرف' },
+    labels: { es: 'ropa de mujer', pt: 'roupa feminina', en: "women's clothing", fr: 'vêtements femme', it: 'abbigliamento donna', uk: 'жіночий одяг', lt: 'moteriški drabužiai', ar: 'ملابس نسائية' },
+    extraLabel: { es: 'letra', pt: 'letra', en: 'letter', fr: 'lettre', it: 'lettera', uk: 'літера', lt: 'raidė', ar: 'حرف' },
     rows: [
       { BR: '36', EU: '34', UK: '6',  US: '2',  extra: 'XS' },
       { BR: '38', EU: '36', UK: '8',  US: '4',  extra: 'S' },
@@ -72,8 +72,8 @@ export const SIZE_TABLES: SizeTable[] = [
   },
   {
     key: 'men', emoji: '👕', kind: 'clothes',
-    labels: { es: 'ropa de hombre', pt: 'roupa masculina', en: "men's clothing", fr: 'vêtements homme', it: 'abbigliamento uomo', uk: 'чоловічий одяг', ar: 'ملابس رجالية' },
-    extraLabel: { es: 'pecho cm', pt: 'peito cm', en: 'chest cm', fr: 'poitrine cm', it: 'petto cm', uk: 'груди см', ar: 'الصدر سم' },
+    labels: { es: 'ropa de hombre', pt: 'roupa masculina', en: "men's clothing", fr: 'vêtements homme', it: 'abbigliamento uomo', uk: 'чоловічий одяг', lt: 'vyriški drabužiai', ar: 'ملابس رجالية' },
+    extraLabel: { es: 'pecho cm', pt: 'peito cm', en: 'chest cm', fr: 'poitrine cm', it: 'petto cm', uk: 'груди см', lt: 'krūtinė cm', ar: 'الصدر سم' },
     rows: [
       { BR: 'PP', EU: '44', UK: 'XS',  US: 'XS',  extra: '86' },
       { BR: 'P',  EU: '46', UK: 'S',   US: 'S',   extra: '92' },
@@ -89,13 +89,13 @@ export const SIZE_TABLES: SizeTable[] = [
 // FRASES DA LOJA
 // ---------------------------------------------------------------------------
 export const SIZE_QUESTIONS: Text[] = [
-  { es: '¿Puedo probármelo?', pt: 'Posso experimentar?', en: 'Can I try it on?', fr: "Puis-je l'essayer ?", it: 'Posso provarlo?', uk: 'Можна поміряти?', ar: 'هل يمكنني تجربته؟' },
-  { es: '¿Dónde está el probador?', pt: 'Onde fica o provador?', en: 'Where is the fitting room?', fr: 'Où sont les cabines ?', it: "Dov'è il camerino?", uk: 'Де примірочна?', ar: 'أين غرفة القياس؟' },
-  { es: 'Me queda grande.', pt: 'Ficou grande em mim.', en: "It's too big.", fr: "C'est trop grand.", it: 'Mi sta grande.', uk: 'Завелике.', ar: 'إنه كبير عليّ.' },
-  { es: 'Me queda pequeño.', pt: 'Ficou pequeno em mim.', en: "It's too small.", fr: "C'est trop petit.", it: 'Mi sta piccolo.', uk: 'Замале.', ar: 'إنه صغير عليّ.' },
-  { es: '¿Tienen una talla más?', pt: 'Tem um número maior?', en: 'Do you have a bigger size?', fr: 'Avez-vous la taille au-dessus ?', it: 'Avete una taglia in più?', uk: 'Є більший розмір?', ar: 'هل لديكم مقاس أكبر؟' },
-  { es: '¿Tienen una talla menos?', pt: 'Tem um número menor?', en: 'Do you have a smaller size?', fr: 'Avez-vous la taille en dessous ?', it: 'Avete una taglia in meno?', uk: 'Є менший розмір?', ar: 'هل لديكم مقاس أصغر؟' },
-  { es: '¿Se puede cambiar si no me vale?', pt: 'Dá para trocar se não servir?', en: "Can I exchange it if it doesn't fit?", fr: 'Puis-je l\'échanger si ça ne va pas ?', it: 'Posso cambiarlo se non mi va?', uk: 'Чи можна обміняти, якщо не підійде?', ar: 'هل يمكن استبداله إذا لم يناسبني؟' },
+  { es: '¿Puedo probármelo?', pt: 'Posso experimentar?', en: 'Can I try it on?', fr: "Puis-je l'essayer ?", it: 'Posso provarlo?', uk: 'Можна поміряти?', lt: 'Ar galiu pasimatuoti?', ar: 'هل يمكنني تجربته؟' },
+  { es: '¿Dónde está el probador?', pt: 'Onde fica o provador?', en: 'Where is the fitting room?', fr: 'Où sont les cabines ?', it: "Dov'è il camerino?", uk: 'Де примірочна?', lt: 'Kur yra matavimosi kabina?', ar: 'أين غرفة القياس؟' },
+  { es: 'Me queda grande.', pt: 'Ficou grande em mim.', en: "It's too big.", fr: "C'est trop grand.", it: 'Mi sta grande.', uk: 'Завелике.', lt: 'Man per didelis.', ar: 'إنه كبير عليّ.' },
+  { es: 'Me queda pequeño.', pt: 'Ficou pequeno em mim.', en: "It's too small.", fr: "C'est trop petit.", it: 'Mi sta piccolo.', uk: 'Замале.', lt: 'Man per mažas.', ar: 'إنه صغير عليّ.' },
+  { es: '¿Tienen una talla más?', pt: 'Tem um número maior?', en: 'Do you have a bigger size?', fr: 'Avez-vous la taille au-dessus ?', it: 'Avete una taglia in più?', uk: 'Є більший розмір?', lt: 'Ar turite didesnį dydį?', ar: 'هل لديكم مقاس أكبر؟' },
+  { es: '¿Tienen una talla menos?', pt: 'Tem um número menor?', en: 'Do you have a smaller size?', fr: 'Avez-vous la taille en dessous ?', it: 'Avete una taglia in meno?', uk: 'Є менший розмір?', lt: 'Ar turite mažesnį dydį?', ar: 'هل لديكم مقاس أصغر؟' },
+  { es: '¿Se puede cambiar si no me vale?', pt: 'Dá para trocar se não servir?', en: "Can I exchange it if it doesn't fit?", fr: 'Puis-je l\'échanger si ça ne va pas ?', it: 'Posso cambiarlo se non mi va?', uk: 'Чи можна обміняти, якщо не підійде?', lt: 'Ar galima pakeisti, jei netiks?', ar: 'هل يمكن استبداله إذا لم يناسبني؟' },
 ];
 
 export const SIZE_WARNING: Text = {
@@ -105,7 +105,7 @@ export const SIZE_WARNING: Text = {
   fr: 'Les tailles varient beaucoup selon les marques. Essayez toujours.',
   it: 'Le taglie cambiano molto tra le marche. Provate sempre il capo.',
   uk: 'Розміри дуже різняться між брендами. Завжди міряйте.',
-  ar: 'المقاسات تختلف كثيرًا بين الماركات. جرّب القطعة دائمًا.',
+  lt: 'Dydžiai labai skiriasi tarp prekių ženklų. Visada pasimatuokite.', ar: 'المقاسات تختلف كثيرًا بين الماركات. جرّب القطعة دائمًا.',
 };
 
 // ---------------------------------------------------------------------------
@@ -120,7 +120,8 @@ const spellSize = (lang: LangCode, size: string): string => {
 
 /** "¿Lo tiene en el número cuarenta y dos?" para calçado, "en la talla" para roupa. */
 export const buildSizeQuestion = (lang: LangCode, size: string, kind: 'shoe' | 'clothes'): string => {
-  const s = spellSize(lang, size);
+  // Em lituano o número do tamanho vai em algarismo: declinar o ordinal seria frágil.
+  const s = lang === 'lt' ? size : spellSize(lang, size);
   const shoe = kind === 'shoe';
   switch (lang) {
     case 'es': return shoe ? `¿Lo tiene en el número ${s}?` : `¿Lo tiene en la talla ${s}?`;
@@ -129,6 +130,7 @@ export const buildSizeQuestion = (lang: LangCode, size: string, kind: 'shoe' | '
     case 'fr': return shoe ? `Vous l'avez en pointure ${s} ?` : `Vous l'avez en taille ${s} ?`;
     case 'it': return shoe ? `Ce l'ha nel numero ${s}?` : `Ce l'ha nella taglia ${s}?`;
     case 'uk': return `У вас є розмір ${s}?`;
+    case 'lt': return `Ar turite ${s} dydį?`;
     default:   return `هل لديك مقاس ${s}؟`;
   }
 };
