@@ -48,7 +48,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
       key={opt.code}
       disabled={isBlocked}
       onClick={() => { playSound('click'); onClick(); }}
-      className={`relative group flex items-center justify-center p-1 rounded-full transition-all duration-300 ${
+      className={`relative group flex items-center justify-center p-1 rounded-full tap ${
         isBlocked
           ? 'opacity-25 grayscale cursor-not-allowed'
           : isSelected
@@ -120,7 +120,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
              <div className="px-3 pb-3 pt-1 mt-auto">
                 <button
                     onClick={handleClose}
-                    className={`w-full py-2 rounded-xl ${theme.color} text-white font-bold shadow-md hover:brightness-90 active:scale-95 transition-all flex items-center justify-center gap-2 ring-1 ring-white/20`}
+                    className={`w-full py-2 rounded-xl ${theme.color} text-white font-bold shadow-md hover:brightness-90 active:scale-95 tap flex items-center justify-center gap-2 ring-1 ring-white/20`}
                 >
                     <span>OK</span>
                     <CheckIcon className="w-4 h-4 stroke-[3]" />

@@ -268,7 +268,7 @@ export default function CatalogModule({
           </button>
           <button
             onClick={() => { playSound('click'); startListening(); }}
-            className={`p-2 rounded-full transition-all shadow-sm border ${isListening ? `${theme.color} text-white scale-110 border-transparent animate-pulse` : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'}`}
+            className={`p-2 rounded-full tap shadow-sm border ${isListening ? `${theme.color} text-white scale-110 border-transparent animate-pulse` : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'}`}
           >
             <MicrophoneIcon className="w-5 h-5" />
           </button>
@@ -281,7 +281,7 @@ export default function CatalogModule({
     <div className="relative" ref={categoryDropdownRef}>
       <button
         onClick={() => { playSound('click'); setIsCategoryDropdownOpen(!isCategoryDropdownOpen); }}
-        className="w-full flex items-center justify-between py-1 px-1 transition-all group"
+        className="w-full flex items-center justify-between py-1 px-1 tap group"
       >
         <div className="flex items-baseline gap-1.5 overflow-hidden">
           <span className="text-3xl font-extrabold text-white tracking-tight drop-shadow-sm truncate">
@@ -300,7 +300,7 @@ export default function CatalogModule({
               <button
                 key={c.name}
                 onClick={() => { handleCategoryChange(c.name); setIsCategoryDropdownOpen(false); }}
-                className={`w-full px-5 py-3 flex items-center justify-between text-left border-b border-gray-50 last:border-0 transition-all ${
+                className={`w-full px-5 py-3 flex items-center justify-between text-left border-b border-gray-50 last:border-0 tap ${
                   isPhrases ? 'bg-gray-900 text-white hover:bg-gray-800'
                   : isSelected ? `bg-gray-100 ${theme.textColor}`
                   : 'hover:bg-gray-50'
@@ -331,7 +331,7 @@ export default function CatalogModule({
               <button
                 key={sub}
                 onClick={() => handleSubCategoryClick(sub, index)}
-                className={`relative px-4 py-2.5 rounded-t-xl text-sm font-medium transition-all duration-300 whitespace-nowrap flex-shrink-0 mb-0 border-t border-l border-r ${
+                className={`relative px-4 py-2.5 rounded-t-xl text-sm font-medium tap whitespace-nowrap flex-shrink-0 mb-0 border-t border-l border-r ${
                   isActive
                     ? `bg-slate-50 ${theme.textColor} font-bold shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-20 scale-105 -translate-y-0.5 border-white pb-3`
                     : `${folderColor} opacity-95 hover:opacity-100 hover:scale-100 scale-95 translate-y-0.5 z-0 border-white/20 shadow-inner`

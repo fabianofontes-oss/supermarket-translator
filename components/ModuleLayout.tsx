@@ -90,7 +90,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
 
       {/* Header with Gradient and Premium Feel */}
       <header
-        className={`flex-shrink-0 relative text-white shadow-lg z-30 transition-all duration-300 flex flex-col ${hasTabs ? '' : 'rounded-b-3xl'}`}
+        className={`flex-shrink-0 relative text-white shadow-lg z-30 tap flex flex-col ${hasTabs ? '' : 'rounded-b-3xl'}`}
         style={{ background: `linear-gradient(to bottom, ${theme.hex}, ${theme.hex}e6)` }}
       >
 
@@ -120,7 +120,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
             <div className="flex-shrink-0 z-20">
                 <button
                     onClick={handleToggleSearch}
-                    className={`p-2 rounded-full transition-all active:scale-95 ${isSearchActive ? 'bg-white text-current shadow-lg' : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'}`}
+                    className={`p-2 rounded-full tap active:scale-95 ${isSearchActive ? 'bg-white text-current shadow-lg' : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'}`}
                     style={{ color: isSearchActive ? theme.hex : 'white' }}
                 >
                     <SearchIcon className="w-5 h-5" />
@@ -129,7 +129,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
             </div>
 
             {/* Search Bar Area */}
-            <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isSearchActive ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className={`overflow-hidden transition-[max-height,opacity] duration-200 ${isSearchActive ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'}`} style={{ transitionTimingFunction: 'var(--ease-out)' }}>
             {searchBarSlot}
             </div>
 
@@ -164,11 +164,14 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
 
       {/* Sliding Panel */}
       <div
-        className={`absolute inset-x-0 bottom-0 bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-40 transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col overflow-hidden border-t border-gray-100 max-w-7xl mx-auto w-full left-0 right-0`}
+        className={`absolute inset-x-0 bottom-0 bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-40 flex flex-col overflow-hidden border-t border-gray-100 max-w-7xl mx-auto w-full left-0 right-0`}
         style={{
             top: '9rem',
             bottom: '0',
-            transform: isPanelOpen ? 'translateY(0)' : 'translateY(100%)'
+            transform: isPanelOpen ? 'translateY(0)' : 'translateY(100%)',
+            // A saída é mais rápida que a entrada: o sistema responde depressa
+            // mesmo quando a decisão do usuário foi lenta.
+            transition: `transform ${isPanelOpen ? 450 : 250}ms var(--ease-drawer)`,
         }}
       >
           {/* Panel Header Area */}
@@ -205,11 +208,11 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
 
       {/* Navigation Bar */}
       <nav className={`absolute bottom-0 w-full ${theme.color} z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.15)]`}>
-        <div className="max-w-7xl mx-auto grid grid-cols-3 h-24 items-end pb-4 transition-all duration-300">
+        <div className="max-w-7xl mx-auto grid grid-cols-3 h-24 items-end pb-4 tap">
            {/* Favorites Tab - Added Toggle Logic */}
            <button
               onClick={() => handleTabChange(activeTab === 'favorites' ? 'home' : 'favorites')}
-              className={`flex flex-col justify-end items-center w-full transition-all duration-300 cursor-pointer relative overflow-hidden group ${
+              className={`flex flex-col justify-end items-center w-full tap cursor-pointer relative overflow-hidden group ${
                   activeTab === 'favorites'
                   ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10'
                   : 'h-20 pb-6 translate-y-2 opacity-80 hover:opacity-100'
@@ -230,7 +233,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
            <div className="relative h-full w-full flex justify-center pointer-events-none">
                 <button
                     onClick={handleOpenLanguage}
-                    className={`w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform transition-all duration-300 hover:scale-105 cursor-pointer absolute bottom-10 z-50 pointer-events-auto shadow-xl`}
+                    className={`w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform tap hover:scale-105 cursor-pointer absolute bottom-10 z-50 pointer-events-auto shadow-xl`}
                     style={{ borderColor: theme.hex }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full z-30 pointer-events-none"></div>
@@ -247,7 +250,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
            {/* Shopping List Tab - Added Toggle Logic */}
            <button
               onClick={() => handleTabChange(activeTab === 'list' ? 'home' : 'list')}
-              className={`flex flex-col justify-end items-center w-full transition-all duration-300 cursor-pointer relative overflow-hidden group ${
+              className={`flex flex-col justify-end items-center w-full tap cursor-pointer relative overflow-hidden group ${
                   activeTab === 'list'
                   ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10'
                   : 'h-20 pb-6 translate-y-2 opacity-80 hover:opacity-100'

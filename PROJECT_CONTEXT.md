@@ -137,6 +137,20 @@ Ao reiniciar o chat, peça para:
 *   "Jūs" formal conjuga na 2ª pessoa do plural, como o francês.
 *   Números flexionam o substantivo contado (1 euras, 2-9 eurai, 10+ eurų) via `ltPlural`. Tamanho de roupa usa algarismo, porque declinar o ordinal seria frágil.
 
+### Polimento de interface (critérios do Emil Kowalski)
+*   Tokens de easing em `index.css`: `--ease-out`, `--ease-in-out`, `--ease-drawer`. As curvas nativas do CSS são fracas demais.
+*   Classe `.tap` substituiu `transition-all` em 34 lugares: propriedades explícitas e 150ms, que é a faixa de retorno de toque. `all` animava sombra e borda, que forçam repintura.
+*   **Bug corrigido:** a curva da gaveta estava escrita como classe Tailwind (`cubic-bezier(...)`) e não compilava. Agora vai em `style`.
+*   Saída da gaveta (250ms) é mais rápida que a entrada (450ms).
+*   `future.hoverOnlyWhenSupported` no Tailwind: uma linha põe todo `hover:` sob `@media (hover: hover)`. Sem isso o hover fica grudado depois do toque no celular.
+*   `prefers-reduced-motion` mantém opacidade e cor, tira o deslocamento. `--scene-duration` cai para 1ms.
+*   Ponteiros do relógio giram um `<g>` em vez de animar `x2`/`y2`: atributo geométrico de SVG não vai para a GPU.
+*   Cascata no hub só nos primeiros 800ms de vida do app. Voltar ao hub é navegação repetida e não deve animar.
+
+### Relógio: 24h e AM/PM
+*   Na Espanha se escreve 24h e se fala 12h mais o período. O módulo mostra os dois lados: mostrador de 1 a 12, relógio digital ao lado e seletor de período (madrugada, mañana, tarde, noche) que entra na frase.
+*   O formato digital começa no do país de destino (`uses12hClock`: EUA e Reino Unido usam AM/PM) e tem seletor para trocar.
+
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.351 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

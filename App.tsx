@@ -100,6 +100,15 @@ export default function App() {
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
 
+  // Cascata só nos primeiros instantes de vida do app. Voltar ao hub é
+  // navegação repetida, e o que se repete muito não deve animar.
+  const [introDone, setIntroDone] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIntroDone(true), 800);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const stagger = !introDone;
+
   // Estado compartilhado dos módulos de catálogo
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -261,7 +270,7 @@ export default function App() {
         return <PronounsModule {...commonProps} />;
       case 'sizes':
         return <SizesModule {...commonProps} />;
-      default:
+      default: {
         return (
           <div className="min-h-screen bg-gray-50 flex flex-col">
             <header className="bg-white shadow-sm pt-12 pb-6 px-6 sticky top-0 z-10">
@@ -281,16 +290,17 @@ export default function App() {
 
             <main className="flex-1 p-6 overflow-y-auto">
               <div className="grid grid-cols-2 gap-4 mb-20">
-                {ACTIVE_MODULES.map((mod) => {
+                {ACTIVE_MODULES.map((mod, i) => {
                   const blocked = !!mod.needsCatalog && !!nativeCountry.originOnly;
                   return (
                     <button
                       key={mod.key}
                       disabled={blocked}
+                      style={stagger ? { animationDelay: `${i * 40}ms` } : undefined}
                       onClick={() => { playSound('click'); setCurrentModule(mod.key); }}
-                      className={blocked
+                      className={`${blocked
                         ? 'bg-gray-50 p-5 rounded-2xl border border-gray-100 flex flex-col items-center gap-3 opacity-60'
-                        : 'bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center gap-3 hover:shadow-md transition-all active:scale-95'}
+                        : 'bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center gap-3 hover:shadow-md tap active:scale-95'} ${stagger ? 'animate-rise-in' : ''}`}
                     >
                       <div className={`w-14 h-14 rounded-full flex items-center justify-center ${mod.iconClass} ${blocked ? 'grayscale' : ''}`}>
                         <mod.icon className="w-7 h-7" />
@@ -317,6 +327,7 @@ export default function App() {
             </main>
           </div>
         );
+      }
     }
   };
 
@@ -339,7 +350,7 @@ export default function App() {
 
       {showInstallModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl transform transition-all animate-slide-up">
+          <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl transform tap animate-slide-up">
             <div className="flex justify-between items-start mb-4">
               <div className="p-3 bg-red-100 rounded-xl">
                 <ShoppingBagIconSolid className="w-8 h-8 text-red-600" />

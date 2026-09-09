@@ -249,6 +249,66 @@ export const buildTime = (lang: LangCode, h: number, m: number): string => {
 };
 
 // ---------------------------------------------------------------------------
+// PERÍODO DO DIA
+// Na Espanha se escreve em 24 horas (placa, bilhete, horário) mas se fala em
+// 12 horas mais o período: "las nueve de la noche", nunca "las veintiuna".
+// ---------------------------------------------------------------------------
+export interface DayPeriod { key: string; labels: Text; phrases: Text }
+
+export const DAY_PERIODS: DayPeriod[] = [
+  {
+    key: 'madrugada',
+    labels:  { es: 'madrugada', pt: 'madrugada', en: 'night', fr: 'nuit', it: 'notte', uk: 'ніч', ar: 'فجر', lt: 'naktis' },
+    phrases: { es: 'de la madrugada', pt: 'da madrugada', en: 'at night', fr: 'du matin', it: 'di notte', uk: 'ночі', ar: 'فجرًا', lt: 'nakties' },
+  },
+  {
+    key: 'manana',
+    labels:  { es: 'mañana', pt: 'manhã', en: 'morning', fr: 'matin', it: 'mattina', uk: 'ранок', ar: 'صباح', lt: 'rytas' },
+    phrases: { es: 'de la mañana', pt: 'da manhã', en: 'in the morning', fr: 'du matin', it: 'di mattina', uk: 'ранку', ar: 'صباحًا', lt: 'ryto' },
+  },
+  {
+    key: 'tarde',
+    labels:  { es: 'tarde', pt: 'tarde', en: 'afternoon', fr: 'après-midi', it: 'pomeriggio', uk: 'день', ar: 'بعد الظهر', lt: 'diena' },
+    phrases: { es: 'de la tarde', pt: 'da tarde', en: 'in the afternoon', fr: "de l'après-midi", it: 'di pomeriggio', uk: 'дня', ar: 'بعد الظهر', lt: 'dienos' },
+  },
+  {
+    key: 'noche',
+    labels:  { es: 'noche', pt: 'noite', en: 'evening', fr: 'soir', it: 'sera', uk: 'вечір', ar: 'مساء', lt: 'vakaras' },
+    phrases: { es: 'de la noche', pt: 'da noite', en: 'in the evening', fr: 'du soir', it: 'di sera', uk: 'вечора', ar: 'مساءً', lt: 'vakaro' },
+  },
+];
+
+/** Converte hora de 1 a 12 mais período no relógio de 24 horas que aparece escrito. */
+export const to24h = (h12: number, periodKey: string): number => {
+  switch (periodKey) {
+    case 'madrugada': return h12 === 12 ? 0 : h12;
+    case 'manana':    return h12;
+    case 'tarde':     return h12 === 12 ? 12 : h12 + 12;
+    default:          return h12 === 12 ? 0 : h12 + 12;
+  }
+};
+
+/**
+ * Estados Unidos e Reino Unido escrevem 8:45 PM; o resto escreve 20:45.
+ * É o formato que a pessoa vai ver na placa, no bilhete e no celular.
+ */
+export const uses12hClock = (countryCode: string): boolean =>
+  countryCode === 'us' || countryCode === 'gb';
+
+export const formatClockDisplay = (h12: number, m: number, periodKey: string, twelve: boolean): string => {
+  const mm = String(m).padStart(2, '0');
+  if (twelve) {
+    const h24 = to24h(h12, periodKey);
+    return `${h12}:${mm} ${h24 < 12 ? 'AM' : 'PM'}`;
+  }
+  return `${String(to24h(h12, periodKey)).padStart(2, '0')}:${mm}`;
+};
+
+/** Acrescenta o período à frase: "Son las ocho menos cuarto de la tarde." */
+export const withPeriod = (sentence: string, periodPhrase: string): string =>
+  sentence.replace(/[.．]$/, ` ${periodPhrase}.`);
+
+// ---------------------------------------------------------------------------
 // PREÇO (em centavos de euro)
 // ---------------------------------------------------------------------------
 export const buildPrice = (lang: LangCode, totalCents: number): string => {

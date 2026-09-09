@@ -71,7 +71,7 @@ export default function BodyModule({
   const partsDimmed = !symptom.local;
 
   const chip = (active: boolean, dim = false) =>
-    `rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95 border ${
+    `rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${
       active ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
     } ${dim ? 'opacity-45' : ''}`;
 
@@ -125,7 +125,7 @@ export default function BodyModule({
                       fill={active ? theme.hex : 'white'}
                       stroke={active ? 'white' : '#94a3b8'}
                       strokeWidth={active ? 3 : 2}
-                      style={{ transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)' }}
+                      style={{ transition: 'r var(--scene-duration) var(--ease-out), fill var(--scene-duration) var(--ease-out), stroke-width var(--scene-duration) var(--ease-out)' }}
                     />
                   </g>
                 );
@@ -153,7 +153,7 @@ export default function BodyModule({
               {LOCAL_SYMPTOMS.map((s) => {
                 const active = s.key === symptom.key;
                 return (
-                  <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 transition-all active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}>
+                  <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}>
                     <span className="text-xl leading-none">{s.emoji}</span>
                     <span className="text-[11px] font-bold leading-tight text-center" dir="auto">{s.labels[target]}</span>
                     {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white/75' : 'text-gray-400'}`} dir="auto">{s.labels[native]}</span>}
@@ -183,7 +183,7 @@ export default function BodyModule({
               {GENERAL_SYMPTOMS.map((s) => {
                 const active = s.key === symptom.key;
                 return (
-                  <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 transition-all active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}>
+                  <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}>
                     <span className="text-xl leading-none">{s.emoji}</span>
                     <span className="text-[11px] font-bold leading-tight text-center" dir="auto">{s.labels[target]}</span>
                     {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white/75' : 'text-gray-400'}`} dir="auto">{s.labels[native]}</span>}

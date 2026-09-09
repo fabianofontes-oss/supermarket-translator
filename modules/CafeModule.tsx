@@ -160,7 +160,7 @@ export default function CafeModule({
                   <button
                     key={d.key}
                     onClick={() => { playSound('click'); setDrink(d); }}
-                    className={`rounded-2xl border p-2 transition-all active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}
+                    className={`rounded-2xl border p-2 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}
                   >
                     <span className="block text-xs font-bold leading-tight" dir="auto">{d.names[target]}</span>
                     {showNative && <span className={`block text-[10px] leading-tight mt-0.5 ${active ? 'text-white/75' : 'text-gray-400'}`} dir="auto">{d.names[native]}</span>}
@@ -180,7 +180,7 @@ export default function CafeModule({
                   <button
                     key={m.key}
                     onClick={() => toggleMod(m)}
-                    className={`rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95 border ${active ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100'}`}
+                    className={`rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${active ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100'}`}
                   >
                     <span dir="auto">{m.labels[target]}</span>
                     {showNative && <span className={`block text-[10px] font-medium ${active ? 'text-white/70' : 'text-gray-400'}`} dir="auto">{m.labels[native]}</span>}

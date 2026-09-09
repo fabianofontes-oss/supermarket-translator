@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { Country } from '../types';
 import { HomeIcon, SpeakerIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
@@ -15,6 +15,10 @@ import {
   MONTHS,
   NUM_QUESTIONS,
   PRICE_PRESETS,
+  DAY_PERIODS,
+  uses12hClock,
+  formatClockDisplay,
+  withPeriod,
 } from './numbers/data/numbersData';
 
 interface NumbersModuleProps {
@@ -58,6 +62,11 @@ export default function NumbersModule({
   const [tab, setTab] = useState<Tab>('time');
   const [hour, setHour] = useState(3);
   const [minute, setMinute] = useState(30);
+  // Na Espanha se escreve 24h e se fala 12h + período. Guardamos os dois.
+  const [periodKey, setPeriodKey] = useState('tarde');
+  // O formato começa no do país de destino, mas a pessoa pode trocar.
+  const [twelveHour, setTwelveHour] = useState(() => uses12hClock(targetCountry.code));
+  useEffect(() => setTwelveHour(uses12hClock(targetCountry.code)), [targetCountry.code]);
   const [cents, setCents] = useState(420);
   const now = new Date();
   const [day, setDay] = useState(now.getDate());
@@ -69,26 +78,29 @@ export default function NumbersModule({
   const plainInt = Number(plainIntStr || 0);
   const hasComma = plainStr.includes(',');
 
+  const period = useMemo(() => DAY_PERIODS.find((p) => p.key === periodKey) ?? DAY_PERIODS[1], [periodKey]);
+  const clockDisplay = formatClockDisplay(hour, minute, periodKey, twelveHour);
+
   const sentence = useMemo(() => {
     switch (tab) {
-      case 'time': return buildTime(target, hour, minute);
+      case 'time': return withPeriod(buildTime(target, hour, minute), period.phrases[target]);
       case 'price': return cap(buildPrice(target, cents));
       case 'date': return buildDate(target, day, month);
       default: return cap(buildDecimal(target, plainInt, plainDecStr));
     }
-  }, [tab, target, hour, minute, cents, day, month, plainInt, plainDecStr]);
+  }, [tab, target, hour, minute, cents, day, month, plainInt, plainDecStr, period]);
 
   // Forma curta do preço, a que se ouve no caixa.
   const shortPrice = useMemo(() => (tab === 'price' ? buildPriceShort(target, cents) : null), [tab, target, cents]);
 
   const sentenceNative = useMemo(() => {
     switch (tab) {
-      case 'time': return buildTime(native, hour, minute);
+      case 'time': return withPeriod(buildTime(native, hour, minute), period.phrases[native]);
       case 'price': return cap(buildPrice(native, cents));
       case 'date': return buildDate(native, day, month);
       default: return cap(buildDecimal(native, plainInt, plainDecStr));
     }
-  }, [tab, native, hour, minute, cents, day, month, plainInt, plainDecStr]);
+  }, [tab, native, hour, minute, cents, day, month, plainInt, plainDecStr, period]);
 
   const speak = (text: string) => {
     playSound('click');
@@ -140,7 +152,7 @@ export default function NumbersModule({
   };
 
   const chip = (active: boolean) =>
-    `rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95 border ${
+    `rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${
       active ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
     }`;
 
@@ -174,7 +186,7 @@ export default function NumbersModule({
               <button
                 key={tb.key}
                 onClick={() => { playSound('page-turn'); setTab(tb.key); }}
-                className={`rounded-2xl border p-2 flex flex-col items-center gap-1 transition-all active:scale-95 ${
+                className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
                   tab === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-600 border-gray-100'
                 }`}
               >
@@ -201,10 +213,35 @@ export default function NumbersModule({
                   const a = (m * 6 - 90) * Math.PI / 180;
                   return <circle key={m} cx={100 + Math.cos(a) * 88} cy={100 + Math.sin(a) * 88} r={m === minute ? 4 : 2} fill={m === minute ? theme.hex : '#cbd5e1'} />;
                 })}
-                <line x1="100" y1="100" x2={100 + Math.cos((hourAngle - 90) * Math.PI / 180) * 42} y2={100 + Math.sin((hourAngle - 90) * Math.PI / 180) * 42} stroke={theme.hex} strokeWidth="7" strokeLinecap="round" style={{ transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)' }} />
-                <line x1="100" y1="100" x2={100 + Math.cos((minAngle - 90) * Math.PI / 180) * 66} y2={100 + Math.sin((minAngle - 90) * Math.PI / 180) * 66} stroke="#475569" strokeWidth="4" strokeLinecap="round" style={{ transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)' }} />
+                {/* Ponteiros giram como grupo: transform vai para a GPU, x2/y2 não. */}
+                <g style={{ transform: `rotate(${hourAngle}deg)`, transformBox: 'view-box', transformOrigin: '100px 100px', transition: 'transform var(--scene-duration) var(--ease-out)' }}>
+                  <line x1="100" y1="100" x2="100" y2="58" stroke={theme.hex} strokeWidth="7" strokeLinecap="round" />
+                </g>
+                <g style={{ transform: `rotate(${minAngle}deg)`, transformBox: 'view-box', transformOrigin: '100px 100px', transition: 'transform var(--scene-duration) var(--ease-out)' }}>
+                  <line x1="100" y1="100" x2="100" y2="34" stroke="#475569" strokeWidth="4" strokeLinecap="round" />
+                </g>
                 <circle cx="100" cy="100" r="6" fill="white" stroke={theme.hex} strokeWidth="3" />
               </svg>
+            )}
+
+            {tab === 'time' && (
+              <div className="ml-4 text-center">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">{t('numOnSigns')}</p>
+                <p className="text-3xl font-extrabold tabular-nums whitespace-nowrap" style={{ color: theme.hex }}>{clockDisplay}</p>
+
+                <div className="mt-2 inline-flex rounded-lg bg-gray-100 p-0.5">
+                  {[false, true].map((twelve) => (
+                    <button
+                      key={String(twelve)}
+                      onClick={() => { playSound('toggle'); setTwelveHour(twelve); }}
+                      className={`tap rounded-md px-2 py-1 text-[10px] font-bold ${twelveHour === twelve ? 'bg-white shadow-sm' : 'text-gray-400'}`}
+                      style={twelveHour === twelve ? { color: theme.hex } : undefined}
+                    >
+                      {twelve ? 'AM/PM' : '24h'}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
 
             {tab === 'price' && (
@@ -269,6 +306,16 @@ export default function NumbersModule({
                 </div>
               </section>
               <section>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('numPeriod')}</h2>
+                <div className="flex flex-wrap gap-2">
+                  {DAY_PERIODS.map((p) => (
+                    <button key={p.key} onClick={() => { playSound('click'); setPeriodKey(p.key); }} className={chip(periodKey === p.key)}>
+                      <span dir="auto">{p.labels[target]}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+              <section>
                 <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('numMinute')}</h2>
                 <div className="grid grid-cols-6 gap-2">
                   {MINUTES.map((m) => (
@@ -314,7 +361,7 @@ export default function NumbersModule({
                 <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('numDay')}</h2>
                 <div className="grid grid-cols-7 gap-1.5">
                   {DAYS.map((d) => (
-                    <button key={d} onClick={() => { playSound('click'); setDay(d); }} className={`rounded-lg py-2 text-sm font-bold transition-all active:scale-95 border ${day === d ? `${theme.color} text-white border-transparent` : 'bg-white text-gray-700 border-gray-100'}`}>
+                    <button key={d} onClick={() => { playSound('click'); setDay(d); }} className={`rounded-lg py-2 text-sm font-bold tap active:scale-95 border ${day === d ? `${theme.color} text-white border-transparent` : 'bg-white text-gray-700 border-gray-100'}`}>
                       {d}
                     </button>
                   ))}

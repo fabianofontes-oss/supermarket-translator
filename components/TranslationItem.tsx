@@ -73,7 +73,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
     if (highlighted && itemRef.current) {
       itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
       const tempHighlightClass = 'bg-blue-100';
-      itemRef.current.classList.add(tempHighlightClass, 'transition-all', 'duration-300');
+      itemRef.current.classList.add(tempHighlightClass, 'tap', 'duration-300');
       const timer = setTimeout(() => {
         itemRef.current?.classList.remove(tempHighlightClass);
         onHighlightDone();
@@ -193,7 +193,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
   return (
     <div
       ref={itemRef}
-      className={`rounded-xl transition-all duration-300 bg-white ${
+      className={`rounded-xl tap bg-white ${
         isExpanded ? `shadow-md border-2 ${theme.textColor.replace('text', 'border')}` : 'shadow-sm'
       } ${isHighlighted ? 'bg-yellow-100' : 'bg-white'} overflow-hidden`}
     >
@@ -276,7 +276,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
 
       {/* Expandable Area */}
       <div
-        className={`transition-all duration-500 ease-in-out overflow-hidden ${
+        className={`tap ease-in-out overflow-hidden ${
           isExpanded ? 'max-h-96' : 'max-h-0'
         }`}
       >

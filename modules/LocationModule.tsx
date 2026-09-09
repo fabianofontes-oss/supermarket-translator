@@ -171,7 +171,7 @@ export default function LocationModule({
                   transform: `translate(${placement.dx}px, ${placement.dy}px) scale(${placement.scale ?? 1})`,
                   opacity: placement.opacity ?? 1,
                   zIndex: placement.z ?? 1,
-                  transition: 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease',
+                  transition: 'transform var(--scene-duration) var(--ease-out), opacity 0.4s ease',
                   filter: 'drop-shadow(0 6px 6px rgba(0,0,0,0.18))',
                 }}
               >
@@ -224,7 +224,7 @@ export default function LocationModule({
                   <button
                     key={rel.key}
                     onClick={() => pickRelation(rel)}
-                    className={`rounded-2xl border p-2 flex flex-col items-center gap-1 transition-all active:scale-95 ${
+                    className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
                       active ? `${theme.color} border-transparent text-white shadow-md` : 'bg-white border-gray-100 text-gray-700 hover:border-gray-300'
                     }`}
                   >
@@ -290,7 +290,7 @@ const ObjectRow: React.FC<ObjectRowProps> = ({ title, selected, onPick, target, 
           <button
             key={obj.key}
             onClick={() => onPick(obj)}
-            className={`flex-shrink-0 w-[84px] rounded-2xl border p-2 flex flex-col items-center gap-0.5 transition-all active:scale-95 ${
+            className={`flex-shrink-0 w-[84px] rounded-2xl border p-2 flex flex-col items-center gap-0.5 tap active:scale-95 ${
               active ? `${theme.color} border-transparent text-white shadow-md` : 'bg-white border-gray-100 text-gray-700'
             }`}
           >

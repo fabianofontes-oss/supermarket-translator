@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* As curvas nativas do CSS são fracas demais e tiram a intenção do movimento. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  /* Curva de gaveta do iOS, usada no painel deslizante. */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Duração das animações que explicam algo: a cena, o mapa, o relógio. */
+  --scene-duration: 550ms;
+}
+
 /* Global Styles & Animations */
 body {
   -webkit-tap-highlight-color: transparent;
@@ -18,30 +29,44 @@ body {
   scrollbar-width: none;
 }
 
+/*
+ * Botões e chips: o gesto mais repetido do app.
+ * Propriedades explícitas em vez de `all`, para não animar sombra e borda,
+ * que forçam repintura. 150ms é a faixa de retorno de toque.
+ */
+.tap {
+  transition:
+    transform 150ms var(--ease-out),
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    opacity 150ms ease;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.25s var(--ease-out) forwards;
 }
 
 /* Expand Up Animation for Flag Menu */
 @keyframes expandUp {
-  from { opacity: 0; transform: scale(0.8) translateY(20px); }
+  from { opacity: 0; transform: scale(0.95) translateY(12px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 .animate-expand-up {
-  animation: expandUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: expandUp 0.25s var(--ease-out) forwards;
 }
 
 /* Expand Down Animation for Flag Menu (Top Header) */
 @keyframes expandDown {
-  from { opacity: 0; transform: scale(0.8) translateY(-20px); }
+  from { opacity: 0; transform: scale(0.95) translateY(-12px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 .animate-expand-down {
-  animation: expandDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: expandDown 0.25s var(--ease-out) forwards;
 }
 
 @keyframes slideUp {
@@ -49,5 +74,50 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-slide-up {
-  animation: slideUp 0.3s ease-out forwards;
+  animation: slideUp 0.25s var(--ease-out) forwards;
+}
+
+/* Entrada em cascata do hub, só na primeira abertura do app. */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise-in {
+  animation: riseIn 0.3s var(--ease-out) both;
+}
+
+/*
+ * Movimento reduzido não é ausência de animação: mantemos opacidade e cor,
+ * que ajudam a entender a mudança, e tiramos o que se desloca.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --scene-duration: 1ms;
+  }
+
+  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes expandUp { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes expandDown { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes slideUp { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes riseIn { from { opacity: 0 } to { opacity: 1 } }
+
+  .animate-rise-in {
+    animation-delay: 0ms !important;
+  }
+
+  .tap {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .tap:active,
+  .active\:scale-95:active {
+    transform: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
 }

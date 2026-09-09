@@ -79,7 +79,7 @@ export default function PronounsModule({
   const note = pronoun.notes?.[showNative ? native : target];
 
   const chip = (active: boolean) =>
-    `rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95 border ${
+    `rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${
       active ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
     }`;
 
@@ -121,7 +121,7 @@ export default function PronounsModule({
                 <button
                   key={m}
                   onClick={() => { playSound('toggle'); setMood(m); }}
-                  className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition-all ${mood === m ? 'bg-white' : 'bg-white/15 text-white hover:bg-white/25'}`}
+                  className={`flex-1 rounded-lg py-1.5 text-xs font-bold tap ${mood === m ? 'bg-white' : 'bg-white/15 text-white hover:bg-white/25'}`}
                   style={mood === m ? { color: theme.hex } : undefined}
                 >
                   <span dir="auto">{MOOD_LABELS[m][showNative ? native : target]}</span>
@@ -149,7 +149,7 @@ export default function PronounsModule({
                   <button
                     key={p.key}
                     onClick={() => { playSound('click'); setPronoun(p); }}
-                    className={`rounded-2xl border p-2.5 flex items-center gap-2.5 text-left transition-all active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}
+                    className={`rounded-2xl border p-2.5 flex items-center gap-2.5 text-left tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}
                   >
                     <PeopleIcon plural={plural} active={active} hex={theme.hex} />
                     <span className="min-w-0 flex-1">

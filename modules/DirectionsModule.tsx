@@ -163,7 +163,7 @@ export default function DirectionsModule({
                 <text x={px(w.x)} y={px(w.y) - 14} textAnchor="middle" fontSize={26}>📍</text>
               )}
               {/* caminhante */}
-              <g style={{ transform: `translate(${px(w.x)}px, ${px(w.y)}px) rotate(${w.heading * 90}deg)`, transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+              <g style={{ transform: `translate(${px(w.x)}px, ${px(w.y)}px) rotate(${w.heading * 90}deg)`, transition: 'transform var(--scene-duration) var(--ease-out)' }}>
                 <circle r={11} fill={theme.hex} stroke="white" strokeWidth={3} />
                 <polygon points="0,-7 5,3 -5,3" fill="white" />
               </g>
@@ -181,7 +181,7 @@ export default function DirectionsModule({
                     key={s.key}
                     disabled={!enabled}
                     onClick={() => addStep(s)}
-                    className={`rounded-2xl border p-2 flex flex-col items-center gap-1 transition-all active:scale-95 ${
+                    className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
                       enabled ? 'bg-white border-gray-100 text-gray-700 hover:border-gray-300' : 'bg-gray-50 border-gray-100 text-gray-300 opacity-60'
                     }`}
                   >
@@ -255,7 +255,7 @@ export default function DirectionsModule({
                     </text>
                   );
                 })}
-                <g style={{ transform: `translate(60px, 60px) rotate(${compass.deg}deg)`, transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+                <g style={{ transform: `translate(60px, 60px) rotate(${compass.deg}deg)`, transition: 'transform var(--scene-duration) var(--ease-out)' }}>
                   <polygon points="0,-30 7,0 -7,0" fill={theme.hex} />
                   <polygon points="0,30 7,0 -7,0" fill="#cbd5e1" />
                   <circle r={4} fill="white" stroke={theme.hex} strokeWidth={2} />
@@ -269,7 +269,7 @@ export default function DirectionsModule({
                       <button
                         key={c.key}
                         onClick={() => { setCompassPick(i); speak(c.names[target]); }}
-                        className={`rounded-xl border px-2 py-1.5 text-left transition-all active:scale-95 ${active ? `${theme.color} border-transparent text-white` : 'bg-white border-gray-100 text-gray-700'}`}
+                        className={`rounded-xl border px-2 py-1.5 text-left tap active:scale-95 ${active ? `${theme.color} border-transparent text-white` : 'bg-white border-gray-100 text-gray-700'}`}
                       >
                         <div className="text-sm font-bold leading-tight">{c.names[target]}</div>
                         {showNative && <div className={`text-[10px] leading-tight ${active ? 'text-white/75' : 'text-gray-400'}`} dir="auto">{c.names[native]}</div>}

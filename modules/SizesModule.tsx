@@ -90,7 +90,7 @@ export default function SizesModule({
               <button
                 key={tb.key}
                 onClick={() => pickTable(tb)}
-                className={`rounded-2xl border p-2 flex flex-col items-center gap-1 transition-all active:scale-95 ${
+                className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
                   table.key === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-600 border-gray-100'
                 }`}
               >
@@ -141,7 +141,7 @@ export default function SizesModule({
                 <button
                   key={r[fromSystem] + i}
                   onClick={() => { playSound('click'); setRowIndex(i); }}
-                  className={`rounded-xl px-3 py-2 text-sm font-bold tabular-nums transition-all active:scale-95 border ${
+                  className={`rounded-xl px-3 py-2 text-sm font-bold tabular-nums tap active:scale-95 border ${
                     i === rowIndex ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100'
                   }`}
                 >
