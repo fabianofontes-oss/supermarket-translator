@@ -120,27 +120,34 @@ export default function PronounsModule({
               </button>
             </div>
 
-            {/* Quando */}
-            <div className="mt-3 pt-3 border-t border-white/20 flex gap-2">
-              {TENSES.map((tn) => (
-                <button
-                  key={tn}
-                  onClick={() => { playSound('toggle'); setTense(tn); }}
-                  className={`tap flex-1 rounded-lg py-1.5 text-xs font-bold ${tense === tn ? 'bg-white' : 'bg-white/15 text-white hover:bg-white/25'}`}
-                  style={tense === tn ? { color: theme.hex } : undefined}
-                >
-                  <span dir="auto">{TENSE_LABELS[tn][showNative ? native : target]}</span>
-                </button>
-              ))}
+            {/*
+              São duas dimensões diferentes, então recebem formas diferentes.
+              Quando: seletor único dentro de um trilho afundado.
+              Tipo de frase: botões soltos e arredondados, sem trilho.
+            */}
+            <div className="mt-3 pt-3 border-t border-white/20">
+              <div className="flex gap-1 rounded-xl bg-black/20 p-1">
+                {TENSES.map((tn) => (
+                  <button
+                    key={tn}
+                    onClick={() => { playSound('toggle'); setTense(tn); }}
+                    className={`tap flex-1 rounded-lg py-1.5 text-xs font-bold ${tense === tn ? 'bg-white shadow-sm' : 'text-white/70'}`}
+                    style={tense === tn ? { color: theme.hex } : undefined}
+                  >
+                    <span dir="auto">{TENSE_LABELS[tn][showNative ? native : target]}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Tipo de frase */}
-            <div className="mt-2 flex gap-2">
+            <div className="mt-2.5 flex gap-2">
               {MOODS.map((m) => (
                 <button
                   key={m}
                   onClick={() => { playSound('toggle'); setMood(m); }}
-                  className={`flex-1 rounded-lg py-1.5 text-xs font-bold tap ${mood === m ? 'bg-white' : 'bg-white/15 text-white hover:bg-white/25'}`}
+                  className={`tap flex-1 rounded-full py-1.5 text-xs font-bold border ${
+                    mood === m ? 'bg-white border-white shadow-sm' : 'border-white/40 text-white/85 hover:bg-white/10'
+                  }`}
                   style={mood === m ? { color: theme.hex } : undefined}
                 >
                   <span dir="auto">{MOOD_LABELS[m][showNative ? native : target]}</span>
