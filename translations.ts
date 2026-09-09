@@ -274,7 +274,7 @@ const enUS = {
   voiceMissingIOS: 'iPhone: Settings → Accessibility → Spoken Content → Voices',
   voiceMissingWindows: 'Windows: Settings → Time & language → Speech → Add voices',
   voiceMissingDismiss: 'Got it',
-  voiceDiagnosticsTitle: 'Voices on this device',
+  voiceDiagnosticsTitle: 'Where the audio comes from',
   voiceAvailableLabel: 'Voice available',
   voiceUnknownLabel: 'Checking…',
   voiceFromInternet: 'Audio from the internet',
@@ -282,6 +282,11 @@ const enUS = {
   updateAvailableBody: 'Update to get the latest fixes.',
   updateNow: 'Update',
   updateLater: 'Later',
+  voiceDeviceLabel: 'On this device',
+  voiceInternetLabel: 'Internet',
+  voiceOfflineLabel: 'No connection',
+  voiceOfflineNote: 'Without internet, only voices installed on the device can speak. The others need a connection.',
+  voiceHowToInstall: 'How to install a voice on the device',
 };
 
 const ptBR = {
@@ -559,7 +564,7 @@ const ptBR = {
   voiceMissingIOS: 'iPhone: Ajustes → Acessibilidade → Conteúdo falado → Vozes',
   voiceMissingWindows: 'Windows: Configurações → Hora e idioma → Voz → Adicionar vozes',
   voiceMissingDismiss: 'Entendi',
-  voiceDiagnosticsTitle: 'Vozes deste aparelho',
+  voiceDiagnosticsTitle: 'De onde vem o áudio',
   voiceAvailableLabel: 'Voz disponível',
   voiceUnknownLabel: 'Verificando…',
   voiceFromInternet: 'Áudio pela internet',
@@ -567,6 +572,11 @@ const ptBR = {
   updateAvailableBody: 'Atualize para receber as últimas correções.',
   updateNow: 'Atualizar',
   updateLater: 'Depois',
+  voiceDeviceLabel: 'No aparelho',
+  voiceInternetLabel: 'Internet',
+  voiceOfflineLabel: 'Sem conexão',
+  voiceOfflineNote: 'Sem internet, só sai o áudio das vozes instaladas no aparelho. As outras precisam de conexão.',
+  voiceHowToInstall: 'Como instalar uma voz no aparelho',
 };
 
 const esCL = {
@@ -844,7 +854,7 @@ const esCL = {
   voiceMissingIOS: 'iPhone: Ajustes → Accesibilidad → Contenido hablado → Voces',
   voiceMissingWindows: 'Windows: Configuración → Hora e idioma → Voz → Agregar voces',
   voiceMissingDismiss: 'Entendido',
-  voiceDiagnosticsTitle: 'Voces de este dispositivo',
+  voiceDiagnosticsTitle: 'De dónde viene el audio',
   voiceAvailableLabel: 'Voz disponible',
   voiceUnknownLabel: 'Comprobando…',
   voiceFromInternet: 'Audio por internet',
@@ -852,6 +862,11 @@ const esCL = {
   updateAvailableBody: 'Actualiza para recibir las últimas correcciones.',
   updateNow: 'Actualizar',
   updateLater: 'Después',
+  voiceDeviceLabel: 'En el dispositivo',
+  voiceInternetLabel: 'Internet',
+  voiceOfflineLabel: 'Sin conexión',
+  voiceOfflineNote: 'Sin internet, solo suenan las voces instaladas en el dispositivo. Las demás necesitan conexión.',
+  voiceHowToInstall: 'Cómo instalar una voz en el dispositivo',
 };
 
 
@@ -1130,7 +1145,7 @@ const frFR = {
   voiceMissingIOS: 'iPhone : Réglages → Accessibilité → Contenu énoncé → Voix',
   voiceMissingWindows: 'Windows : Paramètres → Heure et langue → Voix → Ajouter des voix',
   voiceMissingDismiss: "J'ai compris",
-  voiceDiagnosticsTitle: 'Voix de cet appareil',
+  voiceDiagnosticsTitle: "D'où vient l'audio",
   voiceAvailableLabel: 'Voix disponible',
   voiceUnknownLabel: 'Vérification…',
   voiceFromInternet: 'Audio par internet',
@@ -1138,6 +1153,11 @@ const frFR = {
   updateAvailableBody: 'Mettez à jour pour recevoir les dernières corrections.',
   updateNow: 'Mettre à jour',
   updateLater: 'Plus tard',
+  voiceDeviceLabel: 'Sur cet appareil',
+  voiceInternetLabel: 'Internet',
+  voiceOfflineLabel: 'Pas de connexion',
+  voiceOfflineNote: "Sans internet, seules les voix installées sur l'appareil peuvent parler. Les autres ont besoin d'une connexion.",
+  voiceHowToInstall: "Comment installer une voix sur l'appareil",
 };
 
 const itIT = {
@@ -1415,7 +1435,7 @@ const itIT = {
   voiceMissingIOS: 'iPhone: Impostazioni → Accessibilità → Contenuto pronunciato → Voci',
   voiceMissingWindows: 'Windows: Impostazioni → Data/ora e lingua → Voce → Aggiungi voci',
   voiceMissingDismiss: 'Ho capito',
-  voiceDiagnosticsTitle: 'Voci di questo dispositivo',
+  voiceDiagnosticsTitle: "Da dove viene l'audio",
   voiceAvailableLabel: 'Voce disponibile',
   voiceUnknownLabel: 'Verifica in corso…',
   voiceFromInternet: 'Audio da internet',
@@ -1423,6 +1443,11 @@ const itIT = {
   updateAvailableBody: 'Aggiorna per ricevere le ultime correzioni.',
   updateNow: 'Aggiorna',
   updateLater: 'Più tardi',
+  voiceDeviceLabel: 'Sul dispositivo',
+  voiceInternetLabel: 'Internet',
+  voiceOfflineLabel: 'Nessuna connessione',
+  voiceOfflineNote: 'Senza internet parlano solo le voci installate sul dispositivo. Le altre richiedono una connessione.',
+  voiceHowToInstall: 'Come installare una voce sul dispositivo',
 };
 
 
@@ -1701,7 +1726,7 @@ const ukUA = {
   voiceMissingIOS: 'iPhone: Налаштування → Доступність → Вимовляння вголос → Голоси',
   voiceMissingWindows: 'Windows: Параметри → Час і мова → Мовлення → Додати голоси',
   voiceMissingDismiss: 'Зрозуміло',
-  voiceDiagnosticsTitle: 'Голоси цього пристрою',
+  voiceDiagnosticsTitle: 'Звідки береться звук',
   voiceAvailableLabel: 'Голос доступний',
   voiceUnknownLabel: 'Перевірка…',
   voiceFromInternet: 'Аудіо з інтернету',
@@ -1709,6 +1734,11 @@ const ukUA = {
   updateAvailableBody: 'Оновіть, щоб отримати останні виправлення.',
   updateNow: 'Оновити',
   updateLater: 'Пізніше',
+  voiceDeviceLabel: 'На пристрої',
+  voiceInternetLabel: 'Інтернет',
+  voiceOfflineLabel: 'Немає зʼєднання',
+  voiceOfflineNote: 'Без інтернету звучать лише голоси, встановлені на пристрої. Решта потребує зʼєднання.',
+  voiceHowToInstall: 'Як встановити голос на пристрої',
 };
 
 const arMA = {
@@ -1986,7 +2016,7 @@ const arMA = {
   voiceMissingIOS: 'آيفون: الإعدادات ← تسهيلات الاستخدام ← المحتوى المنطوق ← الأصوات',
   voiceMissingWindows: 'ويندوز: الإعدادات ← الوقت واللغة ← الكلام ← إضافة أصوات',
   voiceMissingDismiss: 'فهمت',
-  voiceDiagnosticsTitle: 'أصوات هذا الجهاز',
+  voiceDiagnosticsTitle: 'من أين يأتي الصوت',
   voiceAvailableLabel: 'الصوت متوفر',
   voiceUnknownLabel: 'جارٍ التحقق…',
   voiceFromInternet: 'الصوت عبر الإنترنت',
@@ -1994,6 +2024,11 @@ const arMA = {
   updateAvailableBody: 'حدّث التطبيق للحصول على آخر الإصلاحات.',
   updateNow: 'تحديث',
   updateLater: 'لاحقًا',
+  voiceDeviceLabel: 'على الجهاز',
+  voiceInternetLabel: 'الإنترنت',
+  voiceOfflineLabel: 'لا يوجد اتصال',
+  voiceOfflineNote: 'بدون إنترنت، تعمل فقط الأصوات المثبّتة على الجهاز. أما البقية فتحتاج إلى اتصال.',
+  voiceHowToInstall: 'كيفية تثبيت صوت على الجهاز',
 };
 
 
@@ -2272,7 +2307,7 @@ const ltLT = {
   voiceMissingIOS: 'iPhone: Nustatymai → Pritaikymas neįgaliesiems → Sakytinis turinys → Balsai',
   voiceMissingWindows: 'Windows: Parametrai → Laikas ir kalba → Kalbėjimas → Pridėti balsų',
   voiceMissingDismiss: 'Supratau',
-  voiceDiagnosticsTitle: 'Šio įrenginio balsai',
+  voiceDiagnosticsTitle: 'Iš kur garsas',
   voiceAvailableLabel: 'Balsas pasiekiamas',
   voiceUnknownLabel: 'Tikrinama…',
   voiceFromInternet: 'Garsas iš interneto',
@@ -2280,6 +2315,11 @@ const ltLT = {
   updateAvailableBody: 'Atnaujinkite, kad gautumėte naujausius pataisymus.',
   updateNow: 'Atnaujinti',
   updateLater: 'Vėliau',
+  voiceDeviceLabel: 'Įrenginyje',
+  voiceInternetLabel: 'Internetas',
+  voiceOfflineLabel: 'Nėra ryšio',
+  voiceOfflineNote: 'Be interneto kalba tik įrenginyje įdiegti balsai. Kitiems reikia ryšio.',
+  voiceHowToInstall: 'Kaip įdiegti balsą įrenginyje',
 };
 
 /**

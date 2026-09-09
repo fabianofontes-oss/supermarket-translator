@@ -186,36 +186,60 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
           <ul id={diagnosticsId} hidden={!showDiagnostics} className="px-4 pb-3 space-y-2">
             {options.filter((opt) => !opt.originOnly).map((opt) => {
               // Mesma função do botão de áudio: uma regra só, nunca duas.
-              // Só conta como disponível a voz da REGIÃO exata — es-US não
+              // Só conta como voz do aparelho a da REGIÃO exata — es-US não
               // serve para a Espanha, pt-PT não serve para o Brasil.
               const lookup = pickVoice(voices, opt.lang);
 
-              // Faltar voz local não impede o áudio: com rede ele vem de fora,
-              // com o sotaque certo. Avisar seria alarme falso.
-              const estado =
-                lookup.status === 'ok' ? 'local'
-                : online ? 'rede'
-                : lookup.status === 'missing' ? 'faltando'
-                : 'verificando';
-
-              const label = { local: t('voiceAvailableLabel'), rede: t('voiceFromInternet'), faltando: t('voiceMissingLabel'), verificando: t('voiceUnknownLabel') }[estado];
-              const mark = { local: '✅', rede: '🌐', faltando: '⚠️', verificando: '…' }[estado];
+              /**
+               * Duas fontes independentes, mostradas separadas. Um idioma pode
+               * estar instalado no aparelho E disponível na rede, e juntar as
+               * duas coisas numa linha só escondia que o áudio funciona: o
+               * painel parecia dizer que quase nada tinha voz.
+               */
+              const noAparelho = lookup.status === 'ok';
+              const aindaLendo = lookup.status === 'unknown';
 
               return (
-                <li key={opt.code} className="text-[11px] leading-tight">
-                  <span className="flex items-center gap-1.5 text-gray-700">
-                    <span aria-hidden="true">{mark}</span>
+                <li key={opt.code} className="text-[11px] leading-tight space-y-0.5">
+                  <span className="flex items-baseline gap-1.5 text-gray-700">
                     <span className="font-medium" dir="auto">{opt.name}</span>
                     <span className="font-mono text-gray-500">{opt.lang}</span>
                   </span>
-                  <span className="block pl-5 text-gray-500" dir="auto">
-                    {label}
-                    {lookup.status === 'ok' && <> — {lookup.voice.name}</>}
+
+                  <span className="flex items-start gap-1 text-gray-500">
+                    <span aria-hidden="true">{noAparelho ? '✅' : aindaLendo ? '…' : '—'}</span>
+                    <span dir="auto">
+                      {t('voiceDeviceLabel')}:{' '}
+                      {noAparelho ? lookup.voice.name : aindaLendo ? t('voiceUnknownLabel') : t('voiceMissingLabel')}
+                    </span>
+                  </span>
+
+                  <span className="flex items-start gap-1 text-gray-500">
+                    <span aria-hidden="true">{online ? '✅' : '—'}</span>
+                    <span dir="auto">
+                      {t('voiceInternetLabel')}:{' '}
+                      {online ? t('voiceFromInternet') : t('voiceOfflineLabel')}
+                    </span>
                   </span>
                 </li>
               );
             })}
           </ul>
+
+          {/*
+            A explicação mora aqui e não só no aviso de falha: quem abre este
+            painel está justamente tentando entender por que umas línguas
+            falam e outras não. Descobrir isso no momento do erro é tarde.
+          */}
+          <div hidden={!showDiagnostics} className="px-4 pb-4 pt-1 border-t border-gray-100 space-y-2">
+            <p className="text-[11px] leading-snug text-gray-600" dir="auto">{t('voiceOfflineNote')}</p>
+            <p className="text-[10px] uppercase tracking-wider text-gray-500" dir="auto">{t('voiceHowToInstall')}</p>
+            <ul className="space-y-1.5 text-[11px] leading-snug text-gray-500">
+              {[t('voiceMissingAndroid'), t('voiceMissingIOS'), t('voiceMissingWindows')].map((passo) => (
+                <li key={passo} dir="auto">{passo}</li>
+              ))}
+            </ul>
+          </div>
         </div>
 
       </div>
