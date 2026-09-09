@@ -278,14 +278,15 @@ export const DAY_PERIODS: DayPeriod[] = [
   },
 ];
 
-/** Converte hora de 1 a 12 mais período no relógio de 24 horas que aparece escrito. */
-export const to24h = (h12: number, periodKey: string): number => {
-  switch (periodKey) {
-    case 'madrugada': return h12 === 12 ? 0 : h12;
-    case 'manana':    return h12;
-    case 'tarde':     return h12 === 12 ? 12 : h12 + 12;
-    default:          return h12 === 12 ? 0 : h12 + 12;
-  }
+/**
+ * O período é deduzido da hora de 24, não escolhido. Assim não existe
+ * combinação impossível: às 22 o app diz "de la noche" e ponto.
+ */
+export const periodFromHour24 = (h24: number): string => {
+  if (h24 <= 5) return 'madrugada';
+  if (h24 <= 11) return 'manana';
+  if (h24 <= 19) return 'tarde';
+  return 'noche';
 };
 
 /**
@@ -295,13 +296,10 @@ export const to24h = (h12: number, periodKey: string): number => {
 export const uses12hClock = (countryCode: string): boolean =>
   countryCode === 'us' || countryCode === 'gb';
 
-export const formatClockDisplay = (h12: number, m: number, periodKey: string, twelve: boolean): string => {
+export const formatClockDisplay = (h24: number, m: number, twelve: boolean): string => {
   const mm = String(m).padStart(2, '0');
-  if (twelve) {
-    const h24 = to24h(h12, periodKey);
-    return `${h12}:${mm} ${h24 < 12 ? 'AM' : 'PM'}`;
-  }
-  return `${String(to24h(h12, periodKey)).padStart(2, '0')}:${mm}`;
+  if (twelve) return `${h24 % 12 === 0 ? 12 : h24 % 12}:${mm} ${h24 < 12 ? 'AM' : 'PM'}`;
+  return `${String(h24).padStart(2, '0')}:${mm}`;
 };
 
 /** Acrescenta o período à frase: "Son las ocho menos cuarto de la tarde." */

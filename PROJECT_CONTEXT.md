@@ -148,8 +148,10 @@ Ao reiniciar o chat, peça para:
 *   Cascata no hub só nos primeiros 800ms de vida do app. Voltar ao hub é navegação repetida e não deve animar.
 
 ### Relógio: 24h e AM/PM
-*   Na Espanha se escreve 24h e se fala 12h mais o período. O módulo mostra os dois lados: mostrador de 1 a 12, relógio digital ao lado e seletor de período (madrugada, mañana, tarde, noche) que entra na frase.
-*   O formato digital começa no do país de destino (`uses12hClock`: EUA e Reino Unido usam AM/PM) e tem seletor para trocar.
+*   Na Espanha se escreve 24h e se fala 12h mais o período. O módulo mostra os dois lados ao mesmo tempo.
+*   **A hora é escolhida de 00 a 23**, e o período (madrugada, mañana, tarde, noche) é **deduzido** por `periodFromHour24`. Escolher o período era um erro: permitia "las diez de la madrugada", que não existe. Deduzindo, a combinação errada deixa de ser possível.
+*   O mostrador continua de 1 a 12 (`DIAL`), porque é assim que se fala. A lista de botões (`HOURS`) é separada, de 00 a 23.
+*   O digital ao lado começa no formato do país de destino (`uses12hClock`: EUA e Reino Unido usam AM/PM) e tem seletor para trocar.
 
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.351 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.

@@ -16,6 +16,7 @@ import {
   NUM_QUESTIONS,
   PRICE_PRESETS,
   DAY_PERIODS,
+  periodFromHour24,
   uses12hClock,
   formatClockDisplay,
   withPeriod,
@@ -39,7 +40,10 @@ const TABS: { key: Tab; labelKey: string; icon: string }[] = [
   { key: 'number', labelKey: 'numNumber', icon: '🔢' },
 ];
 
-const HOURS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+// Horas de 00 a 23: é o que está escrito em placa, bilhete e horário.
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
+// O mostrador continua sendo de 12: é assim que se fala.
+const DIAL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
@@ -60,10 +64,8 @@ export default function NumbersModule({
   const showNative = native !== target;
 
   const [tab, setTab] = useState<Tab>('time');
-  const [hour, setHour] = useState(3);
+  const [hour, setHour] = useState(15);
   const [minute, setMinute] = useState(30);
-  // Na Espanha se escreve 24h e se fala 12h + período. Guardamos os dois.
-  const [periodKey, setPeriodKey] = useState('tarde');
   // O formato começa no do país de destino, mas a pessoa pode trocar.
   const [twelveHour, setTwelveHour] = useState(() => uses12hClock(targetCountry.code));
   useEffect(() => setTwelveHour(uses12hClock(targetCountry.code)), [targetCountry.code]);
@@ -78,8 +80,12 @@ export default function NumbersModule({
   const plainInt = Number(plainIntStr || 0);
   const hasComma = plainStr.includes(',');
 
-  const period = useMemo(() => DAY_PERIODS.find((p) => p.key === periodKey) ?? DAY_PERIODS[1], [periodKey]);
-  const clockDisplay = formatClockDisplay(hour, minute, periodKey, twelveHour);
+  // O período sai da hora, então nunca aparece "las diez de la madrugada".
+  const period = useMemo(
+    () => DAY_PERIODS.find((p) => p.key === periodFromHour24(hour))!,
+    [hour],
+  );
+  const clockDisplay = formatClockDisplay(hour, minute, twelveHour);
 
   const sentence = useMemo(() => {
     switch (tab) {
@@ -201,10 +207,10 @@ export default function NumbersModule({
             {tab === 'time' && (
               <svg viewBox="0 0 200 200" className="w-44 h-44">
                 <circle cx="100" cy="100" r="92" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="4" />
-                {HOURS.map((n) => {
+                {DIAL.map((n) => {
                   const a = (n * 30 - 90) * Math.PI / 180;
                   return (
-                    <text key={n} x={100 + Math.cos(a) * 74} y={100 + Math.sin(a) * 74 + 6} textAnchor="middle" fontSize="16" fontWeight="700" fill={n === hour ? theme.hex : '#94a3b8'}>
+                    <text key={n} x={100 + Math.cos(a) * 74} y={100 + Math.sin(a) * 74 + 6} textAnchor="middle" fontSize="16" fontWeight="700" fill={n === (hour % 12 || 12) ? theme.hex : '#94a3b8'}>
                       {n}
                     </text>
                   );
@@ -301,16 +307,8 @@ export default function NumbersModule({
                 <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('numHour')}</h2>
                 <div className="grid grid-cols-6 gap-2">
                   {HOURS.map((h) => (
-                    <button key={h} onClick={() => { playSound('click'); setHour(h); }} className={chip(hour === h)}>{h}</button>
-                  ))}
-                </div>
-              </section>
-              <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">{t('numPeriod')}</h2>
-                <div className="flex flex-wrap gap-2">
-                  {DAY_PERIODS.map((p) => (
-                    <button key={p.key} onClick={() => { playSound('click'); setPeriodKey(p.key); }} className={chip(periodKey === p.key)}>
-                      <span dir="auto">{p.labels[target]}</span>
+                    <button key={h} onClick={() => { playSound('click'); setHour(h); }} className={`${chip(hour === h)} tabular-nums`}>
+                      {String(h).padStart(2, '0')}
                     </button>
                   ))}
                 </div>
