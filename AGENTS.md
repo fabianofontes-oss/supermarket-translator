@@ -513,29 +513,56 @@ cabeçalhos usam `background-image`, não `background-color`; um script que só 
 A base da farmácia tem **582 itens** e foi escrita por IA. **Nenhum farmacêutico
 revisou.** Não é um detalhe de qualidade, é o maior risco do produto.
 
-Um exemplo concreto do que isso significa. A dipirona está mapeada assim:
+### O que o módulo se propõe a fazer
 
-- Reino Unido e Estados Unidos: `PROIBIDO (Use Paracetamol)` — correto, metamizol é
-  proibido nesses países.
-- Espanha: `Metamizol (Nolotil)` — o nome está certo, mas **o Nolotil é vendido só com
-  receita na Espanha**, e o app não distingue venda livre de receita em lugar nenhum.
+**Dar o nome, não autorizar a compra.** Quem chega numa farmácia estrangeira não sabe
+como se chama ali o remédio que toma a vida inteira. Saber que a dipirona é metamizol,
+e que na Espanha o metamizol é o Nolotil, é o serviço. Vale mesmo quando a pessoa não
+pode simplesmente pegar na prateleira: com o nome certo ela fala com o médico, entende
+a caixa, e pergunta a coisa certa ao farmacêutico. Sem o nome, ela não tem nem por onde
+começar.
 
-Então a pessoa chega na farmácia pedindo um produto que não pode comprar, e o app não
-avisou. Multiplicado por 582 itens.
+Isso precisa ficar claro para quem for mexer aqui, porque a leitura oposta leva a
+mutilar o catálogo: **remédio de receita não deve ser removido**. O nome é a
+informação.
 
-Além disso, 13 itens usam as palavras `PROIBIDO` e `NOT SOLD` **dentro do texto
-traduzido** como marcador de controle, lido por `parsePharmacyData` em
-[components/TranslationItem.tsx](components/TranslationItem.tsx). Conteúdo servindo de
-código: se uma tradução legítima contiver a palavra, o comportamento muda. Deve virar
-um campo próprio no dado, tipo `availability: 'otc' | 'prescription' | 'banned'`, o
-que resolveria as duas coisas de uma vez.
+### O que falta, e é do mesmo tipo
+
+O que o app não diz é **em que condição** cada item é vendido. Isso não é uma trava, é
+mais uma informação do mesmo naipe do nome: a pessoa quer saber se entra e compra, se
+precisa passar no médico antes, ou se aquilo não existe naquele país.
+
+Hoje o app tem só dois estados, e eles vivem **dentro do texto traduzido**: 13 itens
+carregam as palavras `PROIBIDO` e `NOT SOLD` no meio da tradução, lidas por
+`parsePharmacyData` em [components/TranslationItem.tsx](components/TranslationItem.tsx).
+Conteúdo servindo de código, e só em português e inglês. O resto dos 582 itens não diz
+nada.
+
+O caminho é trocar isso por um campo próprio no dado, por país:
+
+```ts
+availability?: Record<string, 'livre' | 'receita' | 'nao-existe'>
+```
+
+Um selo discreto no card resolve as duas coisas de uma vez: tira a palavra-marcador de
+dentro da tradução, e dá à pessoa a informação que ela precisa para não fazer a viagem
+à toa. A dipirona, por exemplo, mostraria "receita" na Espanha e "não existe" no Reino
+Unido, com o nome do remédio bem visível nos dois casos.
+
+### O risco que continua
+
+Nada disso substitui revisão humana. As equivalências foram escritas por IA e podem
+estar simplesmente erradas: nome trocado, princípio ativo diferente, marca que não
+existe mais. Um farmacêutico passando os olhos nos 582 itens é o item de maior retorno
+do projeto inteiro, e não é trabalho de programação.
 
 ## 11. Ordem sugerida de trabalho
 
 1. Favoritos apagados (8.1) e chave duplicada (8.2). São perda de dados do usuário.
 2. Barreira de erro (8.12). É o que separa um bug de uma tela branca.
 3. Zoom liberado (8.4) e cards no teclado (8.3).
-4. Campo de disponibilidade na farmácia (seção 10), e revisão por farmacêutico.
+4. Campo de disponibilidade na farmácia (seção 10). É informação a mais no card, nunca
+   motivo para tirar item do catálogo.
 5. Salvar o idioma escolhido, que hoje volta para Brasil → Espanha a cada abertura.
 6. Nomes acessíveis e Esc no painel de idiomas (8.8 e 8.10), copiando o padrão que já
    existe em `CategorySheet`.
