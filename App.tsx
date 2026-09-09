@@ -257,7 +257,7 @@ export default function App() {
       case 'supermarket':
         return <CatalogModule {...catalogProps} titleKey="supermarketGuide" categories={SUPERMARKET_CATEGORIES} storagePrefix="supermarket" />;
       case 'pharmacy':
-        return <CatalogModule {...catalogProps} titleKey="modulePharmacy" categories={PHARMACY_CATEGORIES} storagePrefix="pharmacy" isPharmacy />;
+        return <CatalogModule {...catalogProps} titleKey="modulePharmacy" categories={PHARMACY_CATEGORIES} storagePrefix="pharmacy" defaultCategoryName="painFever" isPharmacy />;
       case 'location':
         return <LocationModule {...commonProps} />;
       case 'directions':

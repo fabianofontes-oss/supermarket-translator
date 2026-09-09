@@ -172,6 +172,18 @@ Ao reiniciar o chat, peça para:
 *   **Divisão do pacote:** cada módulo virou um pedaço próprio com `lazy`, e o catálogo saiu de `constants.ts` para `data/catalog.ts`. O pedaço inicial caiu de **908 KB para 282 KB**; os 452 KB do catálogo só carregam ao abrir Supermercado ou Farmácia.
 *   Ordem de títulos corrigida nos Pronomes, e bandeiras do painel com carregamento adiado.
 
+### Categorias: painel em grade no lugar da lista suspensa
+*   Quem entrava no Supermercado ou na Farmácia não percebia que havia categorias. A causa era o desenho, não a percepção: o seletor era `text-3xl` branco **sem fundo, sem borda e sem padding**, maior que o próprio título da página, então lia como cabeçalho. Logo abaixo, as abas de subcategoria coloridas prendiam o olho e ninguém subia.
+*   O gatilho agora é uma **linha branca com ícone, rótulo em cima e seta à direita**, na altura de 56px. A gramática de um seletor, menor que o título.
+*   O `CategorySheet` mostra as nove (Supermercado) e as oito (Farmácia) categorias em **grade de duas colunas**, sem rolagem em 375px. Três colunas não cabem: "Estômago e Intestino" tem 20 caracteres.
+*   Ícones desenhados em `components/CategoryIcons.tsx`, **fora de `Icons.tsx` de propósito**, para caírem no pedaço adiado do catálogo e não no pacote inicial.
+*   `components/categoryMeta.ts` guarda ícone e tom por categoria com as **classes escritas por extenso**. O Tailwind não monta `bg-${cor}`: o projeto já quebrou assim duas vezes. Cores quentes (âmbar, laranja, lima) precisam do tom 800 para passar em contraste.
+*   O painel precisa ser **irmão do `ModuleLayout`, não filho**: o cabeçalho é `relative z-30` e cria contexto de empilhamento, então um `fixed z-[90]` lá dentro ficaria preso abaixo da barra de navegação.
+*   É o **primeiro diálogo de verdade do projeto**: nada aqui tinha `role="dialog"`, tecla Esc ou foco preso, nem o `LanguagePanel`, que já é modal. O comportamento foi escrito do zero e o `LanguagePanel` pode adotar depois.
+*   Selecionado é marcado por **três sinais** ao mesmo tempo: fundo tingido, anel na cor do tema e um selo de confirmação. Um só não se vê em telha pequena.
+*   **A Farmácia abria em "Uso Contínuo"**, que é pressão, colesterol e diabetes: a pior estreia para quem entra precisando de analgésico. Passou a abrir em Dor e Febre por `defaultCategoryName`, que só vale para quem nunca abriu o módulo. Junto veio um defeito: a subcategoria salva era aceita sem checar se pertence à categoria resolvida, e a primeira abertura ficava errada.
+*   Falta ainda **animação de saída**: o painel desmonta na hora. Entra deslizando, sai sem transição.
+
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.351 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

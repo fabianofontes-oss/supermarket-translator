@@ -181,6 +181,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
       <button
         onClick={handleClick}
         className={getButtonClasses(locked)}
+        aria-label={locked ? t('lockedAudio') : title}
         title={locked ? t('lockedAudio') : title}
       >
         {locked ? <span className="text-lg">🔒</span> : icon}
@@ -222,7 +223,8 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     playSound(isFavorite ? 'click' : 'success');
                     onToggleFavorite(item);
                 }}
-                className="p-1 rounded-full flex-shrink-0 -mr-1 text-gray-500 hover:text-gray-500"
+                className="hit p-1 rounded-full flex-shrink-0 -mr-1 text-gray-500 hover:text-gray-500"
+                aria-label={t('favorites')}
                 title={t('favorites')}
             >
                 <StarIcon className={`w-6 h-6 ${isFavorite ? 'text-yellow-400 fill-current' : ''}`} />

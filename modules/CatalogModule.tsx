@@ -3,6 +3,8 @@ import { PREPOPULATED_TRANSLATIONS } from '../data/catalog';
 import type { Category, Country, TranslationItem as TranslationItemType } from '../types';
 import { SearchIcon, ChevronDownIcon, MicrophoneIcon, XIcon } from '../components/Icons';
 import { TranslationItem } from '../components/TranslationItem';
+import { CategorySheet } from '../components/CategorySheet';
+import { metaFor } from '../components/categoryMeta';
 import { ModuleLayout } from '../components/ModuleLayout';
 import { FavoritesPanel } from '../components/FavoritesPanel';
 import { ShoppingListPanel } from '../components/ShoppingListPanel';
@@ -20,6 +22,8 @@ export interface CatalogModuleProps {
   categories: Category[];
   storagePrefix: string;
   isPharmacy?: boolean;
+  /** Categoria de estreia. Só vale para quem nunca abriu este módulo. */
+  defaultCategoryName?: string;
 
   nativeCountry: Country;
   targetCountry: Country;
@@ -65,6 +69,7 @@ export default function CatalogModule({
   categories,
   storagePrefix,
   isPharmacy = false,
+  defaultCategoryName,
   nativeCountry,
   targetCountry,
   t,
@@ -88,28 +93,35 @@ export default function CatalogModule({
   const catKey = `${storagePrefix}_lastCategory`;
   const subKey = `${storagePrefix}_lastSubCategory`;
 
-  const [selectedCategory, setSelectedCategory] = useState<Category>(() => {
+  // Resolvida uma vez, na montagem. Quem já usou volta para a sua categoria;
+  // só quem nunca abriu cai na de estreia.
+  const initialCategory = useMemo(() => {
     try {
       const saved = localStorage.getItem(catKey);
       const found = saved ? categories.find((c) => c.name === saved) : undefined;
       if (found) return found;
     } catch (e) { console.error('Error loading category from storage', e); }
-    return categories[0];
-  });
+    return categories.find((c) => c.name === defaultCategoryName) ?? categories[0];
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- valor de montagem
+  }, []);
+
+  const [selectedCategory, setSelectedCategory] = useState<Category>(initialCategory);
 
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>(() => {
     try {
       const saved = localStorage.getItem(subKey);
-      if (saved) return saved;
+      // A subcategoria salva só serve se pertencer à categoria que foi resolvida.
+      // Sem esta checagem o app grava a subcategoria de outra categoria antes do
+      // efeito consertar, e a primeira abertura fica errada.
+      if (saved && initialCategory.subCategories.includes(saved)) return saved;
     } catch (e) { console.error('Error loading subcategory from storage', e); }
-    return categories[0].subCategories[0];
+    return initialCategory.subCategories[0] ?? '';
   });
 
   const [searchTerm, setSearchTerm] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
-  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
-  const categoryDropdownRef = useRef<HTMLDivElement>(null);
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
 
   const isPhrasesCategory = selectedCategory.name === 'phrases';
 
@@ -132,16 +144,11 @@ export default function CatalogModule({
     }
   }, [selectedSubCategory, subKey]);
 
-  // Fecha o menu de categorias ao clicar fora
+  // O painel fecha sozinho quando a tela muda debaixo dele: na busca o gatilho
+  // some, e nos painéis de favoritos e lista ele fica inacessível.
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
-        setIsCategoryDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (isSearchActive || activeTab !== 'home') setIsCategorySheetOpen(false);
+  }, [isSearchActive, activeTab]);
 
   // Garante que a subcategoria pertence à categoria atual
   useEffect(() => {
@@ -279,42 +286,35 @@ export default function CatalogModule({
     </div>
   );
 
-  const categorySelectorContent = (
-    <div className="relative" ref={categoryDropdownRef}>
-      <button
-        onClick={() => { playSound('click'); setIsCategoryDropdownOpen(!isCategoryDropdownOpen); }}
-        className="w-full flex items-center justify-between py-1 px-1 tap group"
-      >
-        <div className="flex items-baseline gap-1.5 overflow-hidden">
-          <span className="text-3xl font-extrabold text-white tracking-tight drop-shadow-sm truncate">
-            {t(selectedCategory.name)}
-          </span>
-          <ChevronDownIcon className={`w-4 h-4 text-white transition-transform duration-300 flex-shrink-0 ${isCategoryDropdownOpen ? 'rotate-180' : 'group-hover:translate-y-0.5'}`} />
-        </div>
-      </button>
+  const currentMeta = metaFor(selectedCategory.name);
+  const CurrentIcon = currentMeta.icon;
 
-      {isCategoryDropdownOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white text-gray-800 rounded-xl shadow-2xl overflow-hidden z-50 max-h-[60vh] overflow-y-auto ring-1 ring-black/5 animate-fade-in origin-top">
-          {categories.map((c) => {
-            const isPhrases = c.name === 'phrases';
-            const isSelected = selectedCategory.name === c.name;
-            return (
-              <button
-                key={c.name}
-                onClick={() => { handleCategoryChange(c.name); setIsCategoryDropdownOpen(false); }}
-                className={`w-full px-5 py-3 flex items-center justify-between text-left border-b border-gray-50 last:border-0 tap ${
-                  isPhrases ? 'bg-gray-900 text-white hover:bg-gray-800'
-                  : isSelected ? `bg-gray-100 ${theme.textColor}`
-                  : 'hover:bg-gray-50'
-                }`}
-              >
-                <span className={`text-sm ${isSelected || isPhrases ? 'font-bold' : 'font-medium text-gray-600'}`}>{t(c.name)}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
+  // Antes isto era só um texto branco enorme, maior que o próprio título da
+  // página, então lia como cabeçalho e ninguém tocava. Agora é uma linha
+  // branca com ícone, rótulo e seta à direita: a gramática de um seletor.
+  const categorySelectorContent = (
+    <button
+      onClick={() => { playSound('click'); setIsCategorySheetOpen(true); }}
+      aria-haspopup="dialog"
+      aria-expanded={isCategorySheetOpen}
+      aria-label={`${t('categoryLabel')}: ${t(selectedCategory.name)}`}
+      className="w-full h-14 flex items-center gap-3 px-3 rounded-2xl bg-white shadow-md ring-1 ring-black/5 tap active:scale-[0.98]"
+    >
+      <span className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${currentMeta.iconClass}`}>
+        <CurrentIcon className="w-5 h-5" />
+      </span>
+      <span className="flex-1 min-w-0 text-left">
+        <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 leading-none" dir="auto">
+          {t('categoryLabel')}
+        </span>
+        <span className={`block text-base font-bold truncate leading-tight ${theme.textColor}`} dir="auto">
+          {t(selectedCategory.name)}
+        </span>
+      </span>
+      <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${theme.hex}1a` }}>
+        <ChevronDownIcon className={`w-4 h-4 ${theme.textColor} transition-transform duration-300 ${isCategorySheetOpen ? 'rotate-180' : ''}`} />
+      </span>
+    </button>
   );
 
   const subCategoryContent = useMemo(() => {
@@ -333,7 +333,7 @@ export default function CatalogModule({
               <button
                 key={sub}
                 onClick={() => handleSubCategoryClick(sub, index)}
-                className={`relative px-4 py-2.5 rounded-t-xl text-sm font-medium tap whitespace-nowrap flex-shrink-0 mb-0 border-t border-l border-r ${
+                className={`hit relative px-4 py-2.5 rounded-t-xl text-sm font-medium tap whitespace-nowrap flex-shrink-0 mb-0 border-t border-l border-r ${
                   isActive
                     ? `bg-slate-50 ${theme.textColor} font-bold shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-20 scale-105 -translate-y-0.5 border-white pb-3`
                     : `${folderColor} opacity-95 hover:opacity-100 hover:scale-100 scale-95 translate-y-0.5 z-0 border-white/20 shadow-inner`
@@ -404,6 +404,7 @@ export default function CatalogModule({
   const showPhraseSections = isPhrasesCategory && !isSearchActive;
 
   return (
+    <>
     <ModuleLayout
       title={t(titleKey)}
       theme={theme}
@@ -459,5 +460,16 @@ export default function CatalogModule({
         )}
       </div>
     </ModuleLayout>
+
+      <CategorySheet
+        isOpen={isCategorySheetOpen}
+        onClose={() => setIsCategorySheetOpen(false)}
+        categories={categories}
+        selectedName={selectedCategory.name}
+        onSelect={(name) => { handleCategoryChange(name); setIsCategorySheetOpen(false); }}
+        theme={theme}
+        t={t}
+      />
+    </>
   );
 }

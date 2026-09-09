@@ -110,7 +110,8 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
             {/* Center: Title */}
             <button
                 onClick={handleGoHome}
-                className="flex-1 mx-2 text-center truncate z-10 outline-none"
+                aria-label={t('a11yHome')}
+                className="hit flex-1 mx-2 text-center truncate z-10"
             >
                 <h1 className="font-bold text-2xl uppercase tracking-tight shadow-sm text-white truncate">
                     {title}
@@ -137,7 +138,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
 
             {/* Main Header Content (Category Selector only - Plan removed) */}
             {!isSearchActive && (
-                <div className={`px-4 py-1 flex items-center justify-between gap-2 relative z-40 ${hasTabs ? 'pb-0' : 'pb-4'}`}>
+                <div className={`px-4 pt-2 flex items-center justify-between gap-2 relative z-20 ${hasTabs ? 'pb-3' : 'pb-4'}`}>
                     <div className="flex-1 min-w-0">
                         {categorySelectorSlot}
                     </div>
