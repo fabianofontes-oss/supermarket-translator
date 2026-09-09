@@ -1,5 +1,5 @@
 // Catálogo do Supermercado e da Farmácia.
-// Fica separado de constants.ts porque são 1.351 itens: só o CatalogModule
+// Fica separado de constants.ts porque são 1.333 itens: só o CatalogModule
 // precisa deles, e o hub não deve pagar esse peso para abrir.
 
 import { groceryData } from '../modules/supermarket/data/groceryData';

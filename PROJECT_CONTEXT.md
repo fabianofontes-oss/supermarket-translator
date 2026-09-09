@@ -3,6 +3,10 @@
 
 **IMPORTANTE:** Cole este arquivo no início de um novo chat para restaurar o contexto do desenvolvimento.
 
+> Este arquivo é o registro de **decisões**: por que cada coisa é como é.
+> Para a descrição do sistema, as convenções obrigatórias e a lista de defeitos
+> conhecidos, leia [AGENTS.md](AGENTS.md), que é a entrega técnica auditada.
+
 ## 1. Conceito do App
 O aplicativo é um **Guia de Sobrevivência para Imigrantes e Viajantes**, não um tradutor literal.
 *   **Objetivo:** Mostrar o produto **equivalente real** (comercial/cultural/farmacêutico) no país de destino.
@@ -185,5 +189,5 @@ Ao reiniciar o chat, peça para:
 *   Falta ainda **animação de saída**: o painel desmonta na hora. Entra deslizando, sai sem transição.
 
 ### Próximos passos previstos
-*   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.351 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
+*   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.333 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

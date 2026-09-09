@@ -60,7 +60,7 @@ const THEMES: Record<ModuleKey, Theme> = {
 };
 
 // Módulos ativos do hub (classes escritas por extenso para o Tailwind gerar o CSS)
-// needsCatalog: depende dos 1.351 itens traduzidos; fica bloqueado para países só de origem (uk, ar).
+// needsCatalog: depende dos 1.333 itens traduzidos; fica bloqueado para países só de origem (uk, ar).
 const ACTIVE_MODULES: { key: ModuleKey; labelKey: string; icon: React.FC<{ className?: string }>; iconClass: string; needsCatalog?: boolean }[] = [
   { key: 'supermarket', labelKey: 'supermarketGuide', icon: ShoppingBagIconSolid, iconClass: 'bg-red-100 text-red-600', needsCatalog: true },
   { key: 'pharmacy',    labelKey: 'modulePharmacy',   icon: PillIcon,             iconClass: 'bg-emerald-100 text-emerald-700', needsCatalog: true },
