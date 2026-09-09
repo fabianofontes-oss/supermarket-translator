@@ -3,6 +3,7 @@ import React from 'react';
 import type { TranslationItem as TranslationItemType, Country } from '../types';
 import { TranslationItem } from './TranslationItem';
 import { StarIcon } from './Icons';
+import type { VoiceStatus } from '../utils/speech';
 
 interface FavoritesPanelProps {
     favorites: TranslationItemType[];
@@ -23,6 +24,8 @@ interface FavoritesPanelProps {
     theme: { color: string; textColor: string };
     onOpenPlan: () => void;
     isPharmacy?: boolean;
+    /** Voz do idioma de destino no aparelho; 'missing' apaga os botões de áudio. */
+    voiceStatus?: VoiceStatus;
 }
 
 // Helper to group items by Category
@@ -56,7 +59,8 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({
     isConversationLocked,
     theme,
     onOpenPlan,
-    isPharmacy = false
+    isPharmacy = false,
+    voiceStatus = 'unknown'
 }) => {
     
     if (favorites.length === 0) {
@@ -100,6 +104,7 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({
                                 isPhrase={item.category === 'phrases'}
                                 onOpenPlan={onOpenPlan}
                                 isPharmacy={isPharmacy}
+                                voiceStatus={voiceStatus}
                             />
                         ))}
                     </div>

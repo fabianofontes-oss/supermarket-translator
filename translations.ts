@@ -265,6 +265,18 @@ const enUS = {
   condoms: 'Condoms',
   lubricants: 'Lubricants',
   rapidTests: 'Rapid Tests',
+
+  // Voz do TTS ausente no aparelho (fase 7).
+  voiceMissingLabel: 'Voice not installed',
+  voiceMissingTitle: 'Voice not installed',
+  voiceMissingBody: "Your device has no voice for this language. The app stays silent instead of speaking with another language's voice, which would teach you the wrong pronunciation. Install the voice and try again.",
+  voiceMissingAndroid: 'Android: Settings → System → Languages → Text-to-speech output → install voice data',
+  voiceMissingIOS: 'iPhone: Settings → Accessibility → Spoken Content → Voices',
+  voiceMissingWindows: 'Windows: Settings → Time & language → Speech → Add voices',
+  voiceMissingDismiss: 'Got it',
+  voiceDiagnosticsTitle: 'Voices on this device',
+  voiceAvailableLabel: 'Voice available',
+  voiceUnknownLabel: 'Checking…',
 };
 
 const ptBR = {
@@ -533,6 +545,18 @@ const ptBR = {
   condoms: 'Íntimo Masculino',
   lubricants: 'Lubrificantes',
   rapidTests: 'Testes Rápidos',
+
+  // Voz do TTS ausente no aparelho (fase 7).
+  voiceMissingLabel: 'Voz não instalada',
+  voiceMissingTitle: 'Voz não instalada',
+  voiceMissingBody: 'Seu aparelho não tem voz neste idioma. O app fica em silêncio em vez de falar com a voz de outro idioma, que ensinaria a pronúncia errada. Instale a voz e tente de novo.',
+  voiceMissingAndroid: 'Android: Configurações → Sistema → Idiomas → Saída de texto para voz → instalar dados de voz',
+  voiceMissingIOS: 'iPhone: Ajustes → Acessibilidade → Conteúdo falado → Vozes',
+  voiceMissingWindows: 'Windows: Configurações → Hora e idioma → Voz → Adicionar vozes',
+  voiceMissingDismiss: 'Entendi',
+  voiceDiagnosticsTitle: 'Vozes deste aparelho',
+  voiceAvailableLabel: 'Voz disponível',
+  voiceUnknownLabel: 'Verificando…',
 };
 
 const esCL = {
@@ -801,6 +825,18 @@ const esCL = {
   condoms: 'Íntimo Masculino',
   lubricants: 'Lubricantes',
   rapidTests: 'Tests Rápidos',
+
+  // Voz do TTS ausente no aparelho (fase 7).
+  voiceMissingLabel: 'Voz no instalada',
+  voiceMissingTitle: 'Voz no instalada',
+  voiceMissingBody: 'Tu dispositivo no tiene voz en este idioma. La app se queda en silencio en vez de hablar con la voz de otro idioma, que te enseñaría una pronunciación equivocada. Instala la voz e inténtalo de nuevo.',
+  voiceMissingAndroid: 'Android: Ajustes → Sistema → Idiomas → Salida de texto a voz → instalar datos de voz',
+  voiceMissingIOS: 'iPhone: Ajustes → Accesibilidad → Contenido hablado → Voces',
+  voiceMissingWindows: 'Windows: Configuración → Hora e idioma → Voz → Agregar voces',
+  voiceMissingDismiss: 'Entendido',
+  voiceDiagnosticsTitle: 'Voces de este dispositivo',
+  voiceAvailableLabel: 'Voz disponible',
+  voiceUnknownLabel: 'Comprobando…',
 };
 
 
@@ -1070,6 +1106,18 @@ const frFR = {
   condoms: 'Préservatifs',
   lubricants: 'Lubrifiants',
   rapidTests: 'Tests rapides',
+
+  // Voz do TTS ausente no aparelho (fase 7).
+  voiceMissingLabel: 'Voix non installée',
+  voiceMissingTitle: 'Voix non installée',
+  voiceMissingBody: "Votre appareil n'a pas de voix dans cette langue. L'application reste silencieuse plutôt que de parler avec la voix d'une autre langue, qui vous apprendrait une mauvaise prononciation. Installez la voix et réessayez.",
+  voiceMissingAndroid: 'Android : Paramètres → Système → Langues → Sortie de synthèse vocale → installer les données vocales',
+  voiceMissingIOS: 'iPhone : Réglages → Accessibilité → Contenu énoncé → Voix',
+  voiceMissingWindows: 'Windows : Paramètres → Heure et langue → Voix → Ajouter des voix',
+  voiceMissingDismiss: "J'ai compris",
+  voiceDiagnosticsTitle: 'Voix de cet appareil',
+  voiceAvailableLabel: 'Voix disponible',
+  voiceUnknownLabel: 'Vérification…',
 };
 
 const itIT = {
@@ -1338,6 +1386,18 @@ const itIT = {
   condoms: 'Preservativi',
   lubricants: 'Lubrificanti',
   rapidTests: 'Test rapidi',
+
+  // Voz do TTS ausente no aparelho (fase 7).
+  voiceMissingLabel: 'Voce non installata',
+  voiceMissingTitle: 'Voce non installata',
+  voiceMissingBody: "Il tuo dispositivo non ha una voce in questa lingua. L'app resta in silenzio invece di parlare con la voce di un'altra lingua, che ti insegnerebbe la pronuncia sbagliata. Installa la voce e riprova.",
+  voiceMissingAndroid: 'Android: Impostazioni → Sistema → Lingue → Sintesi vocale → installa i dati vocali',
+  voiceMissingIOS: 'iPhone: Impostazioni → Accessibilità → Contenuto pronunciato → Voci',
+  voiceMissingWindows: 'Windows: Impostazioni → Data/ora e lingua → Voce → Aggiungi voci',
+  voiceMissingDismiss: 'Ho capito',
+  voiceDiagnosticsTitle: 'Voci di questo dispositivo',
+  voiceAvailableLabel: 'Voce disponibile',
+  voiceUnknownLabel: 'Verifica in corso…',
 };
 
 
@@ -1607,6 +1667,18 @@ const ukUA = {
   condoms: 'Презервативи',
   lubricants: 'Лубриканти',
   rapidTests: 'Швидкі тести',
+
+  // Voz do TTS ausente no aparelho (fase 7).
+  voiceMissingLabel: 'Голос не встановлено',
+  voiceMissingTitle: 'Голос не встановлено',
+  voiceMissingBody: 'На вашому пристрої немає голосу для цієї мови. Застосунок мовчить, замість того щоб говорити голосом іншої мови, який навчив би неправильної вимови. Встановіть голос і спробуйте ще раз.',
+  voiceMissingAndroid: 'Android: Налаштування → Система → Мови → Синтез мовлення → встановити дані голосу',
+  voiceMissingIOS: 'iPhone: Налаштування → Доступність → Вимовляння вголос → Голоси',
+  voiceMissingWindows: 'Windows: Параметри → Час і мова → Мовлення → Додати голоси',
+  voiceMissingDismiss: 'Зрозуміло',
+  voiceDiagnosticsTitle: 'Голоси цього пристрою',
+  voiceAvailableLabel: 'Голос доступний',
+  voiceUnknownLabel: 'Перевірка…',
 };
 
 const arMA = {
@@ -1875,6 +1947,18 @@ const arMA = {
   condoms: 'الواقيات الذكرية',
   lubricants: 'المزلقات',
   rapidTests: 'الاختبارات السريعة',
+
+  // Voz do TTS ausente no aparelho (fase 7).
+  voiceMissingLabel: 'الصوت غير مثبَّت',
+  voiceMissingTitle: 'الصوت غير مثبَّت',
+  voiceMissingBody: 'جهازك لا يحتوي على صوت بهذه اللغة. يبقى التطبيق صامتًا بدل أن يتكلم بصوت لغة أخرى، لأن ذلك يعلّم نطقًا خاطئًا. ثبّت الصوت ثم حاول مرة أخرى.',
+  voiceMissingAndroid: 'أندرويد: الإعدادات ← النظام ← اللغات ← تحويل النص إلى كلام ← تثبيت بيانات الصوت',
+  voiceMissingIOS: 'آيفون: الإعدادات ← تسهيلات الاستخدام ← المحتوى المنطوق ← الأصوات',
+  voiceMissingWindows: 'ويندوز: الإعدادات ← الوقت واللغة ← الكلام ← إضافة أصوات',
+  voiceMissingDismiss: 'فهمت',
+  voiceDiagnosticsTitle: 'أصوات هذا الجهاز',
+  voiceAvailableLabel: 'الصوت متوفر',
+  voiceUnknownLabel: 'جارٍ التحقق…',
 };
 
 
@@ -2144,6 +2228,18 @@ const ltLT = {
   condoms: 'Prezervatyvai',
   lubricants: 'Lubrikantai',
   rapidTests: 'Greitieji testai',
+
+  // Voz do TTS ausente no aparelho (fase 7).
+  voiceMissingLabel: 'Balsas neįdiegtas',
+  voiceMissingTitle: 'Balsas neįdiegtas',
+  voiceMissingBody: 'Jūsų įrenginyje nėra šios kalbos balso. Programa tyli, užuot kalbėjusi kitos kalbos balsu, nes tai išmokytų neteisingos tarties. Įdiekite balsą ir bandykite dar kartą.',
+  voiceMissingAndroid: 'Android: Nustatymai → Sistema → Kalbos → Teksto vertimas į kalbą → įdiegti balso duomenis',
+  voiceMissingIOS: 'iPhone: Nustatymai → Pritaikymas neįgaliesiems → Sakytinis turinys → Balsai',
+  voiceMissingWindows: 'Windows: Parametrai → Laikas ir kalba → Kalbėjimas → Pridėti balsų',
+  voiceMissingDismiss: 'Supratau',
+  voiceDiagnosticsTitle: 'Šio įrenginio balsai',
+  voiceAvailableLabel: 'Balsas pasiekiamas',
+  voiceUnknownLabel: 'Tikrinama…',
 };
 
 /**

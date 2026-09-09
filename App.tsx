@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useId, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useId, Suspense } from 'react';
 import { COUNTRIES, SUPERMARKET_CATEGORIES, PHARMACY_CATEGORIES } from './constants';
 import type { Country, TranslationItem } from './types';
 // Cada módulo vira um pedaço próprio: abrir o hub não baixa o catálogo
@@ -17,10 +17,12 @@ import { useFavorites } from './hooks/useFavorites';
 import { useDialog } from './hooks/useDialog';
 import { useCountryPair } from './hooks/useCountryPair';
 import { LanguagePanel } from './components/LanguagePanel';
+import { VoiceMissingSheet } from './components/VoiceMissingSheet';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ErrorFallback } from './components/ErrorFallback';
 import { lazyWithRetry } from './utils/lazyWithRetry';
 import { playSound } from './utils/soundUtils';
+import { pickVoice } from './utils/speech';
 import {
   ShoppingBagIcon,
   PillIcon,
@@ -95,8 +97,6 @@ const COMING_SOON: { labelKey: string; icon: React.FC<{ className?: string }>; i
   { labelKey: 'modulePolice',     icon: ShieldCheckIcon, iconClass: 'bg-blue-100 text-blue-500' },
   { labelKey: 'modulePost',       icon: EnvelopeIcon,    iconClass: 'bg-yellow-100 text-yellow-500' },
 ];
-
-const normalizeLang = (l: string) => l.replace('_', '-').toLowerCase();
 
 export default function App() {
   const [currentModule, setCurrentModule] = useState<ModuleKey | null>(null);
@@ -191,36 +191,75 @@ export default function App() {
   };
 
   // ----- Áudio (voz do sistema, funciona offline) -----
-  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
+  //
+  // A regra é absoluta: nunca falar com voz de outro idioma. Antes, quando o
+  // aparelho não tinha a voz do destino, `utterance.voice` ficava nulo e o
+  // motor caía na voz padrão do sistema — texto italiano lido com voz
+  // americana. `utterance.lang` sozinho não resolve: é só uma dica.
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  /** País cuja voz falta. Preenchido só quando alguém tenta ouvir. */
+  const [voiceMissingFor, setVoiceMissingFor] = useState<Country | null>(null);
+
   useEffect(() => {
     const synth = window.speechSynthesis;
     if (!synth) return;
-    const load = () => { voicesRef.current = synth.getVoices(); };
+
+    const load = () => {
+      const next = synth.getVoices();
+      // `voiceschanged` dispara várias vezes com a mesma lista em alguns
+      // motores; trocar o estado à toa re-renderiza o app inteiro.
+      setVoices((prev) =>
+        prev.length === next.length && prev.every((v, i) => v.voiceURI === next[i].voiceURI) ? prev : next
+      );
+    };
+
     load();
     synth.addEventListener('voiceschanged', load);
     return () => synth.removeEventListener('voiceschanged', load);
   }, []);
 
+  /** Estado da voz do destino atual, para a interface saber antes do toque. */
+  const targetVoice = useMemo(() => pickVoice(voices, targetCountry.lang), [voices, targetCountry.lang]);
+
   const handlePlayAudio = useCallback((text: string, lang: string) => {
     const synth = window.speechSynthesis;
     if (!synth) return;
-    synth.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
-    utterance.rate = 0.95;
+    const speak = (voice: SpeechSynthesisVoice) => {
+      synth.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+      utterance.rate = 0.95;
+      utterance.voice = voice;
+      synth.speak(utterance);
+    };
 
-    const voices = voicesRef.current.length ? voicesRef.current : synth.getVoices();
-    const wanted = normalizeLang(lang);
-    const base = wanted.split('-')[0];
-    const exact = voices.filter((v) => normalizeLang(v.lang) === wanted);
-    const preferred =
-      exact.find((v) => /google|natural|premium|enhanced/i.test(v.name)) ||
-      exact[0] ||
-      voices.find((v) => normalizeLang(v.lang).startsWith(base));
-    if (preferred) utterance.voice = preferred;
+    const warn = () => setVoiceMissingFor(COUNTRIES.find((c) => c.lang === lang) ?? null);
 
-    synth.speak(utterance);
+    const decide = (list: SpeechSynthesisVoice[]) => {
+      const lookup = pickVoice(list, lang);
+      if (lookup.status === 'ok') speak(lookup.voice);
+      else warn();
+    };
+
+    // Reconsulta o motor: a lista pode ter chegado depois do último render.
+    const now = synth.getVoices();
+    const lookup = pickVoice(now, lang);
+
+    if (lookup.status === 'ok') { speak(lookup.voice); return; }
+    if (lookup.status === 'missing') { warn(); return; }
+
+    // `unknown`: o motor ainda não listou nada. No WebView do Capacitor isso é
+    // comum na primeira interação. Falar agora seria apostar na voz padrão, que
+    // é exatamente o defeito. Espera um instante pelo `voiceschanged` e decide
+    // com a lista real — nunca com uma voz não verificada.
+    const onChanged = () => { cleanup(); decide(synth.getVoices()); };
+    const timer = window.setTimeout(() => { cleanup(); decide(synth.getVoices()); }, 600);
+    const cleanup = () => {
+      window.clearTimeout(timer);
+      synth.removeEventListener('voiceschanged', onChanged);
+    };
+    synth.addEventListener('voiceschanged', onChanged);
   }, []);
 
   const handlePlayPhrase = useCallback((type: 'ask' | 'want', item: TranslationItem) => {
@@ -247,6 +286,10 @@ export default function App() {
     onGoHome: () => setCurrentModule(null),
     onOpenLanguageModal: () => setIsLanguageModalOpen(true),
     handlePlayAudio,
+    // 'missing' deixa o botão de áudio já nascer indisponível, em vez de a
+    // pessoa descobrir no toque. 'unknown' não vira aviso: seria alarme falso
+    // enquanto o motor TTS ainda está subindo.
+    voiceStatus: targetVoice.status,
   };
 
   const catalogProps = {
@@ -381,6 +424,14 @@ export default function App() {
         t={t}
         theme={theme}
         blockOriginOnly={currentModule === 'supermarket' || currentModule === 'pharmacy'}
+        voices={voices}
+      />
+
+      <VoiceMissingSheet
+        country={voiceMissingFor}
+        onClose={() => setVoiceMissingFor(null)}
+        t={t}
+        theme={theme}
       />
 
       {showInstallModal && (

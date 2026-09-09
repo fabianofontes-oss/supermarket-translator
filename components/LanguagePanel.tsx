@@ -1,9 +1,10 @@
 
-import React, { useCallback, useId, useRef } from 'react';
+import React, { useCallback, useId, useRef, useState } from 'react';
 import type { Country } from '../types';
 import { XIcon, CheckIcon } from './Icons';
 import { useDialog } from '../hooks/useDialog';
 import { playSound } from '../utils/soundUtils';
+import { pickVoice, type VoiceLike } from '../utils/speech';
 
 interface LanguagePanelProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ interface LanguagePanelProps {
   theme: { color: string; textColor: string; hex: string };
   /** Bloqueia em "Eu falo" os países que ainda não têm dados do módulo atual (ex.: catálogo). */
   blockOriginOnly?: boolean;
+  /** Vozes do aparelho, para o diagnóstico. Vazio = motor ainda não respondeu. */
+  voices?: readonly VoiceLike[];
 }
 
 export const LanguagePanel: React.FC<LanguagePanelProps> = ({
@@ -29,7 +32,8 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
   options,
   t,
   theme,
-  blockOriginOnly = false
+  blockOriginOnly = false,
+  voices = []
 }) => {
   const handleClose = useCallback(() => {
       playSound('pop');
@@ -44,6 +48,9 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
   const ids = useId();
   const nativeGroupId = `${ids}-native`;
   const targetGroupId = `${ids}-target`;
+  const diagnosticsId = `${ids}-voices`;
+
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   if (!isOpen) return null;
 
@@ -151,6 +158,53 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
                     <CheckIcon className="w-4 h-4 stroke-[3]" />
                 </button>
              </div>
+        </div>
+
+        {/*
+          Diagnóstico de vozes. Existe para que um relato futuro de "a pronúncia
+          está errada" possa ser separado em "defeito do app" e "pacote de voz
+          não instalado" — que é a confusão que produziu as reprovações.
+          Fechado por padrão: quem não procurar, não vê.
+        */}
+        <div className="border-t border-gray-100 bg-white rounded-b-2xl">
+          {/*
+            Botão + aria-expanded em vez de <details>: o elemento nativo entra
+            na árvore como role="group" e passaria a contar como um terceiro
+            grupo no painel, ao lado de "Eu falo" e "Estou em".
+          */}
+          <button
+            onClick={() => setShowDiagnostics((v) => !v)}
+            aria-expanded={showDiagnostics}
+            aria-controls={diagnosticsId}
+            className="w-full px-4 py-2.5 text-left text-[11px] uppercase tracking-wider text-gray-500 hover:text-gray-700"
+          >
+            {t('voiceDiagnosticsTitle')}
+          </button>
+          <ul id={diagnosticsId} hidden={!showDiagnostics} className="px-4 pb-3 space-y-2">
+            {options.filter((opt) => !opt.originOnly).map((opt) => {
+              // Mesma função do botão de áudio: uma regra só, nunca duas.
+              const lookup = pickVoice(voices, opt.lang);
+              const label =
+                lookup.status === 'ok' ? t('voiceAvailableLabel')
+                : lookup.status === 'missing' ? t('voiceMissingLabel')
+                : t('voiceUnknownLabel');
+              const mark = lookup.status === 'ok' ? '✅' : lookup.status === 'missing' ? '⚠️' : '…';
+
+              return (
+                <li key={opt.code} className="text-[11px] leading-tight">
+                  <span className="flex items-center gap-1.5 text-gray-700">
+                    <span aria-hidden="true">{mark}</span>
+                    <span className="font-medium" dir="auto">{opt.name}</span>
+                    <span className="font-mono text-gray-500">{opt.lang}</span>
+                  </span>
+                  <span className="block pl-5 text-gray-500" dir="auto">
+                    {label}
+                    {lookup.status === 'ok' && <> — {lookup.voice.name}</>}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </div>
 
       </div>

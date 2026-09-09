@@ -1,8 +1,9 @@
 
 import React, { useMemo, useState } from 'react';
 import type { Country } from '../types';
-import { HomeIcon, SpeakerIcon, QuestionMarkCircleIcon } from '../components/Icons';
+import { HomeIcon, SpeakerIcon, SpeakerOffIcon, QuestionMarkCircleIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
+import type { VoiceStatus } from '../utils/speech';
 import {
   LOC_OBJECTS,
   LOC_RELATIONS,
@@ -22,6 +23,8 @@ interface LocationModuleProps {
   onGoHome: () => void;
   onOpenLanguageModal: () => void;
   handlePlayAudio: (text: string, lang: string) => void;
+  /** Voz do idioma de destino no aparelho; 'missing' apaga os botões de áudio. */
+  voiceStatus?: VoiceStatus;
 }
 
 // Posição do objeto na cena, relativa ao centro (referência).
@@ -70,6 +73,7 @@ export default function LocationModule({
   onGoHome,
   onOpenLanguageModal,
   handlePlayAudio,
+  voiceStatus = 'unknown',
 }: LocationModuleProps) {
   const [subject, setSubject] = useState<LocObject>(LOC_OBJECTS[0]);
   const [reference, setReference] = useState<LocObject>(LOC_OBJECTS[1]);
@@ -100,6 +104,13 @@ export default function LocationModule({
     playSound('toggle');
     setRelation(rel);
   };
+
+  // Sem voz do idioma de destino, `handlePlayAudio` recusa falar e abre o
+  // aviso — falar com a voz padrão ensinaria outra pronúncia. Aqui só o botão
+  // conta isso antes do toque.
+  const voiceMissing = voiceStatus === 'missing';
+  const Listen = voiceMissing ? SpeakerOffIcon : SpeakerIcon;
+  const audioLabel = (base: string) => (voiceMissing ? `${base} — ${t('voiceMissingLabel')}` : base);
 
   const speak = (text: string) => {
     playSound('click');
@@ -195,9 +206,10 @@ export default function LocationModule({
                 onClick={() => speak(sentence)}
                 className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0"
                 style={{ color: theme.hex }}
-                aria-label={t('locListen')}
+                aria-label={audioLabel(t('locListen'))}
+                title={audioLabel(t('locListen'))}
               >
-                <SpeakerIcon className="w-6 h-6" />
+                <Listen className="w-6 h-6" />
               </button>
             </div>
 
@@ -209,7 +221,8 @@ export default function LocationModule({
               <button
                 onClick={() => speak(question)}
                 className="p-2 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 transition flex-shrink-0"
-                aria-label={t('locAsk')}
+                aria-label={audioLabel(t('locAsk'))}
+                title={audioLabel(t('locAsk'))}
               >
                 <QuestionMarkCircleIcon className="w-6 h-6" />
               </button>

@@ -1,8 +1,9 @@
 
 import React, { useMemo, useState } from 'react';
 import type { Country } from '../types';
-import { HomeIcon, SpeakerIcon, InfoIcon } from '../components/Icons';
+import { HomeIcon, SpeakerIcon, SpeakerOffIcon, InfoIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
+import type { VoiceStatus } from '../utils/speech';
 import { toLangCode } from './location/data/locationData';
 import {
   PRONOUNS,
@@ -24,6 +25,8 @@ interface PronounsModuleProps {
   onGoHome: () => void;
   onOpenLanguageModal: () => void;
   handlePlayAudio: (text: string, lang: string) => void;
+  /** Voz do idioma de destino no aparelho; 'missing' apaga os botões de áudio. */
+  voiceStatus?: VoiceStatus;
 }
 
 const MOODS: Mood[] = ['affirm', 'question', 'negative'];
@@ -49,6 +52,7 @@ export default function PronounsModule({
   onGoHome,
   onOpenLanguageModal,
   handlePlayAudio,
+  voiceStatus = 'unknown',
 }: PronounsModuleProps) {
   const target = toLangCode(targetCountry.lang);
   const native = toLangCode(nativeCountry.lang);
@@ -67,6 +71,13 @@ export default function PronounsModule({
 
   const phrase = useMemo(() => buildPhrase(target, pronoun, verb, comp, mood, tense), [target, pronoun, verb, comp, mood, tense]);
   const phraseNative = useMemo(() => buildPhrase(native, pronoun, verb, comp, mood, tense), [native, pronoun, verb, comp, mood, tense]);
+
+  // Sem voz do idioma de destino, `handlePlayAudio` recusa falar e abre o
+  // aviso — falar com a voz padrão ensinaria outra pronúncia. Aqui só o botão
+  // conta isso antes do toque.
+  const voiceMissing = voiceStatus === 'missing';
+  const Listen = voiceMissing ? SpeakerOffIcon : SpeakerIcon;
+  const audioLabel = (base: string) => (voiceMissing ? `${base} — ${t('voiceMissingLabel')}` : base);
 
   const speak = (text: string) => {
     playSound('click');
@@ -115,8 +126,8 @@ export default function PronounsModule({
                 <p className="text-2xl font-bold leading-snug" dir="auto">{phrase}</p>
                 {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{phraseNative}</p>}
               </div>
-              <button onClick={() => speak(phrase)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={t('locListen')}>
-                <SpeakerIcon className="w-6 h-6" />
+              <button onClick={() => speak(phrase)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+                <Listen className="w-6 h-6" />
               </button>
             </div>
 
@@ -254,7 +265,7 @@ export default function PronounsModule({
                       <span className={`text-sm font-bold flex-1 min-w-0 truncate ${active ? theme.textColor : 'text-gray-800'}`} dir="auto">
                         {tenseTable[p.altPerson?.[target] ?? p.person]}
                       </span>
-                      <SpeakerIcon className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
+                      <Listen className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
                     </button>
                   </li>
                 );

@@ -1,8 +1,9 @@
 
 import React, { useMemo, useState } from 'react';
 import type { Country } from '../types';
-import { HomeIcon, SpeakerIcon } from '../components/Icons';
+import { HomeIcon, SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
+import type { VoiceStatus } from '../utils/speech';
 import { toLangCode } from './location/data/locationData';
 import {
   BODY_PARTS,
@@ -24,6 +25,8 @@ interface BodyModuleProps {
   onGoHome: () => void;
   onOpenLanguageModal: () => void;
   handlePlayAudio: (text: string, lang: string) => void;
+  /** Voz do idioma de destino no aparelho; 'missing' apaga os botões de áudio. */
+  voiceStatus?: VoiceStatus;
 }
 
 export default function BodyModule({
@@ -34,6 +37,7 @@ export default function BodyModule({
   onGoHome,
   onOpenLanguageModal,
   handlePlayAudio,
+  voiceStatus = 'unknown',
 }: BodyModuleProps) {
   const target = toLangCode(targetCountry.lang);
   const native = toLangCode(nativeCountry.lang);
@@ -45,6 +49,13 @@ export default function BodyModule({
 
   const sentence = useMemo(() => buildComplaint(target, symptom, part, duration), [target, symptom, part, duration]);
   const sentenceNative = useMemo(() => buildComplaint(native, symptom, part, duration), [native, symptom, part, duration]);
+
+  // Sem voz do idioma de destino, `handlePlayAudio` recusa falar e abre o
+  // aviso — falar com a voz padrão ensinaria outra pronúncia. Aqui só o botão
+  // conta isso antes do toque.
+  const voiceMissing = voiceStatus === 'missing';
+  const Listen = voiceMissing ? SpeakerOffIcon : SpeakerIcon;
+  const audioLabel = (base: string) => (voiceMissing ? `${base} — ${t('voiceMissingLabel')}` : base);
 
   const speak = (text: string) => {
     playSound('click');
@@ -140,8 +151,8 @@ export default function BodyModule({
                 <p className="text-xl font-bold leading-snug" dir="auto">{sentence}</p>
                 {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{sentenceNative}</p>}
               </div>
-              <button onClick={() => speak(sentence)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={t('locListen')}>
-                <SpeakerIcon className="w-6 h-6" />
+              <button onClick={() => speak(sentence)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+                <Listen className="w-6 h-6" />
               </button>
             </div>
           </div>
@@ -216,7 +227,7 @@ export default function BodyModule({
                       <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
                       {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
                     </div>
-                    <SpeakerIcon className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
+                    <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
                   </button>
                 </li>
               ))}

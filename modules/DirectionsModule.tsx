@@ -1,8 +1,9 @@
 
 import React, { useMemo, useState } from 'react';
 import type { Country } from '../types';
-import { HomeIcon, SpeakerIcon, XIcon } from '../components/Icons';
+import { HomeIcon, SpeakerIcon, SpeakerOffIcon, XIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
+import type { VoiceStatus } from '../utils/speech';
 import { toLangCode, type LangCode } from './location/data/locationData';
 import {
   DIR_STEPS,
@@ -27,6 +28,8 @@ interface DirectionsModuleProps {
   onGoHome: () => void;
   onOpenLanguageModal: () => void;
   handlePlayAudio: (text: string, lang: string) => void;
+  /** Voz do idioma de destino no aparelho; 'missing' apaga os botões de áudio. */
+  voiceStatus?: VoiceStatus;
 }
 
 const MAX_STEPS = 10;
@@ -55,6 +58,7 @@ export default function DirectionsModule({
   onGoHome,
   onOpenLanguageModal,
   handlePlayAudio,
+  voiceStatus = 'unknown',
 }: DirectionsModuleProps) {
   const target = toLangCode(targetCountry.lang);
   const native = toLangCode(nativeCountry.lang);
@@ -91,6 +95,13 @@ export default function DirectionsModule({
   };
   const undo = () => { playSound('toggle'); setSteps((p) => p.slice(0, -1)); };
   const clear = () => { playSound('toggle'); setSteps([]); };
+
+  // Sem voz do idioma de destino, `handlePlayAudio` recusa falar e abre o
+  // aviso — falar com a voz padrão ensinaria outra pronúncia. Aqui só o botão
+  // conta isso antes do toque.
+  const voiceMissing = voiceStatus === 'missing';
+  const Listen = voiceMissing ? SpeakerOffIcon : SpeakerIcon;
+  const audioLabel = (base: string) => (voiceMissing ? `${base} — ${t('voiceMissingLabel')}` : base);
 
   const speak = (text: string) => {
     playSound('click');
@@ -219,8 +230,8 @@ export default function DirectionsModule({
                       <p className="font-bold leading-snug">{s.phrases[target]}</p>
                       {showNative && <p className="text-xs text-white leading-snug" dir="auto">{s.phrases[native]}</p>}
                     </div>
-                    <button onClick={() => speak(s.phrases[target])} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 flex-shrink-0" aria-label={t('locListen')}>
-                      <SpeakerIcon className="w-4 h-4" />
+                    <button onClick={() => speak(s.phrases[target])} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 flex-shrink-0" aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+                      <Listen className="w-4 h-4" />
                     </button>
                   </li>
                 ))}
@@ -233,7 +244,7 @@ export default function DirectionsModule({
                 className="mt-3 w-full py-2.5 rounded-xl bg-white font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
                 style={{ color: theme.hex }}
               >
-                <SpeakerIcon className="w-5 h-5" /> {t('dirPlayAll')}
+                <Listen className="w-5 h-5" /> {t('dirPlayAll')}
               </button>
             )}
           </div>
@@ -278,7 +289,7 @@ export default function DirectionsModule({
                   })}
                 </div>
                 <button onClick={() => speak(headingSentence(target, compass))} className="w-full text-left flex items-center gap-2">
-                  <SpeakerIcon className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
+                  <Listen className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold leading-snug">{headingSentence(target, compass)}</p>
                     {showNative && <p className="text-[11px] text-gray-500 leading-snug" dir="auto">{headingSentence(native, compass)}</p>}
@@ -299,7 +310,7 @@ export default function DirectionsModule({
                       <p className="font-semibold leading-snug">{q[target]}</p>
                       {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
                     </div>
-                    <SpeakerIcon className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
+                    <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
                   </button>
                 </li>
               ))}

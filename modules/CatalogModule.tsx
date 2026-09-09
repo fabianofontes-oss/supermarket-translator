@@ -12,6 +12,7 @@ import { useVoiceSearch } from '../hooks/useVoiceSearch';
 import { mapTranslationItem } from '../utils/itemHelpers';
 import { MAX_SEARCH_RESULTS, MIN_SEARCH_LENGTH, matchesSearch, normalizeForSearch } from '../utils/searchText';
 import { playSound } from '../utils/soundUtils';
+import type { VoiceStatus } from '../utils/speech';
 
 /**
  * Módulo genérico de catálogo (Supermercado, Farmácia e futuros módulos de lista).
@@ -33,6 +34,8 @@ export interface CatalogModuleProps {
   theme: { color: string; textColor: string; hex: string; borderColor: string };
   handlePlayAudio: (text: string, lang: string) => void;
   handlePlayPhrase: (phraseType: 'ask' | 'want', item: TranslationItemType) => void;
+  /** Voz do idioma de destino no aparelho; 'missing' apaga os botões de áudio. */
+  voiceStatus?: VoiceStatus;
 
   activeTab: 'home' | 'search' | 'favorites' | 'list';
   onTabChange: (tab: 'home' | 'search' | 'favorites' | 'list') => void;
@@ -87,6 +90,7 @@ export default function CatalogModule({
   theme,
   handlePlayAudio,
   handlePlayPhrase,
+  voiceStatus = 'unknown',
   activeTab,
   onTabChange,
   isSearchActive,
@@ -289,6 +293,7 @@ export default function CatalogModule({
     isPhrase,
     onOpenPlan: () => {},
     isPharmacy,
+    voiceStatus,
   });
 
   const searchBarContent = (
@@ -419,6 +424,7 @@ export default function CatalogModule({
         theme={theme}
         onOpenPlan={() => {}}
         isPharmacy={isPharmacy}
+        voiceStatus={voiceStatus}
       />
     );
   } else if (activeTab === 'list') {
@@ -442,6 +448,7 @@ export default function CatalogModule({
         theme={theme}
         onOpenPlan={() => {}}
         isPharmacy={isPharmacy}
+        voiceStatus={voiceStatus}
       />
     );
   }

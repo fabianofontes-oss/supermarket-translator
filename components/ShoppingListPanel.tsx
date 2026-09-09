@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import type { TranslationItem as TranslationItemType, Country } from '../types';
 import { ShoppingBagIcon } from './Icons';
 import { TranslationItem } from './TranslationItem';
+import type { VoiceStatus } from '../utils/speech';
 
 
 interface ShoppingListPanelProps {
@@ -23,6 +24,8 @@ interface ShoppingListPanelProps {
     theme: { color: string; textColor: string };
     onOpenPlan: () => void;
     isPharmacy?: boolean;
+    /** Voz do idioma de destino no aparelho; 'missing' apaga os botões de áudio. */
+    voiceStatus?: VoiceStatus;
 }
 
 const groupItemsByHierarchy = (items: TranslationItemType[]) => {
@@ -61,7 +64,8 @@ export const ShoppingListPanel: React.FC<ShoppingListPanelProps> = ({
     isConversationLocked,
     theme,
     onOpenPlan,
-    isPharmacy = false
+    isPharmacy = false,
+    voiceStatus = 'unknown'
 }) => {
 
     const groupedShoppingList = useMemo(() => {
@@ -111,6 +115,7 @@ export const ShoppingListPanel: React.FC<ShoppingListPanelProps> = ({
                                 isPhrase={item.category === 'phrases'}
                                 onOpenPlan={onOpenPlan}
                                 isPharmacy={isPharmacy}
+                                voiceStatus={voiceStatus}
                             />
                            )
                         })}

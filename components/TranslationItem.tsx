@@ -2,6 +2,7 @@
 import React, { useEffect, useId, useRef } from 'react';
 import {
   SpeakerIcon,
+  SpeakerOffIcon,
   QuestionMarkCircleIcon,
   CartIcon,
   CheckIcon,
@@ -11,6 +12,7 @@ import {
 } from './Icons';
 import type { TranslationItem as TranslationItemType, Country } from '../types';
 import { playSound } from '../utils/soundUtils';
+import type { VoiceStatus } from '../utils/speech';
 
 interface TranslationItemProps {
   item: TranslationItemType;
@@ -39,6 +41,12 @@ interface TranslationItemProps {
    * podem exibir o mesmo nome e a posição é o que os distingue.
    */
   contextLabel?: string;
+  /**
+   * Voz do idioma de destino no aparelho. 'missing' apaga os botões de áudio,
+   * porque falar com voz de outro idioma ensinaria a pronúncia errada.
+   * 'unknown' é tratado como normal: o motor TTS ainda pode estar subindo.
+   */
+  voiceStatus?: VoiceStatus;
 }
 
 export const TranslationItem: React.FC<TranslationItemProps> = ({
@@ -63,12 +71,18 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
   isPhrase = false,
   onOpenPlan,
   isPharmacy = false,
-  contextLabel
+  contextLabel,
+  voiceStatus = 'unknown'
 }) => {
-  const getButtonClasses = (locked: boolean) => 
+  /** Aparelho sem voz do idioma de destino: o áudio não sai, e o botão diz isso. */
+  const voiceMissing = voiceStatus === 'missing';
+
+  const getButtonClasses = (locked: boolean, muted = false) =>
     `hit p-2 rounded-full transition-colors duration-200 ${
-      locked 
-        ? 'bg-red-50 hover:bg-red-100' 
+      locked
+        ? 'bg-red-50 hover:bg-red-100'
+        : muted
+        ? 'text-gray-400 hover:bg-gray-100'
         : `hover:bg-gray-100 text-gray-500 hover:${theme.textColor}`
     }`;
 
@@ -176,14 +190,27 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
       }
     };
 
+    /**
+     * O toque continua chamando `onPlayAudio`/`onPlayPhrase`: é lá, num lugar
+     * só, que mora a regra de não falar com voz errada — e é de lá que sai o
+     * aviso. Duplicar a decisão aqui é como as duas telas saem de sincronia.
+     */
+    const muted = voiceMissing && !locked;
+    const shownIcon = muted && phraseType === 'listen'
+      ? <SpeakerOffIcon className={baseIconClasses} />
+      : icon;
+    // Nome composto: os três botões de áudio do card ficariam com o mesmo nome
+    // acessível se fossem só "Voz não instalada".
+    const shownTitle = locked ? t('lockedAudio') : muted ? `${title} — ${t('voiceMissingLabel')}` : title;
+
     return (
       <button
         onClick={handleClick}
-        className={getButtonClasses(locked)}
-        aria-label={locked ? t('lockedAudio') : title}
-        title={locked ? t('lockedAudio') : title}
+        className={getButtonClasses(locked, muted)}
+        aria-label={shownTitle}
+        title={shownTitle}
       >
-        {locked ? <span className="text-lg">🔒</span> : icon}
+        {locked ? <span className="text-lg">🔒</span> : shownIcon}
       </button>
     );
   };
