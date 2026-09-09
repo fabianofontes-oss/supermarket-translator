@@ -114,7 +114,8 @@ export default function LocationModule({
         <div className="flex items-center justify-between px-4 pt-4 pb-4 max-w-3xl mx-auto">
           <button
             onClick={() => { playSound('click'); onGoHome(); }}
-            className="p-2 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors"
+            aria-label={t('a11yHome')}
+            className="hit p-2 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors"
           >
             <HomeIcon className="w-5 h-5" />
           </button>
@@ -123,11 +124,12 @@ export default function LocationModule({
           </h1>
           <button
             onClick={() => { playSound('click'); onOpenLanguageModal(); }}
-            className="p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors"
+            aria-label={t('languageSettings')}
+            className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors"
           >
             <div className="flex items-center -space-x-2">
-              <img src={nativeCountry.image} alt={nativeCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
-              <img src={targetCountry.image} alt={targetCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
+              <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
+              <img src={targetCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
             </div>
           </button>
         </div>

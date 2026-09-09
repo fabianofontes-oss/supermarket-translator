@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useCallback, useId, useRef } from 'react';
 import type { Country } from '../types';
 import { XIcon, CheckIcon } from './Icons';
+import { useDialog } from '../hooks/useDialog';
 import { playSound } from '../utils/soundUtils';
 
 interface LanguagePanelProps {
@@ -30,25 +31,39 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
   theme,
   blockOriginOnly = false
 }) => {
-  if (!isOpen) return null;
-
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
       playSound('pop');
       onClose();
-  };
+  }, [onClose]);
+
+  // Foco entra no país já escolhido em "Eu falo", que é o que a pessoa veio
+  // conferir. Tab circula dentro, Esc fecha, foco volta para quem abriu.
+  const nativeSelectedRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useDialog(isOpen, handleClose, nativeSelectedRef);
+
+  const ids = useId();
+  const nativeGroupId = `${ids}-native`;
+  const targetGroupId = `${ids}-target`;
+
+  if (!isOpen) return null;
 
   const renderFlagButton = (
     opt: Country,
     isSelected: boolean,
     onClick: () => void,
     ringColor: string,
-    isBlocked = false // já escolhido no outro lado: o mesmo país não pode ser origem e destino
+    isBlocked = false, // já escolhido no outro lado: o mesmo país não pode ser origem e destino
+    ref?: React.Ref<HTMLButtonElement>
   ) => (
     <button
       key={opt.code}
+      ref={ref}
       disabled={isBlocked}
+      // O anel e a saturação são só visuais: sem isto, um leitor de tela ouve
+      // doze botões iguais e não sabe qual país está escolhido.
+      aria-pressed={isSelected}
       onClick={() => { playSound('click'); onClick(); }}
-      className={`relative group flex items-center justify-center p-1 rounded-full tap ${
+      className={`hit relative group flex items-center justify-center p-1 rounded-full tap ${
         isBlocked
           ? 'opacity-25 grayscale cursor-not-allowed'
           : isSelected
@@ -71,41 +86,50 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={handleClose}></div>
 
-      <div className="relative w-full max-w-[16rem] bg-white rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[85vh] overflow-y-auto animate-expand-up no-scrollbar">
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('languageSettings')}
+        className="relative w-full max-w-[16rem] bg-white rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[85vh] overflow-y-auto animate-expand-up no-scrollbar"
+      >
 
         {/* Close Button */}
         <button
             onClick={handleClose}
-            className="absolute top-1.5 right-1.5 p-1 bg-black/10 rounded-full text-white z-50 hover:bg-black/30 backdrop-blur-md transition-colors"
+            aria-label={t('close')}
+            className="hit absolute top-1.5 right-1.5 p-1 bg-black/10 rounded-full text-white z-50 hover:bg-black/30 backdrop-blur-md transition-colors"
         >
             <XIcon className="w-3.5 h-3.5" />
         </button>
 
         {/* Top Section: Native Language (Blue Theme) */}
         <div className="bg-slate-100 flex flex-col shrink-0">
-             <div className="bg-slate-700 text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2">
+             <div id={nativeGroupId} className="bg-slate-700 text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2">
                 {t('myLanguage')}...
              </div>
              {/* Optimized padding and gap for small screens */}
-             <div className="p-3 grid grid-cols-3 gap-3 justify-items-center">
-                {options.map((opt) =>
-                    renderFlagButton(
+             <div role="group" aria-labelledby={nativeGroupId} className="p-3 grid grid-cols-3 gap-3 justify-items-center">
+                {options.map((opt) => {
+                    const isSelected = nativeCountry.code === opt.code;
+                    return renderFlagButton(
                         opt,
-                        nativeCountry.code === opt.code,
+                        isSelected,
                         () => onNativeChange(opt),
                         '#475569',
-                        targetCountry.code === opt.code || (blockOriginOnly && !!opt.originOnly)
-                    )
-                )}
+                        targetCountry.code === opt.code || (blockOriginOnly && !!opt.originOnly),
+                        isSelected ? nativeSelectedRef : undefined,
+                    );
+                })}
              </div>
         </div>
 
         {/* Bottom Section: Target Location (Red Theme) */}
         <div className="flex flex-col relative shrink-0 flex-1" style={{ backgroundColor: `${theme.hex}14` }}>
-             <div className={`${theme.color} text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2`}>
+             <div id={targetGroupId} className={`${theme.color} text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2`}>
                 {t('iAmIn')}...
              </div>
-             <div className="p-3 grid grid-cols-3 gap-3 pb-2 justify-items-center">
+             <div role="group" aria-labelledby={targetGroupId} className="p-3 grid grid-cols-3 gap-3 pb-2 justify-items-center">
                  {options.filter((opt) => !opt.originOnly).map((opt) =>
                     renderFlagButton(
                         opt,
@@ -121,7 +145,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
              <div className="px-3 pb-3 pt-1 mt-auto">
                 <button
                     onClick={handleClose}
-                    className={`w-full py-2 rounded-xl ${theme.color} text-white font-bold shadow-md hover:brightness-90 active:scale-95 tap flex items-center justify-center gap-2 ring-1 ring-white/20`}
+                    className={`w-full min-h-[44px] py-2 rounded-xl ${theme.color} text-white font-bold shadow-md hover:brightness-90 active:scale-95 tap flex items-center justify-center gap-2 ring-1 ring-white/20`}
                 >
                     <span>OK</span>
                     <CheckIcon className="w-4 h-4 stroke-[3]" />

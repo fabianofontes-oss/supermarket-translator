@@ -179,11 +179,14 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
       >
           {/* Panel Header Area */}
           <div className={`w-full flex flex-col items-center pt-3 pb-2 relative transition-colors duration-300 ${panelTitle ? theme.color : 'bg-white'}`}>
-               {/* Drag Handle */}
-              <div
-                className={`w-12 h-1.5 rounded-full cursor-pointer mb-3 ${panelTitle ? 'bg-white/30' : 'bg-gray-200'}`}
+               {/* Alça: fecha o painel. Era uma div com onClick — sem papel, sem
+                  nome e inalcançável pelo teclado. */}
+              <button
+                type="button"
                 onClick={() => handleTabChange('home')}
-              ></div>
+                aria-label={t('close')}
+                className={`hit w-12 h-1.5 rounded-full mb-3 ${panelTitle ? 'bg-white/30' : 'bg-gray-200'}`}
+              />
 
               {/* Panel Title */}
               {panelTitle && (
@@ -194,7 +197,8 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
                       </h2>
                       <button
                         onClick={() => handleTabChange('home')}
-                        className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-white"
+                        aria-label={t('close')}
+                        className="hit p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-white"
                       >
                         <XIcon className="w-5 h-5" />
                       </button>
@@ -236,15 +240,19 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
            <div className="relative h-full w-full flex justify-center pointer-events-none">
                 <button
                     onClick={handleOpenLanguage}
+                    aria-label={t('languageSettings')}
                     className={`w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform tap hover:scale-105 cursor-pointer absolute bottom-10 z-50 pointer-events-auto shadow-xl`}
                     style={{ borderColor: theme.hex }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full z-30 pointer-events-none"></div>
                     <div className="absolute inset-0 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] z-20 pointer-events-none"></div>
 
+                    {/* Decorativa: o nome do botão já diz o que ele faz, e o
+                        `alt` do país o rebatizaria de "Espanha". */}
                     <img
                     src={targetCountry.image}
-                    alt={targetCountry.name}
+                    alt=""
+                    aria-hidden="true"
                     className="w-full h-full object-cover rounded-full"
                     />
                 </button>

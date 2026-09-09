@@ -52,7 +52,7 @@ export const PRONOUNS: Pronoun[] = [
     key: 'usted', person: 2, tag: 'formal',
     dative: { lt: 'jums' },
     altPerson: { en: 1, fr: 4, uk: 4, ar: 1, lt: 4 },
-    words: { es: 'usted', pt: 'o senhor / a senhora', en: 'you (formal)', fr: 'vous (formel)', it: 'lei (formale)', uk: 'ви (ввічливо)', lt: 'jūs (mandagiai)', ar: 'حضرتك' },
+    words: { es: 'usted', pt: 'o senhor / a senhora', en: 'you', fr: 'vous', it: 'lei', uk: 'ви', lt: 'jūs', ar: 'حضرتك' },
     notes: {
       es: 'Solo con personas mayores o en trámites oficiales. Se conjuga en tercera persona.',
       pt: 'Equivale a "o senhor", não a "você". Use só com idosos ou em repartição pública. Conjuga na 3ª pessoa: "usted quiere".',
@@ -91,7 +91,7 @@ export const PRONOUNS: Pronoun[] = [
     key: 'ustedes', person: 5, tag: 'formal',
     dative: { lt: 'jums' },
     altPerson: { en: 4, fr: 4, uk: 4, ar: 4, lt: 4 },
-    words: { es: 'ustedes', pt: 'os senhores', en: 'you all (formal)', fr: 'vous (formel)', it: 'loro (formale)', uk: 'ви (ввічливо)', lt: 'jūs (mandagiai)', ar: 'حضراتكم' },
+    words: { es: 'ustedes', pt: 'os senhores', en: 'you all', fr: 'vous', it: 'loro', uk: 'ви', lt: 'jūs', ar: 'حضراتكم' },
     notes: {
       es: 'En España, la forma formal de "vosotros".',
       pt: 'Na Espanha é a forma formal de "vosotros". Na América Latina é a única forma de plural.',
@@ -120,6 +120,11 @@ export interface Verb {
   enAux: EnAux;
   /** Idiomas em que este verbo pede o sujeito no dativo (lt: "man reikia"). */
   dativeIn?: LangCode[];
+  /**
+   * A forma verbal carrega preposição ("precisar de", "avoir besoin de") e a
+   * frase sem objeto fica truncada. A UI não oferece o chip "nada" para estes.
+   */
+  requiresComplement?: boolean;
   labels: Text;
   forms: Record<LangCode, [string, string, string, string, string, string]>;
   /** Passado. Em espanhol é o pretérito perfecto, que é o que se ouve na Espanha. */
@@ -246,7 +251,7 @@ export const VERBS: Verb[] = [
     ],
   },
   {
-    key: 'necesitar', enAux: 'do', dativeIn: ['lt'],
+    key: 'necesitar', enAux: 'do', dativeIn: ['lt'], requiresComplement: true,
     labels: { es: 'necesitar', pt: 'precisar', en: 'to need', fr: 'avoir besoin', it: 'avere bisogno', uk: 'потребувати', lt: 'reikėti', ar: 'يحتاج' },
     forms: {
       es: ['necesito', 'necesitas', 'necesita', 'necesitamos', 'necesitáis', 'necesitan'],
@@ -414,6 +419,23 @@ const AR_NOT: string[] = ['لست', 'لست', 'ليس', 'لسنا', 'لستم', 
 /** Junta verbo e complemento respeitando terminações que já pedem elisão. */
 const joinVerb = (verb: string, comp: string) => (verb.endsWith("'") ? `${verb}${comp}` : `${verb} ${comp}`);
 
+/**
+ * Preposição que a forma verbal carrega e que só faz sentido com objeto.
+ * Sem complemento, "preciso de" vira "preciso" e "ai besoin d'" vira
+ * "ai besoin" — frases curtas, mas corretas.
+ */
+const TRAILING_PREPOSITION: Partial<Record<LangCode, RegExp>> = {
+  pt: /\s+de$/,
+  es: /\s+de$/,
+  it: /\s+di$/,
+  fr: /\s*d['’]$|\s+de$/,
+};
+
+const dropDanglingPreposition = (lang: LangCode, form: string): string => {
+  const pattern = TRAILING_PREPOSITION[lang];
+  return pattern ? form.replace(pattern, '') : form;
+};
+
 export const buildPhrase = (
   lang: LangCode,
   pronoun: Pronoun,
@@ -427,8 +449,12 @@ export const buildPhrase = (
   const useDative = verb.dativeIn?.includes(lang) && pronoun.dative?.[lang];
   const p = useDative ? pronoun.dative![lang]! : pronoun.words[lang];
   const table = tense === 'past' ? verb.pastForms : tense === 'future' ? verb.futureForms : verb.forms;
-  const v = table[lang][person];
   const c = comp ? comp.texts[lang] : '';
+  // Verbos como "precisar de" / "avoir besoin de" / "aver bisogno di" trazem a
+  // preposição colada na forma. Sem complemento ela ficava pendurada no fim
+  // ("J'ai besoin d'.", "Eu preciso de."). A UI já evita esse estado para
+  // verbos que exigem objeto; aqui a função se protege de qualquer jeito.
+  const v = c ? table[lang][person] : dropDanglingPreposition(lang, table[lang][person]);
   const body = (v ? (c ? joinVerb(v, c) : v) : c).trim();
 
   if (!body) return `${cap(p)}.`;
@@ -473,7 +499,11 @@ export const buildPhrase = (
         if (!v) return `${p} ${AR_NOT[person]} ${body}.`;
         if (tense === 'past') return `${p} ما ${body}.`;
         if (tense === 'future') {
-          const present = verb.forms.ar[person];
+          // لن pede o verbo sem o prefixo de futuro س — é a mesma forma que o
+          // projeto usa depois de لن em todos os outros verbos. Para ser/estar
+          // o presente é vazio de propósito (o árabe não tem cópula), então a
+          // forma sai do futuro tirando o س: سأكون → أكون.
+          const present = verb.forms.ar[person] || verb.futureForms.ar[person].replace(/^س/, '');
           return `${p} لن ${c ? joinVerb(present, c) : present}.`;
         }
         return `${p} لا ${body}.`;
@@ -489,7 +519,9 @@ export const buildPhrase = (
       if (mood === 'negative') {
         // Na negativa quem elide é "ne", não o sujeito: "je n'ai pas", nunca "j'n'ai".
         const ne = isVowel(aux) ? "n'" : 'ne ';
-        const tail = [...rest, c].filter(Boolean).join(' ');
+        // `join(' ')` cru quebrava a elisão do complemento: "besoin d' aide".
+        // `joinVerb` respeita o apóstrofo, igual à afirmativa.
+        const tail = [...rest, c].filter(Boolean).reduce((acc, part) => (acc ? joinVerb(acc, part) : part), '');
         return `${cap(p)} ${ne}${aux} pas${tail ? ` ${tail}` : ''}.`;
       }
       return `${cap(subj)}${body}.`;

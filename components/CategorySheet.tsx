@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import type { Category } from '../types';
 import { XIcon, CheckIcon } from './Icons';
 import { metaFor } from './categoryMeta';
+import { useDialog } from '../hooks/useDialog';
 import { playSound } from '../utils/soundUtils';
 
 interface CategorySheetProps {
@@ -29,38 +30,14 @@ interface CategorySheetProps {
 export const CategorySheet: React.FC<CategorySheetProps> = ({
   isOpen, onClose, categories, selectedName, onSelect, theme, t,
 }) => {
-  const panelRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
-  const restoreFocusTo = useRef<HTMLElement | null>(null);
 
   const close = useCallback(() => { playSound('pop'); onClose(); }, [onClose]);
 
-  // Ao abrir, guarda quem tinha o foco e leva o foco para a categoria atual.
-  useEffect(() => {
-    if (!isOpen) return;
-    restoreFocusTo.current = document.activeElement as HTMLElement | null;
-    const timer = window.setTimeout(() => selectedRef.current?.focus(), 60);
-    return () => {
-      window.clearTimeout(timer);
-      restoreFocusTo.current?.focus?.();
-    };
-  }, [isOpen]);
-
-  // Esc fecha, e o Tab circula dentro do painel em vez de escapar para a página.
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); close(); return; }
-      if (e.key !== 'Tab' || !panelRef.current) return;
-      const items = panelRef.current.querySelectorAll<HTMLElement>('button:not([disabled])');
-      if (!items.length) return;
-      const first = items[0], last = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [isOpen, close]);
+  // Foco entra na categoria atual, Tab circula dentro, Esc fecha, foco volta
+  // para quem abriu. Mesmo comportamento de antes, agora compartilhado com o
+  // painel de idiomas e o modal de instalação.
+  const panelRef = useDialog(isOpen, close, selectedRef);
 
   if (!isOpen) return null;
 

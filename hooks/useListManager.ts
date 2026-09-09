@@ -1,45 +1,41 @@
 
 import { useState, useEffect } from 'react';
 import type { TranslationItem } from '../types';
+import { checkedKeyFor, isItemArray, isStringArray, listKeyFor, readJSON, writeJSON } from '../utils/storage';
 
+/**
+ * Lista de compras e itens marcados de UM módulo.
+ *
+ * Favoritos **não** moram aqui: eles são uma lista só para o app inteiro e
+ * vivem em `useFavorites`, montado uma vez em App.tsx (achado 8.1). Este hook
+ * é instanciado uma vez por módulo e cada instância só toca nas próprias
+ * chaves prefixadas.
+ */
 export const useListManager = (storagePrefix: string = '') => {
-  // Construct keys based on prefix. 
-  // If prefix is empty (e.g. for Supermarket backward compatibility), use original keys.
-  // If prefix is 'pharmacy_', keys become 'pharmacy_shoppingList', etc.
-  const listKey = storagePrefix ? `${storagePrefix}_shoppingList` : 'shoppingList';
-  const checkedKey = storagePrefix ? `${storagePrefix}_checkedItems` : 'checkedItems';
-  const favoritesKey = 'favorites'; // Favorites are usually global across the app, but could be prefixed if needed.
+  const listKey = listKeyFor(storagePrefix);
+  const checkedKey = checkedKeyFor(storagePrefix);
 
-  const [shoppingList, setShoppingList] = useState<TranslationItem[]>([]);
-  const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
-  const [favorites, setFavorites] = useState<TranslationItem[]>([]);
+  // Cada chave é lida de forma independente, na inicialização do estado.
+  // Antes eram três `JSON.parse` num `try/catch` só, dentro de um efeito: um
+  // JSON quebrado numa chave impedia a leitura das outras, e o efeito de
+  // gravação — que roda no mesmo commit — apagava os dados bons (achado N-5).
+  //
+  // O prefixo é uma constante por instância (App.tsx passa literais), então não
+  // existe recarga por mudança de chave.
+  const [shoppingList, setShoppingList] = useState<TranslationItem[]>(
+    () => readJSON(listKey, [] as TranslationItem[], isItemArray),
+  );
+  const [checkedItems, setCheckedItems] = useState<Set<string>>(
+    () => new Set(readJSON(checkedKey, [] as string[], isStringArray)),
+  );
 
-  // Load from LocalStorage
   useEffect(() => {
-    try {
-      const savedList = localStorage.getItem(listKey);
-      if (savedList) setShoppingList(JSON.parse(savedList));
+    writeJSON(listKey, shoppingList);
+  }, [listKey, shoppingList]);
 
-      const savedChecked = localStorage.getItem(checkedKey);
-      if (savedChecked) setCheckedItems(new Set(JSON.parse(savedChecked)));
-
-      const savedFavorites = localStorage.getItem(favoritesKey);
-      if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
-    } catch (err) {
-      console.error('Failed to load local storage data', err);
-    }
-  }, [listKey, checkedKey, favoritesKey]);
-
-  // Save to LocalStorage
   useEffect(() => {
-    try {
-      localStorage.setItem(listKey, JSON.stringify(shoppingList));
-      localStorage.setItem(checkedKey, JSON.stringify(Array.from(checkedItems)));
-      localStorage.setItem(favoritesKey, JSON.stringify(favorites));
-    } catch (err) {
-      console.error('Failed to save to localStorage', err);
-    }
-  }, [shoppingList, checkedItems, favorites, listKey, checkedKey, favoritesKey]);
+    writeJSON(checkedKey, Array.from(checkedItems));
+  }, [checkedKey, checkedItems]);
 
   const toggleShoppingListItem = (item: TranslationItem) => {
     setShoppingList((prevList) => {
@@ -70,23 +66,10 @@ export const useListManager = (storagePrefix: string = '') => {
     });
   };
 
-  const toggleFavorite = (item: TranslationItem) => {
-    setFavorites((prevFavorites) => {
-      const isFavorite = prevFavorites.some((i) => i.key === item.key);
-      if (isFavorite) {
-        return prevFavorites.filter((i) => i.key !== item.key);
-      } else {
-        return [...prevFavorites, item];
-      }
-    });
-  };
-
   return {
     shoppingList,
     checkedItems,
-    favorites,
     toggleShoppingListItem,
-    toggleCheckedItem,
-    toggleFavorite
+    toggleCheckedItem
   };
 };

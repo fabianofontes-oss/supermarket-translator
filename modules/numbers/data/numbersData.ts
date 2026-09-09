@@ -375,6 +375,9 @@ export const buildPriceShort = (lang: LangCode, totalCents: number): string | nu
     case 'fr': return `${fr1000(e)} ${fr100(c)}.`;
     case 'it': return `${it1000(e)} e ${it100(c)}.`;
     case 'uk': return `${uk1000(e)} ${uk100(c)}.`;
+    // Sem este `case` o lituano caía no `default:`, que é árabe. A conjunção é
+    // "ir", a mesma que `buildPrice` já usa para lituano.
+    case 'lt': return `${lt1000(e)} ir ${lt1000(c)}.`;
     default:   return `${ar1000(e)} و${ar100(c)}.`;
   }
 };
@@ -420,6 +423,11 @@ export const MONTHS: Record<LangCode, string[]> = {
 const EN_ORD = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth', 'eighteenth', 'nineteenth', 'twentieth', 'twenty-first', 'twenty-second', 'twenty-third', 'twenty-fourth', 'twenty-fifth', 'twenty-sixth', 'twenty-seventh', 'twenty-eighth', 'twenty-ninth', 'thirtieth', 'thirty-first'];
 
 /** "el catorce de marzo" — month de 0 a 11. */
+/**
+ * @param day   dia do mês, base 1
+ * @param month índice do mês, **base ZERO** — igual a `Date.prototype.getMonth()`,
+ *              que é de onde o módulo tira o valor. Passar 12 devolve `undefined`.
+ */
 export const buildDate = (lang: LangCode, day: number, month: number): string => {
   const M = MONTHS[lang][month];
   switch (lang) {

@@ -10,6 +10,7 @@ import { FavoritesPanel } from '../components/FavoritesPanel';
 import { ShoppingListPanel } from '../components/ShoppingListPanel';
 import { useVoiceSearch } from '../hooks/useVoiceSearch';
 import { mapTranslationItem } from '../utils/itemHelpers';
+import { MAX_SEARCH_RESULTS, MIN_SEARCH_LENGTH, matchesSearch, normalizeForSearch } from '../utils/searchText';
 import { playSound } from '../utils/soundUtils';
 
 /**
@@ -63,6 +64,15 @@ const FOLDER_COLORS = [
   'bg-pink-100 text-pink-900 border-pink-200',
   'bg-rose-100 text-rose-900 border-rose-200',
 ];
+
+/** O que a tela precisa saber para decidir o que mostrar. */
+type SearchOutcome = {
+  /** browse = sem termo; tooShort = 1 caractere; results = busca de verdade. */
+  mode: 'browse' | 'tooShort' | 'results';
+  items: TranslationItemType[];
+  /** Total encontrado antes do teto de exibição. */
+  total: number;
+};
 
 export default function CatalogModule({
   titleKey,
@@ -119,6 +129,14 @@ export default function CatalogModule({
   });
 
   const [searchTerm, setSearchTerm] = useState('');
+  // O campo responde na hora; a varredura espera a digitação parar.
+  const [debouncedTerm, setDebouncedTerm] = useState('');
+  useEffect(() => {
+    // Limpar e apagar são imediatos: só adiar quando há o que procurar.
+    if (!searchTerm.trim()) { setDebouncedTerm(''); return; }
+    const timer = window.setTimeout(() => setDebouncedTerm(searchTerm), 150);
+    return () => window.clearTimeout(timer);
+  }, [searchTerm]);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
@@ -171,34 +189,61 @@ export default function CatalogModule({
     setExpandedItemKey(expandedItemKey === itemKey ? null : itemKey);
   }, [expandedItemKey, setExpandedItemKey]);
 
-  const searchResults = useMemo((): TranslationItemType[] => {
-    let results: TranslationItemType[] = [];
-
-    if (searchTerm.trim()) {
-      const term = searchTerm.trim().toLowerCase();
-      for (const categoryName in PREPOPULATED_TRANSLATIONS) {
-        if (!categories.some((c) => c.name === categoryName)) continue;
-        for (const subCategoryName in PREPOPULATED_TRANSLATIONS[categoryName]) {
-          PREPOPULATED_TRANSLATIONS[categoryName][subCategoryName]
-            .filter((item) => {
-              const nativeTerm = (nativeCountry.code === 'br' ? item.source_term : item.translations[nativeCountry.code] || item.source_term).toLowerCase();
-              const targetTerm = (targetCountry.code === 'br' ? item.source_term : item.translations[targetCountry.code] || item.source_term).toLowerCase();
-              return nativeTerm.includes(term) || targetTerm.includes(term);
-            })
-            .forEach((item) => results.push(mapTranslationItem(item, categoryName, subCategoryName, nativeCountry, targetCountry)));
+  /**
+   * Índice de busca do módulo: cada item já resolvido pelo MESMO
+   * `mapTranslationItem` que o card usa para desenhar.
+   *
+   * Antes a busca tinha a própria regra (`translations[code] || source_term`),
+   * de um passo só, enquanto o card usava a cadeia de quatro passos. Onde
+   * faltasse a chave do país, a busca comparava um texto e o card mostrava
+   * outro — o item aparecia como "Apple" e não era encontrado por "Apple".
+   *
+   * Recalculado só quando muda o par de idiomas (ou o módulo), não a cada
+   * tecla: o custo de mapear o catálogo sai do caminho da digitação.
+   */
+  const searchIndex = useMemo(() => {
+    const entries: { item: TranslationItemType; haystack: string }[] = [];
+    for (const categoryName in PREPOPULATED_TRANSLATIONS) {
+      if (!categories.some((c) => c.name === categoryName)) continue;
+      for (const subCategoryName in PREPOPULATED_TRANSLATIONS[categoryName]) {
+        for (const raw of PREPOPULATED_TRANSLATIONS[categoryName][subCategoryName]) {
+          const item = mapTranslationItem(raw, categoryName, subCategoryName, nativeCountry, targetCountry);
+          // Exatamente os dois textos que o card mostra: nada de campo extra.
+          entries.push({
+            item,
+            haystack: `${normalizeForSearch(item.source_term)}\n${normalizeForSearch(item.translated_term)}`,
+          });
         }
       }
-    } else {
+    }
+    return entries.sort((a, b) => a.item.source_term.localeCompare(b.item.source_term));
+  }, [categories, nativeCountry, targetCountry]);
+
+  const search = useMemo((): SearchOutcome => {
+    const term = normalizeForSearch(debouncedTerm);
+
+    if (!term) {
       const categoryData = PREPOPULATED_TRANSLATIONS[selectedCategory.name];
-      if (categoryData && categoryData[selectedSubCategory]) {
-        results = categoryData[selectedSubCategory].map((item) =>
-          mapTranslationItem(item, selectedCategory.name, selectedSubCategory, nativeCountry, targetCountry),
-        );
-      }
+      const items = categoryData?.[selectedSubCategory]
+        ? categoryData[selectedSubCategory]
+            .map((raw) => mapTranslationItem(raw, selectedCategory.name, selectedSubCategory, nativeCountry, targetCountry))
+            .sort((a, b) => a.source_term.localeCompare(b.source_term))
+        : [];
+      return { mode: 'browse', items, total: items.length };
     }
 
-    return results.sort((a, b) => a.source_term.localeCompare(b.source_term));
-  }, [searchTerm, selectedCategory, selectedSubCategory, nativeCountry, targetCountry, categories]);
+    // Uma letra varria o catálogo inteiro e devolvia 669 cards.
+    if (term.length < MIN_SEARCH_LENGTH) return { mode: 'tooShort', items: [], total: 0 };
+
+    const found = searchIndex.filter((e) => matchesSearch(e.haystack, term));
+    return {
+      mode: 'results',
+      items: found.slice(0, MAX_SEARCH_RESULTS).map((e) => e.item),
+      total: found.length,
+    };
+  }, [debouncedTerm, searchIndex, selectedCategory, selectedSubCategory, nativeCountry, targetCountry]);
+
+  const searchResults = search.items;
 
   const handleCategoryChange = (categoryKey: string) => {
     setSearchTerm('');
@@ -425,8 +470,22 @@ export default function CatalogModule({
       onOpenLanguageModal={onOpenLanguageModal}
     >
       <div className="space-y-4">
-        {isSearchActive && searchResults.length === 0 && (
-          <p className="text-center text-gray-500 mt-10">{t('noItemsFoundFor')}</p>
+        {/* Uma letra não é "nada encontrado": é um pedido de mais letras. */}
+        {search.mode === 'tooShort' && (
+          <p className="text-center text-gray-500 mt-10" dir="auto">{t('searchMinChars')}</p>
+        )}
+
+        {search.mode === 'results' && search.total === 0 && (
+          <p className="text-center text-gray-500 mt-10" dir="auto">{t('noItemsFoundFor')}</p>
+        )}
+
+        {/* Nunca esconder em silêncio que existem mais. */}
+        {search.mode === 'results' && search.total > searchResults.length && (
+          <p className="text-center text-xs text-gray-500 -mb-1" dir="auto">
+            {t('searchShowingOf')
+              .replace('{shown}', String(searchResults.length))
+              .replace('{total}', String(search.total))}
+          </p>
         )}
 
         {showPhraseSections && (
@@ -454,7 +513,16 @@ export default function CatalogModule({
         {!showPhraseSections && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-4">
             {searchResults.map((item) => (
-              <TranslationItem key={item.key} {...itemProps(item, item.category === 'phrases')} />
+              <TranslationItem
+                key={item.key}
+                {...itemProps(item, item.category === 'phrases')}
+                // Dois "Soro Fisiológico" só se distinguem pela posição no
+                // catálogo. A identidade da Fase 1 já os separa por dentro;
+                // aqui é o usuário que precisa enxergar a diferença.
+                contextLabel={search.mode === 'results' && item.category && item.subCategory
+                  ? `${t(item.category)} › ${t(item.subCategory)}`
+                  : undefined}
+              />
             ))}
           </div>
         )}

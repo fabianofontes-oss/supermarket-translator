@@ -10,8 +10,13 @@ export type Text = Record<LangCode, string>;
 
 export type SizeSystem = 'BR' | 'EU' | 'UK' | 'US';
 
+/**
+ * Chaves de tradução, não texto pronto. Antes eram strings em português
+ * mostradas ao lado de rótulos traduzidos, então um ucraniano lia
+ * "Reino Unido" no meio da interface em ucraniano.
+ */
 export const SYSTEM_LABEL: Record<SizeSystem, string> = {
-  BR: 'Brasil', EU: 'Europa', UK: 'Reino Unido', US: 'EUA',
+  BR: 'sizeSystemBR', EU: 'sizeSystemEU', UK: 'sizeSystemUK', US: 'sizeSystemUS',
 };
 
 /** Qual numeração o país usa. Ucrânia e Marrocos seguem a europeia. */

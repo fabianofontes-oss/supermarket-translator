@@ -1,19 +1,25 @@
-import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useId, Suspense } from 'react';
 import { COUNTRIES, SUPERMARKET_CATEGORIES, PHARMACY_CATEGORIES } from './constants';
 import type { Country, TranslationItem } from './types';
 // Cada módulo vira um pedaço próprio: abrir o hub não baixa o catálogo
 // inteiro nem os dados dos outros oito módulos.
-const CatalogModule = lazy(() => import('./modules/CatalogModule'));
-const LocationModule = lazy(() => import('./modules/LocationModule'));
-const DirectionsModule = lazy(() => import('./modules/DirectionsModule'));
-const NumbersModule = lazy(() => import('./modules/NumbersModule'));
-const BodyModule = lazy(() => import('./modules/BodyModule'));
-const CafeModule = lazy(() => import('./modules/CafeModule'));
-const PronounsModule = lazy(() => import('./modules/PronounsModule'));
-const SizesModule = lazy(() => import('./modules/SizesModule'));
+const CatalogModule = lazyWithRetry(() => import('./modules/CatalogModule'));
+const LocationModule = lazyWithRetry(() => import('./modules/LocationModule'));
+const DirectionsModule = lazyWithRetry(() => import('./modules/DirectionsModule'));
+const NumbersModule = lazyWithRetry(() => import('./modules/NumbersModule'));
+const BodyModule = lazyWithRetry(() => import('./modules/BodyModule'));
+const CafeModule = lazyWithRetry(() => import('./modules/CafeModule'));
+const PronounsModule = lazyWithRetry(() => import('./modules/PronounsModule'));
+const SizesModule = lazyWithRetry(() => import('./modules/SizesModule'));
 import { translations } from './translations';
 import { useListManager } from './hooks/useListManager';
+import { useFavorites } from './hooks/useFavorites';
+import { useDialog } from './hooks/useDialog';
+import { useCountryPair } from './hooks/useCountryPair';
 import { LanguagePanel } from './components/LanguagePanel';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { ErrorFallback } from './components/ErrorFallback';
+import { lazyWithRetry } from './utils/lazyWithRetry';
 import { playSound } from './utils/soundUtils';
 import {
   ShoppingBagIcon,
@@ -94,8 +100,8 @@ const normalizeLang = (l: string) => l.replace('_', '-').toLowerCase();
 
 export default function App() {
   const [currentModule, setCurrentModule] = useState<ModuleKey | null>(null);
-  const [nativeCountry, setNativeCountry] = useState<Country>(COUNTRIES.find((c) => c.code === 'br') || COUNTRIES[0]);
-  const [targetCountry, setTargetCountry] = useState<Country>(COUNTRIES.find((c) => c.code === 'es') || COUNTRIES[0]);
+  // Par de idiomas persistido; também mantém lang/dir do documento.
+  const { nativeCountry, setNativeCountry, targetCountry, setTargetCountry } = useCountryPair(COUNTRIES);
 
   // PWA install
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -117,9 +123,16 @@ export default function App() {
   const [expandedItemKey, setExpandedItemKey] = useState<string | null>(null);
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
 
+  // Lista de compras e itens marcados são por módulo…
   const supermarketLists = useListManager('supermarket');
   const pharmacyLists = useListManager('pharmacy');
   const lists = currentModule === 'pharmacy' ? pharmacyLists : supermarketLists;
+  // …favoritos são uma lista só para o app inteiro, montada uma única vez.
+  const { favorites, toggleFavorite } = useFavorites();
+
+  // Modal de instalação: mesmo padrão de diálogo do painel de categorias.
+  const installTitleId = useId();
+  const installPanelRef = useDialog(showInstallModal, () => handleDismissInstall());
 
   const t = useCallback((key: string) => {
     const lang = nativeCountry.lang || 'en-US';
@@ -243,10 +256,10 @@ export default function App() {
     onTabChange: setActiveTab,
     isSearchActive,
     onToggleSearch: () => setIsSearchActive((v) => !v),
-    favorites: lists.favorites,
+    favorites,
     shoppingList: lists.shoppingList,
     checkedItems: lists.checkedItems,
-    toggleFavorite: lists.toggleFavorite,
+    toggleFavorite,
     toggleShoppingListItem: lists.toggleShoppingListItem,
     expandedItemKey,
     setExpandedItemKey,
@@ -281,7 +294,7 @@ export default function App() {
                   <h1 className="text-2xl font-bold text-gray-800">{t('hubTitle')}</h1>
                   <p className="text-gray-500 text-sm">{t('hubSubtitle')}</p>
                 </div>
-                <button onClick={() => setIsLanguageModalOpen(true)} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                <button onClick={() => setIsLanguageModalOpen(true)} aria-label={t('languageSettings')} className="hit p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
                   <div className="flex items-center -space-x-2">
                     <img src={nativeCountry.image} alt={nativeCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
                     <img src={targetCountry.image} alt={targetCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
@@ -335,9 +348,27 @@ export default function App() {
 
   return (
     <>
-      <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
-        {renderContent()}
-      </Suspense>
+      {/*
+        Menor ponto de isolamento útil: só o módulo carregado sob demanda. Se o
+        chunk não vier, o hub, o seletor de idiomas e a navegação continuam de
+        pé, e o fallback oferece uma saída sem depender da recarga.
+        `resetKey` faz o erro sumir quando o usuário troca de módulo.
+      */}
+      <ErrorBoundary
+        resetKey={currentModule ?? 'home'}
+        fallback={(error) => (
+          <ErrorFallback
+            error={error}
+            t={t}
+            theme={theme}
+            onGoHome={() => setCurrentModule(null)}
+          />
+        )}
+      >
+        <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+          {renderContent()}
+        </Suspense>
+      </ErrorBoundary>
 
       <LanguagePanel
         isOpen={isLanguageModalOpen}
@@ -354,16 +385,22 @@ export default function App() {
 
       {showInstallModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl transform tap animate-slide-up">
+          <div
+            ref={installPanelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={installTitleId}
+            className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl transform tap animate-slide-up"
+          >
             <div className="flex justify-between items-start mb-4">
               <div className="p-3 bg-red-100 rounded-xl">
                 <ShoppingBagIconSolid className="w-8 h-8 text-red-600" />
               </div>
-              <button onClick={handleDismissInstall} className="text-gray-500 hover:text-gray-600 p-1">
-                <span className="text-2xl">&times;</span>
+              <button onClick={handleDismissInstall} aria-label={t('close')} className="hit text-gray-500 hover:text-gray-600 p-1">
+                <span aria-hidden="true" className="text-2xl">&times;</span>
               </button>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('installApp')}</h3>
+            <h3 id={installTitleId} className="text-xl font-bold text-gray-900 mb-2">{t('installApp')}</h3>
             <p className="text-gray-600 mb-6">{t('installAppDesc')}</p>
 
             {isIOS ? (

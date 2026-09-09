@@ -68,14 +68,14 @@ export default function SizesModule({
     <div className="w-full bg-slate-50 text-gray-800 flex flex-col h-[100dvh] relative overflow-hidden font-sans">
       <header className="flex-shrink-0 text-white shadow-lg z-30 rounded-b-3xl" style={{ background: `linear-gradient(to bottom, ${theme.hex}, ${theme.hex}e6)` }}>
         <div className="flex items-center justify-between px-4 pt-4 pb-4 max-w-3xl mx-auto">
-          <button onClick={() => { playSound('click'); onGoHome(); }} className="p-2 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors">
+          <button onClick={() => { playSound('click'); onGoHome(); }} aria-label={t('a11yHome')} className="hit p-2 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors">
             <HomeIcon className="w-5 h-5" />
           </button>
           <h1 className="flex-1 mx-2 text-center font-bold text-2xl uppercase tracking-tight truncate">{t('moduleSizes')}</h1>
-          <button onClick={() => { playSound('click'); onOpenLanguageModal(); }} className="p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors">
+          <button onClick={() => { playSound('click'); onOpenLanguageModal(); }} aria-label={t('languageSettings')} className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors">
             <div className="flex items-center -space-x-2">
-              <img src={nativeCountry.image} alt={nativeCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
-              <img src={targetCountry.image} alt={targetCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
+              <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
+              <img src={targetCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
             </div>
           </button>
         </div>
@@ -105,7 +105,7 @@ export default function SizesModule({
             <div className="flex items-center justify-center gap-4">
               <div className="text-center flex-1">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
-                  {t('sizeYours')} · {SYSTEM_LABEL[fromSystem]}
+                  {t('sizeYours')} · {t(SYSTEM_LABEL[fromSystem])}
                 </p>
                 <p className="text-4xl font-extrabold text-gray-700 tabular-nums">{mySize}</p>
               </div>
@@ -114,7 +114,7 @@ export default function SizesModule({
 
               <div className="text-center flex-1">
                 <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: theme.hex }}>
-                  {t('sizeHere')} · {SYSTEM_LABEL[toSystem]}
+                  {t('sizeHere')} · {t(SYSTEM_LABEL[toSystem])}
                 </p>
                 <p className="text-4xl font-extrabold tabular-nums" style={{ color: theme.hex }}>{theirSize}</p>
               </div>
@@ -134,7 +134,7 @@ export default function SizesModule({
           {/* Escolha do tamanho */}
           <section>
             <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">
-              {t('sizeYours')} · {SYSTEM_LABEL[fromSystem]}
+              {t('sizeYours')} · {t(SYSTEM_LABEL[fromSystem])}
             </h2>
             <div className="flex flex-wrap gap-2">
               {table.rows.map((r, i) => (

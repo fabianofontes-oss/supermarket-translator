@@ -2,6 +2,7 @@
 // Fica separado de constants.ts porque são 1.333 itens: só o CatalogModule
 // precisa deles, e o hub não deve pagar esse peso para abrir.
 
+import type { AvailabilityByCountry } from '../types';
 import { groceryData } from '../modules/supermarket/data/groceryData';
 import { beveragesData } from '../modules/supermarket/data/beveragesData';
 import { bakeryData } from '../modules/supermarket/data/bakeryData';
@@ -17,7 +18,7 @@ import { skinData, intimateData } from '../modules/pharmacy/data/cosmeticsData';
 
 // Pre-populated data for offline-first experience
 // Merged data from all modules
-export const PREPOPULATED_TRANSLATIONS: Record<string, Record<string, { source_term: string; image: string; translations: Record<string, string>; gender_pt: 'm' | 'f'; phonetics?: Record<string, string> }[]>> = {
+export const PREPOPULATED_TRANSLATIONS: Record<string, Record<string, { source_term: string; image: string; translations: Record<string, string>; gender_pt: 'm' | 'f'; phonetics?: Record<string, string>; availability?: AvailabilityByCountry }[]>> = {
   // Supermarket
   produce: produceData,
   butcher: butcherData,

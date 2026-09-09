@@ -1,5 +1,6 @@
 
-import type { Country, TranslationItem } from '../types';
+import type { AvailabilityByCountry, Country, TranslationItem } from '../types';
+import { makeItemKey } from './itemIdentity';
 
 export const mapTranslationItem = (
   item: {
@@ -8,6 +9,7 @@ export const mapTranslationItem = (
     translations: Record<string, string>;
     phonetics?: Record<string, string>;
     gender_pt?: 'm' | 'f';
+    availability?: AvailabilityByCountry;
   },
   category: string,
   subCategory: string,
@@ -62,7 +64,9 @@ export const mapTranslationItem = (
   }
 
   return {
-    key: baseKey,
+    // Identidade composta: o mesmo termo aparece em posições diferentes do
+    // catálogo e precisa ser um item diferente em cada uma.
+    key: makeItemKey(category, subCategory, baseKey),
     source_term: nativeTerm,
     translated_term: targetTerm,
     image: item.image,
@@ -70,5 +74,8 @@ export const mapTranslationItem = (
     subCategory,
     gender_pt: item.gender_pt,
     phonetic: targetPhonetic,
+    // Mapa inteiro, não o estado já resolvido: o item vai para o localStorage
+    // em favoritos e lista, e precisa ser relido contra o destino do momento.
+    availability: item.availability,
   };
 };
