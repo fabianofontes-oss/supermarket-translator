@@ -32,6 +32,12 @@ export default defineConfig({
       // Custo aceito: a atualização entra na próxima abertura, não na hora.
       // Não há prompt na tela: seria interface nova numa fase de robustez.
       registerType: 'prompt',
+      // Quem registra é `utils/pwaUpdate.ts`, porque o registro injetado só
+      // chama `register()` e não tem como avisar que existe versão esperando.
+      // Sem esse aviso, num app instalado a atualização nunca entra: o service
+      // worker novo fica esperando enquanto houver janela aberta, e a janela de
+      // um PWA no Android não fecha.
+      injectRegister: null,
       includeAssets: ['icons/favicon.svg', 'icons/apple-touch-icon.png', 'flags/*.svg', 'robots.txt'],
       manifest: {
         name: 'Translator Hub',

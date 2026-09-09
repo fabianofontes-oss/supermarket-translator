@@ -278,6 +278,10 @@ const enUS = {
   voiceAvailableLabel: 'Voice available',
   voiceUnknownLabel: 'Checking…',
   voiceFromInternet: 'Audio from the internet',
+  updateAvailableTitle: 'New version available',
+  updateAvailableBody: 'Update to get the latest fixes.',
+  updateNow: 'Update',
+  updateLater: 'Later',
 };
 
 const ptBR = {
@@ -559,6 +563,10 @@ const ptBR = {
   voiceAvailableLabel: 'Voz disponível',
   voiceUnknownLabel: 'Verificando…',
   voiceFromInternet: 'Áudio pela internet',
+  updateAvailableTitle: 'Nova versão disponível',
+  updateAvailableBody: 'Atualize para receber as últimas correções.',
+  updateNow: 'Atualizar',
+  updateLater: 'Depois',
 };
 
 const esCL = {
@@ -840,6 +848,10 @@ const esCL = {
   voiceAvailableLabel: 'Voz disponible',
   voiceUnknownLabel: 'Comprobando…',
   voiceFromInternet: 'Audio por internet',
+  updateAvailableTitle: 'Nueva versión disponible',
+  updateAvailableBody: 'Actualiza para recibir las últimas correcciones.',
+  updateNow: 'Actualizar',
+  updateLater: 'Después',
 };
 
 
@@ -1122,6 +1134,10 @@ const frFR = {
   voiceAvailableLabel: 'Voix disponible',
   voiceUnknownLabel: 'Vérification…',
   voiceFromInternet: 'Audio par internet',
+  updateAvailableTitle: 'Nouvelle version disponible',
+  updateAvailableBody: 'Mettez à jour pour recevoir les dernières corrections.',
+  updateNow: 'Mettre à jour',
+  updateLater: 'Plus tard',
 };
 
 const itIT = {
@@ -1403,6 +1419,10 @@ const itIT = {
   voiceAvailableLabel: 'Voce disponibile',
   voiceUnknownLabel: 'Verifica in corso…',
   voiceFromInternet: 'Audio da internet',
+  updateAvailableTitle: 'Nuova versione disponibile',
+  updateAvailableBody: 'Aggiorna per ricevere le ultime correzioni.',
+  updateNow: 'Aggiorna',
+  updateLater: 'Più tardi',
 };
 
 
@@ -1685,6 +1705,10 @@ const ukUA = {
   voiceAvailableLabel: 'Голос доступний',
   voiceUnknownLabel: 'Перевірка…',
   voiceFromInternet: 'Аудіо з інтернету',
+  updateAvailableTitle: 'Доступна нова версія',
+  updateAvailableBody: 'Оновіть, щоб отримати останні виправлення.',
+  updateNow: 'Оновити',
+  updateLater: 'Пізніше',
 };
 
 const arMA = {
@@ -1966,6 +1990,10 @@ const arMA = {
   voiceAvailableLabel: 'الصوت متوفر',
   voiceUnknownLabel: 'جارٍ التحقق…',
   voiceFromInternet: 'الصوت عبر الإنترنت',
+  updateAvailableTitle: 'يتوفر إصدار جديد',
+  updateAvailableBody: 'حدّث التطبيق للحصول على آخر الإصلاحات.',
+  updateNow: 'تحديث',
+  updateLater: 'لاحقًا',
 };
 
 
@@ -2248,6 +2276,10 @@ const ltLT = {
   voiceAvailableLabel: 'Balsas pasiekiamas',
   voiceUnknownLabel: 'Tikrinama…',
   voiceFromInternet: 'Garsas iš interneto',
+  updateAvailableTitle: 'Yra nauja versija',
+  updateAvailableBody: 'Atnaujinkite, kad gautumėte naujausius pataisymus.',
+  updateNow: 'Atnaujinti',
+  updateLater: 'Vėliau',
 };
 
 /**

@@ -18,6 +18,8 @@ import { useDialog } from './hooks/useDialog';
 import { useCountryPair } from './hooks/useCountryPair';
 import { LanguagePanel } from './components/LanguagePanel';
 import { VoiceMissingSheet } from './components/VoiceMissingSheet';
+import { UpdateSheet } from './components/UpdateSheet';
+import { watchForUpdate } from './utils/pwaUpdate';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ErrorFallback } from './components/ErrorFallback';
 import { lazyWithRetry } from './utils/lazyWithRetry';
@@ -107,6 +109,14 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+
+  /**
+   * Versão nova esperando. Sem este aviso a atualização não chega no app
+   * instalado: o service worker novo espera enquanto houver janela aberta, e a
+   * janela de um PWA no Android não fecha.
+   */
+  const [applyUpdate, setApplyUpdate] = useState<(() => void) | null>(null);
+  useEffect(() => watchForUpdate((aplicar) => setApplyUpdate(() => aplicar)), []);
 
   // Cascata só nos primeiros instantes de vida do app. Voltar ao hub é
   // navegação repetida, e o que se repete muito não deve animar.
@@ -471,6 +481,13 @@ export default function App() {
       <VoiceMissingSheet
         country={voiceMissingFor}
         onClose={() => setVoiceMissingFor(null)}
+        t={t}
+        theme={theme}
+      />
+
+      <UpdateSheet
+        onApply={applyUpdate}
+        onDismiss={() => setApplyUpdate(null)}
         t={t}
         theme={theme}
       />
