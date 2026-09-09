@@ -22,6 +22,7 @@ interface FavoritesPanelProps {
     isConversationLocked: boolean;
     theme: { color: string; textColor: string };
     onOpenPlan: () => void;
+    isPharmacy?: boolean;
 }
 
 // Helper to group items by Category
@@ -54,7 +55,8 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({
     isSpeakerLocked,
     isConversationLocked,
     theme,
-    onOpenPlan
+    onOpenPlan,
+    isPharmacy = false
 }) => {
     
     if (favorites.length === 0) {
@@ -97,6 +99,7 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({
                                 theme={theme}
                                 isPhrase={item.category === 'phrases'}
                                 onOpenPlan={onOpenPlan}
+                                isPharmacy={isPharmacy}
                             />
                         ))}
                     </div>

@@ -22,6 +22,7 @@ interface ShoppingListPanelProps {
     isConversationLocked: boolean;
     theme: { color: string; textColor: string };
     onOpenPlan: () => void;
+    isPharmacy?: boolean;
 }
 
 const groupItemsByHierarchy = (items: TranslationItemType[]) => {
@@ -59,7 +60,8 @@ export const ShoppingListPanel: React.FC<ShoppingListPanelProps> = ({
     isSpeakerLocked,
     isConversationLocked,
     theme,
-    onOpenPlan
+    onOpenPlan,
+    isPharmacy = false
 }) => {
 
     const groupedShoppingList = useMemo(() => {
@@ -108,6 +110,7 @@ export const ShoppingListPanel: React.FC<ShoppingListPanelProps> = ({
                                 theme={theme}
                                 isPhrase={item.category === 'phrases'}
                                 onOpenPlan={onOpenPlan}
+                                isPharmacy={isPharmacy}
                             />
                            )
                         })}

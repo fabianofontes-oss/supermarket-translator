@@ -33,7 +33,12 @@ export const mapTranslationItem = (
         return item.translations[langBase];
     }
 
-    // 3. As a final fallback, return the original source term (pt-BR)
+    // 3. Inglês é mais útil que português para quem não fala pt (ex.: uk, ar)
+    if (item.translations['us'] || item.translations['gb']) {
+        return item.translations['us'] || item.translations['gb'];
+    }
+
+    // 4. As a final fallback, return the original source term (pt-BR)
     return baseKey;
   };
 

@@ -1,6 +1,6 @@
 {
-  "appId": "com.supermarket.guide",
-  "appName": "Guia de Supermercado",
+  "appId": "com.translatorhub.app",
+  "appName": "Translator Hub",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

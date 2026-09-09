@@ -1,76 +1,74 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Translator Hub - Guia do Imigrante (PWA & APK)
 
-# Guia de Supermercado - PWA & APK
+Guia de sobrevivência para imigrantes e viajantes. Em vez de traduzir literalmente, mostra o **produto equivalente real** no país de destino (supermercado, farmácia), além de módulos de posição de objetos ("Onde está?") e direções na rua.
 
-Este projeto é um Progressive Web App (PWA) construído com React e Vite, e configurado com Capacitor para gerar aplicativos nativos (Android/iOS).
+Progressive Web App (PWA) construído com React, Vite e Tailwind, configurado com Capacitor para gerar aplicativos nativos (Android/iOS). Funciona 100% offline depois do primeiro acesso.
 
-## 🚀 Como Rodar Localmente
+## Como rodar localmente
 
-1. Instale as dependências:
-   ```bash
-   npm install
-   ```
-2. Crie um arquivo `.env.local` na raiz e adicione sua chave (se necessário):
-   ```env
-   GEMINI_API_KEY=sua_chave_aqui
-   ```
-3. Rode o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
+```bash
+npm install
+npm run dev
+```
 
----
+Não há chaves de API: todo o conteúdo está no próprio app e o áudio usa a voz do sistema.
 
-## 📱 Como Gerar o APK (Android)
-
-Este projeto usa o **Capacitor** para transformar o site em um app nativo.
-
-**Pré-requisitos:**
-*   Você precisa ter o **Android Studio** instalado no seu computador.
-*   Java JDK instalado.
-
-**Passo a Passo:**
-
-1.  **Gere a versão de produção do site:**
-    Isso cria a pasta `dist` com o código otimizado.
-    ```bash
-    npm run build
-    ```
-
-2.  **Sincronize com o Capacitor:**
-    Isso copia a pasta `dist` para dentro da pasta nativa do Android.
-    ```bash
-    npx cap sync
-    ```
-
-3.  **Abra o projeto no Android Studio:**
-    ```bash
-    npx cap open android
-    ```
-
-4.  **Gere o APK:**
-    *   No Android Studio, espere o projeto indexar (Gradle Sync).
-    *   Vá no menu superior: **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
-    *   O Android Studio irá notificar quando o APK estiver pronto e mostrará um link "locate" para a pasta do arquivo.
-    *   Transfira esse arquivo `.apk` para seu celular e instale.
-
----
-
-## 🌐 Como Usar como PWA (Web)
-
-Não é necessário "gerar" um arquivo específico. O PWA funciona através do navegador.
-
-1.  Faça o deploy do projeto (ex: Vercel, Netlify).
-2.  Acesse o link do site pelo celular (Chrome no Android ou Safari no iOS).
-3.  Toque no menu do navegador e selecione **"Adicionar à Tela Inicial"** (Install App).
-4.  O ícone aparecerá no seu celular e o app funcionará offline e em tela cheia.
-
-**Testando o PWA localmente:**
-Para testar o Service Worker localmente, você precisa rodar a versão de produção, pois o modo `dev` geralmente não ativa o cache offline:
+## Build de produção
 
 ```bash
 npm run build
 npm run preview
 ```
+
+O build gera a pasta `dist` já com o service worker e o manifesto do PWA (via `vite-plugin-pwa`). Para testar o modo offline é preciso usar o build, pois o modo `dev` não ativa o cache.
+
+## Ícones do app
+
+Os ícones ficam em `public/icons/` e são gerados a partir de `public/icons/icon.svg`. Para alterar o ícone, edite o SVG e rode:
+
+```bash
+node scripts/generate-icons.mjs
+```
+
+## Estrutura
+
+```
+App.tsx                     hub e estado global (idiomas, áudio, listas)
+modules/CatalogModule.tsx   módulo genérico de catálogo (Supermercado, Farmácia)
+modules/LocationModule.tsx  "Onde está?" - posição de objetos com cena visual
+modules/DirectionsModule.tsx direções na rua com mapa, bússola e frases
+modules/*/data/             dados de cada módulo
+components/                 layout, cards, painéis, seletor de idioma
+translations.ts             textos da interface (en, pt, es, fr, it)
+```
+
+Regras de negócio e decisões de produto estão em `PROJECT_CONTEXT.md`.
+
+---
+
+## Como gerar o APK (Android)
+
+Este projeto usa o **Capacitor** para transformar o site em um app nativo.
+
+**Pré-requisitos:** Android Studio e Java JDK instalados.
+
+1. Gere a versão de produção:
+   ```bash
+   npm run build
+   ```
+2. Sincronize com o Capacitor:
+   ```bash
+   npx cap sync
+   ```
+3. Abra no Android Studio:
+   ```bash
+   npx cap open android
+   ```
+4. No Android Studio: **Build > Build Bundle(s) / APK(s) > Build APK(s)**. Transfira o `.apk` para o celular e instale.
+
+## Como usar como PWA (Web)
+
+1. Faça o deploy do projeto (ex: Vercel, Netlify).
+2. Acesse o link pelo celular (Chrome no Android ou Safari no iOS).
+3. Toque no menu do navegador e selecione **"Adicionar à Tela Inicial"**.
+4. O ícone aparece no celular e o app funciona offline e em tela cheia.

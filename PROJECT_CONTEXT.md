@@ -84,3 +84,51 @@ Ao reiniciar o chat, peça para:
 1.  Revisar se alguma subcategoria específica precisa de ajustes finos.
 2.  Implementar novos módulos (ex: **Restaurante**, **Transporte**) usando o componente `ModuleLayout` já existente.
 3.  Manter a regra de não alterar o CSS/Layout global a menos que solicitado.
+
+## 7. Atualizações de setembro de 2026
+
+### Foco de produto
+*   Público-alvo atual: imigrantes na **Espanha** (brasileiros, marroquinos, ucranianos). Chile e Argentina ficam em segundo plano.
+*   A frase principal é sempre no idioma de **destino**; o idioma nativo aparece pequeno, só como apoio.
+*   País de destino padrão: Espanha.
+
+### Novos módulos
+*   **Onde está?** (`modules/LocationModule.tsx`, azul): cena visual com objeto e referência, 12 posições, frase montada por gramática (artigos e contrações por idioma).
+*   **Direções** (`modules/DirectionsModule.tsx`, laranja): mapa de quarteirões, percurso passo a passo, bússola, perguntas e vocabulário da rua. Espanhol da Espanha (manzana, gira, sigue recto).
+
+### Base técnica (correções)
+*   Supermercado e Farmácia agora usam um único `modules/CatalogModule.tsx` (os arquivos antigos podem ser apagados).
+*   Painéis de Favoritos e Lista de Compras ligados (antes abriam vazios).
+*   Tailwind instalado no build (sem CDN), CSS em `index.css`.
+*   PWA via `vite-plugin-pwa`: service worker gerado no build com pré-cache de tudo, atualização automática. Sem `sw.js`/`manifest.json` manuais.
+*   Ícones reais em `public/icons/` (gerados por `scripts/generate-icons.mjs`), bandeiras locais em `public/flags/`.
+*   Áudio usa só a voz do sistema (`speechSynthesis`), sem endpoint não oficial do Google.
+*   Interface traduzida também para francês e italiano.
+*   Classes do Tailwind nunca são montadas dinamicamente (`bg-${cor}`): usar strings completas ou `style` com o hex do tema.
+
+### Ucrânia e Marrocos (etapa 1, feita)
+*   Países `ua` (uk-UA) e `ma` (ar-MA) com `originOnly: true`: aparecem só em "Eu falo", não em "Estou em".
+*   Interface traduzida (`ukUA`, `arMA` em `translations.ts`), módulos "Onde está?" e Direções com dados em `uk` e `ar`.
+*   Ucraniano: cada objeto traz genitivo, instrumental e locativo; a preposição indica o caso com `{gen}`/`{instr}`/`{loc}`.
+*   Árabe: árabe padrão (não darija), artigo `ال` colado, sem cópula. Texto nativo usa `dir="auto"`; o app continua LTR porque o conteúdo principal é espanhol.
+*   Etiqueta "PROIBIDO" da farmácia agora é `t('banned')`; o marcador `PROIBIDO` nos dados é só um código interno.
+*   Fallback de termo nativo: código do país → idioma base → inglês → pt-BR.
+*   **Bloqueios enquanto o catálogo não estiver traduzido:** módulos com `needsCatalog` (Supermercado, Farmácia) ficam desativados no hub quando a origem é um país `originOnly`; dentro desses módulos o painel recebe `blockOriginOnly` e apaga as bandeiras `ua`/`ma` em "Eu falo". Ao concluir a etapa 2, basta remover `originOnly` dos países.
+*   O mesmo país não pode ser origem e destino: a bandeira já escolhida de um lado fica desativada do outro.
+
+### Módulos "Números" e "Onde dói" (novos)
+*   **Números** (`modules/NumbersModule.tsx`, violeta): quatro abas — hora (relógio), preço (etiqueta + teclado), data (calendário) e número puro. Tudo gerado por regra em `numbersData.ts`: `numberToWords` cobre 0 a 999.999 nos 7 idiomas, mais `buildTime`, `buildPrice` e `buildDate`.
+*   **Onde dói** (`modules/BodyModule.tsx`, rosa): boneco em SVG com 13 pontos tocáveis, 14 partes do corpo, 4 sintomas localizados, 8 sintomas gerais e 5 durações. Cada parte guarda duas formas por idioma: com artigo (`la cabeza`) e com preposição de lugar (`en la cabeza`), o que resolve as contrações de fr/it/pt sem lógica extra.
+*   Nenhum dos dois depende do catálogo, então já funcionam em ucraniano e árabe.
+*   Preço tem duas formas: a completa ("dos euros con ochenta") e a curta que se ouve no caixa ("dos con ochenta"), cada uma com seu áudio. O teclado do preço empurra os centavos como num terminal, com tecla "00"; o de número tem vírgula decimal e lê "dos coma cero cinco" quando há zero à esquerda.
+*   Armadilhas cobertas: espanhol `veintidós`/`menos cuarto`/`con` no preço, francês `soixante-dix`/`quatre-vingts`, italiano `ventuno`/`ventotto`, português `mil duzentos e cinquenta` (o "e" só antes de grupo curto), ucraniano `Пів на четверту`, árabe plural quebrado dos minutos.
+
+### Módulos "Café e tapas", "Eu, você, ele" e "Medidas" (novos)
+*   **Café e tapas** (`CafeModule.tsx`, marrom): copo ou xícara desenhado com a proporção de café, leite, água, leite condensado, licor ou gelo. Nove bebidas com o nome local por país e uma explicação na língua de quem lê, porque tradução literal não serve aqui. Sete modificadores entram na frase do pedido ("un cortado en vaso sin azúcar"). Dez porções explicadas: tapa, pincho, ración, media ración, montadito, menú del día, primero, segundo, para picar, caña.
+*   **Eu, você, ele** (`PronounsModule.tsx`, verde-azulado): 8 pronomes vezes 7 verbos vezes complemento, em afirmação, pergunta e negação. Marca "formal" em usted/ustedes e "Espanha" em vosotros, com aviso explicando a armadilha. O campo `altPerson` resolve o fato de que inglês, francês, ucraniano e árabe conjugam o tratamento formal na 2ª pessoa, enquanto espanhol e italiano usam a 3ª. Ucraniano e árabe têm formas vazias para "ser", porque dispensam a cópula no presente, e o árabe nega frase nominal com "ليس" conjugado.
+*   **Medidas** (`SizesModule.tsx`, índigo): conversor de calçado, roupa feminina e masculina entre Brasil, Europa, Reino Unido e EUA. A numeração de origem vem do país nativo e a de destino do país-alvo. Espanhol e francês distinguem calçado ("número", "pointure") de roupa ("talla", "taille"). Traz aviso de que a numeração varia por marca.
+*   Nenhum dos três depende do catálogo: funcionam em ucraniano e árabe.
+
+### Próximos passos previstos
+*   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.351 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
+*   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

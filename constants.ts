@@ -98,15 +98,17 @@ export const PHARMACY_CATEGORIES: Category[] = [
 ];
 
 export const COUNTRIES: Country[] = [
-    { name: "Brasil", lang: "pt-BR", flag: "🇧🇷", code: "br", image: "https://cdn-icons-png.flaticon.com/512/197/197386.png" },
-    { name: "Chile", lang: "es-CL", flag: "🇨🇱", code: "cl", image: "https://cdn-icons-png.flaticon.com/512/197/197586.png" },
-    { name: "Argentina", lang: "es-AR", flag: "🇦🇷", code: "ar", image: "https://cdn-icons-png.flaticon.com/512/197/197573.png" },
-    { name: "Reino Unido", lang: "en-GB", flag: "🇬🇧", code: "gb", image: "https://cdn-icons-png.flaticon.com/512/197/197374.png" },
-    { name: "Estados Unidos", lang: "en-US", flag: "🇺🇸", code: "us", image: "https://cdn-icons-png.flaticon.com/512/197/197484.png" },
-    { name: "Portugal", lang: "pt-PT", flag: "🇵🇹", code: "pt", image: "https://cdn-icons-png.flaticon.com/512/197/197463.png" },
-    { name: "Espanha", lang: "es-ES", flag: "🇪🇸", code: "es", image: "https://cdn-icons-png.flaticon.com/512/197/197593.png" },
-    { name: "França", lang: "fr-FR", flag: "🇫🇷", code: "fr", image: "https://cdn-icons-png.flaticon.com/512/197/197560.png" },
-    { name: "Itália", lang: "it-IT", flag: "🇮🇹", code: "it", image: "https://cdn-icons-png.flaticon.com/512/197/197626.png" },
+    { name: "Brasil", lang: "pt-BR", flag: "🇧🇷", code: "br", image: "/flags/br.svg" },
+    { name: "Chile", lang: "es-CL", flag: "🇨🇱", code: "cl", image: "/flags/cl.svg" },
+    { name: "Argentina", lang: "es-AR", flag: "🇦🇷", code: "ar", image: "/flags/ar.svg" },
+    { name: "Reino Unido", lang: "en-GB", flag: "🇬🇧", code: "gb", image: "/flags/gb.svg" },
+    { name: "Estados Unidos", lang: "en-US", flag: "🇺🇸", code: "us", image: "/flags/us.svg" },
+    { name: "Portugal", lang: "pt-PT", flag: "🇵🇹", code: "pt", image: "/flags/pt.svg" },
+    { name: "Espanha", lang: "es-ES", flag: "🇪🇸", code: "es", image: "/flags/es.svg" },
+    { name: "França", lang: "fr-FR", flag: "🇫🇷", code: "fr", image: "/flags/fr.svg" },
+    { name: "Itália", lang: "it-IT", flag: "🇮🇹", code: "it", image: "/flags/it.svg" },
+    { name: "Ucrânia", lang: "uk-UA", flag: "🇺🇦", code: "ua", image: "/flags/ua.svg", originOnly: true },
+    { name: "Marrocos", lang: "ar-MA", flag: "🇲🇦", code: "ma", image: "/flags/ma.svg", originOnly: true },
 ];
 
 // Pre-populated data for offline-first experience

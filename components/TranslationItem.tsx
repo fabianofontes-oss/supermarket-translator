@@ -214,7 +214,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     decoding="async"
                   />
                 </div>
-                <p className="text-gray-800 font-bold text-lg truncate pr-2 leading-tight">{item.source_term}</p>
+                <p className="text-gray-800 font-bold text-lg truncate pr-2 leading-tight" dir="auto">{item.source_term}</p>
             </div>
             <button 
                 onClick={(e) => {
@@ -246,7 +246,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     <p className={`${isPharmacy && pharmacyInfo?.isNotSold ? 'text-red-600 font-bold text-xs' : 'text-gray-600 font-medium uppercase'}`}>
                         {/* In collapsed view, show the full term or the unavailable message */}
                         {isPharmacy && pharmacyInfo?.isNotSold 
-                            ? (pharmacyInfo.isForbidden ? 'PROIBIDO / BANNED' : t('productNotAvailable')) 
+                            ? (pharmacyInfo.isForbidden ? t('banned') : t('productNotAvailable')) 
                             : displayTerm}
                     </p>
                 </div>
@@ -290,7 +290,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     {/* Status Banner */}
                     <div className={`flex items-center gap-2 text-sm font-bold px-3 py-2 rounded-lg shadow-sm ${pharmacyInfo.isNotSold ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`}>
                         {pharmacyInfo.isNotSold ? (
-                            <><XIcon className="w-5 h-5" /> <span>{pharmacyInfo.isForbidden ? 'PROIBIDO / BANNED' : t('productNotAvailable')}</span></>
+                            <><XIcon className="w-5 h-5" /> <span>{pharmacyInfo.isForbidden ? t('banned') : t('productNotAvailable')}</span></>
                         ) : (
                             <><CheckIcon className="w-5 h-5" /> <span>DISPONÍVEL / AVAILABLE</span></>
                         )}
