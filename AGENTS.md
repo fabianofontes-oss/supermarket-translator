@@ -10,6 +10,9 @@ existe** e **o que está quebrado**. Quando os dois divergirem, o código manda.
 Auditado em 9 de setembro de 2026, no commit `9e47b15`, com o app rodando.
 Toda medição citada aqui foi feita, não estimada.
 
+Atualizado em 9 de setembro de 2026, no commit `05d4b91`, depois da fase 7 (voz do
+TTS). As seções 1, 2 e 12 foram corrigidas; a seção 11 virou registro histórico.
+
 ---
 
 ## 1. O que é o app
@@ -21,9 +24,18 @@ pessoa está. Dipirona não vira "dipirona" em espanhol, vira Nolotil.
 O dono é brasileiro morando na Espanha. O público pretendido são brasileiros,
 marroquinos, ucranianos e lituanos vivendo na Espanha.
 
-Estado real: **zero usuários**. O app está no ar como código no GitHub, na branch
-`main`. Não existe deploy verificado a partir desta máquina, não existe app nativo
-gerado, e não existe nenhum teste automatizado em 13 mil linhas.
+Estado real: **zero usuários conhecidos**, mas o app está publicado.
+
+Produção é <https://translator-zeta-weld.vercel.app>, hospedada na Vercel e ligada
+ao repositório: **todo push na `main` publica sozinho**, sem passo manual. Não
+procure script de deploy, porque não existe — quem publica é a Vercel.
+
+A suíte de testes existe: **243 testes em 12 arquivos** (`npm test`), cobrindo i18n,
+gramática gerada, seleção de voz do TTS, disponibilidade na farmácia, busca,
+acessibilidade, persistência e recuperação de chunk.
+
+O que continua não existindo é o app nativo: as pastas `android/` e `ios/` nunca
+foram geradas.
 
 ## 2. Como rodar
 
@@ -42,6 +54,14 @@ npm run preview
 Sem chaves de API, sem back-end, sem banco. Todo o conteúdo está no bundle e o áudio
 usa a voz do sistema operacional (`speechSynthesis`). Isso é deliberado: o app precisa
 funcionar dentro de um supermercado sem sinal.
+
+Consequência: **a voz é do aparelho, não do app**, e pode não existir. A regra é
+absoluta — o app nunca fala com voz de idioma diferente do destino. Sem voz
+compatível ele fica calado, o botão nasce indisponível e uma folha explica qual voz
+falta e como instalá-la. Falar com a voz padrão do sistema ensinaria a pronúncia de
+outra língua, que foi o defeito que dois revisores nativos reprovaram. A decisão mora
+em [`utils/speech.ts`](utils/speech.ts), numa função pura, e o painel de idiomas tem
+um diagnóstico que usa exatamente a mesma função.
 
 Verificação de tipos: `npx tsc --noEmit`. Estava limpo na auditoria.
 
@@ -568,10 +588,10 @@ do projeto inteiro, e não é trabalho de programação.
    existe em `CategorySheet`.
 7. O resto da seção 8, que é acabamento.
 
-Antes de qualquer uma dessas: **não existe nenhum teste**. Uma suíte mínima em cima de
-`mapTranslationItem`, do `useListManager` e das funções que montam frase pagaria a si
-mesma no primeiro refactor, e os itens 8.1 e 8.2 são exatamente o tipo de defeito que
-um teste de unidade pega de primeira.
+> **Esta seção 11 é registro histórico.** Era a ordem de trabalho da auditoria de
+> 9/9/2026 e descreve o estado de antes das fases 1 a 7, que já resolveram a maior
+> parte dela. A suíte de testes que este parágrafo pedia existe hoje, com 243 testes.
+> Confira no código antes de tratar qualquer item acima como pendência.
 
 ## 12. Mapa de arquivos
 
@@ -580,7 +600,7 @@ um teste de unidade pega de primeira.
 | [App.tsx](App.tsx) | hub, temas, áudio, estado compartilhado, `switch` de módulo |
 | [constants.ts](constants.ts) | países e categorias |
 | [types.ts](types.ts) | os três tipos do domínio |
-| [translations.ts](translations.ts) | 239 chaves × 8 idiomas |
+| [translations.ts](translations.ts) | 267 chaves × 8 idiomas, paridade exata |
 | [data/catalog.ts](data/catalog.ts) | junta os 12 arquivos de dados do catálogo |
 | [modules/CatalogModule.tsx](modules/CatalogModule.tsx) | Supermercado e Farmácia |
 | [components/ModuleLayout.tsx](components/ModuleLayout.tsx) | moldura: cabeçalho, painel, barra de baixo |
@@ -591,4 +611,6 @@ um teste de unidade pega de primeira.
 | [hooks/useListManager.ts](hooks/useListManager.ts) | favoritos, lista, itens marcados |
 | [utils/itemHelpers.ts](utils/itemHelpers.ts) | resolve o item para o par de idiomas |
 | [utils/soundUtils.ts](utils/soundUtils.ts) | sons sintetizados em WebAudio |
+| [utils/speech.ts](utils/speech.ts) | escolhe a voz do TTS; nunca devolve outro idioma |
+| [components/VoiceMissingSheet.tsx](components/VoiceMissingSheet.tsx) | aviso de voz não instalada |
 | [index.css](index.css) | tokens, foco, `.hit`, `.tap`, movimento reduzido |

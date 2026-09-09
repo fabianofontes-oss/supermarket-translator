@@ -39,7 +39,7 @@ modules/LocationModule.tsx  "Onde está?" - posição de objetos com cena visual
 modules/DirectionsModule.tsx direções na rua com mapa, bússola e frases
 modules/*/data/             dados de cada módulo
 components/                 layout, cards, painéis, seletor de idioma
-translations.ts             textos da interface (en, pt, es, fr, it)
+translations.ts             textos da interface (en, pt, es, fr, it, uk, ar, lt)
 ```
 
 Regras de negócio e decisões de produto estão em `PROJECT_CONTEXT.md`.
@@ -68,7 +68,14 @@ Este projeto usa o **Capacitor** para transformar o site em um app nativo.
 
 ## Como usar como PWA (Web)
 
-1. Faça o deploy do projeto (ex: Vercel, Netlify).
-2. Acesse o link pelo celular (Chrome no Android ou Safari no iOS).
-3. Toque no menu do navegador e selecione **"Adicionar à Tela Inicial"**.
-4. O ícone aparece no celular e o app funciona offline e em tela cheia.
+O app já está publicado em <https://translator-zeta-weld.vercel.app>. A Vercel está
+ligada ao repositório: **todo push na `main` publica sozinho**, não há script de
+deploy para rodar.
+
+1. Acesse o link pelo celular (Chrome no Android ou Safari no iOS).
+2. Toque no menu do navegador e selecione **"Adicionar à Tela Inicial"**.
+3. O ícone aparece no celular e o app funciona offline e em tela cheia.
+
+Ao conferir uma mudança recém-publicada, lembre que o service worker guarda a versão
+anterior: use uma janela anônima, ou limpe o service worker nas ferramentas do
+navegador. Sem isso você vê o app antigo e acha que o deploy falhou.
