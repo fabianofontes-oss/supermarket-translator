@@ -26,6 +26,11 @@ dist-ssr
 # Claude Code local config
 .claude/
 
+# Skills de agente baixadas de repositórios de terceiros.
+# Artefato derivado, como node_modules: quem versiona a intenção é o
+# skills-lock.json, que fica no repositório.
+.agents/
+
 # Variáveis locais
 .env.local
 .env*.local
