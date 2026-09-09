@@ -6,6 +6,15 @@
          1.4.4 da WCAG, e o público inclui gente lendo bula numa farmácia. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
+    <!-- O áudio com o sotaque certo depende disto.
+         O endpoint de voz do Google recusa a requisição quando o navegador
+         manda `Referer` — devolve HTML no lugar do MP3, e o `<audio>` falha com
+         MEDIA_ERR_SRC_NOT_SUPPORTED. Sem `Referer` ele responde 200 audio/mpeg.
+         Medido nos dois sentidos; não é suposição.
+         O app não faz nenhuma outra requisição externa, então não há o que
+         perder ao omitir o cabeçalho. -->
+    <meta name="referrer" content="no-referrer" />
+
     <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 

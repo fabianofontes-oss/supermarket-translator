@@ -20,6 +20,8 @@ interface LanguagePanelProps {
   blockOriginOnly?: boolean;
   /** Vozes do aparelho, para o diagnóstico. Vazio = motor ainda não respondeu. */
   voices?: readonly VoiceLike[];
+  /** Com rede, a falta de voz local deixa de ser impedimento: o áudio vem de fora. */
+  online?: boolean;
 }
 
 export const LanguagePanel: React.FC<LanguagePanelProps> = ({
@@ -33,7 +35,8 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
   t,
   theme,
   blockOriginOnly = false,
-  voices = []
+  voices = [],
+  online = true
 }) => {
   const handleClose = useCallback(() => {
       playSound('pop');
@@ -183,12 +186,20 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
           <ul id={diagnosticsId} hidden={!showDiagnostics} className="px-4 pb-3 space-y-2">
             {options.filter((opt) => !opt.originOnly).map((opt) => {
               // Mesma função do botão de áudio: uma regra só, nunca duas.
+              // Só conta como disponível a voz da REGIÃO exata — es-US não
+              // serve para a Espanha, pt-PT não serve para o Brasil.
               const lookup = pickVoice(voices, opt.lang);
-              const label =
-                lookup.status === 'ok' ? t('voiceAvailableLabel')
-                : lookup.status === 'missing' ? t('voiceMissingLabel')
-                : t('voiceUnknownLabel');
-              const mark = lookup.status === 'ok' ? '✅' : lookup.status === 'missing' ? '⚠️' : '…';
+
+              // Faltar voz local não impede o áudio: com rede ele vem de fora,
+              // com o sotaque certo. Avisar seria alarme falso.
+              const estado =
+                lookup.status === 'ok' ? 'local'
+                : online ? 'rede'
+                : lookup.status === 'missing' ? 'faltando'
+                : 'verificando';
+
+              const label = { local: t('voiceAvailableLabel'), rede: t('voiceFromInternet'), faltando: t('voiceMissingLabel'), verificando: t('voiceUnknownLabel') }[estado];
+              const mark = { local: '✅', rede: '🌐', faltando: '⚠️', verificando: '…' }[estado];
 
               return (
                 <li key={opt.code} className="text-[11px] leading-tight">

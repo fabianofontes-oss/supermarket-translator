@@ -269,7 +269,7 @@ const enUS = {
   // Voz do TTS ausente no aparelho (fase 7).
   voiceMissingLabel: 'Voice not installed',
   voiceMissingTitle: 'Voice not installed',
-  voiceMissingBody: "Your device has no voice for this language. The app stays silent instead of speaking with another language's voice, which would teach you the wrong pronunciation. Install the voice and try again.",
+  voiceMissingBody: "Your device has no voice for this country, and you are offline. The app will not use another country's voice — it would teach you the wrong pronunciation. Connect to the internet, or install the voice on your device.",
   voiceMissingAndroid: 'Android: Settings → System → Languages → Text-to-speech output → install voice data',
   voiceMissingIOS: 'iPhone: Settings → Accessibility → Spoken Content → Voices',
   voiceMissingWindows: 'Windows: Settings → Time & language → Speech → Add voices',
@@ -277,6 +277,7 @@ const enUS = {
   voiceDiagnosticsTitle: 'Voices on this device',
   voiceAvailableLabel: 'Voice available',
   voiceUnknownLabel: 'Checking…',
+  voiceFromInternet: 'Audio from the internet',
 };
 
 const ptBR = {
@@ -549,7 +550,7 @@ const ptBR = {
   // Voz do TTS ausente no aparelho (fase 7).
   voiceMissingLabel: 'Voz não instalada',
   voiceMissingTitle: 'Voz não instalada',
-  voiceMissingBody: 'Seu aparelho não tem voz neste idioma. O app fica em silêncio em vez de falar com a voz de outro idioma, que ensinaria a pronúncia errada. Instale a voz e tente de novo.',
+  voiceMissingBody: 'Seu aparelho não tem a voz deste país e você está sem internet. O app não usa voz de outro país, porque ensinaria a pronúncia errada. Conecte-se à internet, ou instale a voz no aparelho.',
   voiceMissingAndroid: 'Android: Configurações → Sistema → Idiomas → Saída de texto para voz → instalar dados de voz',
   voiceMissingIOS: 'iPhone: Ajustes → Acessibilidade → Conteúdo falado → Vozes',
   voiceMissingWindows: 'Windows: Configurações → Hora e idioma → Voz → Adicionar vozes',
@@ -557,6 +558,7 @@ const ptBR = {
   voiceDiagnosticsTitle: 'Vozes deste aparelho',
   voiceAvailableLabel: 'Voz disponível',
   voiceUnknownLabel: 'Verificando…',
+  voiceFromInternet: 'Áudio pela internet',
 };
 
 const esCL = {
@@ -829,7 +831,7 @@ const esCL = {
   // Voz do TTS ausente no aparelho (fase 7).
   voiceMissingLabel: 'Voz no instalada',
   voiceMissingTitle: 'Voz no instalada',
-  voiceMissingBody: 'Tu dispositivo no tiene voz en este idioma. La app se queda en silencio en vez de hablar con la voz de otro idioma, que te enseñaría una pronunciación equivocada. Instala la voz e inténtalo de nuevo.',
+  voiceMissingBody: 'Tu dispositivo no tiene la voz de este país y estás sin internet. La app no usa la voz de otro país, porque te enseñaría una pronunciación equivocada. Conéctate a internet, o instala la voz en el dispositivo.',
   voiceMissingAndroid: 'Android: Ajustes → Sistema → Idiomas → Salida de texto a voz → instalar datos de voz',
   voiceMissingIOS: 'iPhone: Ajustes → Accesibilidad → Contenido hablado → Voces',
   voiceMissingWindows: 'Windows: Configuración → Hora e idioma → Voz → Agregar voces',
@@ -837,6 +839,7 @@ const esCL = {
   voiceDiagnosticsTitle: 'Voces de este dispositivo',
   voiceAvailableLabel: 'Voz disponible',
   voiceUnknownLabel: 'Comprobando…',
+  voiceFromInternet: 'Audio por internet',
 };
 
 
@@ -1110,7 +1113,7 @@ const frFR = {
   // Voz do TTS ausente no aparelho (fase 7).
   voiceMissingLabel: 'Voix non installée',
   voiceMissingTitle: 'Voix non installée',
-  voiceMissingBody: "Votre appareil n'a pas de voix dans cette langue. L'application reste silencieuse plutôt que de parler avec la voix d'une autre langue, qui vous apprendrait une mauvaise prononciation. Installez la voix et réessayez.",
+  voiceMissingBody: "Votre appareil n'a pas la voix de ce pays et vous êtes hors ligne. L'application n'utilise pas la voix d'un autre pays : elle vous apprendrait une mauvaise prononciation. Connectez-vous à internet, ou installez la voix sur l'appareil.",
   voiceMissingAndroid: 'Android : Paramètres → Système → Langues → Sortie de synthèse vocale → installer les données vocales',
   voiceMissingIOS: 'iPhone : Réglages → Accessibilité → Contenu énoncé → Voix',
   voiceMissingWindows: 'Windows : Paramètres → Heure et langue → Voix → Ajouter des voix',
@@ -1118,6 +1121,7 @@ const frFR = {
   voiceDiagnosticsTitle: 'Voix de cet appareil',
   voiceAvailableLabel: 'Voix disponible',
   voiceUnknownLabel: 'Vérification…',
+  voiceFromInternet: 'Audio par internet',
 };
 
 const itIT = {
@@ -1390,7 +1394,7 @@ const itIT = {
   // Voz do TTS ausente no aparelho (fase 7).
   voiceMissingLabel: 'Voce non installata',
   voiceMissingTitle: 'Voce non installata',
-  voiceMissingBody: "Il tuo dispositivo non ha una voce in questa lingua. L'app resta in silenzio invece di parlare con la voce di un'altra lingua, che ti insegnerebbe la pronuncia sbagliata. Installa la voce e riprova.",
+  voiceMissingBody: "Il tuo dispositivo non ha la voce di questo paese e sei offline. L'app non usa la voce di un altro paese: ti insegnerebbe la pronuncia sbagliata. Connettiti a internet, oppure installa la voce sul dispositivo.",
   voiceMissingAndroid: 'Android: Impostazioni → Sistema → Lingue → Sintesi vocale → installa i dati vocali',
   voiceMissingIOS: 'iPhone: Impostazioni → Accessibilità → Contenuto pronunciato → Voci',
   voiceMissingWindows: 'Windows: Impostazioni → Data/ora e lingua → Voce → Aggiungi voci',
@@ -1398,6 +1402,7 @@ const itIT = {
   voiceDiagnosticsTitle: 'Voci di questo dispositivo',
   voiceAvailableLabel: 'Voce disponibile',
   voiceUnknownLabel: 'Verifica in corso…',
+  voiceFromInternet: 'Audio da internet',
 };
 
 
@@ -1671,7 +1676,7 @@ const ukUA = {
   // Voz do TTS ausente no aparelho (fase 7).
   voiceMissingLabel: 'Голос не встановлено',
   voiceMissingTitle: 'Голос не встановлено',
-  voiceMissingBody: 'На вашому пристрої немає голосу для цієї мови. Застосунок мовчить, замість того щоб говорити голосом іншої мови, який навчив би неправильної вимови. Встановіть голос і спробуйте ще раз.',
+  voiceMissingBody: 'На вашому пристрої немає голосу цієї країни, і ви без інтернету. Застосунок не використовує голос іншої країни, бо це навчило б неправильної вимови. Підключіться до інтернету або встановіть голос на пристрої.',
   voiceMissingAndroid: 'Android: Налаштування → Система → Мови → Синтез мовлення → встановити дані голосу',
   voiceMissingIOS: 'iPhone: Налаштування → Доступність → Вимовляння вголос → Голоси',
   voiceMissingWindows: 'Windows: Параметри → Час і мова → Мовлення → Додати голоси',
@@ -1679,6 +1684,7 @@ const ukUA = {
   voiceDiagnosticsTitle: 'Голоси цього пристрою',
   voiceAvailableLabel: 'Голос доступний',
   voiceUnknownLabel: 'Перевірка…',
+  voiceFromInternet: 'Аудіо з інтернету',
 };
 
 const arMA = {
@@ -1951,7 +1957,7 @@ const arMA = {
   // Voz do TTS ausente no aparelho (fase 7).
   voiceMissingLabel: 'الصوت غير مثبَّت',
   voiceMissingTitle: 'الصوت غير مثبَّت',
-  voiceMissingBody: 'جهازك لا يحتوي على صوت بهذه اللغة. يبقى التطبيق صامتًا بدل أن يتكلم بصوت لغة أخرى، لأن ذلك يعلّم نطقًا خاطئًا. ثبّت الصوت ثم حاول مرة أخرى.',
+  voiceMissingBody: 'جهازك لا يحتوي على صوت هذا البلد، وأنت غير متصل بالإنترنت. لا يستخدم التطبيق صوت بلد آخر، لأن ذلك يعلّم نطقًا خاطئًا. اتصل بالإنترنت، أو ثبّت الصوت على الجهاز.',
   voiceMissingAndroid: 'أندرويد: الإعدادات ← النظام ← اللغات ← تحويل النص إلى كلام ← تثبيت بيانات الصوت',
   voiceMissingIOS: 'آيفون: الإعدادات ← تسهيلات الاستخدام ← المحتوى المنطوق ← الأصوات',
   voiceMissingWindows: 'ويندوز: الإعدادات ← الوقت واللغة ← الكلام ← إضافة أصوات',
@@ -1959,6 +1965,7 @@ const arMA = {
   voiceDiagnosticsTitle: 'أصوات هذا الجهاز',
   voiceAvailableLabel: 'الصوت متوفر',
   voiceUnknownLabel: 'جارٍ التحقق…',
+  voiceFromInternet: 'الصوت عبر الإنترنت',
 };
 
 
@@ -2232,7 +2239,7 @@ const ltLT = {
   // Voz do TTS ausente no aparelho (fase 7).
   voiceMissingLabel: 'Balsas neįdiegtas',
   voiceMissingTitle: 'Balsas neįdiegtas',
-  voiceMissingBody: 'Jūsų įrenginyje nėra šios kalbos balso. Programa tyli, užuot kalbėjusi kitos kalbos balsu, nes tai išmokytų neteisingos tarties. Įdiekite balsą ir bandykite dar kartą.',
+  voiceMissingBody: 'Jūsų įrenginyje nėra šios šalies balso, o interneto ryšio neturite. Programa nenaudoja kitos šalies balso, nes tai išmokytų neteisingos tarties. Prisijunkite prie interneto arba įdiekite balsą įrenginyje.',
   voiceMissingAndroid: 'Android: Nustatymai → Sistema → Kalbos → Teksto vertimas į kalbą → įdiegti balso duomenis',
   voiceMissingIOS: 'iPhone: Nustatymai → Pritaikymas neįgaliesiems → Sakytinis turinys → Balsai',
   voiceMissingWindows: 'Windows: Parametrai → Laikas ir kalba → Kalbėjimas → Pridėti balsų',
@@ -2240,6 +2247,7 @@ const ltLT = {
   voiceDiagnosticsTitle: 'Šio įrenginio balsai',
   voiceAvailableLabel: 'Balsas pasiekiamas',
   voiceUnknownLabel: 'Tikrinama…',
+  voiceFromInternet: 'Garsas iš interneto',
 };
 
 /**

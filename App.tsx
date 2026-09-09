@@ -22,7 +22,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ErrorFallback } from './components/ErrorFallback';
 import { lazyWithRetry } from './utils/lazyWithRetry';
 import { playSound } from './utils/soundUtils';
-import { pickVoice } from './utils/speech';
+import { pickVoice, googleTtsUrl, type VoiceStatus } from './utils/speech';
 import {
   ShoppingBagIcon,
   PillIcon,
@@ -190,15 +190,30 @@ export default function App() {
     try { localStorage.setItem('installDismissed', 'true'); } catch { /* ignore */ }
   };
 
-  // ----- Áudio (voz do sistema, funciona offline) -----
+  // ----- Áudio -----
   //
-  // A regra é absoluta: nunca falar com voz de outro idioma. Antes, quando o
-  // aparelho não tinha a voz do destino, `utterance.voice` ficava nulo e o
-  // motor caía na voz padrão do sistema — texto italiano lido com voz
-  // americana. `utterance.lang` sozinho não resolve: é só uma dica.
+  // A regra é a região, não só o idioma: texto do Brasil nunca sai na voz de
+  // Portugal, espanhol da Espanha nunca sai na voz mexicana. Região errada foi
+  // o que dois revisores nativos reprovaram.
+  //
+  // O aparelho do público real costuma ter uma ou duas vozes só, nenhuma da
+  // região certa. Por isso o áudio online volta a existir: é ele que entrega o
+  // sotaque correto num celular que não tem voz nenhuma instalada.
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   /** País cuja voz falta. Preenchido só quando alguém tenta ouvir. */
   const [voiceMissingFor, setVoiceMissingFor] = useState<Country | null>(null);
+  const [online, setOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
+
+  useEffect(() => {
+    const entrou = () => setOnline(true);
+    const caiu = () => setOnline(false);
+    window.addEventListener('online', entrou);
+    window.addEventListener('offline', caiu);
+    return () => {
+      window.removeEventListener('online', entrou);
+      window.removeEventListener('offline', caiu);
+    };
+  }, []);
 
   useEffect(() => {
     const synth = window.speechSynthesis;
@@ -218,49 +233,75 @@ export default function App() {
     return () => synth.removeEventListener('voiceschanged', load);
   }, []);
 
-  /** Estado da voz do destino atual, para a interface saber antes do toque. */
+  /** Voz do destino atual instalada no aparelho, para a interface saber antes do toque. */
   const targetVoice = useMemo(() => pickVoice(voices, targetCountry.lang), [voices, targetCountry.lang]);
+
+  /**
+   * O botão só se declara indisponível quando realmente não há como falar
+   * certo: sem voz da região no aparelho E sem internet para buscar o áudio.
+   * Com internet, o áudio sai — então marcar o botão seria mentira.
+   */
+  const voiceStatus: VoiceStatus = targetVoice.status === 'missing' && !online ? 'missing' : 'ok';
 
   const handlePlayAudio = useCallback((text: string, lang: string) => {
     const synth = window.speechSynthesis;
-    if (!synth) return;
+    // Reconsulta o motor: a lista pode ter chegado depois do último render.
+    const lookup = synth ? pickVoice(synth.getVoices(), lang) : ({ status: 'missing' } as const);
 
-    const speak = (voice: SpeechSynthesisVoice) => {
+    const falarNoSistema = (voice: SpeechSynthesisVoice | null): boolean => {
+      if (!synth) return false;
       synth.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = lang;
       utterance.rate = 0.95;
-      utterance.voice = voice;
+      if (voice) utterance.voice = voice;
       synth.speak(utterance);
+      return true;
     };
 
-    const warn = () => setVoiceMissingFor(COUNTRIES.find((c) => c.lang === lang) ?? null);
+    const avisar = () => setVoiceMissingFor(COUNTRIES.find((c) => c.lang === lang) ?? null);
 
-    const decide = (list: SpeechSynthesisVoice[]) => {
-      const lookup = pickVoice(list, lang);
-      if (lookup.status === 'ok') speak(lookup.voice);
-      else warn();
+    /** Último recurso. Nunca fala com voz de região diferente. */
+    const degradar = () => {
+      // Lista vazia: o motor não sabe dizer o que tem, então não há prova de
+      // voz errada. Definir só o `lang` é o que o Android respeita — e é o que
+      // a versão que funcionava fazia.
+      if (lookup.status === 'unknown' && falarNoSistema(null)) return;
+      avisar();
     };
 
-    // Reconsulta o motor: a lista pode ter chegado depois do último render.
-    const now = synth.getVoices();
-    const lookup = pickVoice(now, lang);
+    // 1. Voz da região exata instalada: fala já. Offline, instantâneo, correto.
+    if (lookup.status === 'ok') { falarNoSistema(lookup.voice); return; }
 
-    if (lookup.status === 'ok') { speak(lookup.voice); return; }
-    if (lookup.status === 'missing') { warn(); return; }
+    // 2. Sem a voz certa no aparelho: busca o áudio com o sotaque certo.
+    const url = online && typeof Audio !== 'undefined' ? googleTtsUrl(text, lang) : null;
+    if (!url) { degradar(); return; }
 
-    // `unknown`: o motor ainda não listou nada. No WebView do Capacitor isso é
-    // comum na primeira interação. Falar agora seria apostar na voz padrão, que
-    // é exatamente o defeito. Espera um instante pelo `voiceschanged` e decide
-    // com a lista real — nunca com uma voz não verificada.
-    const onChanged = () => { cleanup(); decide(synth.getVoices()); };
-    const timer = window.setTimeout(() => { cleanup(); decide(synth.getVoices()); }, 600);
-    const cleanup = () => {
-      window.clearTimeout(timer);
-      synth.removeEventListener('voiceschanged', onChanged);
+    // `play()` sai daqui de dentro do gesto do toque, que é o que o navegador
+    // de celular exige. Só o tratamento da falha é assíncrono.
+    const audio = new Audio(url);
+    let resolvido = false;
+    let limite: number | undefined;
+
+    const desistir = () => {
+      if (resolvido) return;
+      resolvido = true;
+      window.clearTimeout(limite);
+      try { audio.pause(); } catch { /* já parado */ }
+      degradar();
     };
-    synth.addEventListener('voiceschanged', onChanged);
-  }, []);
+
+    audio.addEventListener('playing', () => {
+      resolvido = true;
+      window.clearTimeout(limite);
+    }, { once: true });
+    audio.addEventListener('error', desistir, { once: true });
+
+    // Rede pendurada não pode virar silêncio sem explicação.
+    limite = window.setTimeout(desistir, 3500);
+
+    void audio.play().catch(desistir);
+  }, [online]);
 
   const handlePlayPhrase = useCallback((type: 'ask' | 'want', item: TranslationItem) => {
     const name = item.translated_term;
@@ -286,10 +327,9 @@ export default function App() {
     onGoHome: () => setCurrentModule(null),
     onOpenLanguageModal: () => setIsLanguageModalOpen(true),
     handlePlayAudio,
-    // 'missing' deixa o botão de áudio já nascer indisponível, em vez de a
-    // pessoa descobrir no toque. 'unknown' não vira aviso: seria alarme falso
-    // enquanto o motor TTS ainda está subindo.
-    voiceStatus: targetVoice.status,
+    // 'missing' só quando não há mesmo como falar certo — sem voz da região e
+    // sem internet. Enquanto houver rede, o áudio sai e o botão fica normal.
+    voiceStatus,
   };
 
   const catalogProps = {
@@ -425,6 +465,7 @@ export default function App() {
         theme={theme}
         blockOriginOnly={currentModule === 'supermarket' || currentModule === 'pharmacy'}
         voices={voices}
+        online={online}
       />
 
       <VoiceMissingSheet

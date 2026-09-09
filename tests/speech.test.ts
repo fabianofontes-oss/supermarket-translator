@@ -1,153 +1,139 @@
 import { describe, it, expect } from 'vitest';
-import { pickVoice, type VoiceLike } from '../utils/speech';
+import { pickVoice, googleTtsUrl, TTS_MAX_CHARS, type VoiceLike } from '../utils/speech';
 import { COUNTRIES } from '../constants';
 
 /**
- * Seleção de voz do TTS.
+ * Seleção de voz e origem do áudio.
  *
- * O defeito que estes testes prendem: com destino Itália, o app falava texto
- * italiano com voz americana. A voz padrão do sistema entrava porque nenhuma
- * voz italiana existia e o código falava assim mesmo. A regra aqui é absoluta —
- * idioma-base diferente do destino nunca sai daqui.
+ * A regra do produto é a REGIÃO, não o idioma. Texto do Brasil não pode sair na
+ * voz de Portugal, espanhol da Espanha não pode sair na voz mexicana, italiano
+ * não pode sair na voz americana. Foi região errada que dois revisores nativos
+ * reprovaram — e uma versão anterior deste código caía de propósito para outra
+ * região, transformando o defeito em comportamento oficial.
  */
 
 const v = (name: string, lang: string): VoiceLike => ({ name, lang });
 
-const baseOf = (lang: string) => lang.replace(/_/g, '-').toLowerCase().split('-')[0];
-
-describe('pickVoice — compatibilidade de idioma', () => {
-  it('locale exato vence outra região do mesmo idioma', () => {
-    const voices = [v('Italiano Svizzera', 'it-CH'), v('Elsa', 'it-IT')];
-    const r = pickVoice(voices, 'it-IT');
-    expect(r.status).toBe('ok');
-    expect(r.status === 'ok' && r.voice.lang).toBe('it-IT');
-  });
-
+describe('pickVoice — só a região exata serve', () => {
   it('[it-IT] + it-IT → ok', () => {
     const r = pickVoice([v('Elsa', 'it-IT')], 'it-IT');
     expect(r.status === 'ok' && r.voice.lang).toBe('it-IT');
   });
 
-  it('[it] + it-IT → ok (mesma língua, sem região)', () => {
-    const r = pickVoice([v('Italian', 'it')], 'it-IT');
-    expect(r.status === 'ok' && r.voice.lang).toBe('it');
+  it('[pt-PT] + pt-BR → missing — a regra que os revisores exigiram', () => {
+    expect(pickVoice([v('Joana', 'pt-PT')], 'pt-BR')).toEqual({ status: 'missing' });
   });
 
-  it('[it-CH] + it-IT → ok (mesma língua, região diferente)', () => {
-    const r = pickVoice([v('Italiano Svizzera', 'it-CH')], 'it-IT');
-    expect(r.status === 'ok' && r.voice.lang).toBe('it-CH');
+  it('[pt-BR] + pt-PT → missing, e o inverso também vale', () => {
+    expect(pickVoice([v('Luciana', 'pt-BR')], 'pt-PT')).toEqual({ status: 'missing' });
   });
 
-  it('[en-US, es-ES] + it-IT → missing', () => {
-    const r = pickVoice([v('English US', 'en-US'), v('Spanish', 'es-ES')], 'it-IT');
-    expect(r).toEqual({ status: 'missing' });
+  it('[es-US] + es-ES → missing — o caso da captura do dono', () => {
+    expect(pickVoice([v('espanhol Estados Unidos', 'es-US')], 'es-ES')).toEqual({ status: 'missing' });
   });
 
-  it('[pt-BR, es-ES] + fr-FR → missing', () => {
-    const r = pickVoice([v('Luciana', 'pt-BR'), v('Mónica', 'es-ES')], 'fr-FR');
-    expect(r).toEqual({ status: 'missing' });
+  it('[en-US] + en-GB → missing', () => {
+    expect(pickVoice([v('inglês Estados Unidos', 'en-US')], 'en-GB')).toEqual({ status: 'missing' });
+  });
+
+  it('[it-CH] + it-IT → missing; outra região não substitui', () => {
+    expect(pickVoice([v('Italiano Svizzera', 'it-CH')], 'it-IT')).toEqual({ status: 'missing' });
+  });
+
+  it('[it] + it-IT → missing; idioma sem região não é a região', () => {
+    expect(pickVoice([v('Italian', 'it')], 'it-IT')).toEqual({ status: 'missing' });
+  });
+
+  it('escolhe a certa quando a errada está na lista junto', () => {
+    const r = pickVoice([v('Joana', 'pt-PT'), v('Luciana', 'pt-BR')], 'pt-BR');
+    expect(r.status === 'ok' && r.voice.lang).toBe('pt-BR');
   });
 });
 
 describe('pickVoice — preferência de qualidade', () => {
-  it('voz premium do idioma certo vence a comum do idioma certo', () => {
-    const voices = [v('Microsoft Elsa', 'it-IT'), v('Google italiano', 'it-IT')];
-    const r = pickVoice(voices, 'it-IT');
+  it('premium vence comum dentro da MESMA região', () => {
+    const r = pickVoice([v('Microsoft Elsa', 'it-IT'), v('Google italiano', 'it-IT')], 'it-IT');
     expect(r.status === 'ok' && r.voice.name).toBe('Google italiano');
   });
 
-  it('voz premium do idioma ERRADO não vence voz comum do idioma certo', () => {
-    const voices = [v('Google US English Premium', 'en-US'), v('Elsa', 'it-IT')];
-    const r = pickVoice(voices, 'it-IT');
-    expect(r.status === 'ok' && r.voice.lang).toBe('it-IT');
-    expect(r.status === 'ok' && r.voice.name).toBe('Elsa');
-  });
-
-  it('qualidade não promove região errada acima do locale exato', () => {
-    const voices = [v('Google Italiano Natural', 'it-CH'), v('Elsa', 'it-IT')];
-    const r = pickVoice(voices, 'it-IT');
-    expect(r.status === 'ok' && r.voice.lang).toBe('it-IT');
+  it('premium de região errada não vence nada — nem existe como opção', () => {
+    const r = pickVoice([v('Google Português Premium', 'pt-PT')], 'pt-BR');
+    expect(r).toEqual({ status: 'missing' });
   });
 });
 
 describe('pickVoice — normalização', () => {
-  const elsa = v('Elsa', 'it-IT');
-
-  it.each(['it_IT', 'IT-it', 'IT-IT', 'it-it', ' it-IT '])('aceita %s', (lang) => {
-    const r = pickVoice([elsa], lang);
-    expect(r.status === 'ok' && r.voice.lang).toBe('it-IT');
+  it.each(['pt_BR', 'PT-br', 'PT-BR', ' pt-BR '])('aceita %s', (lang) => {
+    expect(pickVoice([v('Luciana', 'pt-BR')], lang).status).toBe('ok');
   });
 
   it('normaliza também o lang da voz', () => {
-    const r = pickVoice([v('Elsa', 'it_IT')], 'it-IT');
-    expect(r.status).toBe('ok');
+    expect(pickVoice([v('Luciana', 'pt_BR')], 'pt-BR').status).toBe('ok');
   });
 });
 
 describe('pickVoice — lista vazia', () => {
   it('voices=[] → unknown, nunca missing', () => {
-    expect(pickVoice([], 'it-IT')).toEqual({ status: 'unknown' });
-  });
-
-  it('unknown significa "ainda não sei", não "não existe"', () => {
-    // O motor TTS do WebView pode listar vozes só depois. Concluir `missing`
-    // aqui mostraria um aviso falso na primeira pintura.
-    const r = pickVoice([], 'pt-BR');
-    expect(r.status).not.toBe('missing');
+    expect(pickVoice([], 'pt-BR')).toEqual({ status: 'unknown' });
   });
 });
 
-describe('pickVoice — invariante sobre todos os países', () => {
-  // Uma lista realista de aparelho brasileiro: nenhum italiano, nenhum lituano.
-  const DEVICE = [
-    v('Microsoft Daniel', 'pt-BR'),
-    v('Google português do Brasil', 'pt-BR'),
-    v('Microsoft David', 'en-US'),
-    v('Microsoft Zira', 'en-US'),
-    v('Google español', 'es-ES'),
+describe('pickVoice — o aparelho real do dono', () => {
+  // Exatamente o que a captura mostrou: duas vozes, nenhuma de região certa
+  // além do inglês americano.
+  const APARELHO = [
+    v('espanhol Estados Unidos', 'es-US'),
+    v('inglês Estados Unidos', 'en-US'),
   ];
 
-  it('nenhum resultado tem idioma-base diferente do pedido', () => {
+  it('só os Estados Unidos têm voz de região correta', () => {
+    const comVoz = COUNTRIES.filter((c) => pickVoice(APARELHO, c.lang).status === 'ok').map((c) => c.name);
+    expect(comVoz).toEqual(['Estados Unidos']);
+  });
+
+  it('nenhum resultado tem lang diferente do pedido', () => {
     const erradas: string[] = [];
     for (const country of COUNTRIES) {
-      const r = pickVoice(DEVICE, country.lang);
-      if (r.status === 'ok' && baseOf(r.voice.lang) !== baseOf(country.lang)) {
-        erradas.push(`${country.name} (${country.lang}) → ${r.voice.name} [${r.voice.lang}]`);
+      const r = pickVoice(APARELHO, country.lang);
+      if (r.status === 'ok' && r.voice.lang.toLowerCase() !== country.lang.toLowerCase()) {
+        erradas.push(`${country.name} → ${r.voice.name} [${r.voice.lang}]`);
       }
     }
     expect(erradas).toEqual([]);
   });
-
-  it('os 12 países são avaliáveis sem exceção e só devolvem ok/missing/unknown', () => {
-    expect(COUNTRIES).toHaveLength(12);
-    for (const country of COUNTRIES) {
-      expect(['ok', 'missing', 'unknown']).toContain(pickVoice(DEVICE, country.lang).status);
-    }
-  });
-
-  it('neste aparelho, Itália e Lituânia dão missing e Brasil dá ok', () => {
-    const byName = (n: string) => COUNTRIES.find((c) => c.name === n)!;
-    expect(pickVoice(DEVICE, byName('Itália').lang).status).toBe('missing');
-    expect(pickVoice(DEVICE, byName('Lituânia').lang).status).toBe('missing');
-    expect(pickVoice(DEVICE, byName('Brasil').lang).status).toBe('ok');
-  });
 });
 
-describe('regressão direta — o bug relatado', () => {
-  /**
-   * Destino Itália, aparelho sem voz italiana. Antes disto o app falava com
-   * `Microsoft David` (en-US) e ensinava pronúncia inglesa de texto italiano.
-   * Dois revisores nativos reprovaram o app por causa exatamente disto.
-   */
-  it('destino it-IT em aparelho com [en-US, es-ES] devolve missing, nunca uma voz', () => {
-    const voices = [
-      { name: 'English US', lang: 'en-US' },
-      { name: 'Spanish', lang: 'es-ES' },
-    ];
+describe('googleTtsUrl — o áudio com o sotaque certo', () => {
+  it('manda o locale COMPLETO, que é o que separa pt-BR de pt-PT', () => {
+    const url = googleTtsUrl('bom dia', 'pt-BR')!;
+    expect(url).toContain('tl=pt-BR');
+    expect(url).not.toContain('tl=pt&');
+  });
 
-    const r = pickVoice(voices, 'it-IT');
+  it('pt-PT e pt-BR produzem pedidos diferentes', () => {
+    expect(googleTtsUrl('bom dia', 'pt-BR')).not.toBe(googleTtsUrl('bom dia', 'pt-PT'));
+  });
 
-    expect(r).toEqual({ status: 'missing' });
-    expect(r).not.toHaveProperty('voice');
+  it('escapa o texto', () => {
+    const url = googleTtsUrl('¿dónde está?', 'es-ES')!;
+    expect(url).not.toContain('¿dónde está?');
+    expect(new URL(url).searchParams.get('q')).toBe('¿dónde está?');
+  });
+
+  it('recusa texto acima do limite, em vez de reproduzir meia frase', () => {
+    expect(googleTtsUrl('a'.repeat(TTS_MAX_CHARS + 1), 'pt-BR')).toBeNull();
+    expect(googleTtsUrl('a'.repeat(TTS_MAX_CHARS), 'pt-BR')).not.toBeNull();
+  });
+
+  it('recusa texto vazio', () => {
+    expect(googleTtsUrl('   ', 'pt-BR')).toBeNull();
+  });
+
+  it('cobre todos os 12 países', () => {
+    for (const c of COUNTRIES) {
+      const url = googleTtsUrl('teste', c.lang);
+      expect(url, c.name).not.toBeNull();
+      expect(new URL(url!).searchParams.get('tl')).toBe(c.lang);
+    }
   });
 });
