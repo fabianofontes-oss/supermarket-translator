@@ -122,6 +122,10 @@ export interface Verb {
   dativeIn?: LangCode[];
   labels: Text;
   forms: Record<LangCode, [string, string, string, string, string, string]>;
+  /** Passado. Em espanhol é o pretérito perfecto, que é o que se ouve na Espanha. */
+  pastForms: Record<LangCode, [string, string, string, string, string, string]>;
+  /** Futuro. Em espanhol é o perifrástico "voy a", muito mais falado que "querré". */
+  futureForms: Record<LangCode, [string, string, string, string, string, string]>;
   /** Complementos que combinam com este verbo. */
   complements: { key: string; texts: Text }[];
 }
@@ -138,6 +142,26 @@ export const VERBS: Verb[] = [
       it: ['voglio', 'vuoi', 'vuole', 'vogliamo', 'volete', 'vogliono'],
       uk: ['хочу', 'хочеш', 'хоче', 'хочемо', 'хочете', 'хочуть'],
       lt: ['noriu', 'nori', 'nori', 'norime', 'norite', 'nori'], ar: ['أريد', 'تريد', 'يريد', 'نريد', 'تريدون', 'يريدون'],
+    },
+    pastForms: {
+      es: ['he querido', 'has querido', 'ha querido', 'hemos querido', 'habéis querido', 'han querido'],
+      pt: ['quis', 'quis', 'quis', 'quisemos', 'quiseram', 'quiseram'],
+      en: ['wanted', 'wanted', 'wanted', 'wanted', 'wanted', 'wanted'],
+      fr: ['ai voulu', 'as voulu', 'a voulu', 'avons voulu', 'avez voulu', 'ont voulu'],
+      it: ['ho voluto', 'hai voluto', 'ha voluto', 'abbiamo voluto', 'avete voluto', 'hanno voluto'],
+      uk: ['хотів', 'хотів', 'хотів', 'хотіли', 'хотіли', 'хотіли'],
+      ar: ['أردت', 'أردت', 'أراد', 'أردنا', 'أردتم', 'أرادوا'],
+      lt: ['norėjau', 'norėjai', 'norėjo', 'norėjome', 'norėjote', 'norėjo'],
+    },
+    futureForms: {
+      es: ['voy a querer', 'vas a querer', 'va a querer', 'vamos a querer', 'vais a querer', 'van a querer'],
+      pt: ['vou querer', 'vai querer', 'vai querer', 'vamos querer', 'vão querer', 'vão querer'],
+      en: ['will want', 'will want', 'will want', 'will want', 'will want', 'will want'],
+      fr: ['vais vouloir', 'vas vouloir', 'va vouloir', 'allons vouloir', 'allez vouloir', 'vont vouloir'],
+      it: ['vorrò', 'vorrai', 'vorrà', 'vorremo', 'vorrete', 'vorranno'],
+      uk: ['буду хотіти', 'будеш хотіти', 'буде хотіти', 'будемо хотіти', 'будете хотіти', 'будуть хотіти'],
+      ar: ['سأريد', 'ستريد', 'سيريد', 'سنريد', 'ستريدون', 'سيريدون'],
+      lt: ['norėsiu', 'norėsi', 'norės', 'norėsime', 'norėsite', 'norės'],
     },
     complements: [
       { key: 'coffee', texts: { es: 'un café', pt: 'um café', en: 'a coffee', fr: 'un café', it: 'un caffè', uk: 'каву', lt: 'kavos', ar: 'قهوة' } },
@@ -157,6 +181,26 @@ export const VERBS: Verb[] = [
       uk: ['маю', 'маєш', 'має', 'маємо', 'маєте', 'мають'],
       lt: ['turiu', 'turi', 'turi', 'turime', 'turite', 'turi'], ar: ['لدي', 'لديك', 'لديه', 'لدينا', 'لديكم', 'لديهم'],
     },
+    pastForms: {
+      es: ['he tenido', 'has tenido', 'ha tenido', 'hemos tenido', 'habéis tenido', 'han tenido'],
+      pt: ['tive', 'teve', 'teve', 'tivemos', 'tiveram', 'tiveram'],
+      en: ['had', 'had', 'had', 'had', 'had', 'had'],
+      fr: ['ai eu', 'as eu', 'a eu', 'avons eu', 'avez eu', 'ont eu'],
+      it: ['ho avuto', 'hai avuto', 'ha avuto', 'abbiamo avuto', 'avete avuto', 'hanno avuto'],
+      uk: ['мав', 'мав', 'мав', 'мали', 'мали', 'мали'],
+      ar: ['كان لدي', 'كان لديك', 'كان لديه', 'كان لدينا', 'كان لديكم', 'كان لديهم'],
+      lt: ['turėjau', 'turėjai', 'turėjo', 'turėjome', 'turėjote', 'turėjo'],
+    },
+    futureForms: {
+      es: ['voy a tener', 'vas a tener', 'va a tener', 'vamos a tener', 'vais a tener', 'van a tener'],
+      pt: ['vou ter', 'vai ter', 'vai ter', 'vamos ter', 'vão ter', 'vão ter'],
+      en: ['will have', 'will have', 'will have', 'will have', 'will have', 'will have'],
+      fr: ['vais avoir', 'vas avoir', 'va avoir', 'allons avoir', 'allez avoir', 'vont avoir'],
+      it: ['avrò', 'avrai', 'avrà', 'avremo', 'avrete', 'avranno'],
+      uk: ['буду мати', 'будеш мати', 'буде мати', 'будемо мати', 'будете мати', 'будуть мати'],
+      ar: ['سيكون لدي', 'سيكون لديك', 'سيكون لديه', 'سيكون لدينا', 'سيكون لديكم', 'سيكون لديهم'],
+      lt: ['turėsiu', 'turėsi', 'turės', 'turėsime', 'turėsite', 'turės'],
+    },
     complements: [
       { key: 'reservation', texts: { es: 'una reserva', pt: 'uma reserva', en: 'a reservation', fr: 'une réservation', it: 'una prenotazione', uk: 'бронювання', lt: 'rezervaciją', ar: 'حجز' } },
       { key: 'time', texts: { es: 'tiempo', pt: 'tempo', en: 'time', fr: 'le temps', it: 'tempo', uk: 'час', lt: 'laiko', ar: 'وقت' } },
@@ -174,6 +218,26 @@ export const VERBS: Verb[] = [
       it: ['posso', 'puoi', 'può', 'possiamo', 'potete', 'possono'],
       uk: ['можу', 'можеш', 'може', 'можемо', 'можете', 'можуть'],
       lt: ['galiu', 'gali', 'gali', 'galime', 'galite', 'gali'], ar: ['أستطيع', 'تستطيع', 'يستطيع', 'نستطيع', 'تستطيعون', 'يستطيعون'],
+    },
+    pastForms: {
+      es: ['he podido', 'has podido', 'ha podido', 'hemos podido', 'habéis podido', 'han podido'],
+      pt: ['pude', 'pôde', 'pôde', 'pudemos', 'puderam', 'puderam'],
+      en: ['could', 'could', 'could', 'could', 'could', 'could'],
+      fr: ['ai pu', 'as pu', 'a pu', 'avons pu', 'avez pu', 'ont pu'],
+      it: ['ho potuto', 'hai potuto', 'ha potuto', 'abbiamo potuto', 'avete potuto', 'hanno potuto'],
+      uk: ['міг', 'міг', 'міг', 'могли', 'могли', 'могли'],
+      ar: ['استطعت', 'استطعت', 'استطاع', 'استطعنا', 'استطعتم', 'استطاعوا'],
+      lt: ['galėjau', 'galėjai', 'galėjo', 'galėjome', 'galėjote', 'galėjo'],
+    },
+    futureForms: {
+      es: ['voy a poder', 'vas a poder', 'va a poder', 'vamos a poder', 'vais a poder', 'van a poder'],
+      pt: ['vou poder', 'vai poder', 'vai poder', 'vamos poder', 'vão poder', 'vão poder'],
+      en: ['will be able to', 'will be able to', 'will be able to', 'will be able to', 'will be able to', 'will be able to'],
+      fr: ['vais pouvoir', 'vas pouvoir', 'va pouvoir', 'allons pouvoir', 'allez pouvoir', 'vont pouvoir'],
+      it: ['potrò', 'potrai', 'potrà', 'potremo', 'potrete', 'potranno'],
+      uk: ['зможу', 'зможеш', 'зможе', 'зможемо', 'зможете', 'зможуть'],
+      ar: ['سأستطيع', 'ستستطيع', 'سيستطيع', 'سنستطيع', 'ستستطيعون', 'سيستطيعون'],
+      lt: ['galėsiu', 'galėsi', 'galės', 'galėsime', 'galėsite', 'galės'],
     },
     complements: [
       { key: 'help', texts: { es: 'ayudarme', pt: 'me ajudar', en: 'help me', fr: "m'aider", it: 'aiutarmi', uk: 'мені допомогти', lt: 'man padėti', ar: 'مساعدتي' } },
@@ -193,6 +257,26 @@ export const VERBS: Verb[] = [
       uk: ['потребую', 'потребуєш', 'потребує', 'потребуємо', 'потребуєте', 'потребують'],
       lt: ['reikia', 'reikia', 'reikia', 'reikia', 'reikia', 'reikia'], ar: ['أحتاج', 'تحتاج', 'يحتاج', 'نحتاج', 'تحتاجون', 'يحتاجون'],
     },
+    pastForms: {
+      es: ['he necesitado', 'has necesitado', 'ha necesitado', 'hemos necesitado', 'habéis necesitado', 'han necesitado'],
+      pt: ['precisei de', 'precisou de', 'precisou de', 'precisamos de', 'precisaram de', 'precisaram de'],
+      en: ['needed', 'needed', 'needed', 'needed', 'needed', 'needed'],
+      fr: ['ai eu besoin d\'', 'as eu besoin d\'', 'a eu besoin d\'', 'avons eu besoin d\'', 'avez eu besoin d\'', 'ont eu besoin d\''],
+      it: ['ho avuto bisogno di', 'hai avuto bisogno di', 'ha avuto bisogno di', 'abbiamo avuto bisogno di', 'avete avuto bisogno di', 'hanno avuto bisogno di'],
+      uk: ['потребував', 'потребував', 'потребував', 'потребували', 'потребували', 'потребували'],
+      ar: ['احتجت', 'احتجت', 'احتاج', 'احتجنا', 'احتجتم', 'احتاجوا'],
+      lt: ['reikėjo', 'reikėjo', 'reikėjo', 'reikėjo', 'reikėjo', 'reikėjo'],
+    },
+    futureForms: {
+      es: ['voy a necesitar', 'vas a necesitar', 'va a necesitar', 'vamos a necesitar', 'vais a necesitar', 'van a necesitar'],
+      pt: ['vou precisar de', 'vai precisar de', 'vai precisar de', 'vamos precisar de', 'vão precisar de', 'vão precisar de'],
+      en: ['will need', 'will need', 'will need', 'will need', 'will need', 'will need'],
+      fr: ['vais avoir besoin d\'', 'vas avoir besoin d\'', 'va avoir besoin d\'', 'allons avoir besoin d\'', 'allez avoir besoin d\'', 'vont avoir besoin d\''],
+      it: ['avrò bisogno di', 'avrai bisogno di', 'avrà bisogno di', 'avremo bisogno di', 'avrete bisogno di', 'avranno bisogno di'],
+      uk: ['буду потребувати', 'будеш потребувати', 'буде потребувати', 'будемо потребувати', 'будете потребувати', 'будуть потребувати'],
+      ar: ['سأحتاج', 'ستحتاج', 'سيحتاج', 'سنحتاج', 'ستحتاجون', 'سيحتاجون'],
+      lt: ['reikės', 'reikės', 'reikės', 'reikės', 'reikės', 'reikės'],
+    },
     complements: [
       { key: 'helpN', texts: { es: 'ayuda', pt: 'ajuda', en: 'help', fr: 'aide', it: 'aiuto', uk: 'допомоги', lt: 'pagalbos', ar: 'مساعدة' } },
       { key: 'doctor', texts: { es: 'un médico', pt: 'um médico', en: 'a doctor', fr: 'un médecin', it: 'un medico', uk: 'лікаря', lt: 'gydytojo', ar: 'طبيب' } },
@@ -210,6 +294,26 @@ export const VERBS: Verb[] = [
       it: ['parlo', 'parli', 'parla', 'parliamo', 'parlate', 'parlano'],
       uk: ['говорю', 'говориш', 'говорить', 'говоримо', 'говорите', 'говорять'],
       lt: ['kalbu', 'kalbi', 'kalba', 'kalbame', 'kalbate', 'kalba'], ar: ['أتكلم', 'تتكلم', 'يتكلم', 'نتكلم', 'تتكلمون', 'يتكلمون'],
+    },
+    pastForms: {
+      es: ['he hablado', 'has hablado', 'ha hablado', 'hemos hablado', 'habéis hablado', 'han hablado'],
+      pt: ['falei', 'falou', 'falou', 'falamos', 'falaram', 'falaram'],
+      en: ['spoke', 'spoke', 'spoke', 'spoke', 'spoke', 'spoke'],
+      fr: ['ai parlé', 'as parlé', 'a parlé', 'avons parlé', 'avez parlé', 'ont parlé'],
+      it: ['ho parlato', 'hai parlato', 'ha parlato', 'abbiamo parlato', 'avete parlato', 'hanno parlato'],
+      uk: ['говорив', 'говорив', 'говорив', 'говорили', 'говорили', 'говорили'],
+      ar: ['تكلمت', 'تكلمت', 'تكلم', 'تكلمنا', 'تكلمتم', 'تكلموا'],
+      lt: ['kalbėjau', 'kalbėjai', 'kalbėjo', 'kalbėjome', 'kalbėjote', 'kalbėjo'],
+    },
+    futureForms: {
+      es: ['voy a hablar', 'vas a hablar', 'va a hablar', 'vamos a hablar', 'vais a hablar', 'van a hablar'],
+      pt: ['vou falar', 'vai falar', 'vai falar', 'vamos falar', 'vão falar', 'vão falar'],
+      en: ['will speak', 'will speak', 'will speak', 'will speak', 'will speak', 'will speak'],
+      fr: ['vais parler', 'vas parler', 'va parler', 'allons parler', 'allez parler', 'vont parler'],
+      it: ['parlerò', 'parlerai', 'parlerà', 'parleremo', 'parlerete', 'parleranno'],
+      uk: ['буду говорити', 'будеш говорити', 'буде говорити', 'будемо говорити', 'будете говорити', 'будуть говорити'],
+      ar: ['سأتكلم', 'ستتكلم', 'سيتكلم', 'سنتكلم', 'ستتكلمون', 'سيتكلمون'],
+      lt: ['kalbėsiu', 'kalbėsi', 'kalbės', 'kalbėsime', 'kalbėsite', 'kalbės'],
     },
     complements: [
       { key: 'spanish', texts: { es: 'español', pt: 'espanhol', en: 'Spanish', fr: 'espagnol', it: 'spagnolo', uk: 'іспанською', lt: 'ispaniškai', ar: 'الإسبانية' } },
@@ -229,6 +333,26 @@ export const VERBS: Verb[] = [
       uk: ['', '', '', '', '', ''],
       lt: ['esu', 'esi', 'yra', 'esame', 'esate', 'yra'], ar: ['', '', '', '', '', ''],
     },
+    pastForms: {
+      es: ['he sido', 'has sido', 'ha sido', 'hemos sido', 'habéis sido', 'han sido'],
+      pt: ['fui', 'foi', 'foi', 'fomos', 'foram', 'foram'],
+      en: ['was', 'were', 'was', 'were', 'were', 'were'],
+      fr: ['ai été', 'as été', 'a été', 'avons été', 'avez été', 'ont été'],
+      it: ['sono stato', 'sei stato', 'è stato', 'siamo stati', 'siete stati', 'sono stati'],
+      uk: ['був', 'був', 'був', 'були', 'були', 'були'],
+      ar: ['كنت', 'كنت', 'كان', 'كنا', 'كنتم', 'كانوا'],
+      lt: ['buvau', 'buvai', 'buvo', 'buvome', 'buvote', 'buvo'],
+    },
+    futureForms: {
+      es: ['voy a ser', 'vas a ser', 'va a ser', 'vamos a ser', 'vais a ser', 'van a ser'],
+      pt: ['vou ser', 'vai ser', 'vai ser', 'vamos ser', 'vão ser', 'vão ser'],
+      en: ['will be', 'will be', 'will be', 'will be', 'will be', 'will be'],
+      fr: ['vais être', 'vas être', 'va être', 'allons être', 'allez être', 'vont être'],
+      it: ['sarò', 'sarai', 'sarà', 'saremo', 'sarete', 'saranno'],
+      uk: ['буду', 'будеш', 'буде', 'будемо', 'будете', 'будуть'],
+      ar: ['سأكون', 'ستكون', 'سيكون', 'سنكون', 'ستكونون', 'سيكونون'],
+      lt: ['būsiu', 'būsi', 'bus', 'būsime', 'būsite', 'bus'],
+    },
     complements: [
       { key: 'fromBrazil', texts: { es: 'de Brasil', pt: 'do Brasil', en: 'from Brazil', fr: 'du Brésil', it: 'del Brasile', uk: 'з Бразилії', lt: 'iš Brazilijos', ar: 'من البرازيل' } },
       { key: 'newHere', texts: { es: 'nuevo aquí', pt: 'novo aqui', en: 'new here', fr: 'nouveau ici', it: 'nuovo qui', uk: 'тут новий', lt: 'čia naujas', ar: 'جديد هنا' } },
@@ -247,6 +371,26 @@ export const VERBS: Verb[] = [
       uk: ['', '', '', '', '', ''],
       lt: ['esu', 'esi', 'yra', 'esame', 'esate', 'yra'], ar: ['', '', '', '', '', ''],
     },
+    pastForms: {
+      es: ['he estado', 'has estado', 'ha estado', 'hemos estado', 'habéis estado', 'han estado'],
+      pt: ['estive', 'esteve', 'esteve', 'estivemos', 'estiveram', 'estiveram'],
+      en: ['was', 'were', 'was', 'were', 'were', 'were'],
+      fr: ['ai été', 'as été', 'a été', 'avons été', 'avez été', 'ont été'],
+      it: ['sono stato', 'sei stato', 'è stato', 'siamo stati', 'siete stati', 'sono stati'],
+      uk: ['був', 'був', 'був', 'були', 'були', 'були'],
+      ar: ['كنت', 'كنت', 'كان', 'كنا', 'كنتم', 'كانوا'],
+      lt: ['buvau', 'buvai', 'buvo', 'buvome', 'buvote', 'buvo'],
+    },
+    futureForms: {
+      es: ['voy a estar', 'vas a estar', 'va a estar', 'vamos a estar', 'vais a estar', 'van a estar'],
+      pt: ['vou estar', 'vai estar', 'vai estar', 'vamos estar', 'vão estar', 'vão estar'],
+      en: ['will be', 'will be', 'will be', 'will be', 'will be', 'will be'],
+      fr: ['vais être', 'vas être', 'va être', 'allons être', 'allez être', 'vont être'],
+      it: ['starò', 'starai', 'starà', 'staremo', 'starete', 'staranno'],
+      uk: ['буду', 'будеш', 'буде', 'будемо', 'будете', 'будуть'],
+      ar: ['سأكون', 'ستكون', 'سيكون', 'سنكون', 'ستكونون', 'سيكونون'],
+      lt: ['būsiu', 'būsi', 'bus', 'būsime', 'būsite', 'bus'],
+    },
     complements: [
       { key: 'here', texts: { es: 'aquí', pt: 'aqui', en: 'here', fr: 'ici', it: 'qui', uk: 'тут', lt: 'čia', ar: 'هنا' } },
       { key: 'lost', texts: { es: 'perdido', pt: 'perdido', en: 'lost', fr: 'perdu', it: 'perso', uk: 'загублений', lt: 'pasiklydęs', ar: 'تائه' } },
@@ -259,6 +403,7 @@ export const VERBS: Verb[] = [
 // MONTAGEM DA FRASE
 // ---------------------------------------------------------------------------
 export type Mood = 'affirm' | 'question' | 'negative';
+export type Tense = 'past' | 'present' | 'future';
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const isVowel = (w: string) => /^[aeiouâêîôûàèéëïœh]/i.test(w);
@@ -275,12 +420,14 @@ export const buildPhrase = (
   verb: Verb,
   comp: { texts: Text } | null,
   mood: Mood,
+  tense: Tense = 'present',
 ): string => {
   // Ucraniano e árabe dispensam o verbo "ser" no presente, então a forma vem vazia.
   const person = pronoun.altPerson?.[lang] ?? pronoun.person;
   const useDative = verb.dativeIn?.includes(lang) && pronoun.dative?.[lang];
   const p = useDative ? pronoun.dative![lang]! : pronoun.words[lang];
-  const v = verb.forms[lang][person];
+  const table = tense === 'past' ? verb.pastForms : tense === 'future' ? verb.futureForms : verb.forms;
+  const v = table[lang][person];
   const c = comp ? comp.texts[lang] : '';
   const body = (v ? (c ? joinVerb(v, c) : v) : c).trim();
 
@@ -308,51 +455,87 @@ export const buildPhrase = (
       return `${cap(p)} ${body}.`;
 
     case 'lt': {
-      // A negação lituana cola no verbo: noriu -> nenoriu, yra -> nėra.
+      // A negação lituana cola na primeira palavra: noriu -> nenoriu, yra -> nėra.
       if (mood === 'question') return `Ar ${p} ${body}?`;
       if (mood === 'negative') {
-        const neg = v === 'yra' ? 'nėra' : `ne${v}`;
-        return `${cap(p)} ${c ? `${neg} ${c}` : neg}.`;
+        const [head, ...rest] = v.split(' ');
+        const neg = head === 'yra' ? 'nėra' : `ne${head}`;
+        const tail = [...rest, c].filter(Boolean).join(' ');
+        return `${cap(p)} ${tail ? `${neg} ${tail}` : neg}.`;
       }
       return `${cap(p)} ${body}.`;
     }
 
-    case 'ar':
-      // Sem verbo, a frase é nominal e a negação usa "ليس" em vez de "لا".
+    case 'ar': {
+      // Presente nega com "لا", passado com "ما", futuro com "لن" + presente.
       if (mood === 'question') return `هل ${p} ${body}؟`;
-      if (mood === 'negative') return `${p} ${v ? 'لا' : AR_NOT[person]} ${body}.`;
+      if (mood === 'negative') {
+        if (!v) return `${p} ${AR_NOT[person]} ${body}.`;
+        if (tense === 'past') return `${p} ما ${body}.`;
+        if (tense === 'future') {
+          const present = verb.forms.ar[person];
+          return `${p} لن ${c ? joinVerb(present, c) : present}.`;
+        }
+        return `${p} لا ${body}.`;
+      }
       return `${p} ${body}.`;
+    }
 
     case 'fr': {
-      // "je" vira "j'" antes de vogal, e a negação é ne ... pas.
-      const subj = p === 'je' && isVowel(v) ? "j'" : `${p} `;
+      // "ne ... pas" abraça só o auxiliar: "je n'ai pas voulu", não "n'ai voulu pas".
+      const [aux, ...rest] = v.split(' ');
+      const subj = p === 'je' && isVowel(aux) ? "j'" : `${p} `;
       if (mood === 'question') return `Est-ce que ${subj}${body} ?`;
       if (mood === 'negative') {
-        const ne = isVowel(v) ? "n'" : 'ne ';
-        return `${cap(subj)}${ne}${v} pas${c ? ` ${c}` : ''}.`;
+        // Na negativa quem elide é "ne", não o sujeito: "je n'ai pas", nunca "j'n'ai".
+        const ne = isVowel(aux) ? "n'" : 'ne ';
+        const tail = [...rest, c].filter(Boolean).join(' ');
+        return `${cap(p)} ${ne}${aux} pas${tail ? ` ${tail}` : ''}.`;
       }
       return `${cap(subj)}${body}.`;
     }
 
     default: {
-      // Inglês precisa de auxiliar na pergunta e na negação.
-      const third = person === 2;
+      // Inglês precisa de auxiliar na pergunta e na negação, e ele muda por tempo.
+      const tail = c ? ` ${c}` : '';
+
+      if (tense === 'future') {
+        // As formas de futuro vêm como "will want": basta separar o auxiliar.
+        const rest = v.replace(/^will /, '');
+        if (mood === 'question') return `Will ${p} ${rest}${tail}?`;
+        if (mood === 'negative') return `${cap(p)} will not ${rest}${tail}.`;
+        return `${cap(p)} ${body}.`;
+      }
+
       const base = verb.forms.en[0];
       if (verb.enAux === 'be') {
-        if (mood === 'question') return `${cap(v)} ${p}${c ? ` ${c}` : ''}?`;
-        if (mood === 'negative') return `${cap(p)} ${v} not${c ? ` ${c}` : ''}.`;
+        if (mood === 'question') return `${cap(v)} ${p}${tail}?`;
+        if (mood === 'negative') return `${cap(p)} ${v} not${tail}.`;
         return `${cap(p)} ${body}.`;
       }
       if (verb.enAux === 'can') {
-        if (mood === 'question') return `Can ${p}${c ? ` ${c}` : ''}?`;
-        if (mood === 'negative') return `${cap(p)} cannot${c ? ` ${c}` : ''}.`;
-        return `${cap(p)} can${c ? ` ${c}` : ''}.`;
+        const aux = tense === 'past' ? 'could' : 'can';
+        if (mood === 'question') return `${cap(aux)} ${p}${tail}?`;
+        if (mood === 'negative') return `${cap(p)} ${aux} not${tail}.`;
+        return `${cap(p)} ${aux}${tail}.`;
       }
-      if (mood === 'question') return `${third ? 'Does' : 'Do'} ${p} ${base}${c ? ` ${c}` : ''}?`;
-      if (mood === 'negative') return `${cap(p)} ${third ? "doesn't" : "don't"} ${base}${c ? ` ${c}` : ''}.`;
+      if (tense === 'past') {
+        if (mood === 'question') return `Did ${p} ${base}${tail}?`;
+        if (mood === 'negative') return `${cap(p)} did not ${base}${tail}.`;
+        return `${cap(p)} ${body}.`;
+      }
+      const third = person === 2;
+      if (mood === 'question') return `${third ? 'Does' : 'Do'} ${p} ${base}${tail}?`;
+      if (mood === 'negative') return `${cap(p)} ${third ? "doesn't" : "don't"} ${base}${tail}.`;
       return `${cap(p)} ${body}.`;
     }
   }
+};
+
+export const TENSE_LABELS: Record<Tense, Text> = {
+  past:    { es: 'pasado', pt: 'passado', en: 'past', fr: 'passé', it: 'passato', uk: 'минуле', ar: 'الماضي', lt: 'praeitis' },
+  present: { es: 'presente', pt: 'presente', en: 'present', fr: 'présent', it: 'presente', uk: 'теперішнє', ar: 'الحاضر', lt: 'dabartis' },
+  future:  { es: 'futuro', pt: 'futuro', en: 'future', fr: 'futur', it: 'futuro', uk: 'майбутнє', ar: 'المستقبل', lt: 'ateitis' },
 };
 
 export const MOOD_LABELS: Record<Mood, Text> = {

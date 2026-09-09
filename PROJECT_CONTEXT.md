@@ -153,6 +153,15 @@ Ao reiniciar o chat, peça para:
 *   O mostrador tem **dois anéis**: o de dentro de 1 a 12, como se fala, e o de fora de 13 a 24, como está escrito. Escolher 22 acende 22 e 10 no mesmo ponto, que é o que explica a relação. A lista de botões (`HOURS`) é separada, de 00 a 23.
 *   O digital ao lado começa no formato do país de destino (`uses12hClock`: EUA e Reino Unido usam AM/PM) e tem seletor para trocar.
 
+### Tempos verbais (no mesmo módulo de pronomes)
+*   Passado, presente e futuro entraram como um segundo seletor no cartão da frase, ao lado do de afirmação/pergunta/negação. Módulo separado duplicaria a lista de pronomes e a de verbos.
+*   Espanhol usa o **pretérito perfecto** ("he querido"), que é o passado que se ouve na Espanha, e o **futuro perifrástico** ("voy a querer"), muito mais falado que "querré".
+*   `pastForms` e `futureForms` guardam as seis formas por idioma, como `forms`. Uniforme, sem composição a errar.
+*   Regras por idioma no `buildPhrase`: francês abraça só o auxiliar ("je n'ai pas voulu") e não elide o sujeito antes da negação; lituano cola o "ne" na primeira palavra; árabe nega passado com "ما" e futuro com "لن" mais o presente; inglês troca o auxiliar por tempo (did / will).
+
+### Medidas: seis tabelas
+*   Além de calçado, roupa feminina e masculina, entraram **calça** (cintura, com polegadas em UK e EUA), **sutiã** (banda BR, EU e UK/EUA mais medida abaixo do busto) e **roupa infantil** (idade BR, altura EU).
+
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.351 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

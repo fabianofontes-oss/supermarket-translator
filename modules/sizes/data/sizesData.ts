@@ -83,6 +83,48 @@ export const SIZE_TABLES: SizeTable[] = [
       { BR: 'XG', EU: '54', UK: 'XXL', US: 'XXL', extra: '116' },
     ],
   },
+  {
+    key: 'trousers', emoji: '👖', kind: 'clothes',
+    labels: { es: 'pantalones', pt: 'calça', en: 'trousers', fr: 'pantalon', it: 'pantaloni', uk: 'штани', ar: 'البنطلون', lt: 'kelnės' },
+    extraLabel: { es: 'cintura cm', pt: 'cintura cm', en: 'waist cm', fr: 'taille cm', it: 'vita cm', uk: 'талія см', ar: 'الخصر سم', lt: 'juosmuo cm' },
+    rows: [
+      { BR: '36', EU: '38', UK: '28', US: '28', extra: '71' },
+      { BR: '38', EU: '40', UK: '30', US: '30', extra: '76' },
+      { BR: '40', EU: '42', UK: '32', US: '32', extra: '81' },
+      { BR: '42', EU: '44', UK: '34', US: '34', extra: '86' },
+      { BR: '44', EU: '46', UK: '36', US: '36', extra: '91' },
+      { BR: '46', EU: '48', UK: '38', US: '38', extra: '97' },
+      { BR: '48', EU: '50', UK: '40', US: '40', extra: '102' },
+    ],
+  },
+  {
+    key: 'bra', emoji: '👙', kind: 'clothes',
+    labels: { es: 'sujetador', pt: 'sutiã', en: 'bra', fr: 'soutien-gorge', it: 'reggiseno', uk: 'бюстгальтер', ar: 'حمالة الصدر', lt: 'liemenėlė' },
+    extraLabel: { es: 'bajo pecho cm', pt: 'abaixo do busto cm', en: 'underbust cm', fr: 'sous-poitrine cm', it: 'sottoseno cm', uk: 'під грудьми см', ar: 'تحت الصدر سم', lt: 'po krūtine cm' },
+    rows: [
+      { BR: '38', EU: '80',  UK: '34', US: '34', extra: '70' },
+      { BR: '40', EU: '85',  UK: '36', US: '36', extra: '75' },
+      { BR: '42', EU: '90',  UK: '38', US: '38', extra: '80' },
+      { BR: '44', EU: '95',  UK: '40', US: '40', extra: '85' },
+      { BR: '46', EU: '100', UK: '42', US: '42', extra: '90' },
+      { BR: '48', EU: '105', UK: '44', US: '44', extra: '95' },
+    ],
+  },
+  {
+    key: 'kids', emoji: '🧒', kind: 'clothes',
+    labels: { es: 'ropa de niño', pt: 'roupa infantil', en: "kids' clothing", fr: 'vêtements enfant', it: 'abbigliamento bambino', uk: 'дитячий одяг', ar: 'ملابس الأطفال', lt: 'vaikų drabužiai' },
+    extraLabel: { es: 'altura cm', pt: 'altura cm', en: 'height cm', fr: 'taille cm', it: 'altezza cm', uk: 'зріст см', ar: 'الطول سم', lt: 'ūgis cm' },
+    rows: [
+      { BR: '2',  EU: '92',  UK: '2-3',   US: '2T', extra: '92' },
+      { BR: '3',  EU: '98',  UK: '3-4',   US: '3T', extra: '98' },
+      { BR: '4',  EU: '104', UK: '4-5',   US: '4T', extra: '104' },
+      { BR: '6',  EU: '116', UK: '5-6',   US: '6',  extra: '116' },
+      { BR: '8',  EU: '128', UK: '7-8',   US: '7',  extra: '128' },
+      { BR: '10', EU: '140', UK: '9-10',  US: '10', extra: '140' },
+      { BR: '12', EU: '152', UK: '11-12', US: '12', extra: '152' },
+      { BR: '14', EU: '164', UK: '13-14', US: '14', extra: '164' },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------

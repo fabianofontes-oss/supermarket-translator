@@ -8,10 +8,12 @@ import {
   PRONOUNS,
   VERBS,
   MOOD_LABELS,
+  TENSE_LABELS,
   buildPhrase,
   type Pronoun,
   type Verb,
   type Mood,
+  type Tense,
 } from './pronouns/data/pronounsData';
 
 interface PronounsModuleProps {
@@ -25,6 +27,7 @@ interface PronounsModuleProps {
 }
 
 const MOODS: Mood[] = ['affirm', 'question', 'negative'];
+const TENSES: Tense[] = ['past', 'present', 'future'];
 
 /** Bonequinhos indicando quantas pessoas o pronome representa. */
 const PeopleIcon: React.FC<{ plural: boolean; active: boolean; hex: string }> = ({ plural, active, hex }) => (
@@ -55,14 +58,15 @@ export default function PronounsModule({
   const [verb, setVerb] = useState<Verb>(VERBS[0]);             // querer
   const [compKey, setCompKey] = useState<string | null>(VERBS[0].complements[0].key);
   const [mood, setMood] = useState<Mood>('affirm');
+  const [tense, setTense] = useState<Tense>('present');
 
   const comp = useMemo(
     () => verb.complements.find((c) => c.key === compKey) ?? null,
     [verb, compKey],
   );
 
-  const phrase = useMemo(() => buildPhrase(target, pronoun, verb, comp, mood), [target, pronoun, verb, comp, mood]);
-  const phraseNative = useMemo(() => buildPhrase(native, pronoun, verb, comp, mood), [native, pronoun, verb, comp, mood]);
+  const phrase = useMemo(() => buildPhrase(target, pronoun, verb, comp, mood, tense), [target, pronoun, verb, comp, mood, tense]);
+  const phraseNative = useMemo(() => buildPhrase(native, pronoun, verb, comp, mood, tense), [native, pronoun, verb, comp, mood, tense]);
 
   const speak = (text: string) => {
     playSound('click');
@@ -77,6 +81,7 @@ export default function PronounsModule({
   };
 
   const note = pronoun.notes?.[showNative ? native : target];
+  const tenseTable = (tense === 'past' ? verb.pastForms : tense === 'future' ? verb.futureForms : verb.forms)[target];
 
   const chip = (active: boolean) =>
     `rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${
@@ -115,8 +120,22 @@ export default function PronounsModule({
               </button>
             </div>
 
-            {/* Tipo de frase */}
+            {/* Quando */}
             <div className="mt-3 pt-3 border-t border-white/20 flex gap-2">
+              {TENSES.map((tn) => (
+                <button
+                  key={tn}
+                  onClick={() => { playSound('toggle'); setTense(tn); }}
+                  className={`tap flex-1 rounded-lg py-1.5 text-xs font-bold ${tense === tn ? 'bg-white' : 'bg-white/15 text-white hover:bg-white/25'}`}
+                  style={tense === tn ? { color: theme.hex } : undefined}
+                >
+                  <span dir="auto">{TENSE_LABELS[tn][showNative ? native : target]}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Tipo de frase */}
+            <div className="mt-2 flex gap-2">
               {MOODS.map((m) => (
                 <button
                   key={m}
@@ -204,7 +223,8 @@ export default function PronounsModule({
           {/* Tabela do verbo escolhido */}
           <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
             <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
-              {verb.labels[target]}
+              {verb.labels[target]} <span className="text-gray-300">·</span>{' '}
+              <span className="normal-case tracking-normal" dir="auto">{TENSE_LABELS[tense][showNative ? native : target]}</span>
             </h2>
             <ul className="divide-y divide-gray-100">
               {PRONOUNS.map((p) => {
@@ -212,14 +232,14 @@ export default function PronounsModule({
                 return (
                   <li key={p.key}>
                     <button
-                      onClick={() => { playSound('click'); setPronoun(p); speak(`${p.words[target]} ${verb.forms[target][p.person]}`); }}
+                      onClick={() => { playSound('click'); setPronoun(p); speak(buildPhrase(target, p, verb, null, 'affirm', tense)); }}
                       className="w-full py-2 flex items-center gap-3 text-left"
                     >
                       <span className={`text-sm w-28 flex-shrink-0 truncate ${active ? `font-bold ${theme.textColor}` : 'text-gray-500'}`} dir="auto">
                         {p.words[target]}
                       </span>
                       <span className={`text-sm font-bold flex-1 min-w-0 truncate ${active ? theme.textColor : 'text-gray-800'}`} dir="auto">
-                        {verb.forms[target][p.person]}
+                        {tenseTable[p.altPerson?.[target] ?? p.person]}
                       </span>
                       <SpeakerIcon className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
                     </button>
