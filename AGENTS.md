@@ -55,13 +55,31 @@ Sem chaves de API, sem back-end, sem banco. Todo o conteúdo está no bundle e o
 usa a voz do sistema operacional (`speechSynthesis`). Isso é deliberado: o app precisa
 funcionar dentro de um supermercado sem sinal.
 
-Consequência: **a voz é do aparelho, não do app**, e pode não existir. A regra é
-absoluta — o app nunca fala com voz de idioma diferente do destino. Sem voz
-compatível ele fica calado, o botão nasce indisponível e uma folha explica qual voz
-falta e como instalá-la. Falar com a voz padrão do sistema ensinaria a pronúncia de
-outra língua, que foi o defeito que dois revisores nativos reprovaram. A decisão mora
-em [`utils/speech.ts`](utils/speech.ts), numa função pura, e o painel de idiomas tem
-um diagnóstico que usa exatamente a mesma função.
+A regra é a **região**, não o idioma: `pt-BR` ≠ `pt-PT`, `es-ES` ≠ `es-US`,
+`en-GB` ≠ `en-US`. Texto do Brasil na voz de Portugal é o defeito que dois revisores
+nativos reprovaram. `pickVoice` em [`utils/speech.ts`](utils/speech.ts) só aceita
+locale exato — não existe nível de "mesmo idioma, outra região", porque é ele que
+produz a substituição errada.
+
+Consequência prática: quase nenhum aparelho real tem a voz certa. O do dono tem duas
+vozes ao todo, e nenhuma serve para 8 dos 9 destinos. Por isso o áudio tem três
+níveis, nesta ordem:
+
+1. **voz da região exata instalada** → fala pelo aparelho; offline e instantâneo;
+2. **senão, com rede** → busca o MP3 no endpoint do Google Translate com o locale
+   completo (`tl=pt-BR`, nunca `tl=pt`), que é o que entrega o sotaque certo num
+   celular sem voz nenhuma;
+3. **senão** → cala e explica qual voz falta.
+
+Nenhum caminho fala com região errada.
+
+O endpoint é **não oficial** e pode morrer sem aviso; o nível 3 é a degradação. Ele
+também recusa requisição de navegador que mande `Referer` — devolve HTML no lugar do
+MP3 —, e é por isso que `index.html` traz `<meta name="referrer" content="no-referrer">`.
+Sem essa linha o áudio online não toca. Medido nos dois sentidos.
+
+O painel de idiomas tem um diagnóstico que usa a mesma `pickVoice` e distingue voz
+local (✅) de áudio pela rede (🌐).
 
 Verificação de tipos: `npx tsc --noEmit`. Estava limpo na auditoria.
 

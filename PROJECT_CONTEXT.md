@@ -106,7 +106,12 @@ Ao reiniciar o chat, peça para:
 *   Tailwind instalado no build (sem CDN), CSS em `index.css`.
 *   PWA via `vite-plugin-pwa`: service worker gerado no build com pré-cache de tudo, atualização automática. Sem `sw.js`/`manifest.json` manuais.
 *   Ícones reais em `public/icons/` (gerados por `scripts/generate-icons.mjs`), bandeiras locais em `public/flags/`.
-*   Áudio usa só a voz do sistema (`speechSynthesis`), sem endpoint não oficial do Google.
+*   ~~Áudio usa só a voz do sistema (`speechSynthesis`), sem endpoint não oficial do Google.~~
+    **Revertido em 10/09/2026.** Sem o endpoint, o áudio passou a depender das vozes
+    instaladas — e o aparelho do público real tem uma ou duas, nenhuma da região certa.
+    O app ficou sem cumprir a própria promessa justamente para quem foi feito. A ordem
+    agora é: voz da região exata no aparelho → áudio pela rede com o locale completo →
+    calar e explicar. A região nunca é substituída.
 *   Interface traduzida também para francês e italiano.
 *   Classes do Tailwind nunca são montadas dinamicamente (`bg-${cor}`): usar strings completas ou `style` com o hex do tema.
 
