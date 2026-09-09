@@ -150,7 +150,7 @@ Ao reiniciar o chat, peça para:
 ### Relógio: 24h e AM/PM
 *   Na Espanha se escreve 24h e se fala 12h mais o período. O módulo mostra os dois lados ao mesmo tempo.
 *   **A hora é escolhida de 00 a 23**, e o período (madrugada, mañana, tarde, noche) é **deduzido** por `periodFromHour24`. Escolher o período era um erro: permitia "las diez de la madrugada", que não existe. Deduzindo, a combinação errada deixa de ser possível.
-*   O mostrador continua de 1 a 12 (`DIAL`), porque é assim que se fala. A lista de botões (`HOURS`) é separada, de 00 a 23.
+*   O mostrador tem **dois anéis**: o de dentro de 1 a 12, como se fala, e o de fora de 13 a 24, como está escrito. Escolher 22 acende 22 e 10 no mesmo ponto, que é o que explica a relação. A lista de botões (`HOURS`) é separada, de 00 a 23.
 *   O digital ao lado começa no formato do país de destino (`uses12hClock`: EUA e Reino Unido usam AM/PM) e tem seletor para trocar.
 
 ### Próximos passos previstos

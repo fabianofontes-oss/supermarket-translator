@@ -42,7 +42,8 @@ const TABS: { key: Tab; labelKey: string; icon: string }[] = [
 
 // Horas de 00 a 23: é o que está escrito em placa, bilhete e horário.
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
-// O mostrador continua sendo de 12: é assim que se fala.
+// Dois anéis: o de dentro é como se fala (1 a 12), o de fora é como se
+// escreve (13 a 24). Ver 22 e 10 no mesmo ponto é o que explica a relação.
 const DIAL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -163,6 +164,8 @@ export default function NumbersModule({
     }`;
 
   // Ponteiros do relógio
+  const dialHour = hour % 12 || 12;
+  const outerActive = hour === 0 ? 24 : hour >= 13 ? hour : null;
   const hourAngle = (hour % 12) * 30 + minute * 0.5;
   const minAngle = minute * 6;
 
@@ -205,26 +208,42 @@ export default function NumbersModule({
           {/* Visual */}
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex items-center justify-center min-h-[190px]">
             {tab === 'time' && (
-              <svg viewBox="0 0 200 200" className="w-44 h-44">
+              <svg viewBox="0 0 200 200" className="w-48 h-48">
                 <circle cx="100" cy="100" r="92" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="4" />
+
+                {/* Marcas de minuto na borda */}
+                {MINUTES.map((m) => {
+                  const a = (m * 6 - 90) * Math.PI / 180;
+                  return <circle key={m} cx={100 + Math.cos(a) * 88} cy={100 + Math.sin(a) * 88} r={m === minute ? 3.5 : 1.8} fill={m === minute ? theme.hex : '#cbd5e1'} />;
+                })}
+
+                {/* Anel de fora: 13 a 24, como está escrito nas placas */}
+                {DIAL.map((n) => {
+                  const outer = n + 12;
+                  const a = (n * 30 - 90) * Math.PI / 180;
+                  const on = outer === outerActive;
+                  return (
+                    <text key={`o${n}`} x={100 + Math.cos(a) * 75} y={100 + Math.sin(a) * 75 + 4} textAnchor="middle" fontSize="11" fontWeight="700" fill={on ? theme.hex : '#cbd5e1'}>
+                      {outer}
+                    </text>
+                  );
+                })}
+
+                {/* Anel de dentro: 1 a 12, como se fala */}
                 {DIAL.map((n) => {
                   const a = (n * 30 - 90) * Math.PI / 180;
                   return (
-                    <text key={n} x={100 + Math.cos(a) * 74} y={100 + Math.sin(a) * 74 + 6} textAnchor="middle" fontSize="16" fontWeight="700" fill={n === (hour % 12 || 12) ? theme.hex : '#94a3b8'}>
+                    <text key={n} x={100 + Math.cos(a) * 54} y={100 + Math.sin(a) * 54 + 6} textAnchor="middle" fontSize="16" fontWeight="700" fill={n === dialHour ? theme.hex : '#94a3b8'}>
                       {n}
                     </text>
                   );
                 })}
-                {MINUTES.map((m) => {
-                  const a = (m * 6 - 90) * Math.PI / 180;
-                  return <circle key={m} cx={100 + Math.cos(a) * 88} cy={100 + Math.sin(a) * 88} r={m === minute ? 4 : 2} fill={m === minute ? theme.hex : '#cbd5e1'} />;
-                })}
                 {/* Ponteiros giram como grupo: transform vai para a GPU, x2/y2 não. */}
                 <g style={{ transform: `rotate(${hourAngle}deg)`, transformBox: 'view-box', transformOrigin: '100px 100px', transition: 'transform var(--scene-duration) var(--ease-out)' }}>
-                  <line x1="100" y1="100" x2="100" y2="58" stroke={theme.hex} strokeWidth="7" strokeLinecap="round" />
+                  <line x1="100" y1="100" x2="100" y2="66" stroke={theme.hex} strokeWidth="7" strokeLinecap="round" />
                 </g>
                 <g style={{ transform: `rotate(${minAngle}deg)`, transformBox: 'view-box', transformOrigin: '100px 100px', transition: 'transform var(--scene-duration) var(--ease-out)' }}>
-                  <line x1="100" y1="100" x2="100" y2="34" stroke="#475569" strokeWidth="4" strokeLinecap="round" />
+                  <line x1="100" y1="100" x2="100" y2="46" stroke="#475569" strokeWidth="4" strokeLinecap="round" />
                 </g>
                 <circle cx="100" cy="100" r="6" fill="white" stroke={theme.hex} strokeWidth="3" />
               </svg>
