@@ -126,6 +126,69 @@ body {
 }
 
 /*
+ * Corpo maior em árabe e em ucraniano.
+ *
+ * Dois motivos somados. O primeiro é da própria escrita: no mesmo tamanho
+ * nominal, o árabe e o cirílico têm traço mais fino e detalhe distintivo menor
+ * que o latino, então 12px ali não valem os 12px de "Supermercado". O segundo é
+ * de uso: quem abre este app está lendo um alfabeto que não conhece. Não dá
+ * para reconhecer a palavra pela silhueta — é preciso resolver glifo por glifo,
+ * e é aí que o tamanho pequeno deixa de ser desconforto e vira barreira.
+ *
+ * Cada degrau sobe cerca de 2px, com a entrelinha junto, porque o árabe leva
+ * diacrítico acima e abaixo da linha e apertar isso encavala as marcas.
+ *
+ * De `text-2xl` para cima fica como está: título já é grande, e crescer ali só
+ * produziria reticências nos cabeçalhos, que são estreitos por causa dos
+ * botões nas duas pontas.
+ *
+ * Em `rem`, não em `px`, para continuar respeitando o zoom do sistema.
+ */
+html[lang^='ar'] .text-\[9px\],
+html[lang^='uk'] .text-\[9px\]   { font-size: 0.6875rem; line-height: 0.9375rem; }
+
+html[lang^='ar'] .text-\[10px\],
+html[lang^='uk'] .text-\[10px\]  { font-size: 0.75rem;   line-height: 1rem; }
+
+html[lang^='ar'] .text-\[11px\],
+html[lang^='uk'] .text-\[11px\]  { font-size: 0.8125rem; line-height: 1.125rem; }
+
+html[lang^='ar'] .text-xs,
+html[lang^='uk'] .text-xs         { font-size: 0.875rem;  line-height: 1.25rem; }
+
+html[lang^='ar'] .text-\[13px\],
+html[lang^='uk'] .text-\[13px\]  { font-size: 0.9375rem; line-height: 1.25rem; }
+
+html[lang^='ar'] .text-sm,
+html[lang^='uk'] .text-sm         { font-size: 1rem;      line-height: 1.5rem; }
+
+html[lang^='ar'] .text-base,
+html[lang^='uk'] .text-base       { font-size: 1.125rem;  line-height: 1.75rem; }
+
+html[lang^='ar'] .text-lg,
+html[lang^='uk'] .text-lg         { font-size: 1.25rem;   line-height: 1.75rem; }
+
+html[lang^='ar'] .text-xl,
+html[lang^='uk'] .text-xl         { font-size: 1.375rem;  line-height: 1.875rem; }
+
+/*
+ * Exceção à escala acima: a URL de compartilhamento.
+ *
+ * É uma string de máquina em alfabeto latino. Não ganha nada com o corpo maior
+ * — ninguém lê uma URL glifo por glifo, copia ou aponta a câmera — e em
+ * `font-mono` a 14px ela deixa de caber na largura da folha, quebrando no meio
+ * da palavra ("...vercel.ap" / "p"), o que faz o endereço parecer defeito.
+ *
+ * Fica fora da escala por idioma de propósito, e por isso não usa `text-xs`:
+ * classe própria é o que garante que nenhuma regra de idioma a alcance.
+ */
+.url-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+/*
  * Movimento reduzido não é ausência de animação: mantemos opacidade e cor,
  * que ajudam a entender a mudança, e tiramos o que se desloca.
  */

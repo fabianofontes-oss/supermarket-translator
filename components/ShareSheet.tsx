@@ -200,7 +200,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
           <p className="text-xs text-gray-500 text-center leading-snug" dir="auto">{t('shareQrHint')}</p>
           {/* `dir="ltr"` próprio: em árabe o algoritmo bidi reordenaria os
               pedaços da URL e ela viraria um endereço que não existe. */}
-          <p className="font-mono text-xs text-gray-500 text-center select-all break-all" dir="ltr">{SHARE_URL}</p>
+          <p className="url-mono text-gray-500 text-center select-all break-all" dir="ltr">{SHARE_URL}</p>
         </div>
 
         {/*

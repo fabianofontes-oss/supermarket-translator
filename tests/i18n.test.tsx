@@ -246,3 +246,40 @@ describe('PARTE 12 — dir="auto" no texto traduzido', () => {
     expect(card).toMatch(/id=\{termId\}[\s\S]{0,220}dir="auto"/);
   });
 });
+
+describe('PARTE 13 — corpo maior em árabe e ucraniano', () => {
+  /**
+   * No mesmo tamanho nominal, árabe e cirílico têm traço mais fino e detalhe
+   * distintivo menor que o latino. Some a isso que quem usa este app está lendo
+   * um alfabeto que não conhece — não dá para reconhecer a palavra pela
+   * silhueta, é preciso resolver glifo por glifo — e 12px viram barreira.
+   *
+   * Regra fácil de apagar sem perceber, porque nada quebra visualmente para
+   * quem revisa em português.
+   */
+  const ESCALA = ['.text-xs', '.text-sm', '.text-base', '.text-lg', '.text-xl'];
+
+  it('cada degrau da escala pequena tem regra para as duas escritas', () => {
+    const css = ler('index.css');
+    for (const cls of ESCALA) {
+      expect(css, `${cls} sem regra para árabe`).toContain(`html[lang^='ar'] ${cls}`);
+      expect(css, `${cls} sem regra para ucraniano`).toContain(`html[lang^='uk'] ${cls}`);
+    }
+  });
+
+  it('os títulos grandes ficam de fora, senão o cabeçalho corta', () => {
+    const css = ler('index.css');
+    for (const cls of ['.text-2xl', '.text-3xl', '.text-4xl']) {
+      expect(css, `${cls} não devia escalar`).not.toContain(`html[lang^='ar'] ${cls}`);
+    }
+  });
+
+  it('a URL de compartilhamento fica fora da escala', () => {
+    // String de máquina em alfabeto latino: ninguém a lê glifo por glifo, e em
+    // `font-mono` a 14px ela não cabe na folha e quebra no meio da palavra.
+    expect(ler('index.css')).toContain('.url-mono');
+    const folha = ler('components/ShareSheet.tsx');
+    expect(folha).toContain('url-mono');
+    expect(folha, 'a URL voltou para uma classe que a escala alcança').not.toContain('font-mono text-xs');
+  });
+});
