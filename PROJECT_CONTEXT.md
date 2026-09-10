@@ -193,6 +193,18 @@ Ao reiniciar o chat, peça para:
 *   **A Farmácia abria em "Uso Contínuo"**, que é pressão, colesterol e diabetes: a pior estreia para quem entra precisando de analgésico. Passou a abrir em Dor e Febre por `defaultCategoryName`, que só vale para quem nunca abriu o módulo. Junto veio um defeito: a subcategoria salva era aceita sem checar se pertence à categoria resolvida, e a primeira abertura ficava errada.
 *   Falta ainda **animação de saída**: o painel desmonta na hora. Entra deslizando, sai sem transição.
 
+### Compartilhar o app (novo)
+*   O app não tinha como ser passado adiante, e o crescimento previsto é por indicação — muitas vezes cara a cara, dentro de uma loja. Por isso o **QR tem o maior peso visual** da folha, e por isso ele é um SVG pré-gerado e precacheado: aparece com o aparelho offline, que é o cenário real.
+*   A URL é a constante `SHARE_URL` em `constants.ts`, **nunca `window.location.origin`**. A origem em runtime erra em dois cenários: no Capacitor vira `capacitor://localhost` e num preview da Vercel vira o domínio efêmero do deploy. A mesma constante alimenta o QR, os quatro canais e o texto.
+*   `scripts/generate-qr.mjs` gera o QR lendo a URL de `constants.ts` e grava um `<desc>` com ela dentro do SVG. Um QR é ilegível em diff: sem esse `<desc>`, trocar de domínio sem regerar passaria despercebido. O teste compara os dois e quebra a CI em vez de quebrar o usuário.
+*   **WhatsApp por `wa.me`, nunca `whatsapp://send`.** O esquema nativo não faz nada em desktop nem em webview embutida, e no iOS sem o app mostra erro do Safari — botão morto. Há teste trancando isso.
+*   O `index.html` não tinha **nenhuma meta Open Graph**. Sem elas o link chegava no WhatsApp como URL pelada, e o `sharer.php` do Facebook ficava sem título, descrição e imagem — ele ignora texto pré-preenchido e lê só de OG. `og:image` reaproveita `/icons/pwa-512x512.png`, que já está no precache.
+*   Escala de empilhamento hoje: header 30, painel do ModuleLayout 40, nav e modal de instalação 50, `CategorySheet` 90, `LanguagePanel` 100, **`ShareSheet` 105**, `VoiceMissingSheet` 110, `UpdateSheet` 120. O 105 é deliberado: a folha fica acima de tudo que o usuário abre por vontade própria e abaixo dos dois avisos que o sistema impõe.
+*   O `ShareIcon` de `Icons.tsx` era uma **bandeja com seta para cima** e nunca tinha sido usado. O nome mentia: lê como baixar ou enviar arquivo. Virou `UploadIcon`, e `ShareIcon` passou a ser o glifo de três pontos ligados, que é o único que ninguém confunde.
+*   Glifos de marca ficam em `components/BrandIcons.tsx`, **fora de `Icons.tsx` de propósito**: são marcas registradas com geometria de preenchimento, então a convenção de ícone autoral com `stroke` não se aplica, e o arquivo separado impede a exceção de contaminar o resto.
+*   O botão entrou nos **nove headers**, sempre como item mais interno do cluster direito, com `gap-2`. O espaçamento não é estética: a área de toque de `.hit` é 44px centrada no botão, e com menos que isso as duas se sobrepõem e a de baixo no DOM para de responder. Medido: 46px entre centros no catálogo, 54px nos módulos.
+*   Como os sete headers de módulo são duplicados, um teste varre os nove arquivos exigindo `<ShareButton`. Um décimo módulo que esqueça o botão não passa na CI.
+
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.333 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

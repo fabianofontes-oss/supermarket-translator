@@ -19,6 +19,8 @@ import { useCountryPair } from './hooks/useCountryPair';
 import { LanguagePanel } from './components/LanguagePanel';
 import { VoiceMissingSheet } from './components/VoiceMissingSheet';
 import { UpdateSheet } from './components/UpdateSheet';
+import { ShareSheet } from './components/ShareSheet';
+import { ShareButton } from './components/ShareButton';
 import { watchForUpdate } from './utils/pwaUpdate';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ErrorFallback } from './components/ErrorFallback';
@@ -132,6 +134,7 @@ export default function App() {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [expandedItemKey, setExpandedItemKey] = useState<string | null>(null);
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   // Lista de compras e itens marcados são por módulo…
   const supermarketLists = useListManager('supermarket');
@@ -336,6 +339,7 @@ export default function App() {
     theme,
     onGoHome: () => setCurrentModule(null),
     onOpenLanguageModal: () => setIsLanguageModalOpen(true),
+    onOpenShare: () => setIsShareOpen(true),
     handlePlayAudio,
     // 'missing' só quando não há mesmo como falar certo — sem voz da região e
     // sem internet. Enquanto houver rede, o áudio sai e o botão fica normal.
@@ -387,12 +391,18 @@ export default function App() {
                   <h1 className="text-2xl font-bold text-gray-800">{t('hubTitle')}</h1>
                   <p className="text-gray-500 text-sm">{t('hubSubtitle')}</p>
                 </div>
-                <button onClick={() => setIsLanguageModalOpen(true)} aria-label={t('languageSettings')} className="hit p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
-                  <div className="flex items-center -space-x-2">
-                    <img src={nativeCountry.image} alt={nativeCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
-                    <img src={targetCountry.image} alt={targetCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
-                  </div>
-                </button>
+                {/* Cluster da direita. `gap-2` não é escolha estética: a área
+                    de toque de `.hit` é 44px centrada no botão, e com menos
+                    espaço as duas se sobrepõem e uma delas para de responder. */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <ShareButton onClick={() => setIsShareOpen(true)} t={t} variant="onLight" />
+                  <button onClick={() => setIsLanguageModalOpen(true)} aria-label={t('languageSettings')} className="hit p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                    <div className="flex items-center -space-x-2">
+                      <img src={nativeCountry.image} alt={nativeCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
+                      <img src={targetCountry.image} alt={targetCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
+                    </div>
+                  </button>
+                </div>
               </div>
             </header>
 
@@ -481,6 +491,13 @@ export default function App() {
       <VoiceMissingSheet
         country={voiceMissingFor}
         onClose={() => setVoiceMissingFor(null)}
+        t={t}
+        theme={theme}
+      />
+
+      <ShareSheet
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
         t={t}
         theme={theme}
       />

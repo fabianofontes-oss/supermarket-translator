@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import type { Country } from '../types';
 import { HomeIcon, SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
+import { ShareButton } from '../components/ShareButton';
 import type { VoiceStatus } from '../utils/speech';
 import { toLangCode } from './location/data/locationData';
 import {
@@ -24,6 +25,7 @@ interface BodyModuleProps {
   theme: { color: string; textColor: string; hex: string; borderColor: string };
   onGoHome: () => void;
   onOpenLanguageModal: () => void;
+  onOpenShare: () => void;
   handlePlayAudio: (text: string, lang: string) => void;
   /** Voz do idioma de destino no aparelho; 'missing' apaga os botões de áudio. */
   voiceStatus?: VoiceStatus;
@@ -36,6 +38,7 @@ export default function BodyModule({
   theme,
   onGoHome,
   onOpenLanguageModal,
+  onOpenShare,
   handlePlayAudio,
   voiceStatus = 'unknown',
 }: BodyModuleProps) {
@@ -94,12 +97,18 @@ export default function BodyModule({
             <HomeIcon className="w-5 h-5" />
           </button>
           <h1 className="flex-1 mx-2 text-center font-bold text-2xl uppercase tracking-tight truncate">{t('moduleBody')}</h1>
-          <button onClick={() => { playSound('click'); onOpenLanguageModal(); }} aria-label={t('languageSettings')} className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors">
-            <div className="flex items-center -space-x-2">
-              <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
-              <img src={targetCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
-            </div>
-          </button>
+          {/* Cluster da direita. `gap-2` não é escolha estética: a área de
+              toque de `.hit` é 44px centrada no botão, e com menos espaço
+              que isso as duas se sobrepõem e uma para de responder. */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <ShareButton onClick={onOpenShare} t={t} variant="onColor" />
+            <button onClick={() => { playSound('click'); onOpenLanguageModal(); }} aria-label={t('languageSettings')} className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors">
+              <div className="flex items-center -space-x-2">
+                <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
+                <img src={targetCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
+              </div>
+            </button>
+          </div>
         </div>
       </header>
 

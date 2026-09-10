@@ -49,6 +49,7 @@ export interface CatalogModuleProps {
   expandedItemKey: string | null;
   setExpandedItemKey: (key: string | null) => void;
   onOpenLanguageModal: () => void;
+  onOpenShare: () => void;
 }
 
 // Cores pastel das abas inativas (efeito de pastas de arquivo)
@@ -103,6 +104,7 @@ export default function CatalogModule({
   expandedItemKey,
   setExpandedItemKey,
   onOpenLanguageModal,
+  onOpenShare,
 }: CatalogModuleProps) {
   const catKey = `${storagePrefix}_lastCategory`;
   const subKey = `${storagePrefix}_lastSubCategory`;
@@ -475,6 +477,7 @@ export default function CatalogModule({
       panelContent={panelContent}
       panelTitle={panelTitle}
       onOpenLanguageModal={onOpenLanguageModal}
+      onOpenShare={onOpenShare}
     >
       <div className="space-y-4">
         {/* Uma letra não é "nada encontrado": é um pedido de mais letras. */}

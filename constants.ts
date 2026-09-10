@@ -1,6 +1,26 @@
 
 import type { Category, Country } from './types';
 
+/**
+ * URL canônica de produção, usada por tudo que compartilha o app: o QR code, os
+ * quatro canais e o texto da mensagem.
+ *
+ * É constante, e não `window.location.origin`, porque a origem em runtime erra
+ * em dois cenários reais: no app nativo (Capacitor) ela é `capacitor://localhost`
+ * e num preview da Vercel é o domínio efêmero do deploy. Nos dois casos o QR e o
+ * link levariam a lugar nenhum.
+ *
+ * Sem `?utm_source=`: não há analytics no projeto, e o parâmetro só faria a URL
+ * do QR divergir da URL do botão de copiar.
+ *
+ * Quem mudar isto tem que rodar `node scripts/generate-qr.mjs` de novo — o
+ * `tests/share.test.tsx` compara o SVG com esta constante e falha se esquecerem.
+ */
+export const SHARE_URL = 'https://translator-zeta-weld.vercel.app';
+
+/** QR pré-gerado por `scripts/generate-qr.mjs`. Precacheado pelo service worker. */
+export const SHARE_QR_SRC = '/qr-share.svg';
+
 // Pharmacy Data Imports
 
 // --- REGISTRY OF IMPLEMENTED MODULES ---

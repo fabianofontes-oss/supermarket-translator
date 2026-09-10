@@ -122,7 +122,8 @@ describe('PARTE 13 — nada de texto solto fora do sistema de tradução', () =>
   it('as chaves usadas no código existem em todos os locales', () => {
     const fontes = ['App.tsx', 'components/TranslationItem.tsx', 'components/ModuleLayout.tsx',
                     'components/LanguagePanel.tsx', 'components/CategorySheet.tsx',
-                    'components/ErrorFallback.tsx', 'modules/CatalogModule.tsx'];
+                    'components/ErrorFallback.tsx', 'modules/CatalogModule.tsx',
+                    'components/ShareSheet.tsx', 'components/ShareButton.tsx'];
     const usadas = new Set<string>();
     for (const f of fontes) {
       for (const m of ler(f).matchAll(/\bt\('([A-Za-z0-9_]+)'\)/g)) usadas.add(m[1]);
@@ -226,7 +227,8 @@ describe('PARTE 11 — RTL', () => {
 });
 
 describe('PARTE 12 — dir="auto" no texto traduzido', () => {
-  const alvos = ['components/TranslationItem.tsx', 'components/ErrorFallback.tsx', 'modules/CatalogModule.tsx'];
+  const alvos = ['components/TranslationItem.tsx', 'components/ErrorFallback.tsx', 'modules/CatalogModule.tsx',
+                 'components/ShareSheet.tsx'];
 
   it('os textos vindos de tradução declaram dir="auto"', () => {
     for (const f of alvos) {

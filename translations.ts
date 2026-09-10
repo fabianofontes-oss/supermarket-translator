@@ -287,6 +287,19 @@ const enUS = {
   voiceOfflineLabel: 'No connection',
   voiceOfflineNote: 'Without internet, only voices installed on the device can speak. The others need a connection.',
   voiceHowToInstall: 'How to install a voice on the device',
+  // Compartilhar o app. A URL nunca entra na string traduzida: ela vem de
+  // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
+  // nao sao chave: 'WhatsApp' e igual nos 12 locales.
+  shareApp: 'Share the app',
+  shareTitle: 'Share Translator Hub',
+  shareSubtitle: 'Send it to someone who needs it. It works offline.',
+  shareQrHint: 'Point the other phone camera at the code',
+  shareVia: 'Share via',
+  shareCopyLink: 'Copy link',
+  shareCopied: 'Link copied',
+  shareCopyFailed: 'Copy the link below',
+  shareMoreOptions: 'More options',
+  shareMessage: 'Translator Hub: a free offline guide for the supermarket, the pharmacy and asking for directions.',
 };
 
 const ptBR = {
@@ -577,6 +590,19 @@ const ptBR = {
   voiceOfflineLabel: 'Sem conexão',
   voiceOfflineNote: 'Sem internet, só sai o áudio das vozes instaladas no aparelho. As outras precisam de conexão.',
   voiceHowToInstall: 'Como instalar uma voz no aparelho',
+  // Compartilhar o app. A URL nunca entra na string traduzida: ela vem de
+  // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
+  // nao sao chave: 'WhatsApp' e igual nos 12 locales.
+  shareApp: 'Compartilhar o app',
+  shareTitle: 'Compartilhe o Translator Hub',
+  shareSubtitle: 'Mande para quem precisa. Funciona sem internet.',
+  shareQrHint: 'Aponte a câmera do outro celular para o código',
+  shareVia: 'Compartilhar pelo',
+  shareCopyLink: 'Copiar link',
+  shareCopied: 'Link copiado',
+  shareCopyFailed: 'Copie o link abaixo',
+  shareMoreOptions: 'Mais opções',
+  shareMessage: 'Translator Hub: um guia grátis e sem internet para o supermercado, a farmácia e pedir informação na rua.',
 };
 
 const esCL = {
@@ -867,6 +893,19 @@ const esCL = {
   voiceOfflineLabel: 'Sin conexión',
   voiceOfflineNote: 'Sin internet, solo suenan las voces instaladas en el dispositivo. Las demás necesitan conexión.',
   voiceHowToInstall: 'Cómo instalar una voz en el dispositivo',
+  // Compartilhar o app. A URL nunca entra na string traduzida: ela vem de
+  // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
+  // nao sao chave: 'WhatsApp' e igual nos 12 locales.
+  shareApp: 'Compartir la app',
+  shareTitle: 'Comparte Translator Hub',
+  shareSubtitle: 'Mándalo a quien lo necesite. Funciona sin internet.',
+  shareQrHint: 'Apunta la cámara del otro móvil al código',
+  shareVia: 'Compartir por',
+  shareCopyLink: 'Copiar enlace',
+  shareCopied: 'Enlace copiado',
+  shareCopyFailed: 'Copia el enlace de abajo',
+  shareMoreOptions: 'Más opciones',
+  shareMessage: 'Translator Hub: una guía gratis y sin internet para el supermercado, la farmacia y preguntar en la calle.',
 };
 
 
@@ -1158,6 +1197,19 @@ const frFR = {
   voiceOfflineLabel: 'Pas de connexion',
   voiceOfflineNote: "Sans internet, seules les voix installées sur l'appareil peuvent parler. Les autres ont besoin d'une connexion.",
   voiceHowToInstall: "Comment installer une voix sur l'appareil",
+  // Compartilhar o app. A URL nunca entra na string traduzida: ela vem de
+  // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
+  // nao sao chave: 'WhatsApp' e igual nos 12 locales.
+  shareApp: 'Partager l\'appli',
+  shareTitle: 'Partagez Translator Hub',
+  shareSubtitle: 'Envoyez-le à quelqu\'un qui en a besoin. Ça marche sans internet.',
+  shareQrHint: 'Dirigez la caméra de l\'autre téléphone vers le code',
+  shareVia: 'Partager via',
+  shareCopyLink: 'Copier le lien',
+  shareCopied: 'Lien copié',
+  shareCopyFailed: 'Copiez le lien ci-dessous',
+  shareMoreOptions: 'Plus d\'options',
+  shareMessage: 'Translator Hub : un guide gratuit et hors ligne pour le supermarché, la pharmacie et demander son chemin.',
 };
 
 const itIT = {
@@ -1448,6 +1500,19 @@ const itIT = {
   voiceOfflineLabel: 'Nessuna connessione',
   voiceOfflineNote: 'Senza internet parlano solo le voci installate sul dispositivo. Le altre richiedono una connessione.',
   voiceHowToInstall: 'Come installare una voce sul dispositivo',
+  // Compartilhar o app. A URL nunca entra na string traduzida: ela vem de
+  // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
+  // nao sao chave: 'WhatsApp' e igual nos 12 locales.
+  shareApp: 'Condividi l\'app',
+  shareTitle: 'Condividi Translator Hub',
+  shareSubtitle: 'Mandalo a chi ne ha bisogno. Funziona senza internet.',
+  shareQrHint: 'Inquadra il codice con la fotocamera dell\'altro telefono',
+  shareVia: 'Condividi su',
+  shareCopyLink: 'Copia link',
+  shareCopied: 'Link copiato',
+  shareCopyFailed: 'Copia il link qui sotto',
+  shareMoreOptions: 'Altre opzioni',
+  shareMessage: 'Translator Hub: una guida gratuita e offline per il supermercato, la farmacia e chiedere indicazioni.',
 };
 
 
@@ -1739,6 +1804,19 @@ const ukUA = {
   voiceOfflineLabel: 'Немає зʼєднання',
   voiceOfflineNote: 'Без інтернету звучать лише голоси, встановлені на пристрої. Решта потребує зʼєднання.',
   voiceHowToInstall: 'Як встановити голос на пристрої',
+  // Compartilhar o app. A URL nunca entra na string traduzida: ela vem de
+  // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
+  // nao sao chave: 'WhatsApp' e igual nos 12 locales.
+  shareApp: 'Поділитися застосунком',
+  shareTitle: 'Поділіться Translator Hub',
+  shareSubtitle: 'Надішліть тому, кому це потрібно. Працює без інтернету.',
+  shareQrHint: 'Наведіть камеру іншого телефона на код',
+  shareVia: 'Поділитися через',
+  shareCopyLink: 'Копіювати посилання',
+  shareCopied: 'Посилання скопійовано',
+  shareCopyFailed: 'Скопіюйте посилання нижче',
+  shareMoreOptions: 'Більше варіантів',
+  shareMessage: 'Translator Hub: безкоштовний офлайн-довідник для супермаркету, аптеки та запитань на вулиці.',
 };
 
 const arMA = {
@@ -2029,6 +2107,19 @@ const arMA = {
   voiceOfflineLabel: 'لا يوجد اتصال',
   voiceOfflineNote: 'بدون إنترنت، تعمل فقط الأصوات المثبّتة على الجهاز. أما البقية فتحتاج إلى اتصال.',
   voiceHowToInstall: 'كيفية تثبيت صوت على الجهاز',
+  // Compartilhar o app. A URL nunca entra na string traduzida: ela vem de
+  // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
+  // nao sao chave: 'WhatsApp' e igual nos 12 locales.
+  shareApp: 'شارك التطبيق',
+  shareTitle: 'شارك Translator Hub',
+  shareSubtitle: 'أرسله لمن يحتاجه. يعمل بدون إنترنت.',
+  shareQrHint: 'وجّه كاميرا الهاتف الآخر نحو الرمز',
+  shareVia: 'مشاركة عبر',
+  shareCopyLink: 'نسخ الرابط',
+  shareCopied: 'تم نسخ الرابط',
+  shareCopyFailed: 'انسخ الرابط أدناه',
+  shareMoreOptions: 'خيارات أخرى',
+  shareMessage: 'Translator Hub: دليل مجاني يعمل بدون إنترنت للسوق والصيدلية والسؤال عن الطريق.',
 };
 
 
@@ -2320,6 +2411,19 @@ const ltLT = {
   voiceOfflineLabel: 'Nėra ryšio',
   voiceOfflineNote: 'Be interneto kalba tik įrenginyje įdiegti balsai. Kitiems reikia ryšio.',
   voiceHowToInstall: 'Kaip įdiegti balsą įrenginyje',
+  // Compartilhar o app. A URL nunca entra na string traduzida: ela vem de
+  // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
+  // nao sao chave: 'WhatsApp' e igual nos 12 locales.
+  shareApp: 'Dalintis programėle',
+  shareTitle: 'Pasidalykite Translator Hub',
+  shareSubtitle: 'Nusiųskite tam, kam jos reikia. Veikia be interneto.',
+  shareQrHint: 'Nukreipkite kito telefono kamerą į kodą',
+  shareVia: 'Dalintis per',
+  shareCopyLink: 'Kopijuoti nuorodą',
+  shareCopied: 'Nuoroda nukopijuota',
+  shareCopyFailed: 'Nukopijuokite nuorodą žemiau',
+  shareMoreOptions: 'Daugiau parinkčių',
+  shareMessage: 'Translator Hub: nemokamas neprisijungus veikiantis vadovas parduotuvei, vaistinei ir klausimams gatvėje.',
 };
 
 /**

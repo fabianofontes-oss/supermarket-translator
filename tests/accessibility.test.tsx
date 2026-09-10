@@ -353,7 +353,8 @@ describe('3 e 9 — marcação verificada na fonte', () => {
 
   it('nenhum botão só de ícone ficou sem nome', () => {
     const arquivos = ['components/ModuleLayout.tsx', 'components/LanguagePanel.tsx',
-                      'components/CategorySheet.tsx', 'components/TranslationItem.tsx'];
+                      'components/CategorySheet.tsx', 'components/TranslationItem.tsx',
+                      'components/ShareSheet.tsx', 'components/ShareButton.tsx'];
     const semNome: string[] = [];
     for (const f of arquivos) {
       // Comentários JSX contêm a palavra "<button>" em prosa; sem tirá-los o

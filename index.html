@@ -24,6 +24,24 @@
     <meta name="theme-color" content="#c83745" />
     <meta name="description" content="Guia de sobrevivência para imigrantes: supermercado, farmácia, direções e mais, com o produto equivalente no país de destino." />
 
+    <!-- Open Graph. Sem estas tags o link compartilhado chega no WhatsApp como
+         uma URL pelada, e o `sharer.php` do Facebook fica sem título, sem
+         descrição e sem imagem — ele ignora texto pré-preenchido e lê só daqui.
+         O `index.html` é servido estático pela Vercel, então o crawler vê estas
+         tags mesmo com o app sendo renderizado no cliente.
+
+         `og:image` tem que ser ABSOLUTA. Reaproveita o ícone que já está no
+         precache em vez de somar um arquivo novo ao download de todo usuário por
+         causa de algo que só o crawler lê. A URL aqui é a mesma `SHARE_URL` de
+         `constants.ts`; HTML não importa constante, então são dois lugares. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Translator Hub" />
+    <meta property="og:description" content="Guia de sobrevivência para imigrantes: supermercado, farmácia, direções e mais, com o produto equivalente no país de destino." />
+    <meta property="og:url" content="https://translator-zeta-weld.vercel.app" />
+    <meta property="og:image" content="https://translator-zeta-weld.vercel.app/icons/pwa-512x512.png" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta name="twitter:card" content="summary" />
+
     <title>Translator Hub</title>
   </head>
   <body>

@@ -7,6 +7,7 @@ import {
   ShoppingBagIconSolid,
   XIcon
 } from './Icons';
+import { ShareButton } from './ShareButton';
 import type { Country } from '../types';
 import { playSound } from '../utils/soundUtils';
 
@@ -35,6 +36,7 @@ interface ModuleLayoutProps {
   isSearchActive: boolean;
   onToggleSearch: () => void;
   onOpenLanguageModal: () => void;
+  onOpenShare: () => void;
 }
 
 export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
@@ -55,7 +57,8 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
   panelTitle,
   isSearchActive,
   onToggleSearch,
-  onOpenLanguageModal
+  onOpenLanguageModal,
+  onOpenShare
 }) => {
 
   const isPanelOpen = activeTab === 'favorites' || activeTab === 'list';
@@ -118,8 +121,13 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
                 </h1>
             </button>
 
-            {/* Right: Search */}
-            <div className="flex-shrink-0 z-20">
+            {/* Right: Share + Search.
+                `gap-2` não é escolha estética: a área de toque de `.hit` é 44px
+                centrada no botão, e dois botões `p-2` (36px de caixa) com menos
+                espaço que isso têm as áreas sobrepostas — a de baixo no DOM para
+                de responder ao toque. */}
+            <div className="flex items-center gap-2 flex-shrink-0 z-20">
+                <ShareButton onClick={onOpenShare} t={t} variant="onColor" />
                 <button
                     onClick={handleToggleSearch}
                     aria-label={t('searchLabel')}
