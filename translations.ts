@@ -300,6 +300,9 @@ const enUS = {
   shareCopyFailed: 'Copy the link below',
   shareMoreOptions: 'More options',
   shareMessage: 'Translator Hub: a free offline guide for the supermarket, the pharmacy and asking for directions.',
+  // O mapa de Direções gira com o caminhante em vez de manter o norte em
+  // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
+  dirMapTurns: 'The map turns with you: the arrow always points where you are going.',
 };
 
 const ptBR = {
@@ -603,6 +606,9 @@ const ptBR = {
   shareCopyFailed: 'Copie o link abaixo',
   shareMoreOptions: 'Mais opções',
   shareMessage: 'Translator Hub: um guia grátis e sem internet para o supermercado, a farmácia e pedir informação na rua.',
+  // O mapa de Direções gira com o caminhante em vez de manter o norte em
+  // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
+  dirMapTurns: 'O mapa gira com você: a seta aponta sempre para onde você está indo.',
 };
 
 const esCL = {
@@ -906,6 +912,9 @@ const esCL = {
   shareCopyFailed: 'Copia el enlace de abajo',
   shareMoreOptions: 'Más opciones',
   shareMessage: 'Translator Hub: una guía gratis y sin internet para el supermercado, la farmacia y preguntar en la calle.',
+  // O mapa de Direções gira com o caminhante em vez de manter o norte em
+  // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
+  dirMapTurns: 'El mapa gira contigo: la flecha apunta siempre hacia donde vas.',
 };
 
 
@@ -1210,6 +1219,9 @@ const frFR = {
   shareCopyFailed: 'Copiez le lien ci-dessous',
   shareMoreOptions: 'Plus d\'options',
   shareMessage: 'Translator Hub : un guide gratuit et hors ligne pour le supermarché, la pharmacie et demander son chemin.',
+  // O mapa de Direções gira com o caminhante em vez de manter o norte em
+  // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
+  dirMapTurns: 'La carte tourne avec vous : la flèche pointe toujours vers où vous allez.',
 };
 
 const itIT = {
@@ -1513,6 +1525,9 @@ const itIT = {
   shareCopyFailed: 'Copia il link qui sotto',
   shareMoreOptions: 'Altre opzioni',
   shareMessage: 'Translator Hub: una guida gratuita e offline per il supermercato, la farmacia e chiedere indicazioni.',
+  // O mapa de Direções gira com o caminhante em vez de manter o norte em
+  // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
+  dirMapTurns: 'La mappa gira con te: la freccia punta sempre dove stai andando.',
 };
 
 
@@ -1817,6 +1832,9 @@ const ukUA = {
   shareCopyFailed: 'Скопіюйте посилання нижче',
   shareMoreOptions: 'Більше варіантів',
   shareMessage: 'Translator Hub: безкоштовний офлайн-довідник для супермаркету, аптеки та запитань на вулиці.',
+  // O mapa de Direções gira com o caminhante em vez de manter o norte em
+  // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
+  dirMapTurns: 'Карта повертається разом з вами: стрілка завжди вказує туди, куди ви йдете.',
 };
 
 const arMA = {
@@ -2120,6 +2138,9 @@ const arMA = {
   shareCopyFailed: 'انسخ الرابط أدناه',
   shareMoreOptions: 'خيارات أخرى',
   shareMessage: 'Translator Hub: دليل مجاني يعمل بدون إنترنت للسوق والصيدلية والسؤال عن الطريق.',
+  // O mapa de Direções gira com o caminhante em vez de manter o norte em
+  // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
+  dirMapTurns: 'الخريطة تدور معك: السهم يشير دائمًا إلى حيث تتجه.',
 };
 
 
@@ -2424,6 +2445,9 @@ const ltLT = {
   shareCopyFailed: 'Nukopijuokite nuorodą žemiau',
   shareMoreOptions: 'Daugiau parinkčių',
   shareMessage: 'Translator Hub: nemokamas neprisijungus veikiantis vadovas parduotuvei, vaistinei ir klausimams gatvėje.',
+  // O mapa de Direções gira com o caminhante em vez de manter o norte em
+  // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
+  dirMapTurns: 'Žemėlapis sukasi kartu su jumis: rodyklė visada rodo ten, kur einate.',
 };
 
 /**

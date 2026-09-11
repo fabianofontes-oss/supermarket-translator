@@ -144,7 +144,10 @@ export const DIR_DISTANCES: Vocab[] = [
 // SIMULAÇÃO DO PERCURSO NO MAPA
 // Grade de GRID x GRID cruzamentos. Começa embaixo, no meio, olhando para o norte.
 // ---------------------------------------------------------------------------
-export const GRID = 5;
+// 7x7 cruzamentos = 6x6 quarteirões. Era 5x5, e com o mapa mostrando a cidade
+// continuando para todo lado, a borda do bairro virou uma parede invisível: os
+// botões apagavam sem nada explicar por quê. Bairro maior, esbarrão mais raro.
+export const GRID = 7;
 export const HEADINGS = [
   { dx: 0, dy: -1 }, // 0 = norte
   { dx: 1, dy: 0 },  // 1 = leste
@@ -153,7 +156,8 @@ export const HEADINGS = [
 ];
 
 export interface Walker { x: number; y: number; heading: number }
-export const START: Walker = { x: 2, y: GRID - 1, heading: 0 };
+// Embaixo, no meio da largura, olhando para o norte.
+export const START: Walker = { x: (GRID - 1) / 2, y: GRID - 1, heading: 0 };
 
 const inBounds = (x: number, y: number) => x >= 0 && x < GRID && y >= 0 && y < GRID;
 

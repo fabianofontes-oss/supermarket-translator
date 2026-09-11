@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { Country } from '../types';
 import { HomeIcon, SpeakerIcon, SpeakerOffIcon, XIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
@@ -37,19 +37,59 @@ interface DirectionsModuleProps {
 const MAX_STEPS = 10;
 
 // Geometria do mapa (SVG 300x300)
-const SP = 60;      // distância entre cruzamentos
+const SP = 72;      // distância entre cruzamentos
 const OFF = 30;     // margem
 const px = (i: number) => OFF + i * SP;
 
+/**
+ * Onde o caminhante fica parado. O mundo é que gira e desliza em volta.
+ *
+ * No meio, porque é onde o olho o procura e é o que faz o mapa parecer um GPS.
+ * Isso só é possível porque a cidade do cenário não acaba (ver o `pattern`):
+ * ancorado numa cidade de 4 quarteirões, a câmera saía do mundo e o mapa sumia
+ * do quadro.
+ */
+const ANCORA = { x: 150, y: 150 };
+
+/** Tempo de cada tempo da animação, e o tempo do deslize dentro dele. */
+const COMPASSO = 520;
+const DESLIZE = 400;
+
+/**
+ * Seta de virada, no referencial do caminhante — que aponta sempre para cima,
+ * então "direita" aqui é direita na tela, sempre.
+ */
+const SETA_VIRADA: Record<string, string> = {
+  direita: 'M0 26 L0 -6 Q0 -20 14 -20 L30 -20 M22 -29 L32 -20 L22 -11',
+  esquerda: 'M0 26 L0 -6 Q0 -20 -14 -20 L-30 -20 M-22 -29 L-32 -20 L-22 -11',
+  volta: 'M8 26 L8 -6 Q8 -22 -6 -22 Q-20 -22 -20 -6 L-20 8 M-29 0 L-20 9 L-11 0',
+};
+
+/** Um tempo da animação: onde o caminhante está e quanto o mundo já girou. */
+interface Pose { x: number; y: number; spin: number }
+
+/**
+ * Rotatória e bifurcação. Existem no vocabulário do módulo e não existiam no
+ * mapa — eram palavra sem figura. Entram como cenário: o caminhante passa por
+ * elas andando na grade reta, mas não há passo de "pegue a segunda saída".
+ */
+const ROTATORIA = { x: 4, y: 3 };
+const BIFURCACAO = { de: { x: 1, y: 5 }, para: { x: 2, y: 4 } };
+
 // Pontos de referência desenhados nos quarteirões (coluna, linha)
+// Espalhados de modo que quase sempre haja um à vista: com o quarteirão a 72
+// unidades, cabem só uns quatro por quatro na tela de uma vez.
 const LANDMARKS: { bx: number; by: number; emoji: string }[] = [
-  { bx: 0, by: 0, emoji: '🏦' },
-  { bx: 3, by: 0, emoji: '⛲' },
-  { bx: 1, by: 1, emoji: '🚏' },
-  { bx: 2, by: 2, emoji: '💊' },
-  { bx: 0, by: 3, emoji: '🚇' },
-  { bx: 3, by: 2, emoji: '🏫' },
-  { bx: 1, by: 3, emoji: '🍞' },
+  { bx: 1, by: 0, emoji: '🏦' },
+  { bx: 4, by: 0, emoji: '⛲' },
+  { bx: 0, by: 2, emoji: '🚏' },
+  { bx: 2, by: 1, emoji: '🏫' },
+  { bx: 5, by: 1, emoji: '🚉' },
+  { bx: 3, by: 3, emoji: '💊' },
+  { bx: 0, by: 4, emoji: '🚇' },
+  { bx: 5, by: 3, emoji: '🍞' },
+  { bx: 2, by: 5, emoji: '🏥' },
+  { bx: 4, by: 5, emoji: '⛪' },
 ];
 
 export default function DirectionsModule({
@@ -69,20 +109,90 @@ export default function DirectionsModule({
 
   const [steps, setSteps] = useState<DirStep[]>([]);
   const [compassPick, setCompassPick] = useState<number | null>(null);
+  const setaId = useId();
+  const cidadeId = useId();
 
   // Recalcula o percurso a partir dos passos (fonte única de verdade)
   const route = useMemo(() => {
     let walker: Walker = START;
     const points: Walker[] = [START];
-    for (const s of steps) {
+    const marks: { x: number; y: number; n: number }[] = [];
+    // Giro acumulado, SEM módulo: é ele que gira o mapa. Com `% 4`, a passagem
+    // de 270° para 0° faria o mapa desandar 270° para trás em vez de seguir 90°
+    // adiante — e a animação contaria uma virada que não aconteceu.
+    let spin = 0;
+    for (let i = 0; i < steps.length; i++) {
+      const s = steps[i];
       const r = applyStep(walker, s);
       if (!r) break;
+      spin += s.turn;
       walker = r.next;
       points.push(...r.path);
       if (s.turn === 2 && r.path.length === 0) points.push(walker); // meia-volta sem andar
+      // Passo que não anda (meia-volta, chegada) cai no mesmo cruzamento do
+      // anterior: fica só o número mais recente, senão as bolinhas se empilham
+      // e nenhuma fica legível.
+      const ultima = marks[marks.length - 1];
+      if (ultima && ultima.x === walker.x && ultima.y === walker.y) ultima.n = i + 1;
+      else marks.push({ x: walker.x, y: walker.y, n: i + 1 });
     }
-    return { walker, points, arrived: steps.some((s) => s.arrive) };
+    return { walker, points, marks, spin, arrived: steps.some((s) => s.arrive) };
   }, [steps]);
+
+  /**
+   * Os tempos da animação, um por um.
+   *
+   * Antes cada passo acontecia numa tacada só: o boneco deslizava e girava ao
+   * mesmo tempo, e a virada — que é exatamente o que a frase ensina — passava
+   * batida. Agora virar é um tempo próprio, parado na esquina, e cada quarteirão
+   * andado é outro. É o que deixa a pessoa VER "gira a la derecha" acontecer.
+   */
+  const timeline = useMemo(() => {
+    const poses: Pose[] = [{ x: START.x, y: START.y, spin: 0 }];
+    let walker: Walker = START;
+    let spin = 0;
+    for (const s of steps) {
+      const r = applyStep(walker, s);
+      if (!r) break;
+      spin += s.turn;
+      // vira parado, antes de sair andando
+      if (s.turn !== 0) poses.push({ x: walker.x, y: walker.y, spin });
+      // um quarteirão por tempo
+      for (const ponto of r.path) poses.push({ x: ponto.x, y: ponto.y, spin });
+      if (r.path.length === 0) poses.push({ x: r.next.x, y: r.next.y, spin });
+      walker = r.next;
+    }
+    return poses;
+  }, [steps]);
+
+  // Quem pediu menos movimento não quer ver o passeio: pula direto para o fim.
+  const semMovimento = typeof window !== 'undefined'
+    && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  const [frame, setFrame] = useState(0);
+  const ultimoFrame = timeline.length - 1;
+
+  // Em que tempo estávamos quando o passo foi pedido. É o que faz o PRIMEIRO
+  // tempo sair na hora: sem isto, o toque ficava meio segundo sem resposta
+  // nenhuma antes de o boneco mexer, e meio segundo de nada lê como travado.
+  const frameAoPedir = useRef(0);
+  useEffect(() => { frameAoPedir.current = frame; }, [steps]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (frame === ultimoFrame) return;
+    // Desfazer e limpar encurtam a linha do tempo: aí não há passeio, há corte.
+    if (frame > ultimoFrame || semMovimento) { setFrame(ultimoFrame); return; }
+    const espera = frame === frameAoPedir.current ? 0 : COMPASSO;
+    const id = window.setTimeout(() => setFrame((f) => Math.min(f + 1, ultimoFrame)), espera);
+    return () => window.clearTimeout(id);
+  }, [frame, ultimoFrame, semMovimento]);
+
+  const pose = timeline[Math.min(frame, ultimoFrame)] ?? timeline[0];
+  const noFim = frame >= ultimoFrame;
+  /** Quanto o mundo girou NESTE tempo: é o que acende a seta de virada. */
+  const viradaAgora = frame > 0 && frame <= ultimoFrame
+    ? pose.spin - timeline[frame - 1].spin
+    : 0;
 
   const canApply = (step: DirStep) => {
     if (route.arrived || steps.length >= MAX_STEPS) return false;
@@ -114,8 +224,17 @@ export default function DirectionsModule({
   const fullRoute = steps.map((s) => s.phrases[target]).join(' ');
   const compassIdx = compassPick ?? route.walker.heading;
   const compass = COMPASS[compassIdx];
+  /** Inicial do norte no idioma de destino, para a rosa dos ventos do mapa. */
+  const compassNorth = COMPASS[0].names[target].charAt(0);
 
   const w = route.walker;
+
+  // Cruzamentos repetidos viram segmento de comprimento zero, e aí a seta do
+  // `marker-mid` não sabe para onde apontar. Tira as repetições seguidas.
+  const linhaDoPercurso = route.points
+    .map((p) => `${px(p.x)},${px(p.y)}`)
+    .filter((p, i, todos) => i === 0 || p !== todos[i - 1])
+    .join(' ');
 
   return (
     <div className="w-full bg-slate-50 text-gray-800 flex flex-col h-[100dvh] relative overflow-hidden font-sans">
@@ -147,47 +266,198 @@ export default function DirectionsModule({
           {/* MAPA */}
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-3">
             <svg viewBox="0 0 300 300" className="w-full max-w-[320px] mx-auto block select-none" style={{ aspectRatio: '1 / 1' }}>
-              {/* quarteirões */}
-              {Array.from({ length: GRID - 1 }).map((_, bx) =>
-                Array.from({ length: GRID - 1 }).map((_, by) => (
-                  <rect key={`${bx}-${by}`} x={px(bx) + 8} y={px(by) + 8} width={SP - 16} height={SP - 16} rx={6} fill="#f1f5f9" stroke="#e2e8f0" />
-                ))
-              )}
-              {/* ruas */}
-              {Array.from({ length: GRID }).map((_, i) => (
-                <g key={i}>
-                  <line x1={px(0)} y1={px(i)} x2={px(GRID - 1)} y2={px(i)} stroke="#cbd5e1" strokeWidth={10} strokeLinecap="round" />
-                  <line x1={px(i)} y1={px(0)} x2={px(i)} y2={px(GRID - 1)} stroke="#cbd5e1" strokeWidth={10} strokeLinecap="round" />
-                  <line x1={px(0)} y1={px(i)} x2={px(GRID - 1)} y2={px(i)} stroke="white" strokeWidth={1.2} strokeDasharray="4 6" />
-                  <line x1={px(i)} y1={px(0)} x2={px(i)} y2={px(GRID - 1)} stroke="white" strokeWidth={1.2} strokeDasharray="4 6" />
+              <defs>
+                {/* Setas brancas dentro do traço do percurso: dizem o SENTIDO.
+                    Sem elas a rota é uma linha lisa e não dá para saber onde
+                    começou nem para onde foi. */}
+                <marker id={setaId} markerUnits="userSpaceOnUse" markerWidth={10} markerHeight={10} refX={5} refY={5} orient="auto">
+                  <path d="M3.4 2 L6.6 5 L3.4 8" fill="none" stroke="white" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
+                </marker>
+
+                {/*
+                  A CIDADE NÃO ACABA.
+
+                  Sem isto, prender o caminhante no meio da tela era impossível: o
+                  bairro tem 4 quarteirões de lado, então a câmera saía do mundo e
+                  o mapa sumia do quadro. Um ladrilho repetido dá cidade infinita
+                  com um elemento só, em vez de centenas de quarteirões desenhados
+                  que ninguém vai olhar.
+
+                  Em tom mais claro de propósito: é cenário. O bairro onde dá para
+                  andar vem desenhado por cima, mais forte, e essa diferença de
+                  tom é o que conta, sem legenda, até onde o percurso pode ir.
+                */}
+                <pattern id={cidadeId} patternUnits="userSpaceOnUse" x={OFF} y={OFF} width={SP} height={SP}>
+                  <rect x={9} y={9} width={SP - 18} height={SP - 18} rx={7} fill="#f8fafc" stroke="#eef2f7" />
+                  {[0, SP].map((d) => (
+                    <g key={d}>
+                      <line x1={d} y1={-SP} x2={d} y2={SP * 2} stroke="#e8edf3" strokeWidth={11} />
+                      <line x1={-SP} y1={d} x2={SP * 2} y2={d} stroke="#e8edf3" strokeWidth={11} />
+                    </g>
+                  ))}
+                </pattern>
+              </defs>
+
+              {/*
+                O MUNDO gira e desliza em volta do caminhante, que não sai do meio
+                da tela — o comportamento de um GPS, e o conserto deste módulo.
+
+                Antes o mapa era norte-sempre-em-cima e as frases são do ponto de
+                vista de quem anda. As duas coisas só coincidiam olhando para o
+                norte: de frente para o sul, "gira a la derecha" mandava o boneco
+                para a ESQUERDA da tela. Em 3 das 4 direções o mapa discordava da
+                frase, e em 1 delas dizia o oposto.
+              */}
+              <g
+                style={{
+                  transform: `translate(${ANCORA.x}px, ${ANCORA.y}px) rotate(${-pose.spin * 90}deg) translate(${-px(pose.x)}px, ${-px(pose.y)}px)`,
+                  transformOrigin: '0px 0px',
+                  transition: `transform ${DESLIZE}ms var(--ease-out)`,
+                }}
+              >
+                {/* cenário: a cidade que continua para todo lado */}
+                <rect x={-1200} y={-1200} width={2700} height={2700} fill={`url(#${cidadeId})`} />
+
+                {/* o bairro onde dá para andar, em tom mais forte */}
+                {Array.from({ length: GRID - 1 }).map((_, bx) =>
+                  Array.from({ length: GRID - 1 }).map((_, by) => (
+                    <rect key={`${bx}-${by}`} x={px(bx) + 9} y={px(by) + 9} width={SP - 18} height={SP - 18} rx={7} fill="#f1f5f9" stroke="#e2e8f0" />
+                  ))
+                )}
+                {Array.from({ length: GRID }).map((_, i) => (
+                  <g key={i}>
+                    <line x1={px(0)} y1={px(i)} x2={px(GRID - 1)} y2={px(i)} stroke="#cbd5e1" strokeWidth={11} strokeLinecap="round" />
+                    <line x1={px(i)} y1={px(0)} x2={px(i)} y2={px(GRID - 1)} stroke="#cbd5e1" strokeWidth={11} strokeLinecap="round" />
+                    <line x1={px(0)} y1={px(i)} x2={px(GRID - 1)} y2={px(i)} stroke="white" strokeWidth={1.3} strokeDasharray="5 7" />
+                    <line x1={px(i)} y1={px(0)} x2={px(i)} y2={px(GRID - 1)} stroke="white" strokeWidth={1.3} strokeDasharray="5 7" />
+                  </g>
+                ))}
+
+                {/*
+                  Bifurcação e rotatória.
+
+                  Estão no vocabulário do módulo ("la bifurcación", "la rotonda")
+                  e não existiam no mapa, então eram palavras sem figura. São
+                  CENÁRIO: o caminhante anda na grade reta e passa por elas, mas
+                  não há passo de "pegue a segunda saída" — isso seria outro
+                  modelo de movimento.
+                */}
+                <line
+                  x1={px(BIFURCACAO.de.x)} y1={px(BIFURCACAO.de.y)}
+                  x2={px(BIFURCACAO.para.x)} y2={px(BIFURCACAO.para.y)}
+                  stroke="#cbd5e1" strokeWidth={11} strokeLinecap="round"
+                />
+                <line
+                  x1={px(BIFURCACAO.de.x)} y1={px(BIFURCACAO.de.y)}
+                  x2={px(BIFURCACAO.para.x)} y2={px(BIFURCACAO.para.y)}
+                  stroke="white" strokeWidth={1.3} strokeDasharray="5 7"
+                />
+                <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={23} fill="none" stroke="#cbd5e1" strokeWidth={11} />
+                <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={23} fill="none" stroke="white" strokeWidth={1.3} strokeDasharray="5 7" />
+                <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={16} fill="#dcfce7" stroke="#bbf7d0" strokeWidth={2} />
+                <Upright x={px(ROTATORIA.x)} y={px(ROTATORIA.y)} deg={pose.spin * 90}>
+                  <text x={px(ROTATORIA.x)} y={px(ROTATORIA.y) + 6} textAnchor="middle" fontSize={17}>🌳</text>
+                </Upright>
+
+                {/* pontos de referência — de pé enquanto o mapa gira */}
+                {LANDMARKS.map((l, i) => {
+                  const lx = px(l.bx) + SP / 2;
+                  const ly = px(l.by) + SP / 2;
+                  return (
+                    <Upright key={i} x={lx} y={ly} deg={pose.spin * 90}>
+                      <text x={lx} y={ly + 9} textAnchor="middle" fontSize={27}>{l.emoji}</text>
+                    </Upright>
+                  );
+                })}
+
+                {/* percurso */}
+                <polyline
+                  points={linhaDoPercurso}
+                  fill="none"
+                  stroke={theme.hex}
+                  strokeWidth={8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  markerMid={`url(#${setaId})`}
+                />
+                {/* início: anel vazado, o símbolo de origem */}
+                <circle cx={px(START.x)} cy={px(START.y)} r={8} fill="white" stroke={theme.hex} strokeWidth={3} />
+                <circle cx={px(START.x)} cy={px(START.y)} r={3} fill={theme.hex} />
+
+                {/* número de cada passo, casando com a lista numerada abaixo */}
+                {route.marks.map((m) => {
+                  const mx = px(m.x);
+                  const my = px(m.y);
+                  if (m.x === pose.x && m.y === pose.y) return null; // o boneco cobriria
+                  return (
+                    <Upright key={`${m.x}-${m.y}`} x={mx} y={my} deg={pose.spin * 90}>
+                      <circle cx={mx} cy={my} r={12} fill={theme.hex} stroke="white" strokeWidth={2.5} />
+                      <text x={mx} y={my + 5} textAnchor="middle" fontSize={14} fontWeight={700} fill="white">{m.n}</text>
+                    </Upright>
+                  );
+                })}
+
+                {/* destino: só quando a animação chega lá */}
+                {route.arrived && noFim && (
+                  <Upright x={px(w.x)} y={px(w.y) - 18} deg={pose.spin * 90}>
+                    <text x={px(w.x)} y={px(w.y) - 18} textAnchor="middle" fontSize={28}>📍</text>
+                  </Upright>
+                )}
+              </g>
+
+              {/*
+                Caminhante: fora do grupo que gira, cravado no meio e sempre
+                apontando para cima. Não leva rotação nenhuma — é esse o ponto. O
+                cone de visão mostra o que está à frente sem precisar de legenda.
+              */}
+              <g style={{ transform: `translate(${ANCORA.x}px, ${ANCORA.y}px)` }}>
+                <path d="M0 0 L-21 -38 A42 42 0 0 1 21 -38 Z" fill={theme.hex} opacity={0.15} />
+                <circle r={14} fill={theme.hex} stroke="white" strokeWidth={3} />
+                <polygon points="0,-8 6.5,4.5 -6.5,4.5" fill="white" />
+              </g>
+
+              {/*
+                Seta da virada, como a de um GPS. Só acende no tempo em que o
+                caminhante está virando — que agora é um tempo próprio, parado na
+                esquina, e não mais um borrão junto com o andar.
+              */}
+              {viradaAgora !== 0 && (
+                <g style={{ transform: `translate(${ANCORA.x}px, ${ANCORA.y}px)` }}>
+                  <path
+                    d={SETA_VIRADA[Math.abs(viradaAgora) === 2 ? 'volta' : viradaAgora > 0 ? 'direita' : 'esquerda']}
+                    fill="none"
+                    stroke={theme.hex}
+                    strokeWidth={7}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </g>
-              ))}
-              {/* pontos de referência */}
-              {LANDMARKS.map((l, i) => (
-                <text key={i} x={px(l.bx) + SP / 2} y={px(l.by) + SP / 2 + 8} textAnchor="middle" fontSize={22}>{l.emoji}</text>
-              ))}
-              {/* percurso */}
-              <polyline
-                points={route.points.map((p) => `${px(p.x)},${px(p.y)}`).join(' ')}
-                fill="none"
-                stroke={theme.hex}
-                strokeWidth={6}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity={0.85}
-              />
-              {/* início */}
-              <circle cx={px(START.x)} cy={px(START.y)} r={6} fill="white" stroke={theme.hex} strokeWidth={3} />
-              {/* destino */}
-              {route.arrived && (
-                <text x={px(w.x)} y={px(w.y) - 14} textAnchor="middle" fontSize={26}>📍</text>
               )}
-              {/* caminhante */}
-              <g style={{ transform: `translate(${px(w.x)}px, ${px(w.y)}px) rotate(${w.heading * 90}deg)`, transition: 'transform var(--scene-duration) var(--ease-out)' }}>
-                <circle r={11} fill={theme.hex} stroke="white" strokeWidth={3} />
-                <polygon points="0,-7 5,3 -5,3" fill="white" />
+
+              {/*
+                Rosa dos ventos, fixa no canto e por cima do mapa. O mapa deixou
+                de ter o norte para cima, então precisa dizer para onde o norte
+                foi — e de quebra é o que este módulo ensina logo abaixo.
+              */}
+              <g
+                style={{
+                  transform: `rotate(${-pose.spin * 90}deg)`,
+                  transformOrigin: '266px 34px',
+                  transition: `transform ${DESLIZE}ms var(--ease-out)`,
+                }}
+              >
+                <circle cx={266} cy={34} r={18} fill="white" stroke="#e2e8f0" strokeWidth={1.5} />
+                <polygon points="266,20 270,34 262,34" fill={theme.hex} />
+                <polygon points="266,48 270,34 262,34" fill="#cbd5e1" />
+                <Upright x={266} y={17} deg={pose.spin * 90}>
+                  <text x={266} y={17} textAnchor="middle" fontSize={10} fontWeight={700} fill={theme.hex}>
+                    {compassNorth}
+                  </text>
+                </Upright>
               </g>
             </svg>
+
+            <p className="text-xs text-gray-500 text-center leading-snug mt-1 px-2" dir="auto">{t('dirMapTurns')}</p>
           </div>
 
           {/* BOTÕES DE PASSO */}
@@ -334,6 +604,25 @@ export default function DirectionsModule({
     </div>
   );
 }
+
+/**
+ * Mantém um elemento de pé enquanto o mapa gira por baixo dele.
+ *
+ * Emoji de cabeça para baixo e número de passo espelhado não se leem. Gira no
+ * sentido contrário ao do mundo, em torno do próprio ponto, e com a MESMA
+ * duração — com tempos diferentes o item pareceria rodopiar durante a virada.
+ */
+const Upright: React.FC<{ x: number; y: number; deg: number; children: React.ReactNode }> = ({ x, y, deg, children }) => (
+  <g
+    style={{
+      transform: `rotate(${deg}deg)`,
+      transformOrigin: `${x}px ${y}px`,
+      transition: 'transform var(--scene-duration) var(--ease-out)',
+    }}
+  >
+    {children}
+  </g>
+);
 
 interface VocabGroupProps {
   title: string;
