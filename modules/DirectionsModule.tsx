@@ -39,6 +39,10 @@ interface DirectionsModuleProps {
 
 const MAX_STEPS = 10;
 
+/** Quantas colunas para quantos passos. Escrito por extenso: o Tailwind varre o
+ *  fonte e não gera classe que só existe depois de concatenada. */
+const COLUNAS: Record<number, string> = { 1: 'grid-cols-1', 2: 'grid-cols-2', 3: 'grid-cols-3' };
+
 // Geometria do mapa (SVG 300x300)
 const SP = 72;      // distância entre cruzamentos
 const OFF = 30;     // margem
@@ -207,6 +211,13 @@ export default function DirectionsModule({
     playSound('click');
     handlePlayAudio(text, targetCountry.lang);
   };
+
+  /**
+   * Os passos de lugar que valem AGORA. Vazio quase sempre, e é isso que faz a
+   * seção inteira sumir em vez de ficar apagada na tela.
+   */
+  const passosDeLugar = DIR_PLACE_STEPS.filter(canApply);
+  const naRotatoria = passosDeLugar.some((p) => p.at === 'rotatoria');
 
   /** O mesmo botão serve as duas grades de passos. */
   const botaoPasso = (s: DirStep) => {
@@ -471,20 +482,38 @@ export default function DirectionsModule({
           </section>
 
           {/*
-            Rotatória e bifurcação: passos que só existem num lugar.
+            Rotatória e bifurcação: aparecem só quando dá para usá-las.
 
-            Ficam em seção própria em vez de misturados na grade de cima, porque
-            na maior parte do tempo estão apagados — e apagado no meio dos outros
-            parece defeito, enquanto apagado debaixo de um título que diz "só
-            funcionam quando você chega nelas" parece regra.
+            Antes ficavam sempre na tela, quase sempre apagadas. Botão que passa
+            a vida apagado não ensina a regra dele — ensina a ignorar aquele
+            canto da tela, e ainda ocupa espaço o tempo todo por algo que vale em
+            dois pontos do mapa.
+
+            Surgindo no momento em que a pessoa chega, viram acontecimento: é o
+            único instante em que ela vai ler o que está escrito ali. E o texto
+            não gasta a linha dizendo onde elas ficam — o mapa já mostra —, e sim
+            o que muda na fala, que é a parte que ninguém adivinha: na rotatória
+            não se diz "vire", conta-se a saída.
+
+            A descoberta não fica solta: a rotatória e a avenida diagonal estão
+            desenhadas no mapa desde o começo, então há para onde mirar.
           */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1 px-1">{t('dirPlaceSteps')}</h2>
-            <p className="text-xs text-gray-500 mb-2 px-1 leading-snug" dir="auto">{t('dirPlaceStepsHint')}</p>
-            <div className="grid grid-cols-3 gap-2">
-              {DIR_PLACE_STEPS.map(botaoPasso)}
-            </div>
-          </section>
+          {passosDeLugar.length > 0 && (
+            <section
+              className="rounded-3xl border p-4 animate-expand-up"
+              style={{ borderColor: theme.hex, backgroundColor: `${theme.hex}0d` }}
+            >
+              <h2 className={`text-xs font-bold uppercase tracking-widest mb-1 ${theme.textColor}`} dir="auto">
+                {t(naRotatoria ? 'dirAtRoundabout' : 'dirAtFork')}
+              </h2>
+              <p className="text-xs text-gray-600 mb-3 leading-snug" dir="auto">
+                {t(naRotatoria ? 'dirAtRoundaboutHint' : 'dirAtForkHint')}
+              </p>
+              <div className={`grid ${COLUNAS[passosDeLugar.length] ?? 'grid-cols-3'} gap-2`}>
+                {passosDeLugar.map(botaoPasso)}
+              </div>
+            </section>
+          )}
 
           {/* PERCURSO (frases) */}
           <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
