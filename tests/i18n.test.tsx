@@ -123,7 +123,12 @@ describe('PARTE 13 — nada de texto solto fora do sistema de tradução', () =>
     const fontes = ['App.tsx', 'components/TranslationItem.tsx', 'components/ModuleLayout.tsx',
                     'components/LanguagePanel.tsx', 'components/CategorySheet.tsx',
                     'components/ErrorFallback.tsx', 'modules/CatalogModule.tsx',
-                    'components/ShareSheet.tsx', 'components/ShareButton.tsx'];
+                    'components/ShareSheet.tsx', 'components/ShareButton.tsx',
+                    // Nenhum módulo generativo estava nesta lista, então um
+                    // t('mkDeph') com erro de digitação renderizaria a chave
+                    // crua e nenhum teste pegaria. Estender aos outros sete
+                    // é trabalho próprio, e vale.
+                    'modules/MakeupModule.tsx'];
     const usadas = new Set<string>();
     for (const f of fontes) {
       for (const m of ler(f).matchAll(/\bt\('([A-Za-z0-9_]+)'\)/g)) usadas.add(m[1]);

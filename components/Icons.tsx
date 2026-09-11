@@ -320,3 +320,13 @@ export const SizesIcon: React.FC<{ className?: string }> = ({ className }) => (
     <path strokeLinecap="round" d="M6.5 8v3M10 8v4.5M13.5 8v3M17 8v4.5" />
   </svg>
 );
+
+// Batom com o bisel: é o único glifo de maquiagem que não se confunde com os
+// outros nove do hub a 28px. Um frasco lê como remédio, um pincel lê como caneta.
+export const MakeupIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 10h6v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 10V5.4a.6.6 0 0 1 .35-.55l4-1.8a.6.6 0 0 1 .85.55V10" />
+    <path strokeLinecap="round" d="M8 13.5h8" />
+  </svg>
+);

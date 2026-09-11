@@ -432,6 +432,10 @@ export interface Tool {
   askFor: Text;
   /** Genitivo, onde o verbo do quadro reger. */
   gen?: { uk?: string; lt?: string };
+  /** Idiomas em que o objeto é PLURAL. Marcado só onde for, o resto é singular.
+   *  O número muda de língua para língua — "las pinzas" mas "a pinça" —, e é o
+   *  que faz "¿Cuánto cuesta?" virar "¿Cuánto cuestan?". */
+  num?: Partial<Record<LangCode, 'pl'>>;
   /** Armadilha de nome, na língua de quem lê. */
   note?: Text;
 }
@@ -469,6 +473,7 @@ export const TOOLS: Tool[] = [
     names: { es: 'el rizador de pestañas', pt: 'o curvador de cílios', en: 'the eyelash curler', fr: 'le recourbe-cils', it: 'il piegaciglia', uk: 'щипці для вій', lt: 'blakstienų žnyplės', ar: 'جهاز تجعيد الرموش' },
     askFor: { es: 'un rizador de pestañas', pt: 'um curvador de cílios', en: 'an eyelash curler', fr: 'un recourbe-cils', it: 'un piegaciglia', uk: 'щипці для вій', lt: 'blakstienų žnyples', ar: 'جهاز تجعيد الرموش' },
     gen: { uk: 'щипців для вій', lt: 'blakstienų žnyplių' },
+    num: { uk: 'pl', lt: 'pl' },
     note: { es: 'En España se llama "rizador", de "rizar".', pt: 'Em espanhol é "rizador", de "rizar" (encaracolar). Não lembra nada "curvador" — é uma das palavras que mais trava na loja.', en: 'Spanish calls it "rizador", from "rizar" (to curl).', fr: 'En espagnol : "rizador", de "rizar" (boucler).', it: 'In spagnolo "rizador", da "rizar" (arricciare).', uk: 'Іспанською "rizador", від "rizar" — підкручувати.', lt: 'Ispaniškai "rizador", nuo "rizar" — garbanoti.', ar: 'بالإسبانية "rizador"، من "rizar" أي يجعّد.' },
   },
   {
@@ -476,6 +481,7 @@ export const TOOLS: Tool[] = [
     names: { es: 'las pinzas', pt: 'a pinça', en: 'the tweezers', fr: 'la pince à épiler', it: 'le pinzette', uk: 'пінцет', lt: 'pincetas', ar: 'ملقط' },
     askFor: { es: 'unas pinzas', pt: 'uma pinça', en: 'tweezers', fr: 'une pince à épiler', it: 'delle pinzette', uk: 'пінцет', lt: 'pincetą', ar: 'ملقط' },
     gen: { uk: 'пінцета', lt: 'pinceto' },
+    num: { es: 'pl', en: 'pl', it: 'pl' },
     note: { es: 'Siempre en plural: "unas pinzas".', pt: 'Em espanhol vai sempre no plural: "unas pinzas". No singular, "una pinza" é a presilha de cabelo — objeto diferente.', en: 'Always plural in Spanish: "unas pinzas". The singular means a hair clip.', fr: 'Toujours au pluriel en espagnol : "unas pinzas". Au singulier, c\'est une pince à cheveux.', it: 'Sempre al plurale in spagnolo: "unas pinzas". Al singolare è una molletta.', uk: 'Іспанською завжди у множині: "unas pinzas". В однині це заколка.', lt: 'Ispaniškai visada daugiskaita: "unas pinzas". Vienaskaita reiškia plaukų segtuką.', ar: 'دائمًا بالجمع بالإسبانية: "unas pinzas". المفرد يعني مشبك شعر.' },
   },
   {
@@ -490,6 +496,7 @@ export const TOOLS: Tool[] = [
     names: { es: 'las pestañas postizas', pt: 'os cílios postiços', en: 'the false lashes', fr: 'les faux cils', it: 'le ciglia finte', uk: 'накладні вії', lt: 'dirbtinės blakstienos', ar: 'رموش صناعية' },
     askFor: { es: 'unas pestañas postizas', pt: 'uns cílios postiços', en: 'false lashes', fr: 'des faux cils', it: 'delle ciglia finte', uk: 'накладні вії', lt: 'dirbtines blakstienas', ar: 'رموش صناعية' },
     gen: { uk: 'накладних вій', lt: 'dirbtinių blakstienų' },
+    num: { es: 'pl', pt: 'pl', en: 'pl', fr: 'pl', it: 'pl', uk: 'pl', lt: 'pl', ar: 'pl' },
   },
   // --- cabelo ---
   {
@@ -504,6 +511,7 @@ export const TOOLS: Tool[] = [
     names: { es: 'el peine', pt: 'o pente', en: 'the comb', fr: 'le peigne', it: 'il pettine', uk: 'гребінець', lt: 'šukos', ar: 'مشط' },
     askFor: { es: 'un peine', pt: 'um pente', en: 'a comb', fr: 'un peigne', it: 'un pettine', uk: 'гребінець', lt: 'šukas', ar: 'مشط' },
     gen: { uk: 'гребінця', lt: 'šukų' },
+    num: { lt: 'pl' },   // "šukos" é plural em lituano, como "tesouras"
   },
   {
     key: 'faixa', group: 'hair',
@@ -537,12 +545,14 @@ export const TOOLS: Tool[] = [
     names: { es: 'los discos de algodón', pt: 'os discos de algodão', en: 'the cotton pads', fr: 'les disques de coton', it: 'i dischetti di cotone', uk: 'ватні диски', lt: 'vatos diskeliai', ar: 'أقراص قطنية' },
     askFor: { es: 'unos discos de algodón', pt: 'uns discos de algodão', en: 'cotton pads', fr: 'des disques de coton', it: 'dei dischetti di cotone', uk: 'ватні диски', lt: 'vatos diskelius', ar: 'أقراص قطنية' },
     gen: { uk: 'ватних дисків', lt: 'vatos diskelių' },
+    num: { es: 'pl', pt: 'pl', en: 'pl', fr: 'pl', it: 'pl', uk: 'pl', lt: 'pl', ar: 'pl' },
   },
   {
     key: 'cotonete', group: 'clean',
     names: { es: 'los bastoncillos', pt: 'os cotonetes', en: 'the cotton buds', fr: 'les cotons-tiges', it: 'i cotton fioc', uk: 'ватні палички', lt: 'vatos pagaliukai', ar: 'أعواد قطنية' },
     askFor: { es: 'unos bastoncillos', pt: 'uns cotonetes', en: 'cotton buds', fr: 'des cotons-tiges', it: 'dei cotton fioc', uk: 'ватні палички', lt: 'vatos pagaliukus', ar: 'أعواد قطنية' },
     gen: { uk: 'ватних паличок', lt: 'vatos pagaliukų' },
+    num: { es: 'pl', pt: 'pl', en: 'pl', fr: 'pl', it: 'pl', uk: 'pl', lt: 'pl', ar: 'pl' },
     note: { es: 'En España son "bastoncillos".', pt: 'Em espanhol é "bastoncillos" — "cotonete" é marca brasileira e ninguém entende ali.', en: 'Spain says "bastoncillos".', fr: 'En Espagne : "bastoncillos".', it: 'In Spagna si dice "bastoncillos".', uk: 'В Іспанії — "bastoncillos".', lt: 'Ispanijoje — "bastoncillos".', ar: 'في إسبانيا تسمى "bastoncillos".' },
   },
   {
@@ -550,6 +560,7 @@ export const TOOLS: Tool[] = [
     names: { es: 'las toallitas desmaquillantes', pt: 'os lenços demaquilantes', en: 'the makeup wipes', fr: 'les lingettes démaquillantes', it: 'le salviette struccanti', uk: 'серветки для зняття макіяжу', lt: 'makiažo valymo servetėlės', ar: 'مناديل مزيلة للمكياج' },
     askFor: { es: 'unas toallitas desmaquillantes', pt: 'uns lenços demaquilantes', en: 'makeup wipes', fr: 'des lingettes démaquillantes', it: 'delle salviette struccanti', uk: 'серветки для зняття макіяжу', lt: 'makiažo valymo servetėles', ar: 'مناديل مزيلة للمكياج' },
     gen: { uk: 'серветок для зняття макіяжу', lt: 'makiažo valymo servetėlių' },
+    num: { es: 'pl', pt: 'pl', en: 'pl', fr: 'pl', it: 'pl', uk: 'pl', lt: 'pl', ar: 'pl' },
   },
   // --- levar e ver ---
   {
@@ -590,6 +601,9 @@ export interface ToolFrame {
   labels: Text;
   /** Contém "{item}". */
   templates: Text;
+  /** Versão para objeto plural, onde o verbo do quadro concordar em número.
+   *  Só o de preço precisa: os outros três têm objeto direto e não concordam. */
+  templatesPl?: Text;
   /** `askFor` = indefinido/acusativo; `names` = definido/nominativo. */
   use: 'askFor' | 'names';
   /** Idiomas em que o verbo do quadro rege genitivo. */
@@ -616,6 +630,8 @@ export const TOOL_FRAMES: ToolFrame[] = [
     key: 'price', use: 'names',
     labels: { es: '¿Cuánto cuesta…?', pt: 'Quanto custa…?', en: 'How much is…?', fr: 'Combien coûte… ?', it: 'Quanto costa…?', uk: 'Скільки коштує…?', lt: 'Kiek kainuoja…?', ar: 'كم سعر…؟' },
     templates: { es: '¿Cuánto cuesta {item}?', pt: 'Quanto custa {item}?', en: 'How much is {item}?', fr: 'Combien coûte {item} ?', it: 'Quanto costa {item}?', uk: 'Скільки коштує {item}?', lt: 'Kiek kainuoja {item}?', ar: 'كم سعر {item}؟' },
+    // "Kiek kainuoja" não flexiona em lituano, e o árabe aqui não tem verbo.
+    templatesPl: { es: '¿Cuánto cuestan {item}?', pt: 'Quanto custam {item}?', en: 'How much are {item}?', fr: 'Combien coûtent {item} ?', it: 'Quanto costano {item}?', uk: 'Скільки коштують {item}?', lt: 'Kiek kainuoja {item}?', ar: 'كم سعر {item}؟' },
   },
 ];
 
@@ -669,7 +685,11 @@ export const buildMakeupRequest = (
     const chosen = picks[key];
     if (!chosen) continue;
     const dim = DIMENSIONS.find((d) => d.key === key);
-    const opt = dim?.options.find((o) => o.key === chosen);
+    // `optionsFor` e não `dim.options`: a escolha pode ter sobrado de outro
+    // produto. A tela guarda tudo o que a pessoa escolheu — o tom descreve a
+    // PESSOA e não some ao trocar de produto —, e é aqui que o que não vale
+    // para este produto fica de fora da frase.
+    const opt = dim && optionsFor(dim, product).find((o) => o.key === chosen);
     if (!dim || !opt) continue;
     const frag = form(opt.texts[lang], slot);
     if (dim.agrees && ADJ_BEFORE.includes(lang)) head = `${frag} ${head}`;
@@ -677,7 +697,10 @@ export const buildMakeupRequest = (
     else tail.push(frag);
   }
 
-  const body = head + tail.map((f) => SEP[lang] + f).join('');
+  // O primeiro fragmento cola no núcleo com espaço ("una base de tono claro");
+  // só do segundo em diante entra a vírgula. Com vírgula desde o primeiro sai
+  // "una base de maquillaje, de tono claro", que soa a lista, não a pedido.
+  const body = tail.reduce((s, f, i) => s + (i === 0 ? ' ' : SEP[lang]) + f, head);
   switch (lang) {
     case 'es': return `Busco ${body}, por favor.`;
     case 'pt': return `Estou procurando ${body}, por favor.`;
@@ -691,12 +714,14 @@ export const buildMakeupRequest = (
   }
 };
 
-/** "¿Tenéis una brocha?" */
+/** "¿Tenéis una brocha?" / "¿Cuánto cuestan las pinzas?" */
 export const buildToolPhrase = (lang: LangCode, frame: ToolFrame, tool: Tool): string => {
   const wantsGen = frame.gen?.includes(lang) ?? false;
   const genitive = lang === 'uk' ? tool.gen?.uk : lang === 'lt' ? tool.gen?.lt : undefined;
   const item = frame.use === 'names'
     ? tool.names[lang]
     : (wantsGen ? genitive : undefined) ?? tool.askFor[lang];
-  return frame.templates[lang].replace('{item}', item);
+  const plural = tool.num?.[lang] === 'pl';
+  const molde = (plural && frame.templatesPl ? frame.templatesPl : frame.templates)[lang];
+  return molde.replace('{item}', item);
 };

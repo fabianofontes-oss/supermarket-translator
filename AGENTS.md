@@ -93,7 +93,7 @@ Não existe roteador. Não existe gerenciador de estado. `App.tsx` guarda tudo e
 `useState` e escolhe o módulo com um `switch`:
 
 ```
-index.tsx  →  App.tsx  →  switch (currentModule)  →  um dos nove módulos
+index.tsx  →  App.tsx  →  switch (currentModule)  →  um dos dez módulos
 ```
 
 `currentModule === null` desenha o hub, que é a grade de módulos. Cada módulo é
@@ -182,13 +182,13 @@ pronúncia só quando existe, então quase metade das vezes ele abre sem ela.
 por um prefixo de armazenamento. Tem busca, busca por voz, favoritos, lista de compras
 e o painel de categorias.
 
-**Generativo** (os outros sete). Não guardam frases prontas. Guardam tabelas pequenas
+**Generativo** (os outros oito). Não guardam frases prontas. Guardam tabelas pequenas
 e **regras de gramática por idioma**, e montam a frase na hora. É o que permite oito
 idiomas sem oito listas de frases.
 
 ### Como um módulo generativo é montado
 
-Os sete recebem exatamente os mesmos sete campos de `commonProps` e nada mais: os dois
+Os oito recebem exatamente os mesmos sete campos de `commonProps` e nada mais: os dois
 países, `t`, o tema, `onGoHome`, `onOpenLanguageModal` e `handlePlayAudio`. Nenhum
 deles conhece favoritos, lista ou busca.
 
@@ -215,7 +215,7 @@ const native = toLangCode(nativeCountry.lang);
 const showNative = native !== target;
 ```
 
-### Os sete
+### Os oito
 
 | Módulo | Dados | Função que monta a frase |
 |---|---|---|
@@ -226,6 +226,7 @@ const showNative = native !== target;
 | **Café e tapas** | 9 bebidas, 7 modificadores, 10 termos de porção | `buildOrder` |
 | **Eu, você, ele** | 8 pronomes, 7 verbos, **1.008 formas verbais** | `buildPhrase` |
 | **Medidas** | 6 tabelas, 47 linhas | `buildSizeQuestion` |
+| **Maquiagem** | 9 produtos, 9 dimensões (36 opções), 21 acessórios, 4 quadros | `buildMakeupRequest`, `buildToolPhrase` |
 
 **Onde está?** Uma cena com dois emoji: um objeto de referência grande e um menor que
 se move para a posição escolhida. Implementa contração românica (`de o → do`,
@@ -275,6 +276,18 @@ A armadilha que motivou o módulo: o pronome `tu` tem `words.pt = 'você'` mas
 `person = 1`, para a linha portuguesa sair natural enquanto a espanhola mostra
 `tú quieres`. E `altPerson` corrige o tratamento formal, porque espanhol e italiano
 conjugam `usted` na terceira pessoa e inglês, francês, ucraniano, árabe e lituano não.
+
+**Maquiagem.** Duas metades num seletor de modo, porque são interações diferentes: em
+*Produtos* a pessoa **configura** um pedido (produto × tom × subtom × cobertura ×
+acabamento × pele), em *Acessórios* ela **navega** e aponta 21 objetos desenhados.
+Três convenções de caso que **divergem** do Café e precisam ser respeitadas: `orders.uk`
+é **acusativo** (`Шукаю`), `orders.lt` é **genitivo** (`Ieškau`, não `norėti`), e
+`orders.ar` é **indefinido, sem `ال`** — o oposto de `locationData.ts`. Só a dimensão
+`color` tem adjetivo que concorda com o produto, com as quatro formas escritas à mão
+(`rosa` é invariável em gênero e número no espanhol, `marrón` só flexiona no plural), e
+só `uk`/`lt` antepõem o adjetivo. O estado **não é podado** ao trocar de produto: o tom
+descreve a pessoa, e quem filtra é o builder, por `optionsFor`. Tabela e concordância
+são varridas por `tests/makeup.test.ts`.
 
 **Medidas.** Seis tabelas de conversão entre Brasil, Europa, Reino Unido e Estados
 Unidos. `systemForCountry` manda tudo que não é `br`, `cl`, `ar`, `gb` ou `us` para o
@@ -478,7 +491,7 @@ o novo gatilho de categoria, de 56px, que mudou a conta. Deve ser medido, não f
 **8.16 — O painel de categorias entra deslizando e sai seco.** Ele desmonta na hora,
 sem transição de saída.
 
-**8.17 — O cabeçalho existe em sete cópias.** Nenhum dos sete módulos generativos usa
+**8.17 — O cabeçalho existe em oito cópias.** Nenhum dos oito módulos generativos usa
 [components/ModuleLayout.tsx](components/ModuleLayout.tsx): cada um redesenha à mão o
 mesmo cabeçalho com gradiente, botão de início, título e o par de bandeiras. Mexer no
 cabeçalho significa mexer em sete arquivos, e é assim que eles saem de sincronia.
@@ -621,6 +634,8 @@ do projeto inteiro, e não é trabalho de programação.
 | [translations.ts](translations.ts) | 267 chaves × 8 idiomas, paridade exata |
 | [data/catalog.ts](data/catalog.ts) | junta os 12 arquivos de dados do catálogo |
 | [modules/CatalogModule.tsx](modules/CatalogModule.tsx) | Supermercado e Farmácia |
+| [modules/makeup/data/makeupData.ts](modules/makeup/data/makeupData.ts) | Maquiagem: produtos, dimensões, 21 acessórios, os dois builders |
+| [modules/makeup/MakeupGlyphs.tsx](modules/makeup/MakeupGlyphs.tsx) | os 21 glifos de acessório, no pedaço adiado do módulo |
 | [components/ModuleLayout.tsx](components/ModuleLayout.tsx) | moldura: cabeçalho, painel, barra de baixo |
 | [components/TranslationItem.tsx](components/TranslationItem.tsx) | o card de item |
 | [components/CategorySheet.tsx](components/CategorySheet.tsx) | painel de categorias, e o padrão de diálogo do projeto |

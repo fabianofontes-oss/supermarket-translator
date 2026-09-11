@@ -11,6 +11,7 @@ const BodyModule = lazyWithRetry(() => import('./modules/BodyModule'));
 const CafeModule = lazyWithRetry(() => import('./modules/CafeModule'));
 const PronounsModule = lazyWithRetry(() => import('./modules/PronounsModule'));
 const SizesModule = lazyWithRetry(() => import('./modules/SizesModule'));
+const MakeupModule = lazyWithRetry(() => import('./modules/MakeupModule'));
 import { translations } from './translations';
 import { useListManager } from './hooks/useListManager';
 import { useFavorites } from './hooks/useFavorites';
@@ -50,11 +51,12 @@ import {
   CafeIcon,
   PronounsIcon,
   SizesIcon,
+  MakeupIcon,
 } from './components/Icons';
 
 type ModuleKey =
   | 'supermarket' | 'pharmacy' | 'location' | 'directions'
-  | 'numbers' | 'body' | 'cafe' | 'pronouns' | 'sizes';
+  | 'numbers' | 'body' | 'cafe' | 'pronouns' | 'sizes' | 'makeup';
 type Tab = 'home' | 'search' | 'favorites' | 'list';
 
 export interface Theme { color: string; textColor: string; hex: string; borderColor: string }
@@ -69,6 +71,10 @@ const THEMES: Record<ModuleKey, Theme> = {
   cafe:        { color: 'bg-orange-800',  textColor: 'text-orange-800',  hex: '#9a3412', borderColor: 'border-orange-800' },
   pronouns:    { color: 'bg-teal-700',    textColor: 'text-teal-700',    hex: '#0f766e', borderColor: 'border-teal-700' },
   sizes:       { color: 'bg-indigo-600',  textColor: 'text-indigo-600',  hex: '#4f46e5', borderColor: 'border-indigo-600' },
+  // fuchsia-700 e não 600: no sólido o 600 dá 4,71:1, e no pé do gradiente do
+  // header (`${hex}e6`) cai abaixo de 4,5:1 — foi onde Farmácia, Direções e
+  // Pronomes reprovaram antes de subirem para o tom 700.
+  makeup:      { color: 'bg-fuchsia-700', textColor: 'text-fuchsia-700', hex: '#a21caf', borderColor: 'border-fuchsia-700' },
 };
 
 // Módulos ativos do hub (classes escritas por extenso para o Tailwind gerar o CSS)
@@ -83,6 +89,7 @@ const ACTIVE_MODULES: { key: ModuleKey; labelKey: string; icon: React.FC<{ class
   { key: 'cafe',        labelKey: 'moduleCafe',       icon: CafeIcon,             iconClass: 'bg-orange-100 text-orange-800' },
   { key: 'pronouns',    labelKey: 'modulePronouns',   icon: PronounsIcon,         iconClass: 'bg-teal-100 text-teal-700' },
   { key: 'sizes',       labelKey: 'moduleSizes',      icon: SizesIcon,            iconClass: 'bg-indigo-100 text-indigo-600' },
+  { key: 'makeup',      labelKey: 'moduleMakeup',     icon: MakeupIcon,           iconClass: 'bg-fuchsia-100 text-fuchsia-700' },
 ];
 
 // Módulos ainda não implementados (aparecem desativados)
@@ -382,6 +389,8 @@ export default function App() {
         return <PronounsModule {...commonProps} />;
       case 'sizes':
         return <SizesModule {...commonProps} />;
+      case 'makeup':
+        return <MakeupModule {...commonProps} />;
       default: {
         return (
           <div className="min-h-screen bg-gray-50 flex flex-col">
