@@ -8,6 +8,9 @@ import type { VoiceStatus } from '../utils/speech';
 import { toLangCode, type LangCode } from './location/data/locationData';
 import {
   DIR_STEPS,
+  DIR_PLACE_STEPS,
+  ROTATORIA,
+  DIAGONAIS,
   COMPASS,
   DIR_QUESTIONS,
   DIR_PLACES,
@@ -56,25 +59,10 @@ const COMPASSO = 520;
 const DESLIZE = 400;
 
 /**
- * Seta de virada, no referencial do caminhante — que aponta sempre para cima,
- * então "direita" aqui é direita na tela, sempre.
+ * Um tempo da animação: onde o caminhante está, quanto o mundo já girou e — no
+ * tempo em que ele vira — a placa da manobra.
  */
-const SETA_VIRADA: Record<string, string> = {
-  direita: 'M0 26 L0 -6 Q0 -20 14 -20 L30 -20 M22 -29 L32 -20 L22 -11',
-  esquerda: 'M0 26 L0 -6 Q0 -20 -14 -20 L-30 -20 M-22 -29 L-32 -20 L-22 -11',
-  volta: 'M8 26 L8 -6 Q8 -22 -6 -22 Q-20 -22 -20 -6 L-20 8 M-29 0 L-20 9 L-11 0',
-};
-
-/** Um tempo da animação: onde o caminhante está e quanto o mundo já girou. */
-interface Pose { x: number; y: number; spin: number }
-
-/**
- * Rotatória e bifurcação. Existem no vocabulário do módulo e não existiam no
- * mapa — eram palavra sem figura. Entram como cenário: o caminhante passa por
- * elas andando na grade reta, mas não há passo de "pegue a segunda saída".
- */
-const ROTATORIA = { x: 4, y: 3 };
-const BIFURCACAO = { de: { x: 1, y: 5 }, para: { x: 2, y: 4 } };
+interface Pose { x: number; y: number; spin: number; placa?: string }
 
 // Pontos de referência desenhados nos quarteirões (coluna, linha)
 // Espalhados de modo que quase sempre haja um à vista: com o quarteirão a 72
@@ -125,10 +113,10 @@ export default function DirectionsModule({
       const s = steps[i];
       const r = applyStep(walker, s);
       if (!r) break;
-      spin += s.turn;
+      spin += r.turn;
       walker = r.next;
       points.push(...r.path);
-      if (s.turn === 2 && r.path.length === 0) points.push(walker); // meia-volta sem andar
+      if (r.turn === 4 && r.path.length === 0) points.push(walker); // meia-volta sem andar
       // Passo que não anda (meia-volta, chegada) cai no mesmo cruzamento do
       // anterior: fica só o número mais recente, senão as bolinhas se empilham
       // e nenhuma fica legível.
@@ -154,9 +142,9 @@ export default function DirectionsModule({
     for (const s of steps) {
       const r = applyStep(walker, s);
       if (!r) break;
-      spin += s.turn;
-      // vira parado, antes de sair andando
-      if (s.turn !== 0) poses.push({ x: walker.x, y: walker.y, spin });
+      spin += r.turn;
+      // vira parado, antes de sair andando, mostrando a placa da manobra
+      if (r.turn !== 0) poses.push({ x: walker.x, y: walker.y, spin, placa: s.icon });
       // um quarteirão por tempo
       for (const ponto of r.path) poses.push({ x: ponto.x, y: ponto.y, spin });
       if (r.path.length === 0) poses.push({ x: r.next.x, y: r.next.y, spin });
@@ -189,14 +177,13 @@ export default function DirectionsModule({
 
   const pose = timeline[Math.min(frame, ultimoFrame)] ?? timeline[0];
   const noFim = frame >= ultimoFrame;
-  /** Quanto o mundo girou NESTE tempo: é o que acende a seta de virada. */
-  const viradaAgora = frame > 0 && frame <= ultimoFrame
-    ? pose.spin - timeline[frame - 1].spin
-    : 0;
 
   const canApply = (step: DirStep) => {
     if (route.arrived || steps.length >= MAX_STEPS) return false;
     if (step.arrive) return steps.length > 0;
+    // A rotatória exige estar nela. A bifurcação não precisa de teste: o passo
+    // pede chão diagonal, e `applyStep` recusa onde não há.
+    if (step.at === 'rotatoria' && (route.walker.x !== ROTATORIA.x || route.walker.y !== ROTATORIA.y)) return false;
     return applyStep(route.walker, step) !== null;
   };
 
@@ -221,8 +208,30 @@ export default function DirectionsModule({
     handlePlayAudio(text, targetCountry.lang);
   };
 
+  /** O mesmo botão serve as duas grades de passos. */
+  const botaoPasso = (s: DirStep) => {
+    const enabled = canApply(s);
+    return (
+      <button
+        key={s.key}
+        disabled={!enabled}
+        onClick={() => addStep(s)}
+        className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
+          enabled ? 'bg-white border-gray-100 text-gray-700 hover:border-gray-300' : 'bg-gray-50 border-gray-100 text-gray-400 opacity-60'
+        }`}
+      >
+        <span className="text-2xl leading-none">{s.icon}</span>
+        <span className="text-[11px] font-bold leading-tight text-center">{s.labels[target]}</span>
+        {showNative && <span className="text-[10px] leading-tight text-center text-gray-500" dir="auto">{s.labels[native]}</span>}
+      </button>
+    );
+  };
+
   const fullRoute = steps.map((s) => s.phrases[target]).join(' ');
-  const compassIdx = compassPick ?? route.walker.heading;
+  // O rumo agora tem 8 valores e a bússola só tem 4 pontos: na diagonal mostra o
+  // cardeal mais próximo. É aproximação consciente — quem quiser o rumo exato
+  // escolhe na própria bússola.
+  const compassIdx = compassPick ?? (Math.round(route.walker.heading / 2) % 4);
   const compass = COMPASS[compassIdx];
   /** Inicial do norte no idioma de destino, para a rosa dos ventos do mapa. */
   const compassNorth = COMPASS[0].names[target].charAt(0);
@@ -310,7 +319,7 @@ export default function DirectionsModule({
               */}
               <g
                 style={{
-                  transform: `translate(${ANCORA.x}px, ${ANCORA.y}px) rotate(${-pose.spin * 90}deg) translate(${-px(pose.x)}px, ${-px(pose.y)}px)`,
+                  transform: `translate(${ANCORA.x}px, ${ANCORA.y}px) rotate(${-pose.spin * 45}deg) translate(${-px(pose.x)}px, ${-px(pose.y)}px)`,
                   transformOrigin: '0px 0px',
                   transition: `transform ${DESLIZE}ms var(--ease-out)`,
                 }}
@@ -342,20 +351,16 @@ export default function DirectionsModule({
                   não há passo de "pegue a segunda saída" — isso seria outro
                   modelo de movimento.
                 */}
-                <line
-                  x1={px(BIFURCACAO.de.x)} y1={px(BIFURCACAO.de.y)}
-                  x2={px(BIFURCACAO.para.x)} y2={px(BIFURCACAO.para.y)}
-                  stroke="#cbd5e1" strokeWidth={11} strokeLinecap="round"
-                />
-                <line
-                  x1={px(BIFURCACAO.de.x)} y1={px(BIFURCACAO.de.y)}
-                  x2={px(BIFURCACAO.para.x)} y2={px(BIFURCACAO.para.y)}
-                  stroke="white" strokeWidth={1.3} strokeDasharray="5 7"
-                />
+                {DIAGONAIS.map((e, i) => (
+                  <g key={i}>
+                    <line x1={px(e.a.x)} y1={px(e.a.y)} x2={px(e.b.x)} y2={px(e.b.y)} stroke="#cbd5e1" strokeWidth={11} strokeLinecap="round" />
+                    <line x1={px(e.a.x)} y1={px(e.a.y)} x2={px(e.b.x)} y2={px(e.b.y)} stroke="white" strokeWidth={1.3} strokeDasharray="5 7" />
+                  </g>
+                ))}
                 <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={23} fill="none" stroke="#cbd5e1" strokeWidth={11} />
                 <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={23} fill="none" stroke="white" strokeWidth={1.3} strokeDasharray="5 7" />
                 <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={16} fill="#dcfce7" stroke="#bbf7d0" strokeWidth={2} />
-                <Upright x={px(ROTATORIA.x)} y={px(ROTATORIA.y)} deg={pose.spin * 90}>
+                <Upright x={px(ROTATORIA.x)} y={px(ROTATORIA.y)} deg={pose.spin * 45}>
                   <text x={px(ROTATORIA.x)} y={px(ROTATORIA.y) + 6} textAnchor="middle" fontSize={17}>🌳</text>
                 </Upright>
 
@@ -364,7 +369,7 @@ export default function DirectionsModule({
                   const lx = px(l.bx) + SP / 2;
                   const ly = px(l.by) + SP / 2;
                   return (
-                    <Upright key={i} x={lx} y={ly} deg={pose.spin * 90}>
+                    <Upright key={i} x={lx} y={ly} deg={pose.spin * 45}>
                       <text x={lx} y={ly + 9} textAnchor="middle" fontSize={27}>{l.emoji}</text>
                     </Upright>
                   );
@@ -390,7 +395,7 @@ export default function DirectionsModule({
                   const my = px(m.y);
                   if (m.x === pose.x && m.y === pose.y) return null; // o boneco cobriria
                   return (
-                    <Upright key={`${m.x}-${m.y}`} x={mx} y={my} deg={pose.spin * 90}>
+                    <Upright key={`${m.x}-${m.y}`} x={mx} y={my} deg={pose.spin * 45}>
                       <circle cx={mx} cy={my} r={12} fill={theme.hex} stroke="white" strokeWidth={2.5} />
                       <text x={mx} y={my + 5} textAnchor="middle" fontSize={14} fontWeight={700} fill="white">{m.n}</text>
                     </Upright>
@@ -399,7 +404,7 @@ export default function DirectionsModule({
 
                 {/* destino: só quando a animação chega lá */}
                 {route.arrived && noFim && (
-                  <Upright x={px(w.x)} y={px(w.y) - 18} deg={pose.spin * 90}>
+                  <Upright x={px(w.x)} y={px(w.y) - 18} deg={pose.spin * 45}>
                     <text x={px(w.x)} y={px(w.y) - 18} textAnchor="middle" fontSize={28}>📍</text>
                   </Upright>
                 )}
@@ -417,20 +422,17 @@ export default function DirectionsModule({
               </g>
 
               {/*
-                Seta da virada, como a de um GPS. Só acende no tempo em que o
-                caminhante está virando — que agora é um tempo próprio, parado na
-                esquina, e não mais um borrão junto com o andar.
+                A PLACA da manobra, no tempo em que o caminhante está virando.
+
+                Era uma seta curva desenhada à mão, e ficava esquisita: um risco
+                solto no meio do mapa, sem parentesco com nada. A placa é o mesmo
+                símbolo do botão que a pessoa acabou de apertar — o que liga o
+                toque ao que acontece na tela, e é como a rua avisa de verdade.
               */}
-              {viradaAgora !== 0 && (
+              {pose.placa && (
                 <g style={{ transform: `translate(${ANCORA.x}px, ${ANCORA.y}px)` }}>
-                  <path
-                    d={SETA_VIRADA[Math.abs(viradaAgora) === 2 ? 'volta' : viradaAgora > 0 ? 'direita' : 'esquerda']}
-                    fill="none"
-                    stroke={theme.hex}
-                    strokeWidth={7}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                  <rect x={-27} y={-88} width={54} height={46} rx={13} fill="white" stroke="#e2e8f0" strokeWidth={1.5} />
+                  <text x={0} y={-54} textAnchor="middle" fontSize={28}>{pose.placa}</text>
                 </g>
               )}
 
@@ -441,7 +443,7 @@ export default function DirectionsModule({
               */}
               <g
                 style={{
-                  transform: `rotate(${-pose.spin * 90}deg)`,
+                  transform: `rotate(${-pose.spin * 45}deg)`,
                   transformOrigin: '266px 34px',
                   transition: `transform ${DESLIZE}ms var(--ease-out)`,
                 }}
@@ -449,7 +451,7 @@ export default function DirectionsModule({
                 <circle cx={266} cy={34} r={18} fill="white" stroke="#e2e8f0" strokeWidth={1.5} />
                 <polygon points="266,20 270,34 262,34" fill={theme.hex} />
                 <polygon points="266,48 270,34 262,34" fill="#cbd5e1" />
-                <Upright x={266} y={17} deg={pose.spin * 90}>
+                <Upright x={266} y={17} deg={pose.spin * 45}>
                   <text x={266} y={17} textAnchor="middle" fontSize={10} fontWeight={700} fill={theme.hex}>
                     {compassNorth}
                   </text>
@@ -464,23 +466,23 @@ export default function DirectionsModule({
           <section>
             <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('dirSteps')}</h2>
             <div className="grid grid-cols-4 gap-2">
-              {DIR_STEPS.map((s) => {
-                const enabled = canApply(s);
-                return (
-                  <button
-                    key={s.key}
-                    disabled={!enabled}
-                    onClick={() => addStep(s)}
-                    className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
-                      enabled ? 'bg-white border-gray-100 text-gray-700 hover:border-gray-300' : 'bg-gray-50 border-gray-100 text-gray-400 opacity-60'
-                    }`}
-                  >
-                    <span className="text-2xl leading-none">{s.icon}</span>
-                    <span className="text-[11px] font-bold leading-tight text-center">{s.labels[target]}</span>
-                    {showNative && <span className="text-[10px] leading-tight text-center text-gray-500" dir="auto">{s.labels[native]}</span>}
-                  </button>
-                );
-              })}
+              {DIR_STEPS.map(botaoPasso)}
+            </div>
+          </section>
+
+          {/*
+            Rotatória e bifurcação: passos que só existem num lugar.
+
+            Ficam em seção própria em vez de misturados na grade de cima, porque
+            na maior parte do tempo estão apagados — e apagado no meio dos outros
+            parece defeito, enquanto apagado debaixo de um título que diz "só
+            funcionam quando você chega nelas" parece regra.
+          */}
+          <section>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1 px-1">{t('dirPlaceSteps')}</h2>
+            <p className="text-xs text-gray-500 mb-2 px-1 leading-snug" dir="auto">{t('dirPlaceStepsHint')}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {DIR_PLACE_STEPS.map(botaoPasso)}
             </div>
           </section>
 

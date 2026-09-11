@@ -16,9 +16,19 @@ export type Text = Record<LangCode, string>;
 export interface DirStep {
   key: string;
   icon: string;
-  turn: 0 | 1 | -1 | 2;
+  /**
+   * Giro em oitavos de volta (45°), positivo para a direita.
+   *
+   * Era em quartos, e 4 direções bastavam enquanto a cidade só tinha ruas em
+   * cruz. A bifurcação é uma rua DIAGONAL: sem 45° ela seria desenho, não
+   * caminho. Então: 2 = direita, -2 = esquerda, 4 = meia-volta, e 1 / -1 são os
+   * desvios da bifurcação.
+   */
+  turn: number;
   forward: number | 'end';
   arrive?: boolean;
+  /** Só pode ser usado parado neste lugar. Sem isto, vale em qualquer esquina. */
+  at?: 'rotatoria';
   labels: Text;
   phrases: Text;
 }
@@ -35,12 +45,12 @@ export const DIR_STEPS: DirStep[] = [
     phrases: { es: 'Sigue recto dos manzanas.', pt: 'Siga reto dois quarteirões.', en: 'Go straight for two blocks.', fr: 'Continuez tout droit sur deux pâtés de maisons.', it: 'Vai dritto per due isolati.', uk: 'Йдіть прямо два квартали.', lt: 'Eikite tiesiai du kvartalus.', ar: 'امشِ مباشرة مسافة شارعين.' },
   },
   {
-    key: 'right', icon: '↪️', turn: 1, forward: 1,
+    key: 'right', icon: '↪️', turn: 2, forward: 1,
     labels:  { es: 'a la derecha', pt: 'à direita', en: 'turn right', fr: 'à droite', it: 'a destra', uk: 'праворуч', lt: 'į dešinę', ar: 'إلى اليمين' },
     phrases: { es: 'En la esquina, gira a la derecha.', pt: 'Na esquina, vire à direita.', en: 'At the corner, turn right.', fr: 'Au coin, tournez à droite.', it: "All'angolo, gira a destra.", uk: 'На розі поверніть праворуч.', lt: 'Kampe pasukite į dešinę.', ar: 'عند الزاوية، انعطف يمينًا.' },
   },
   {
-    key: 'left', icon: '↩️', turn: -1, forward: 1,
+    key: 'left', icon: '↩️', turn: -2, forward: 1,
     labels:  { es: 'a la izquierda', pt: 'à esquerda', en: 'turn left', fr: 'à gauche', it: 'a sinistra', uk: 'ліворуч', lt: 'į kairę', ar: 'إلى اليسار' },
     phrases: { es: 'En la esquina, gira a la izquierda.', pt: 'Na esquina, vire à esquerda.', en: 'At the corner, turn left.', fr: 'Au coin, tournez à gauche.', it: "All'angolo, gira a sinistra.", uk: 'На розі поверніть ліворуч.', lt: 'Kampe pasukite į kairę.', ar: 'عند الزاوية، انعطف يسارًا.' },
   },
@@ -55,7 +65,7 @@ export const DIR_STEPS: DirStep[] = [
     phrases: { es: 'Sigue hasta el final de la calle.', pt: 'Siga até o final da rua.', en: 'Go to the end of the street.', fr: "Allez jusqu'au bout de la rue.", it: 'Vai fino alla fine della strada.', uk: 'Йдіть до кінця вулиці.', lt: 'Eikite iki gatvės galo.', ar: 'استمر حتى نهاية الشارع.' },
   },
   {
-    key: 'back', icon: '🔄', turn: 2, forward: 0,
+    key: 'back', icon: '🔄', turn: 4, forward: 0,
     labels:  { es: 'da la vuelta', pt: 'dê a volta', en: 'turn around', fr: 'demi-tour', it: 'torna indietro', uk: 'розверніться', lt: 'apsisukite', ar: 'ارجع' },
     phrases: { es: 'Da la vuelta.', pt: 'Dê a volta.', en: 'Turn around.', fr: 'Faites demi-tour.', it: 'Torna indietro.', uk: 'Розверніться.', lt: 'Apsisukite.', ar: 'ارجع إلى الخلف.' },
   },
@@ -63,6 +73,40 @@ export const DIR_STEPS: DirStep[] = [
     key: 'arrive', icon: '📍', turn: 0, forward: 0, arrive: true,
     labels:  { es: 'has llegado', pt: 'chegou', en: 'arrived', fr: 'arrivé', it: 'arrivato', uk: 'прибули', lt: 'atvykote', ar: 'وصلت' },
     phrases: { es: 'Ya has llegado. Está justo ahí.', pt: 'Você chegou. É bem ali.', en: "You have arrived. It's right there.", fr: "Vous êtes arrivé. C'est juste là.", it: 'Sei arrivato. È proprio lì.', uk: 'Ви прибули. Це прямо тут.', lt: 'Jūs atvykote. Tai čia pat.', ar: 'لقد وصلت. إنه هنا تمامًا.' },
+  },
+];
+
+
+// ---------------------------------------------------------------------------
+// PASSOS QUE SÓ EXISTEM NUM LUGAR
+// A rotatória pede estar nela; a bifurcação se recusa sozinha, porque a rua
+// diagonal só existe entre dois cruzamentos (ver DIAGONAIS).
+// ---------------------------------------------------------------------------
+export const DIR_PLACE_STEPS: DirStep[] = [
+  {
+    key: 'exit1', icon: '1\uFE0F\u20E3', turn: 2, forward: 1, at: 'rotatoria',
+    labels:  { es: 'primera salida', pt: 'primeira saída', en: 'first exit', fr: 'première sortie', it: 'prima uscita', uk: 'перший з\'їзд', lt: 'pirmas išvažiavimas', ar: 'المخرج الأول' },
+    phrases: { es: 'En la rotonda, toma la primera salida.', pt: 'Na rotatória, pegue a primeira saída.', en: 'At the roundabout, take the first exit.', fr: 'Au rond-point, prenez la première sortie.', it: 'Alla rotonda, prendi la prima uscita.', uk: 'На кільці зверніть на перший з\'їзд.', lt: 'Žiedinėje sankryžoje sukite į pirmą išvažiavimą.', ar: 'في الدوار، اسلك المخرج الأول.' },
+  },
+  {
+    key: 'exit2', icon: '2\uFE0F\u20E3', turn: 0, forward: 1, at: 'rotatoria',
+    labels:  { es: 'segunda salida', pt: 'segunda saída', en: 'second exit', fr: 'deuxième sortie', it: 'seconda uscita', uk: 'другий з\'їзд', lt: 'antras išvažiavimas', ar: 'المخرج الثاني' },
+    phrases: { es: 'En la rotonda, toma la segunda salida.', pt: 'Na rotatória, pegue a segunda saída.', en: 'At the roundabout, take the second exit.', fr: 'Au rond-point, prenez la deuxième sortie.', it: 'Alla rotonda, prendi la seconda uscita.', uk: 'На кільці зверніть на другий з\'їзд.', lt: 'Žiedinėje sankryžoje sukite į antrą išvažiavimą.', ar: 'في الدوار، اسلك المخرج الثاني.' },
+  },
+  {
+    key: 'exit3', icon: '3\uFE0F\u20E3', turn: -2, forward: 1, at: 'rotatoria',
+    labels:  { es: 'tercera salida', pt: 'terceira saída', en: 'third exit', fr: 'troisième sortie', it: 'terza uscita', uk: 'третій з\'їзд', lt: 'trečias išvažiavimas', ar: 'المخرج الثالث' },
+    phrases: { es: 'En la rotonda, toma la tercera salida.', pt: 'Na rotatória, pegue a terceira saída.', en: 'At the roundabout, take the third exit.', fr: 'Au rond-point, prenez la troisième sortie.', it: 'Alla rotonda, prendi la terza uscita.', uk: 'На кільці зверніть на третій з\'їзд.', lt: 'Žiedinėje sankryžoje sukite į trečią išvažiavimą.', ar: 'في الدوار، اسلك المخرج الثالث.' },
+  },
+  {
+    key: 'forkRight', icon: '\u2197\uFE0F', turn: 1, forward: 1,
+    labels:  { es: 'desvío derecha', pt: 'desvio à direita', en: 'right branch', fr: 'fourche à droite', it: 'bivio a destra', uk: 'розвилка праворуч', lt: 'atšaka į dešinę', ar: 'مفترق يمين' },
+    phrases: { es: 'En la bifurcación, coge el desvío de la derecha.', pt: 'Na bifurcação, pegue o desvio à direita.', en: 'At the fork, take the right branch.', fr: 'À la fourche, prenez à droite.', it: 'Al bivio, prendi a destra.', uk: 'На розвилці тримайтеся правого боку.', lt: 'Sankryžoje laikykitės dešinės.', ar: 'عند المفترق، اسلك اليمين.' },
+  },
+  {
+    key: 'forkLeft', icon: '\u2196\uFE0F', turn: -1, forward: 1,
+    labels:  { es: 'desvío izquierda', pt: 'desvio à esquerda', en: 'left branch', fr: 'fourche à gauche', it: 'bivio a sinistra', uk: 'розвилка ліворуч', lt: 'atšaka į kairę', ar: 'مفترق يسار' },
+    phrases: { es: 'En la bifurcación, coge el desvío de la izquierda.', pt: 'Na bifurcação, pegue o desvio à esquerda.', en: 'At the fork, take the left branch.', fr: 'À la fourche, prenez à gauche.', it: 'Al bivio, prendi a sinistra.', uk: 'На розвилці тримайтеся лівого боку.', lt: 'Sankryžoje laikykitės kairės.', ar: 'عند المفترق، اسلك اليسار.' },
   },
 ];
 
@@ -148,12 +192,39 @@ export const DIR_DISTANCES: Vocab[] = [
 // continuando para todo lado, a borda do bairro virou uma parede invisível: os
 // botões apagavam sem nada explicar por quê. Bairro maior, esbarrão mais raro.
 export const GRID = 7;
+
+/** Oito direções, de 45 em 45, do norte girando pela direita. */
 export const HEADINGS = [
-  { dx: 0, dy: -1 }, // 0 = norte
-  { dx: 1, dy: 0 },  // 1 = leste
-  { dx: 0, dy: 1 },  // 2 = sul
-  { dx: -1, dy: 0 }, // 3 = oeste
+  { dx: 0,  dy: -1 }, // 0 = norte
+  { dx: 1,  dy: -1 }, // 1 = nordeste
+  { dx: 1,  dy: 0 },  // 2 = leste
+  { dx: 1,  dy: 1 },  // 3 = sudeste
+  { dx: 0,  dy: 1 },  // 4 = sul
+  { dx: -1, dy: 1 },  // 5 = sudoeste
+  { dx: -1, dy: 0 },  // 6 = oeste
+  { dx: -1, dy: -1 }, // 7 = noroeste
 ];
+
+/** A rotatória. Os passos de saída só valem parado aqui. */
+export const ROTATORIA = { x: 4, y: 3 };
+
+/**
+ * A avenida diagonal — a bifurcação.
+ *
+ * Andar na diagonal só é possível NESTES trechos. É o que separa uma
+ * bifurcação de uma esquina: numa esquina você vira 90°, na bifurcação a rua
+ * se abre em 45° e continua. Fora destes trechos não há chão diagonal, e o
+ * passo se recusa sozinho.
+ */
+export const DIAGONAIS = [
+  { a: { x: 1, y: 5 }, b: { x: 2, y: 4 } },
+  { a: { x: 2, y: 4 }, b: { x: 3, y: 3 } },
+];
+
+const temDiagonal = (x: number, y: number, nx: number, ny: number) =>
+  DIAGONAIS.some((e) =>
+    (e.a.x === x && e.a.y === y && e.b.x === nx && e.b.y === ny) ||
+    (e.b.x === x && e.b.y === y && e.a.x === nx && e.a.y === ny));
 
 export interface Walker { x: number; y: number; heading: number }
 // Embaixo, no meio da largura, olhando para o norte.
@@ -162,22 +233,52 @@ export const START: Walker = { x: (GRID - 1) / 2, y: GRID - 1, heading: 0 };
 const inBounds = (x: number, y: number) => x >= 0 && x < GRID && y >= 0 && y < GRID;
 
 /** Aplica um passo. Retorna null se sair do mapa. */
-export const applyStep = (w: Walker, step: DirStep): { next: Walker; path: Walker[] } | null => {
-  const heading = (w.heading + step.turn + 4) % 4;
+/**
+ * "Vire à direita" quer dizer *pegue a próxima rua à direita*, não *gire 90°*.
+ *
+ * Na grade em cruz dá no mesmo e nada muda. Saindo da avenida diagonal, não:
+ * 90° a partir de uma diagonal cai no meio de um quarteirão, onde não há rua, e
+ * o passo apagava — o fim da diagonal virava beco sem saída. Por isso, depois do
+ * giro cheio, tenta-se o mais aberto, que é o que reencontra a grade.
+ */
+const candidatosDeGiro = (turn: number) =>
+  turn === 2 || turn === -2 ? [turn, turn / 2] : [turn];
+
+/**
+ * `turn` no retorno é o giro REALMENTE aplicado, que pode não ser o do passo
+ * quando entra o de reserva. Quem gira o mapa tem que ler daqui: usando o do
+ * passo, o mapa giraria 90° enquanto o caminhante virou 45°.
+ */
+export const applyStep = (w: Walker, step: DirStep): { next: Walker; path: Walker[]; turn: number } | null => {
+  for (const giro of candidatosDeGiro(step.turn)) {
+    const r = tentarGiro(w, step, giro);
+    if (r) return r;
+  }
+  return null;
+};
+
+const tentarGiro = (w: Walker, step: DirStep, turn: number): { next: Walker; path: Walker[]; turn: number } | null => {
+  const heading = (w.heading + turn + 8) % 8;
   const { dx, dy } = HEADINGS[heading];
+  const naDiagonal = dx !== 0 && dy !== 0;
   let { x, y } = w;
   const path: Walker[] = [];
 
+  // Na diagonal não basta estar dentro do mapa: é preciso haver rua diagonal
+  // ligando os dois cruzamentos.
+  const podeAndar = (nx: number, ny: number) =>
+    inBounds(nx, ny) && (!naDiagonal || temDiagonal(x, y, nx, ny));
+
   if (step.forward === 'end') {
     let moved = 0;
-    while (inBounds(x + dx, y + dy)) { x += dx; y += dy; moved++; path.push({ x, y, heading }); }
+    while (podeAndar(x + dx, y + dy)) { x += dx; y += dy; moved++; path.push({ x, y, heading }); }
     if (moved === 0) return null;
   } else {
     for (let i = 0; i < step.forward; i++) {
-      if (!inBounds(x + dx, y + dy)) return null;
+      if (!podeAndar(x + dx, y + dy)) return null;
       x += dx; y += dy;
       path.push({ x, y, heading });
     }
   }
-  return { next: { x, y, heading }, path };
+  return { next: { x, y, heading }, path, turn };
 };

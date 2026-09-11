@@ -223,6 +223,16 @@ Ao reiniciar o chat, peça para:
 *   O quarteirão passou de 60 para **72 unidades** e o bairro de 5x5 para **7x7 cruzamentos**. O bairro maior não é estética: com a cidade continuando à vista, a borda virou parede invisível, e os botões apagavam sem explicar por quê.
 *   **Rotatória e bifurcação** entraram no mapa. Estavam no vocabulário do módulo e não tinham figura — eram palavra sem desenho. São cenário: o caminhante passa por elas andando na grade reta. **Não existe passo de "pegue a segunda saída"** — isso seria outro modelo de movimento.
 
+### Rotatória e bifurcação viram passos de verdade (novo)
+*   Elas tinham entrado só como desenho. O dono cobrou os botões, e a cobrança estava certa: palavra que o módulo ensina e não se pode usar é vitrine.
+*   O que segurava era o modelo: o caminhante só sabia andar em **4 direções**, e a bifurcação é uma rua **diagonal**. Sem 45° ela seria desenho para sempre. `HEADINGS` passou a ter **8 direções** e `turn` passou a ser medido em oitavos de volta: 2 = direita, -2 = esquerda, 4 = meia-volta, e **1 / -1 são os desvios da bifurcação**.
+*   Chão diagonal só existe nos trechos listados em `DIAGONAIS` — é o que separa uma bifurcação de uma esquina. Numa esquina você gira 90°; na bifurcação a rua se abre em 45° e continua. Fora desses trechos o passo se recusa sozinho, e por isso a bifurcação **não precisa de teste de posição**: na tela, só o desvio que existe fica aceso.
+*   A rotatória precisa de teste, e tem: `at: 'rotatoria'` exige estar nela. As três saídas são primeira (direita), segunda (reto) e terceira (esquerda) — a ordem real de quem entra num anel.
+*   **"Vire à direita" quer dizer *pegue a próxima rua à direita*, não *gire 90°*.** Na grade em cruz dá no mesmo; saindo da diagonal, não: 90° a partir de uma diagonal cai no meio de um quarteirão e o passo apagava, transformando o fim da avenida diagonal em beco sem saída. Agora, depois do giro cheio, tenta-se o mais aberto.
+*   Consequência que quase passou batida: **`applyStep` devolve o giro REALMENTE aplicado**, e é dele que sai a rotação do mapa. Lendo o giro do passo, o mapa girava 90° enquanto o caminhante virava 45°.
+*   Os cinco passos ficam em **seção própria**, não misturados na grade principal: na maior parte do tempo estão apagados, e apagado no meio dos outros parece defeito, enquanto apagado debaixo de um título que explica a regra parece regra.
+*   **A seta de virada virou placa.** A seta curva desenhada à mão ficava esquisita — um risco solto no meio do mapa, sem parentesco com nada. A placa mostra o mesmo símbolo do botão que a pessoa acabou de apertar, o que liga o toque ao que acontece na tela e é como a rua avisa de verdade.
+
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.333 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

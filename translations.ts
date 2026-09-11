@@ -303,6 +303,8 @@ const enUS = {
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'The map turns with you: the arrow always points where you are going.',
+  dirPlaceSteps: 'Roundabout and fork',
+  dirPlaceStepsHint: 'They only work once you reach them: the roundabout is further ahead, and the fork is the diagonal street.',
 };
 
 const ptBR = {
@@ -609,6 +611,8 @@ const ptBR = {
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'O mapa gira com você: a seta aponta sempre para onde você está indo.',
+  dirPlaceSteps: 'Rotatória e bifurcação',
+  dirPlaceStepsHint: 'Só funcionam quando você chega nelas: a rotatória fica adiante, e a bifurcação é a rua diagonal.',
 };
 
 const esCL = {
@@ -915,6 +919,8 @@ const esCL = {
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'El mapa gira contigo: la flecha apunta siempre hacia donde vas.',
+  dirPlaceSteps: 'Rotonda y bifurcación',
+  dirPlaceStepsHint: 'Solo funcionan cuando llegas a ellas: la rotonda está más adelante y la bifurcación es la calle diagonal.',
 };
 
 
@@ -1222,6 +1228,8 @@ const frFR = {
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'La carte tourne avec vous : la flèche pointe toujours vers où vous allez.',
+  dirPlaceSteps: 'Rond-point et fourche',
+  dirPlaceStepsHint: 'Ils ne marchent qu\'une fois sur place : le rond-point est plus loin, et la fourche est la rue en diagonale.',
 };
 
 const itIT = {
@@ -1528,6 +1536,8 @@ const itIT = {
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'La mappa gira con te: la freccia punta sempre dove stai andando.',
+  dirPlaceSteps: 'Rotonda e bivio',
+  dirPlaceStepsHint: 'Funzionano solo quando ci arrivi: la rotonda è più avanti e il bivio è la strada diagonale.',
 };
 
 
@@ -1835,6 +1845,8 @@ const ukUA = {
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'Карта повертається разом з вами: стрілка завжди вказує туди, куди ви йдете.',
+  dirPlaceSteps: 'Кільце та розвилка',
+  dirPlaceStepsHint: 'Працюють лише коли ви до них дійдете: кільце попереду, а розвилка — це діагональна вулиця.',
 };
 
 const arMA = {
@@ -2141,6 +2153,8 @@ const arMA = {
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'الخريطة تدور معك: السهم يشير دائمًا إلى حيث تتجه.',
+  dirPlaceSteps: 'الدوار والمفترق',
+  dirPlaceStepsHint: 'لا تعمل إلا عند الوصول إليهما: الدوار أمامك، والمفترق هو الشارع المائل.',
 };
 
 
@@ -2448,6 +2462,8 @@ const ltLT = {
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'Žemėlapis sukasi kartu su jumis: rodyklė visada rodo ten, kur einate.',
+  dirPlaceSteps: 'Žiedas ir sankryža',
+  dirPlaceStepsHint: 'Veikia tik atėjus iki jų: žiedas yra toliau, o sankryža — įstriža gatvė.',
 };
 
 /**
