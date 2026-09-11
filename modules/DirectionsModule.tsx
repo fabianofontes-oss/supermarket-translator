@@ -215,27 +215,32 @@ export default function DirectionsModule({
   /** Os passos que dão para usar daqui. Os outros não ficam apagados: somem. */
   const passosPossiveis = DIR_STEPS.filter(canApply);
 
-  /**
-   * Os passos de lugar que valem AGORA. Vazio quase sempre, e é isso que faz a
-   * seção inteira sumir em vez de ficar apagada na tela.
-   */
+  /** Os passos de lugar que valem AGORA. Vazio quase sempre. */
   const passosDeLugar = DIR_PLACE_STEPS.filter(canApply);
+  const emLugar = passosDeLugar.length > 0;
   const naRotatoria = passosDeLugar.some((p) => p.at === 'rotatoria');
 
-  /** O mesmo botão serve as duas grades de passos. */
+  /** Tudo numa grade só, com os de lugar no fim para não empurrar os de sempre. */
+  const passosNaTela = [...passosPossiveis, ...passosDeLugar];
+
+  /**
+   * O botão de um passo. Só é chamado para passos possíveis, então não existe
+   * estado apagado aqui.
+   *
+   * Os de lugar vêm tingidos com a cor do módulo: é o que os faz saltar dentro
+   * da grade comum, agora que não têm mais seção própria para chamar atenção.
+   */
   const botaoPasso = (s: DirStep) => {
-    const enabled = canApply(s);
+    const deLugar = DIR_PLACE_STEPS.includes(s);
     return (
       <button
         key={s.key}
-        disabled={!enabled}
         onClick={() => addStep(s)}
-        className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
-          enabled ? 'bg-white border-gray-100 text-gray-700 hover:border-gray-300' : 'bg-gray-50 border-gray-100 text-gray-400 opacity-60'
-        }`}
+        className="rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 bg-white border-gray-100 text-gray-700 hover:border-gray-300"
+        style={deLugar ? { borderColor: theme.hex, backgroundColor: `${theme.hex}0d` } : undefined}
       >
         <span className="text-2xl leading-none">{s.icon}</span>
-        <span className="text-[11px] font-bold leading-tight text-center">{s.labels[target]}</span>
+        <span className={`text-[11px] font-bold leading-tight text-center ${deLugar ? theme.textColor : ''}`}>{s.labels[target]}</span>
         {showNative && <span className="text-[10px] leading-tight text-center text-gray-500" dir="auto">{s.labels[native]}</span>}
       </button>
     );
@@ -477,68 +482,48 @@ export default function DirectionsModule({
           </div>
 
           {/*
-            BOTÕES DE PASSO — só os que dão para usar daqui.
+            BOTÕES DE PASSO — uma grade só, com os possíveis daqui.
 
-            Antes os impossíveis ficavam apagados na grade. Apagado carrega um
-            recado ("a rua acabou") que quase nunca é verdade: com o bairro de
-            7x7, o mais comum é o passo não valer por um detalhe de geometria que
-            ninguém precisa saber. O resultado era meia grade cinzenta o tempo
-            todo, que é como se ensina a pessoa a parar de olhar para ali.
+            Duas regras, e a segunda custou uma tentativa errada.
 
-            O preço de sumir é a grade mexer de lugar a cada passo, e botão que
-            some sem explicação confunde tanto quanto botão apagado. Por isso a
-            regra vem escrita DENTRO do cartão, e por isso existe a linha do
-            beco sem saída: sem ela, chegar num canto deixaria a seção vazia sem
-            dizer o que fazer.
+            1. Passo impossível não fica apagado: some. Apagado carrega um recado
+               ("a rua acabou") que quase nunca é verdade — com o bairro de 7x7 o
+               mais comum é não valer por um detalhe de geometria que ninguém
+               precisa saber, e meia grade cinzenta o tempo todo é como se ensina
+               a pessoa a parar de olhar para ali.
 
-            Cartão branco, não tingido: o tingido é da rotatória e da bifurcação,
-            e é o que faz elas parecerem novidade quando aparecem.
+            2. Rotatória e bifurcação entram AQUI DENTRO, no fim da mesma grade.
+               Estavam numa seção própria logo abaixo, e o resultado foi alguém
+               procurar o botão da bifurcação na grade de cima e não achar. Botão
+               que aparece fora do lugar onde se olha é botão que não apareceu.
+
+            Eles entram no fim, não no começo, para os oito de sempre não trocarem
+            de posição a cada passo; e vêm tingidos com a cor do módulo, que é o
+            que os faz saltar sem precisar de seção à parte.
+
+            O preço de sumir é a grade mexer, e botão que some sem explicação
+            confunde tanto quanto botão apagado — por isso a regra vem escrita
+            logo acima, e ela troca de texto quando a pessoa chega na rotatória ou
+            na bifurcação, que é onde a explicação vale.
           */}
           <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
             <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">{t('dirSteps')}</h2>
-            <p className="text-xs text-gray-500 mb-3 leading-snug" dir="auto">{t('dirStepsHint')}</p>
-            {passosPossiveis.length > 0 ? (
+            <p className="text-xs text-gray-500 mb-3 leading-snug" dir="auto">
+              {emLugar && (
+                <strong className={`font-bold ${theme.textColor}`}>
+                  {t(naRotatoria ? 'dirAtRoundabout' : 'dirAtFork')}{' — '}
+                </strong>
+              )}
+              {t(emLugar ? (naRotatoria ? 'dirAtRoundaboutHint' : 'dirAtForkHint') : 'dirStepsHint')}
+            </p>
+            {passosNaTela.length > 0 ? (
               <div className="grid grid-cols-4 gap-2">
-                {passosPossiveis.map(botaoPasso)}
+                {passosNaTela.map(botaoPasso)}
               </div>
             ) : (
               <p className="text-sm text-gray-600 leading-snug" dir="auto">{t('dirNoSteps')}</p>
             )}
           </section>
-
-          {/*
-            Rotatória e bifurcação: aparecem só quando dá para usá-las.
-
-            Antes ficavam sempre na tela, quase sempre apagadas. Botão que passa
-            a vida apagado não ensina a regra dele — ensina a ignorar aquele
-            canto da tela, e ainda ocupa espaço o tempo todo por algo que vale em
-            dois pontos do mapa.
-
-            Surgindo no momento em que a pessoa chega, viram acontecimento: é o
-            único instante em que ela vai ler o que está escrito ali. E o texto
-            não gasta a linha dizendo onde elas ficam — o mapa já mostra —, e sim
-            o que muda na fala, que é a parte que ninguém adivinha: na rotatória
-            não se diz "vire", conta-se a saída.
-
-            A descoberta não fica solta: a rotatória e a avenida diagonal estão
-            desenhadas no mapa desde o começo, então há para onde mirar.
-          */}
-          {passosDeLugar.length > 0 && (
-            <section
-              className="rounded-3xl border p-4 animate-expand-up"
-              style={{ borderColor: theme.hex, backgroundColor: `${theme.hex}0d` }}
-            >
-              <h2 className={`text-xs font-bold uppercase tracking-widest mb-1 ${theme.textColor}`} dir="auto">
-                {t(naRotatoria ? 'dirAtRoundabout' : 'dirAtFork')}
-              </h2>
-              <p className="text-xs text-gray-600 mb-3 leading-snug" dir="auto">
-                {t(naRotatoria ? 'dirAtRoundaboutHint' : 'dirAtForkHint')}
-              </p>
-              <div className={`grid ${COLUNAS[passosDeLugar.length] ?? 'grid-cols-3'} gap-2`}>
-                {passosDeLugar.map(botaoPasso)}
-              </div>
-            </section>
-          )}
 
           {/* PERCURSO (frases) */}
           <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
