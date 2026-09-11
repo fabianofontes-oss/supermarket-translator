@@ -212,6 +212,9 @@ export default function DirectionsModule({
     handlePlayAudio(text, targetCountry.lang);
   };
 
+  /** Os passos que dão para usar daqui. Os outros não ficam apagados: somem. */
+  const passosPossiveis = DIR_STEPS.filter(canApply);
+
   /**
    * Os passos de lugar que valem AGORA. Vazio quase sempre, e é isso que faz a
    * seção inteira sumir em vez de ficar apagada na tela.
@@ -473,12 +476,34 @@ export default function DirectionsModule({
             <p className="text-xs text-gray-500 text-center leading-snug mt-1 px-2" dir="auto">{t('dirMapTurns')}</p>
           </div>
 
-          {/* BOTÕES DE PASSO */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('dirSteps')}</h2>
-            <div className="grid grid-cols-4 gap-2">
-              {DIR_STEPS.map(botaoPasso)}
-            </div>
+          {/*
+            BOTÕES DE PASSO — só os que dão para usar daqui.
+
+            Antes os impossíveis ficavam apagados na grade. Apagado carrega um
+            recado ("a rua acabou") que quase nunca é verdade: com o bairro de
+            7x7, o mais comum é o passo não valer por um detalhe de geometria que
+            ninguém precisa saber. O resultado era meia grade cinzenta o tempo
+            todo, que é como se ensina a pessoa a parar de olhar para ali.
+
+            O preço de sumir é a grade mexer de lugar a cada passo, e botão que
+            some sem explicação confunde tanto quanto botão apagado. Por isso a
+            regra vem escrita DENTRO do cartão, e por isso existe a linha do
+            beco sem saída: sem ela, chegar num canto deixaria a seção vazia sem
+            dizer o que fazer.
+
+            Cartão branco, não tingido: o tingido é da rotatória e da bifurcação,
+            e é o que faz elas parecerem novidade quando aparecem.
+          */}
+          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">{t('dirSteps')}</h2>
+            <p className="text-xs text-gray-500 mb-3 leading-snug" dir="auto">{t('dirStepsHint')}</p>
+            {passosPossiveis.length > 0 ? (
+              <div className="grid grid-cols-4 gap-2">
+                {passosPossiveis.map(botaoPasso)}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-600 leading-snug" dir="auto">{t('dirNoSteps')}</p>
+            )}
           </section>
 
           {/*

@@ -307,6 +307,8 @@ const enUS = {
   dirAtRoundaboutHint: 'You do not say "turn" here: you count the exit you take.',
   dirAtFork: 'At the fork',
   dirAtForkHint: 'The street splits in two. You do not turn: you pick a side.',
+  dirStepsHint: 'Only the steps you can take from here are shown.',
+  dirNoSteps: 'You cannot go on from here. Use Undo or Clear in the route below.',
 };
 
 const ptBR = {
@@ -617,6 +619,8 @@ const ptBR = {
   dirAtRoundaboutHint: 'Aqui não se diz "vire": conta-se a saída que você pega.',
   dirAtFork: 'Na bifurcação',
   dirAtForkHint: 'A rua se abre em duas. Você não vira: escolhe um lado.',
+  dirStepsHint: 'Só aparecem os passos possíveis a partir de onde você está.',
+  dirNoSteps: 'Daqui não dá para seguir. Use Desfazer ou Limpar no percurso abaixo.',
 };
 
 const esCL = {
@@ -927,6 +931,8 @@ const esCL = {
   dirAtRoundaboutHint: 'Aquí no se dice "gira": se cuenta la salida que tomas.',
   dirAtFork: 'En la bifurcación',
   dirAtForkHint: 'La calle se abre en dos. No giras: eliges un lado.',
+  dirStepsHint: 'Solo aparecen los pasos posibles desde donde estás.',
+  dirNoSteps: 'Desde aquí no se puede seguir. Usa Deshacer o Limpiar en la ruta de abajo.',
 };
 
 
@@ -1238,6 +1244,8 @@ const frFR = {
   dirAtRoundaboutHint: 'Ici on ne dit pas "tournez" : on compte la sortie que vous prenez.',
   dirAtFork: 'À la fourche',
   dirAtForkHint: 'La rue se sépare en deux. Vous ne tournez pas : vous choisissez un côté.',
+  dirStepsHint: 'Seules les étapes possibles depuis votre position sont affichées.',
+  dirNoSteps: 'Impossible de continuer d\'ici. Utilisez Annuler ou Effacer dans l\'itinéraire ci-dessous.',
 };
 
 const itIT = {
@@ -1548,6 +1556,8 @@ const itIT = {
   dirAtRoundaboutHint: 'Qui non si dice "gira": si conta l\'uscita che prendi.',
   dirAtFork: 'Al bivio',
   dirAtForkHint: 'La strada si apre in due. Non giri: scegli un lato.',
+  dirStepsHint: 'Compaiono solo i passi possibili da dove sei.',
+  dirNoSteps: 'Da qui non si può proseguire. Usa Annulla o Cancella nel percorso qui sotto.',
 };
 
 
@@ -1859,6 +1869,8 @@ const ukUA = {
   dirAtRoundaboutHint: 'Тут не кажуть "поверніть": рахують з\'їзд, на який ви звертаєте.',
   dirAtFork: 'На розвилці',
   dirAtForkHint: 'Вулиця розходиться надвоє. Ви не повертаєте: обираєте бік.',
+  dirStepsHint: 'Показані лише кроки, можливі звідси.',
+  dirNoSteps: 'Звідси далі не можна. Скористайтеся «Скасувати» або «Очистити» в маршруті нижче.',
 };
 
 const arMA = {
@@ -2169,6 +2181,8 @@ const arMA = {
   dirAtRoundaboutHint: 'هنا لا يُقال "انعطف": يُعدّ المخرج الذي تسلكه.',
   dirAtFork: 'عند المفترق',
   dirAtForkHint: 'الشارع ينقسم إلى اثنين. أنت لا تنعطف: تختار جهة.',
+  dirStepsHint: 'تظهر فقط الخطوات الممكنة من مكانك.',
+  dirNoSteps: 'لا يمكن المتابعة من هنا. استخدم تراجع أو مسح في المسار بالأسفل.',
 };
 
 
@@ -2480,6 +2494,8 @@ const ltLT = {
   dirAtRoundaboutHint: 'Čia nesakoma „sukite“: skaičiuojamas išvažiavimas, kurį pasirenkate.',
   dirAtFork: 'Sankryžoje',
   dirAtForkHint: 'Gatvė išsišakoja. Jūs nesukate: pasirenkate pusę.',
+  dirStepsHint: 'Rodomi tik žingsniai, galimi iš čia.',
+  dirNoSteps: 'Iš čia toliau eiti negalima. Naudokite „Atšaukti“ arba „Išvalyti“ maršrute žemiau.',
 };
 
 /**
