@@ -38,12 +38,54 @@ interface NumbersModuleProps {
   voiceStatus?: VoiceStatus;
 }
 
+/**
+ * Os quatro ícones dos modos.
+ *
+ * Eram emoji — 🕒 🏷️ 📅 🔢 — e emoji não serve como ícone de interface aqui por
+ * três motivos, nenhum deles estético. Não aceita `currentColor`, então na aba
+ * escolhida ele é o único ícone do app que não tinge com a cor do módulo. Vem
+ * da fonte do sistema, então é um desenho no Android, outro no iPhone e outro
+ * no Windows — e este app é PWA instalado nos três. E é colorido e claro, então
+ * no tema escuro ele fica aceso sozinho no meio da tela.
+ *
+ * Casa do projeto: 24x24, fill none, traço 1.8, `currentColor` (AGENTS.md §7.2).
+ */
+const IconeRelogio: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className} aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3.5 2" />
+  </svg>
+);
+
+const IconeEtiqueta: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 11.4V4.8a1.3 1.3 0 0 1 1.3-1.3h6.6c.35 0 .68.14.92.38l8 8a1.3 1.3 0 0 1 0 1.84l-6.6 6.6a1.3 1.3 0 0 1-1.84 0l-8-8a1.3 1.3 0 0 1-.38-.92Z" />
+    <circle cx="8" cy="8" r="1.6" />
+  </svg>
+);
+
+const IconeCalendario: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className} aria-hidden="true">
+    <rect x="3.2" y="5" width="17.6" height="16" rx="2.4" />
+    <path strokeLinecap="round" d="M3.2 10h17.6M8.5 3v4M15.5 3v4" />
+  </svg>
+);
+
+/* Teclado numérico, e não um cerquilha: `#` só diz "número" em inglês, e este
+   modo é justamente o que abre um teclado para digitar a quantidade. */
+const IconeTeclado: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className} aria-hidden="true">
+    <rect x="3.5" y="3.5" width="17" height="17" rx="2.4" />
+    <path strokeLinecap="round" d="M8.2 8.2h.01M12 8.2h.01M15.8 8.2h.01M8.2 12h.01M12 12h.01M15.8 12h.01M8.2 15.8h.01M12 15.8h.01M15.8 15.8h.01" />
+  </svg>
+);
+
 type Tab = 'time' | 'price' | 'date' | 'number';
-const TABS: { key: Tab; labelKey: string; icon: string }[] = [
-  { key: 'time',   labelKey: 'numTime',   icon: '🕒' },
-  { key: 'price',  labelKey: 'numPrice',  icon: '🏷️' },
-  { key: 'date',   labelKey: 'numDate',   icon: '📅' },
-  { key: 'number', labelKey: 'numNumber', icon: '🔢' },
+const TABS: { key: Tab; labelKey: string; Icon: React.FC<{ className?: string }> }[] = [
+  { key: 'time',   labelKey: 'numTime',   Icon: IconeRelogio },
+  { key: 'price',  labelKey: 'numPrice',  Icon: IconeEtiqueta },
+  { key: 'date',   labelKey: 'numDate',   Icon: IconeCalendario },
+  { key: 'number', labelKey: 'numNumber', Icon: IconeTeclado },
 ];
 
 // Horas de 00 a 23: é o que está escrito em placa, bilhete e horário.
@@ -210,8 +252,11 @@ export default function NumbersModule({
                   tab === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border-gray-100 dark:border-slate-700'
                 }`}
               >
-                <span className="text-xl leading-none">{tb.icon}</span>
-                <span className="text-[11px] font-bold leading-tight text-center">{t(tb.labelKey)}</span>
+                <tb.Icon className="w-6 h-6" />
+                {/* 14px e não 11: é o piso de leitura do projeto. Como as quatro
+                    abas crescem juntas na grade, a palavra mais longa só quebra
+                    em duas linhas — `leading-tight` já conta com isso. */}
+                <span className="text-sm font-bold leading-tight text-center">{t(tb.labelKey)}</span>
               </button>
             ))}
           </div>
