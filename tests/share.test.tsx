@@ -213,7 +213,7 @@ describe('11 — o QR aponta para a URL canônica', () => {
 
 // ------------------------------------------------------------- presença
 
-describe('12 — o botão está nas nove telas', () => {
+describe('12 — o botão está em todas as telas', () => {
   it('nenhum header ficou sem o gatilho', () => {
     // Antídoto para os headers duplicados: um décimo módulo que esqueça o
     // botão não passa na CI.
@@ -227,7 +227,7 @@ describe('12 — o botão está nas nove telas', () => {
       'modules/CafeModule.tsx',
       'modules/PronounsModule.tsx',
       'modules/SizesModule.tsx',
-      'modules/MakeupModule.tsx',
+      'modules/MakeupModule.tsx', 'modules/ElderCareModule.tsx',
     ];
     for (const f of headers) {
       expect(ler(f), `${f} não tem o botão de compartilhar`).toContain('<ShareButton');

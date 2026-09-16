@@ -330,3 +330,17 @@ export const MakeupIcon: React.FC<{ className?: string }> = ({ className }) => (
     <path strokeLinecap="round" d="M8 13.5h8" />
   </svg>
 );
+
+/** Cuidar de idosos: uma mão amparando por baixo, e a bengala ao lado.
+ *  A mão é o que separa este ícone do de Saúde — aqui há duas pessoas. */
+export const ElderCareIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
+    <circle cx="13" cy="4.6" r="2.1" strokeLinecap="round" strokeLinejoin="round" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13 8.2c-2 0-3.2 1.3-3.4 3.2L9 15.5" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.2 12.5 14 21" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.4 21 11 16" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V11.5a2 2 0 0 0-4 0" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.6 13.4c.9-.6 2-.3 2.6.6l1.2 1.9" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 17.5c0 2 1.6 3.5 3.6 3.5H9" />
+  </svg>
+);

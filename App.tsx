@@ -12,6 +12,7 @@ const CafeModule = lazyWithRetry(() => import('./modules/CafeModule'));
 const PronounsModule = lazyWithRetry(() => import('./modules/PronounsModule'));
 const SizesModule = lazyWithRetry(() => import('./modules/SizesModule'));
 const MakeupModule = lazyWithRetry(() => import('./modules/MakeupModule'));
+const ElderCareModule = lazyWithRetry(() => import('./modules/ElderCareModule'));
 import { translations } from './translations';
 import { useListManager } from './hooks/useListManager';
 import { useFavorites } from './hooks/useFavorites';
@@ -52,11 +53,12 @@ import {
   PronounsIcon,
   SizesIcon,
   MakeupIcon,
+  ElderCareIcon,
 } from './components/Icons';
 
 type ModuleKey =
   | 'supermarket' | 'pharmacy' | 'location' | 'directions'
-  | 'numbers' | 'body' | 'cafe' | 'pronouns' | 'sizes' | 'makeup';
+  | 'numbers' | 'body' | 'cafe' | 'pronouns' | 'sizes' | 'makeup' | 'eldercare';
 type Tab = 'home' | 'search' | 'favorites' | 'list';
 
 export interface Theme { color: string; textColor: string; hex: string; borderColor: string }
@@ -75,6 +77,11 @@ const THEMES: Record<ModuleKey, Theme> = {
   // header (`${hex}e6`) cai abaixo de 4,5:1 — foi onde Farmácia, Direções e
   // Pronomes reprovaram antes de subirem para o tom 700.
   makeup:      { color: 'bg-fuchsia-700', textColor: 'text-fuchsia-700', hex: '#a21caf', borderColor: 'border-fuchsia-700' },
+  // sky-700: 5,93:1 com branco no sólido e 4,87:1 no pé do gradiente do header
+  // (`${hex}e6`). O sky-600 dá 4,10:1 e já reprova no sólido, antes mesmo do
+  // gradiente. Mesma armadilha de Farmácia, Direções, Pronomes e Maquiagem,
+  // que subiram todos para o tom 700.
+  eldercare:   { color: 'bg-sky-700',     textColor: 'text-sky-700',     hex: '#0369a1', borderColor: 'border-sky-700' },
 };
 
 // Módulos ativos do hub (classes escritas por extenso para o Tailwind gerar o CSS)
@@ -90,6 +97,9 @@ const ACTIVE_MODULES: { key: ModuleKey; labelKey: string; icon: React.FC<{ class
   { key: 'pronouns',    labelKey: 'modulePronouns',   icon: PronounsIcon,         iconClass: 'bg-teal-100 text-teal-700' },
   { key: 'sizes',       labelKey: 'moduleSizes',      icon: SizesIcon,            iconClass: 'bg-indigo-100 text-indigo-600' },
   { key: 'makeup',      labelKey: 'moduleMakeup',     icon: MakeupIcon,           iconClass: 'bg-fuchsia-100 text-fuchsia-700' },
+  // Sem `needsCatalog`: e generativo, entao abre tambem para ucraniana,
+  // marroquina e lituana — que sao justamente quem faz este trabalho.
+  { key: 'eldercare',   labelKey: 'moduleElderCare',  icon: ElderCareIcon,        iconClass: 'bg-sky-100 text-sky-700' },
 ];
 
 // Módulos ainda não implementados (aparecem desativados)
@@ -391,6 +401,8 @@ export default function App() {
         return <SizesModule {...commonProps} />;
       case 'makeup':
         return <MakeupModule {...commonProps} />;
+      case 'eldercare':
+        return <ElderCareModule {...commonProps} />;
       default: {
         return (
           <div className="min-h-screen bg-gray-50 flex flex-col">

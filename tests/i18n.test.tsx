@@ -128,7 +128,8 @@ describe('PARTE 13 — nada de texto solto fora do sistema de tradução', () =>
                     // t('mkDeph') com erro de digitação renderizaria a chave
                     // crua e nenhum teste pegaria. Estender aos outros sete
                     // é trabalho próprio, e vale.
-                    'modules/MakeupModule.tsx'];
+                    'modules/MakeupModule.tsx',
+                    'modules/ElderCareModule.tsx'];
     const usadas = new Set<string>();
     for (const f of fontes) {
       for (const m of ler(f).matchAll(/\bt\('([A-Za-z0-9_]+)'\)/g)) usadas.add(m[1]);

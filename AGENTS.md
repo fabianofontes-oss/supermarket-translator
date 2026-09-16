@@ -93,7 +93,7 @@ Não existe roteador. Não existe gerenciador de estado. `App.tsx` guarda tudo e
 `useState` e escolhe o módulo com um `switch`:
 
 ```
-index.tsx  →  App.tsx  →  switch (currentModule)  →  um dos dez módulos
+index.tsx  →  App.tsx  →  switch (currentModule)  →  um dos onze módulos
 ```
 
 `currentModule === null` desenha o hub, que é a grade de módulos. Cada módulo é
@@ -188,13 +188,13 @@ idiomas sem oito listas de frases.
 
 ### Como um módulo generativo é montado
 
-Os oito recebem exatamente os mesmos sete campos de `commonProps` e nada mais: os dois
+Os nove recebem exatamente os mesmos sete campos de `commonProps` e nada mais: os dois
 países, `t`, o tema, `onGoHome`, `onOpenLanguageModal` e `handlePlayAudio`. Nenhum
 deles conhece favoritos, lista ou busca.
 
 O núcleo de idiomas mora em
 [modules/location/data/locationData.ts](modules/location/data/locationData.ts), que
-exporta `LangCode`, `SUPPORTED_LANGS` e `toLangCode`. **Os sete componentes e os seis
+exporta `LangCode`, `SUPPORTED_LANGS` e `toLangCode`. **Os oito componentes e os sete
 outros arquivos de dados importam de lá.** Location é, na prática, o módulo base.
 
 ```ts
@@ -215,7 +215,7 @@ const native = toLangCode(nativeCountry.lang);
 const showNative = native !== target;
 ```
 
-### Os oito
+### Os nove
 
 | Módulo | Dados | Função que monta a frase |
 |---|---|---|
@@ -227,6 +227,7 @@ const showNative = native !== target;
 | **Eu, você, ele** | 8 pronomes, 7 verbos, **1.008 formas verbais** | `buildPhrase` |
 | **Medidas** | 6 tabelas, 47 linhas | `buildSizeQuestion` |
 | **Maquiagem** | 9 produtos, 9 dimensões (36 opções), 21 acessórios, 4 quadros | `buildMakeupRequest`, `buildToolPhrase` |
+| **Cuidar de idosos** | 17 falas, 12 relatos, 5 marcadores de tempo, 14 objetos, 4 quadros, 6 frases de emergência | `buildCareLine`, `buildReport`, `buildToolPhrase` |
 
 **Onde está?** Uma cena com dois emoji: um objeto de referência grande e um menor que
 se move para a posição escolhida. Implementa contração românica (`de o → do`,
@@ -289,6 +290,40 @@ só `uk`/`lt` antepõem o adjetivo. O estado **não é podado** ao trocar de pro
 descreve a pessoa, e quem filtra é o builder, por `optionsFor`. Tabela e concordância
 são varridas por `tests/makeup.test.ts`.
 
+**Cuidar de idosos.** O primeiro módulo em que o app fala **com uma pessoa** e não com
+um balconista: nos outros dez todo interlocutor é comerciante ou desconhecido na rua, e
+toda frase é em 1ª pessoa sobre si (`Me duele la cabeza`). Aqui a frase vai **para** ela
+(`¿Le duele algo?`) e **sobre** ela, para a família (`Hoy ha comido poco`).
+
+Tem **dois eixos de flexão, e a regra é que eles nunca se multipliquem**: tratamento
+(usted/tú) vive só no modo *Falar com ela*; gênero da pessoa cuidada vive só no modo
+*Contar à família*, onde tratamento nem se aplica porque o interlocutor é outro. Os dois
+seletores nunca aparecem na mesma tela, então a combinação é impossível pelo uso, e não
+só pelo tipo. Nenhuma frase passa de duas formas. Para isso o lado "falar com ela" segue
+uma regra de conteúdo: nenhum adjetivo concorda com o gênero dela — usa-se `tener` +
+substantivo (`¿Tiene frío?`) no lugar de `estar` + adjetivo. Mesmo desvio que a
+Maquiagem adotou para não concordar com o produto.
+
+Duas exceções estão escritas no cabeçalho de `elderCareData.ts` e não devem ser
+"corrigidas": em **árabe** a 2ª pessoa concorda com o gênero de quem OUVE e a cortesia é
+lexical (`حضرتك`), nunca morfológica — por isso a célula `ar` guarda `{f, m}` e a linha de
+apoio mostra as duas formas; em **ucraniano** o passado de 1ª pessoa denunciaria o gênero
+de quem CUIDA (`я допомогла`), que é um terceiro eixo proibido, e por isso aquele lado
+evita passado. Consequência: `pt` e `uk` podem coincidir nos dois tratamentos, e só
+`es`, `fr`, `it` e `lt` têm garantia de diferir — há teste para cada uma dessas coisas.
+
+O caso gramatical aqui **varia por quadro**, e não por módulo como na Maquiagem:
+`Ar turite` rege acusativo e `Ieškau` rege genitivo, no mesmo arquivo, sobre o mesmo
+objeto. E há uma **regra de segurança que não é negociável**: nunca nome de medicamento,
+nunca dose, nunca quantidade de comprimido — horário e adesão sim, o resto é a Farmácia.
+O único algarismo permitido no arquivo é o `112`, e só em `EMERGENCY`.
+`tests/eldercare.test.ts` varre todas as strings dos oito idiomas atrás de unidade de
+dose, quantidade e princípio ativo. **É o único teste do projeto cuja falha não é bug: é
+motivo para não publicar.**
+
+É também o único módulo com **piso de 14px** — os outros dez descem a `text-[10px]` na
+linha de apoio. Divergência deliberada, registrada no PROJECT_CONTEXT.md.
+
 **Medidas.** Seis tabelas de conversão entre Brasil, Europa, Reino Unido e Estados
 Unidos. `systemForCountry` manda tudo que não é `br`, `cl`, `ar`, `gb` ou `us` para o
 sistema europeu, o que cobre Ucrânia, Marrocos e Lituânia. Este arquivo importa
@@ -312,7 +347,7 @@ Doze países em [constants.ts](constants.ts), oito blocos de tradução em
 | `esCL` | `es-CL`, `es-AR`, **`es-ES`** |
 | `frFR`, `itIT`, `ukUA`, `arMA`, `ltLT` | um cada |
 
-Os oito blocos têm **239 chaves cada, sem uma diferença**. Verificado por script:
+Os oito blocos têm **333 chaves cada, sem uma diferença**. Verificado por script:
 nenhuma chave duplicada, nenhuma chave usada no código que não exista. Essa parte
 está sólida.
 
@@ -491,10 +526,10 @@ o novo gatilho de categoria, de 56px, que mudou a conta. Deve ser medido, não f
 **8.16 — O painel de categorias entra deslizando e sai seco.** Ele desmonta na hora,
 sem transição de saída.
 
-**8.17 — O cabeçalho existe em oito cópias.** Nenhum dos oito módulos generativos usa
+**8.17 — O cabeçalho existe em nove cópias.** Nenhum dos nove módulos generativos usa
 [components/ModuleLayout.tsx](components/ModuleLayout.tsx): cada um redesenha à mão o
 mesmo cabeçalho com gradiente, botão de início, título e o par de bandeiras. Mexer no
-cabeçalho significa mexer em sete arquivos, e é assim que eles saem de sincronia.
+cabeçalho significa mexer em oito arquivos, e é assim que eles saem de sincronia.
 Cada um também redeclara a mesma interface de props com outro nome, e cinco redefinem
 a própria função `cap()`.
 
@@ -543,7 +578,7 @@ Vale registrar, porque foi conquistado e é fácil quebrar sem perceber.
 | Verificação | Resultado |
 |---|---|
 | Contraste de texto, em 6 telas | **zero falhas** |
-| Paridade das traduções | 239 chaves × 8 blocos, exatas |
+| Paridade das traduções | 333 chaves × 8 blocos, exatas |
 | Chaves usadas no código sem definição | zero |
 | `tsc --noEmit` | limpo |
 | Alvos de toque nas telas de catálogo | zero abaixo de 44px |
@@ -631,11 +666,13 @@ do projeto inteiro, e não é trabalho de programação.
 | [App.tsx](App.tsx) | hub, temas, áudio, estado compartilhado, `switch` de módulo |
 | [constants.ts](constants.ts) | países e categorias |
 | [types.ts](types.ts) | os três tipos do domínio |
-| [translations.ts](translations.ts) | 267 chaves × 8 idiomas, paridade exata |
+| [translations.ts](translations.ts) | 333 chaves × 8 idiomas, paridade exata |
 | [data/catalog.ts](data/catalog.ts) | junta os 12 arquivos de dados do catálogo |
 | [modules/CatalogModule.tsx](modules/CatalogModule.tsx) | Supermercado e Farmácia |
 | [modules/makeup/data/makeupData.ts](modules/makeup/data/makeupData.ts) | Maquiagem: produtos, dimensões, 21 acessórios, os dois builders |
 | [modules/makeup/MakeupGlyphs.tsx](modules/makeup/MakeupGlyphs.tsx) | os 21 glifos de acessório, no pedaço adiado do módulo |
+| [modules/eldercare/data/elderCareData.ts](modules/eldercare/data/elderCareData.ts) | Cuidar de idosos: os dois eixos, as cinco tabelas, a regra de segurança |
+| [modules/eldercare/ElderCareGlyphs.tsx](modules/eldercare/ElderCareGlyphs.tsx) | os 14 glifos de objeto de cuidado, no pedaço adiado do módulo |
 | [components/ModuleLayout.tsx](components/ModuleLayout.tsx) | moldura: cabeçalho, painel, barra de baixo |
 | [components/TranslationItem.tsx](components/TranslationItem.tsx) | o card de item |
 | [components/CategorySheet.tsx](components/CategorySheet.tsx) | painel de categorias, e o padrão de diálogo do projeto |
