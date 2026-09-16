@@ -105,7 +105,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
             <button
                 onClick={handleGoHome}
                 aria-label={t('a11yHome')}
-                className="hit p-2 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex-shrink-0 z-20 text-white hover:bg-white/20 transition-colors"
+                className="hit p-2 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex-shrink-0 z-20 text-white hover:bg-white/20 tap active:scale-90"
             >
                 <HomeIcon className="w-5 h-5" />
             </button>
@@ -114,7 +114,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
             <button
                 onClick={handleGoHome}
                 aria-label={t('a11yHome')}
-                className="hit flex-1 mx-2 text-center truncate z-10"
+                className="hit flex-1 mx-2 text-center truncate z-10 tap active:scale-[0.98]"
             >
                 <h1 className="font-bold text-2xl uppercase tracking-tight shadow-sm text-white truncate">
                     {title}
@@ -193,7 +193,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
                 type="button"
                 onClick={() => handleTabChange('home')}
                 aria-label={t('close')}
-                className={`hit w-12 h-1.5 rounded-full mb-3 ${panelTitle ? 'bg-white/30' : 'bg-gray-200'}`}
+                className={`hit w-12 h-1.5 rounded-full mb-3 tap active:scale-90 ${panelTitle ? 'bg-white/30' : 'bg-gray-200'}`}
               />
 
               {/* Panel Title */}
@@ -206,7 +206,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
                       <button
                         onClick={() => handleTabChange('home')}
                         aria-label={t('close')}
-                        className="hit p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-white"
+                        className="hit p-2 rounded-full bg-white/20 hover:bg-white/30 text-white tap active:scale-90"
                       >
                         <XIcon className="w-5 h-5" />
                       </button>
@@ -227,7 +227,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
            {/* Favorites Tab - Added Toggle Logic */}
            <button
               onClick={() => handleTabChange(activeTab === 'favorites' ? 'home' : 'favorites')}
-              className={`flex flex-col justify-end items-center w-full tap cursor-pointer relative overflow-hidden group ${
+              className={`flex flex-col justify-end items-center w-full tap active:scale-[0.97] cursor-pointer relative overflow-hidden group ${
                   activeTab === 'favorites'
                   ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10'
                   : 'h-20 pb-6 translate-y-2 opacity-80 hover:opacity-100'
@@ -249,7 +249,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
                 <button
                     onClick={handleOpenLanguage}
                     aria-label={t('languageSettings')}
-                    className={`w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform tap hover:scale-105 cursor-pointer absolute bottom-10 z-50 pointer-events-auto shadow-xl`}
+                    className={`w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform tap hover:scale-105 active:scale-95 cursor-pointer absolute bottom-10 z-50 pointer-events-auto shadow-xl`}
                     style={{ borderColor: theme.hex }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full z-30 pointer-events-none"></div>
@@ -269,7 +269,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
            {/* Shopping List Tab - Added Toggle Logic */}
            <button
               onClick={() => handleTabChange(activeTab === 'list' ? 'home' : 'list')}
-              className={`flex flex-col justify-end items-center w-full tap cursor-pointer relative overflow-hidden group ${
+              className={`flex flex-col justify-end items-center w-full tap active:scale-[0.97] cursor-pointer relative overflow-hidden group ${
                   activeTab === 'list'
                   ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10'
                   : 'h-20 pb-6 translate-y-2 opacity-80 hover:opacity-100'

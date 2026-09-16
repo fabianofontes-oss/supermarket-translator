@@ -50,13 +50,13 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
         className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] max-h-[85vh] flex flex-col animate-slide-up"
       >
         <div className={`${theme.color} rounded-t-[2.5rem] flex flex-col items-center pt-3 pb-3`}>
-          <button onClick={close} aria-label={t('close')} className="hit w-12 h-1.5 rounded-full bg-white/40 mb-3 tap" />
+          <button onClick={close} aria-label={t('close')} className="hit w-12 h-1.5 rounded-full bg-white/40 mb-3 tap active:scale-90" />
           <div className="flex items-center justify-between w-full px-5">
             <span className="w-9" />
             <h2 id="category-sheet-title" className="text-base font-bold uppercase tracking-widest text-white text-center" dir="auto">
               {t('chooseCategory')}
             </h2>
-            <button onClick={close} aria-label={t('close')} className="hit p-2 rounded-full bg-white/20 hover:bg-white/30 text-white tap">
+            <button onClick={close} aria-label={t('close')} className="hit p-2 rounded-full bg-white/20 hover:bg-white/30 text-white tap active:scale-90">
               <XIcon className="w-5 h-5" />
             </button>
           </div>

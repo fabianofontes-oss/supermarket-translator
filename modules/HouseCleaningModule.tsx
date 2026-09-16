@@ -117,7 +117,7 @@ const PhraseList: React.FC<{
   <ul className="divide-y divide-gray-100">
     {items.map((item) => (
       <li key={item.key} className="py-1">
-        <button onClick={() => onSpeak(item.target)} className="w-full py-2 flex items-center gap-3 text-left" aria-label={listenLabel}>
+        <button onClick={() => onSpeak(item.target)} className="w-full py-2 flex items-center gap-3 text-left tap active:scale-[0.98]" aria-label={listenLabel}>
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold leading-snug" dir="auto">{item.target}</p>
             {item.native && <p className="text-sm text-gray-500 leading-snug" dir="auto">{item.native}</p>}

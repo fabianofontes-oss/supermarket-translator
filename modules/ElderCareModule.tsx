@@ -272,7 +272,7 @@ export default function ElderCareModule({
         <button
           onClick={() => { playSound('page-turn'); setSos((v) => !v); }}
           aria-expanded={sos}
-          className="w-full px-4 py-3 flex items-center justify-between text-left"
+          className="w-full px-4 py-3 flex items-center justify-between text-left tap active:scale-[0.98]"
         >
           <span className="text-base font-extrabold text-red-700 uppercase tracking-wide" dir="auto">{t('ecEmergency')}</span>
           <span className="text-xl font-extrabold text-red-700 tabular-nums">{EMERGENCY_NUMBER}</span>
@@ -283,7 +283,7 @@ export default function ElderCareModule({
             <ul className="space-y-2">
               {EMERGENCY.map((e, i) => (
                 <li key={i}>
-                  <button onClick={() => speak(e[target])} className="w-full bg-white rounded-2xl border border-red-200 p-3 flex items-center gap-3 text-left" aria-label={listen}>
+                  <button onClick={() => speak(e[target])} className="w-full bg-white rounded-2xl border border-red-200 p-3 flex items-center gap-3 text-left tap active:scale-[0.98]" aria-label={listen}>
                     <span className="flex-1 min-w-0">
                       <span className="block text-base font-bold leading-snug" dir="auto">{e[target]}</span>
                       {showNative && <span className="block text-sm text-gray-600 leading-snug" dir="auto">{e[native]}</span>}

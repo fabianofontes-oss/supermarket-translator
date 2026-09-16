@@ -435,7 +435,7 @@ export default function App() {
                     espaço as duas se sobrepõem e uma delas para de responder. */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <ShareButton onClick={() => setIsShareOpen(true)} t={t} variant="onLight" />
-                  <button onClick={() => setIsLanguageModalOpen(true)} aria-label={t('languageSettings')} className="hit p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                  <button onClick={() => setIsLanguageModalOpen(true)} aria-label={t('languageSettings')} className="hit p-2 rounded-full bg-gray-100 hover:bg-gray-200 tap active:scale-90">
                     <div className="flex items-center -space-x-2">
                       <img src={nativeCountry.image} alt={nativeCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
                       <img src={targetCountry.image} alt={targetCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
@@ -561,7 +561,7 @@ export default function App() {
               <div className="p-3 bg-red-100 rounded-xl">
                 <ShoppingBagIconSolid className="w-8 h-8 text-red-600" />
               </div>
-              <button onClick={handleDismissInstall} aria-label={t('close')} className="hit text-gray-500 hover:text-gray-600 p-1">
+              <button onClick={handleDismissInstall} aria-label={t('close')} className="hit text-gray-500 hover:text-gray-600 p-1 tap active:scale-90">
                 <span aria-hidden="true" className="text-2xl">&times;</span>
               </button>
             </div>
@@ -580,10 +580,10 @@ export default function App() {
               </div>
             ) : (
               <div className="flex gap-3">
-                <button onClick={handleDismissInstall} className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-colors">
+                <button onClick={handleDismissInstall} className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 tap active:scale-95">
                   {t('notNow')}
                 </button>
-                <button onClick={handleInstallClick} className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 transition-colors">
+                <button onClick={handleInstallClick} className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 tap active:scale-95">
                   {t('install')}
                 </button>
               </div>

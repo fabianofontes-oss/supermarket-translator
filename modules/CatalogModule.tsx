@@ -322,14 +322,14 @@ export default function CatalogModule({
               }
             }}
             aria-label={t('dirClear')}
-            className="hit p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="hit p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-600 tap active:scale-90"
           >
             <XIcon className="w-5 h-5" />
           </button>
           <button
             onClick={() => { playSound('click'); startListening(); }}
             aria-label={t('a11yVoice')}
-            className={`hit p-2 rounded-full tap shadow-sm border ${isListening ? `${theme.color} text-white scale-110 border-transparent animate-pulse` : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'}`}
+            className={`hit p-2 rounded-full tap shadow-sm border ${isListening ? `${theme.color} text-white scale-110 border-transparent animate-pulse` : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200 active:scale-90'}`}
           >
             <MicrophoneIcon className="w-5 h-5" />
           </button>
@@ -385,7 +385,7 @@ export default function CatalogModule({
               <button
                 key={sub}
                 onClick={() => handleSubCategoryClick(sub, index)}
-                className={`hit relative px-4 py-2.5 rounded-t-xl text-sm font-medium tap whitespace-nowrap flex-shrink-0 mb-0 border-t border-l border-r ${
+                className={`hit relative px-4 py-2.5 rounded-t-xl text-sm font-medium tap active:scale-[0.97] whitespace-nowrap flex-shrink-0 mb-0 border-t border-l border-r ${
                   isActive
                     ? `bg-slate-50 ${theme.textColor} font-bold shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-20 scale-105 -translate-y-0.5 border-white pb-3`
                     : `${folderColor} opacity-95 hover:opacity-100 hover:scale-100 scale-95 translate-y-0.5 z-0 border-white/20 shadow-inner`

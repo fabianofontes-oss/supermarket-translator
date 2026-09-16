@@ -77,7 +77,7 @@ export const ModuleShell: React.FC<ModuleShellProps> = ({
         <button
           onClick={() => { playSound('click'); onGoHome(); }}
           aria-label={t('a11yHome')}
-          className="hit p-2 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors"
+          className="hit p-2 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 tap active:scale-90"
         >
           <HomeIcon className="w-5 h-5" />
         </button>
@@ -90,7 +90,7 @@ export const ModuleShell: React.FC<ModuleShellProps> = ({
           <button
             onClick={() => { playSound('click'); onOpenLanguageModal(); }}
             aria-label={t('languageSettings')}
-            className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors"
+            className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 tap active:scale-90"
           >
             <div className="flex items-center -space-x-2">
               <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />

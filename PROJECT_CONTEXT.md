@@ -341,6 +341,16 @@ Ao reiniciar o chat, peça para:
 *   ⚠️ **O ícone continua dizendo "tradutor" sem usar palavras.** É um balão de fala com um globo dentro — o pictograma universal de tradução. Não tem letra nenhuma, então o rename não obrigou a mexer, mas a imagem contradiz o nome novo. Fica como assunto à parte.
 *   `tests/share.test.tsx` varre o código e as configurações atrás do nome antigo, e confere que as oito formas continuam diferentes entre si. Documentação e testes ficam de fora: lá o nome antigo aparece contando a história, e "Segunda Auditoria Translator Hub" é o nome de uma auditoria, não do app.
 
+### Passada de acabamento (Emil Kowalski): retorno de toque
+
+*   **O diagnóstico foi bom e ruim ao mesmo tempo.** O sistema já estava limpo nos erros grandes que essa escola aponta: zero `transition: all`, zero `ease-in`, zero entrada a partir de `scale(0)`, `hoverOnlyWhenSupported` ligado no Tailwind, movimento reduzido tratado do jeito certo (vira opacidade, não some), e as três curvas custom — `--ease-out`, `--ease-in-out`, `--ease-drawer` — já no `index.css`.
+*   **O buraco era um só, e era grande: retorno de toque.** De 129 botões, quase metade não reagia ao dedo. E os que faltavam eram os mais tocados: os dois do cabeçalho de **toda tela dos dez módulos**, o card do catálogo, o botão de áudio de **cada item da lista** (83 dos 140 botões do Supermercado), as linhas das listas de frases de sete módulos, as abas de subcategoria e as duas abas de baixo do catálogo.
+*   **A escala é por tamanho de alvo, e isso é o miolo da regra:** `scale-90` em botão só de ícone, `scale-95` em chip, `scale-[0.97]`–`[0.98]` em cartão ou linha de largura inteira. Cinco por cento numa faixa que ocupa a tela toda lê como a tela pulando; num chip de 60px, 5% é sutil.
+*   **Exceção declarada:** trilhos de duas posições e abas de modo ficaram de fora. Neles a troca de estado **já é** o retorno — a pastilha branca pula para o outro lado no mesmo instante. Somar escala ali seria animar por animar, que é exatamente o que a escola manda não fazer.
+*   **Um caso de conflito de estado:** o botão de busca por voz cresce 10% enquanto ouve. O retorno de toque entrou só no ramo parado, senão as duas escalas brigariam.
+*   **Dois achados de brinde, dentro do `TranslationItem`:** a área expansível tinha `tap ease-in-out`, e `.tap` não transiciona `max-height` — a classe não animava nada, e ainda substituía a curva custom pela fraca do Tailwind nas propriedades que ele de fato transiciona. Saiu.
+*   **Ficou em aberto, e é o defeito 8.16:** os painéis entram deslizando e saem secos. Animar a saída exige manter o componente montado por uns 200ms depois do fechar, em quatro folhas. É a próxima da lista nessa linha.
+
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.333 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

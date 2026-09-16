@@ -227,7 +227,7 @@ export default function NumbersModule({
             </div>
 
             {shortPrice && (
-              <button onClick={() => speak(shortPrice)} className="mt-3 pt-3 border-t border-white/20 w-full flex items-center gap-2 text-left">
+              <button onClick={() => speak(shortPrice)} className="mt-3 pt-3 border-t border-white/20 w-full flex items-center gap-2 text-left tap active:scale-[0.98]">
                 <Listen className="w-4 h-4 flex-shrink-0 text-white" />
                 <span className="text-xs text-white">{t('numAlsoSaid')}:</span>
                 <span className="font-bold" dir="auto">{shortPrice}</span>
@@ -445,7 +445,7 @@ export default function NumbersModule({
         <ul className="divide-y divide-gray-100">
           {NUM_QUESTIONS.map((q, i) => (
             <li key={i}>
-              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left">
+              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
                   {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}

@@ -78,7 +78,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
   const voiceMissing = voiceStatus === 'missing';
 
   const getButtonClasses = (locked: boolean, muted = false) =>
-    `hit p-2 rounded-full transition-colors duration-200 ${
+    `hit p-2 rounded-full tap active:scale-90 ${
       locked
         ? 'bg-red-50 hover:bg-red-100'
         : muted
@@ -238,7 +238,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
           aria-expanded={isExpanded}
           aria-controls={panelId}
           aria-labelledby={[contextLabel && contextId, nameId, termId, availability && badgeId].filter(Boolean).join(' ')}
-          className="flex-1 min-w-0 flex flex-col gap-1 text-left rounded-lg"
+          className="flex-1 min-w-0 flex flex-col gap-1 text-left rounded-lg tap active:scale-[0.98]"
         >
             {/* Contexto: só na busca, para separar homônimos. */}
             {contextLabel && (
@@ -321,7 +321,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     playSound(isFavorite ? 'click' : 'success');
                     onToggleFavorite(item);
                 }}
-                className="hit p-1 rounded-full flex-shrink-0 -mr-1 text-gray-500 hover:text-gray-500"
+                className="hit p-1 rounded-full flex-shrink-0 -mr-1 text-gray-500 hover:text-gray-500 tap active:scale-90"
                 aria-label={t('favorites')}
                 aria-pressed={isFavorite}
             >
@@ -353,7 +353,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
       {/* Expandable Area */}
       <div
         id={panelId}
-        className={`tap ease-in-out overflow-hidden ${
+        className={`tap overflow-hidden ${
           isExpanded ? 'max-h-96' : 'max-h-0'
         }`}
       >

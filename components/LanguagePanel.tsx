@@ -108,7 +108,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
         <button
             onClick={handleClose}
             aria-label={t('close')}
-            className="hit absolute top-1.5 right-1.5 p-1 bg-black/10 rounded-full text-white z-50 hover:bg-black/30 backdrop-blur-md transition-colors"
+            className="hit absolute top-1.5 right-1.5 p-1 bg-black/10 rounded-full text-white z-50 hover:bg-black/30 backdrop-blur-md tap active:scale-90"
         >
             <XIcon className="w-3.5 h-3.5" />
         </button>

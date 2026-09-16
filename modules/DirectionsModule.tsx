@@ -617,7 +617,7 @@ export default function DirectionsModule({
         <ul className="divide-y divide-gray-100">
           {DIR_QUESTIONS.map((q, i) => (
             <li key={i}>
-              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left">
+              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold leading-snug">{q[target]}</p>
                   {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}

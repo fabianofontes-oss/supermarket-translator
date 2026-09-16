@@ -436,11 +436,20 @@ para aquele idioma, não uma data futura.
    `Icons.tsx`, de propósito: assim caem no pedaço adiado do catálogo.
 3. **`.hit`** amplia a área de toque para 44px por pseudo-elemento, sem mexer no
    desenho. Todo botão só de ícone precisa dela.
-4. **`.tap`** é a transição padrão de toque, com propriedades explícitas.
-5. **`dir="auto"`** em todo texto que venha de tradução, para o árabe virar sozinho.
-6. **Movimento reduzido** já está tratado em [index.css](index.css): as animações
+4. **`.tap`** é a transição padrão de toque, com propriedades explícitas
+   (`transform 150ms var(--ease-out)` e as cores), nunca `all`.
+5. **Todo pressável dá retorno ao dedo.** `.tap` + `active:scale-*`, e a escala é
+   por tamanho de alvo: `scale-90` em botão só de ícone, `scale-95` em chip,
+   `scale-[0.97]`–`[0.98]` em cartão ou linha de largura inteira — 5% numa faixa
+   larga lê como a tela pulando. **Exceção declarada:** trilhos de duas posições e
+   abas de modo ficam de fora, porque neles a troca de estado JÁ é o retorno — a
+   pastilha branca pula para o outro lado no mesmo instante, e somar escala seria
+   animar por animar. Antes desta regra, 83 dos 140 botões do Supermercado não
+   respondiam ao toque, incluindo o de áudio de cada item da lista.
+6. **`dir="auto"`** em todo texto que venha de tradução, para o árabe virar sozinho.
+7. **Movimento reduzido** já está tratado em [index.css](index.css): as animações
    viram opacidade pura em vez de sumirem.
-7. Cor de tema vem de `THEMES` em [App.tsx](App.tsx), que tem as quatro formas da cor
+8. Cor de tema vem de `THEMES` em [App.tsx](App.tsx), que tem as quatro formas da cor
    (`color`, `textColor`, `hex`, `borderColor`) justamente para nunca precisar montar
    classe.
 

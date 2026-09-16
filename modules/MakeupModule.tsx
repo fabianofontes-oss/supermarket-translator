@@ -367,7 +367,7 @@ export default function MakeupModule({
                 </div>
                 <button
                   onClick={() => speak(tool.names[target])}
-                  className={`hit p-1.5 rounded-full flex-shrink-0 ${theme.textColor}`}
+                  className={`hit p-1.5 rounded-full flex-shrink-0 tap active:scale-90 ${theme.textColor}`}
                   aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}
                 >
                   <Listen className="w-5 h-5" />
@@ -434,7 +434,7 @@ export default function MakeupModule({
         <ul className="divide-y divide-gray-100">
           {MAKEUP_QUESTIONS.map((q, i) => (
             <li key={i}>
-              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left">
+              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
                   {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}

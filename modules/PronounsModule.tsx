@@ -261,7 +261,7 @@ export default function PronounsModule({
               <li key={p.key}>
                 <button
                   onClick={() => { playSound('click'); setPronoun(p); speak(buildPhrase(target, p, verb, null, 'affirm', tense)); }}
-                  className="w-full py-2 flex items-center gap-3 text-left"
+                  className="w-full py-2 flex items-center gap-3 text-left tap active:scale-[0.98]"
                 >
                   <span className={`text-sm w-28 flex-shrink-0 truncate ${active ? `font-bold ${theme.textColor}` : 'text-gray-500'}`} dir="auto">
                     {p.words[target]}
