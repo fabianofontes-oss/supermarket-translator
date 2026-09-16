@@ -179,7 +179,11 @@ export default function NumbersModule({
 
   // Ponteiros do relógio
   const dialHour = hour % 12 || 12;
+  const isPM = hour >= 12;
   const outerActive = hour === 0 ? 24 : hour >= 13 ? hour : null;
+
+  /** Do mostrador de 12 para a hora de 24, que é a que o resto do módulo usa. */
+  const setFrom12 = (d: number, pm: boolean) => setHour((d % 12) + (pm ? 12 : 0));
   const hourAngle = (hour % 12) * 30 + minute * 0.5;
   const minAngle = minute * 6;
 
@@ -334,12 +338,42 @@ export default function NumbersModule({
         <>
           <section>
             <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numHour')}</h2>
+
+            {/* Em AM/PM a grade tem DOZE números e um seletor de metade do dia.
+                Antes mostrava os mesmos 24 nos dois modos: quem escolhia AM/PM e
+                tocava em 20 via "8:00 PM" aparecer sem ter escolhido PM em lugar
+                nenhum — o seletor simplesmente não existia, e o modo não mudava
+                nada abaixo do relógio. */}
+            {twelveHour && (
+              <div className="mb-2 inline-flex rounded-xl bg-gray-200/70 p-1">
+                {[false, true].map((pm) => (
+                  <button
+                    key={String(pm)}
+                    aria-pressed={isPM === pm}
+                    onClick={() => { playSound('toggle'); setFrom12(dialHour, pm); }}
+                    className={`tap rounded-lg px-5 py-1.5 text-xs font-bold ${isPM === pm ? 'bg-white shadow-sm' : 'text-gray-600'}`}
+                    style={isPM === pm ? { color: theme.hex } : undefined}
+                  >
+                    {pm ? 'PM' : 'AM'}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div className="grid grid-cols-6 gap-2">
-              {HOURS.map((h) => (
-                <button key={h} onClick={() => { playSound('click'); setHour(h); }} className={`${chip(hour === h)} tabular-nums`}>
-                  {String(h).padStart(2, '0')}
-                </button>
-              ))}
+              {(twelveHour ? DIAL : HOURS).map((h) => {
+                const escolhida = twelveHour ? dialHour === h : hour === h;
+                return (
+                  <button
+                    key={h}
+                    aria-pressed={escolhida}
+                    onClick={() => { playSound('click'); if (twelveHour) setFrom12(h, isPM); else setHour(h); }}
+                    className={`${chip(escolhida)} tabular-nums`}
+                  >
+                    {twelveHour ? h : String(h).padStart(2, '0')}
+                  </button>
+                );
+              })}
             </div>
           </section>
           <section>
