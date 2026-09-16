@@ -305,6 +305,16 @@ Ao reiniciar o chat, peça para:
 *   **Mudança estrutural mínima:** `HEARD` era `Text[]` e não tinha onde pendurar nota. Virou `{ key, text, note? }[]`, a mesma forma de `Task` e `CareTool` — e de quebra as chaves do React deixaram de ser índices.
 *   **A nota fica FORA do botão de áudio.** Dentro, ela entraria no nome acessível da frase, e quem usa leitor de tela ouviria o parágrafo inteiro antes de saber o que a frase diz.
 
+### A moldura comum aos módulos generativos
+
+*   **O que disparou.** "O layout do supermercado e da farmácia é diferente do restante, e eu gosto do layout do supermercado." Era verdade: o catálogo tinha barra de baixo com o botão redondo grande da bandeira, e os outros dez tinham um par de bandeirinhas de 24px no canto do cabeçalho — para a troca de idioma, que é o controle mais tocado do app.
+*   **A observação que definiu o desenho, e é do dono:** "os botões de baixo do supermercado fazem sentido lá; em cada módulo outra coisa fará sentido." Copiar Favoritos e Lista para todos encheria a barra de botão sem função — o erro que o projeto já registrou em Direções. Então a moldura tem **dois slots opcionais**: quem tem o que pôr, põe; quem não tem, fica só com a bandeira no meio.
+*   **Não era complicado, e dá para provar:** os dez cabeçalhos eram **idênticos**, variando só a chave do título. A migração foi sobretudo apagar — dez cópias viraram uma —, e de quebra fechou o defeito **8.17** do AGENTS.md, anotado desde antes destes módulos.
+*   **Quem ganhou slot, e quem não ganhou.** Cuidar de idosos: **Emergência**, que antes era uma faixa vermelha dentro da rolagem e agora abre e **rola até ela** de qualquer ponto da tela — emergência não é coisa que se procura rolando. Direções **não** ganhou: `Desfazer` e `Limpar` já existem dentro do cartão do percurso, colados ao que eles mexem, e levá-los para a barra separaria a ação da coisa. Os outros oito ficam sem slot, e isso é resposta, não pendência.
+*   **O par de bandeirinhas saiu do cabeçalho.** A barra mostra só a bandeira de **destino**, como o Supermercado sempre fez: a de origem já é a língua em que a tela inteira está escrita.
+*   **`behavior: 'smooth'` não rola neste WebView.** Medido, não suposto: com ele o painel de emergência abria e a tela ficava onde estava; sem ele, rola. Num botão de emergência, chegar lá vale mais que chegar bonito — e fica o aviso para quem for usar `scrollIntoView` em outro lugar.
+*   **O teste ficou melhor do que era.** Antes exigia `<ShareButton` em doze arquivos; agora exige `<ModuleShell` nos dez e **proíbe** `<header>` e `<ShareButton>` à mão. Não basta ter o botão: não se pode redesenhar a moldura, que é exatamente como os dez saíram de sincronia.
+
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.333 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

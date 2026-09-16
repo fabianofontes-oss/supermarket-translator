@@ -1,9 +1,9 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { ModuleShell } from '../components/ModuleShell';
 import type { Country } from '../types';
-import { HomeIcon, SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
+import { SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
-import { ShareButton } from '../components/ShareButton';
 import type { VoiceStatus } from '../utils/speech';
 import { toLangCode } from './location/data/locationData';
 import {
@@ -184,256 +184,239 @@ export default function NumbersModule({
   const minAngle = minute * 6;
 
   return (
-    <div className="w-full bg-slate-50 text-gray-800 flex flex-col h-[100dvh] relative overflow-hidden font-sans">
-      <header className="flex-shrink-0 text-white shadow-lg z-30 rounded-b-3xl" style={{ background: `linear-gradient(to bottom, ${theme.hex}, ${theme.hex}e6)` }}>
-        <div className="flex items-center justify-between px-4 pt-4 pb-4 max-w-3xl mx-auto">
-          <button onClick={() => { playSound('click'); onGoHome(); }} aria-label={t('a11yHome')} className="hit p-2 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors">
-            <HomeIcon className="w-5 h-5" />
+    <ModuleShell
+      title={t('moduleNumbers')}
+      theme={theme}
+      t={t}
+      targetCountry={targetCountry}
+      onGoHome={onGoHome}
+      onOpenLanguageModal={onOpenLanguageModal}
+      onOpenShare={onOpenShare}
+    >
+
+      {/* Abas */}
+      <div className="grid grid-cols-4 gap-2">
+        {TABS.map((tb) => (
+          <button
+            key={tb.key}
+            onClick={() => { playSound('page-turn'); setTab(tb.key); }}
+            className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
+              tab === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-600 border-gray-100'
+            }`}
+          >
+            <span className="text-xl leading-none">{tb.icon}</span>
+            <span className="text-[11px] font-bold leading-tight text-center">{t(tb.labelKey)}</span>
           </button>
-          <h1 className="flex-1 mx-2 text-center font-bold text-2xl uppercase tracking-tight truncate">{t('moduleNumbers')}</h1>
-          {/* Cluster da direita. `gap-2` não é escolha estética: a área de
-              toque de `.hit` é 44px centrada no botão, e com menos espaço
-              que isso as duas se sobrepõem e uma para de responder. */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <ShareButton onClick={onOpenShare} t={t} variant="onColor" />
-            <button onClick={() => { playSound('click'); onOpenLanguageModal(); }} aria-label={t('languageSettings')} className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors">
-              <div className="flex items-center -space-x-2">
-                <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
-                <img src={targetCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
-              </div>
+        ))}
+      </div>
+
+      {/* Visual */}
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex items-center justify-center min-h-[190px]">
+        {tab === 'time' && (
+          <svg viewBox="0 0 200 200" className="w-48 h-48">
+            <circle cx="100" cy="100" r="92" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="4" />
+
+            {/* Marcas de minuto na borda */}
+            {MINUTES.map((m) => {
+              const a = (m * 6 - 90) * Math.PI / 180;
+              return <circle key={m} cx={100 + Math.cos(a) * 88} cy={100 + Math.sin(a) * 88} r={m === minute ? 3.5 : 1.8} fill={m === minute ? theme.hex : '#cbd5e1'} />;
+            })}
+
+            {/* Anel de fora: 13 a 24, como está escrito nas placas */}
+            {DIAL.map((n) => {
+              const outer = n + 12;
+              const a = (n * 30 - 90) * Math.PI / 180;
+              const on = outer === outerActive;
+              return (
+                <text key={`o${n}`} x={100 + Math.cos(a) * 75} y={100 + Math.sin(a) * 75 + 4} textAnchor="middle" fontSize="11" fontWeight="700" fill={on ? theme.hex : '#cbd5e1'}>
+                  {outer}
+                </text>
+              );
+            })}
+
+            {/* Anel de dentro: 1 a 12, como se fala */}
+            {DIAL.map((n) => {
+              const a = (n * 30 - 90) * Math.PI / 180;
+              return (
+                <text key={n} x={100 + Math.cos(a) * 54} y={100 + Math.sin(a) * 54 + 6} textAnchor="middle" fontSize="16" fontWeight="700" fill={n === dialHour ? theme.hex : '#94a3b8'}>
+                  {n}
+                </text>
+              );
+            })}
+            {/* Ponteiros giram como grupo: transform vai para a GPU, x2/y2 não. */}
+            <g style={{ transform: `rotate(${hourAngle}deg)`, transformBox: 'view-box', transformOrigin: '100px 100px', transition: 'transform var(--scene-duration) var(--ease-out)' }}>
+              <line x1="100" y1="100" x2="100" y2="66" stroke={theme.hex} strokeWidth="7" strokeLinecap="round" />
+            </g>
+            <g style={{ transform: `rotate(${minAngle}deg)`, transformBox: 'view-box', transformOrigin: '100px 100px', transition: 'transform var(--scene-duration) var(--ease-out)' }}>
+              <line x1="100" y1="100" x2="100" y2="46" stroke="#475569" strokeWidth="4" strokeLinecap="round" />
+            </g>
+            <circle cx="100" cy="100" r="6" fill="white" stroke={theme.hex} strokeWidth="3" />
+          </svg>
+        )}
+
+        {tab === 'time' && (
+          <div className="ml-4 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">{t('numOnSigns')}</p>
+            <p className="text-3xl font-extrabold tabular-nums whitespace-nowrap" style={{ color: theme.hex }}>{clockDisplay}</p>
+
+            <div className="mt-2 inline-flex rounded-lg bg-gray-100 p-0.5">
+              {[false, true].map((twelve) => (
+                <button
+                  key={String(twelve)}
+                  onClick={() => { playSound('toggle'); setTwelveHour(twelve); }}
+                  className={`tap rounded-md px-2 py-1 text-[10px] font-bold ${twelveHour === twelve ? 'bg-white shadow-sm' : 'text-gray-600'}`}
+                  style={twelveHour === twelve ? { color: theme.hex } : undefined}
+                >
+                  {twelve ? 'AM/PM' : '24h'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab === 'price' && (
+          <div className="text-center">
+            <div className="inline-block rounded-2xl px-8 py-5 shadow-inner" style={{ backgroundColor: `${theme.hex}12` }}>
+              <span className="text-5xl font-extrabold tabular-nums" style={{ color: theme.hex }}>{formatPriceTag(cents)}</span>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center mt-3">
+              {PRICE_PRESETS.map((p) => (
+                <button key={p} onClick={() => { playSound('click'); setCents(p); }} className={chip(cents === p)}>
+                  {formatPriceTag(p)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab === 'date' && (
+          <div className="text-center">
+            <div className="inline-block rounded-2xl overflow-hidden shadow border border-gray-100 w-32">
+              <div className={`${theme.color} text-white text-xs font-bold uppercase tracking-widest py-1.5`}>{MONTHS[target][month]}</div>
+              <div className="text-6xl font-extrabold text-gray-800 py-3 tabular-nums">{day}</div>
+            </div>
+          </div>
+        )}
+
+        {tab === 'number' && (
+          <span className="text-6xl font-extrabold tabular-nums" style={{ color: theme.hex }}>{plainStr}</span>
+        )}
+      </div>
+
+      {/* Frase */}
+      <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
+        <div className="flex items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-xl font-bold leading-snug" dir="auto">{sentence}</p>
+            {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{sentenceNative}</p>}
+          </div>
+          <button onClick={() => speak(sentence)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+            <Listen className="w-6 h-6" />
+          </button>
+        </div>
+
+        {shortPrice && (
+          <button onClick={() => speak(shortPrice)} className="mt-3 pt-3 border-t border-white/20 w-full flex items-center gap-2 text-left">
+            <Listen className="w-4 h-4 flex-shrink-0 text-white" />
+            <span className="text-xs text-white">{t('numAlsoSaid')}:</span>
+            <span className="font-bold" dir="auto">{shortPrice}</span>
+          </button>
+        )}
+      </div>
+
+      {/* Controles */}
+      {tab === 'time' && (
+        <>
+          <section>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numHour')}</h2>
+            <div className="grid grid-cols-6 gap-2">
+              {HOURS.map((h) => (
+                <button key={h} onClick={() => { playSound('click'); setHour(h); }} className={`${chip(hour === h)} tabular-nums`}>
+                  {String(h).padStart(2, '0')}
+                </button>
+              ))}
+            </div>
+          </section>
+          <section>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numMinute')}</h2>
+            <div className="grid grid-cols-6 gap-2">
+              {MINUTES.map((m) => (
+                <button key={m} onClick={() => { playSound('click'); setMinute(m); }} className={chip(minute === m)}>
+                  {String(m).padStart(2, '0')}
+                </button>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
+
+      {(tab === 'price' || tab === 'number') && (
+        <section>
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">
+              {tab === 'price' ? t('numTypePrice') : t('numTypeNumber')}
+            </h2>
+            <button onClick={pressClear} className="text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-gray-600">
+              {t('dirClear')}
             </button>
           </div>
-        </div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto pb-10">
-        <div className="px-4 pt-4 max-w-3xl mx-auto w-full space-y-4">
-
-          {/* Abas */}
-          <div className="grid grid-cols-4 gap-2">
-            {TABS.map((tb) => (
-              <button
-                key={tb.key}
-                onClick={() => { playSound('page-turn'); setTab(tb.key); }}
-                className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
-                  tab === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-600 border-gray-100'
-                }`}
-              >
-                <span className="text-xl leading-none">{tb.icon}</span>
-                <span className="text-[11px] font-bold leading-tight text-center">{t(tb.labelKey)}</span>
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => (
+              <button key={d} onClick={() => pressDigit(d)} className="rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold text-gray-700 active:scale-95 transition-transform shadow-sm">
+                {d}
               </button>
             ))}
+            {tab === 'price' ? (
+              <button onClick={pressDoubleZero} className="rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold text-gray-700 active:scale-95 transition-transform shadow-sm">00</button>
+            ) : (
+              <button onClick={pressComma} disabled={hasComma} className={`rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold active:scale-95 transition-transform shadow-sm ${hasComma ? 'text-gray-200' : 'text-gray-700'}`}>,</button>
+            )}
+            <button onClick={() => pressDigit(0)} className="rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold text-gray-700 active:scale-95 transition-transform shadow-sm">0</button>
+            <button onClick={pressBack} className="rounded-2xl bg-white border border-gray-100 py-3 text-xl font-bold text-gray-500 active:scale-95 transition-transform shadow-sm">←</button>
           </div>
+        </section>
+      )}
 
-          {/* Visual */}
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex items-center justify-center min-h-[190px]">
-            {tab === 'time' && (
-              <svg viewBox="0 0 200 200" className="w-48 h-48">
-                <circle cx="100" cy="100" r="92" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="4" />
-
-                {/* Marcas de minuto na borda */}
-                {MINUTES.map((m) => {
-                  const a = (m * 6 - 90) * Math.PI / 180;
-                  return <circle key={m} cx={100 + Math.cos(a) * 88} cy={100 + Math.sin(a) * 88} r={m === minute ? 3.5 : 1.8} fill={m === minute ? theme.hex : '#cbd5e1'} />;
-                })}
-
-                {/* Anel de fora: 13 a 24, como está escrito nas placas */}
-                {DIAL.map((n) => {
-                  const outer = n + 12;
-                  const a = (n * 30 - 90) * Math.PI / 180;
-                  const on = outer === outerActive;
-                  return (
-                    <text key={`o${n}`} x={100 + Math.cos(a) * 75} y={100 + Math.sin(a) * 75 + 4} textAnchor="middle" fontSize="11" fontWeight="700" fill={on ? theme.hex : '#cbd5e1'}>
-                      {outer}
-                    </text>
-                  );
-                })}
-
-                {/* Anel de dentro: 1 a 12, como se fala */}
-                {DIAL.map((n) => {
-                  const a = (n * 30 - 90) * Math.PI / 180;
-                  return (
-                    <text key={n} x={100 + Math.cos(a) * 54} y={100 + Math.sin(a) * 54 + 6} textAnchor="middle" fontSize="16" fontWeight="700" fill={n === dialHour ? theme.hex : '#94a3b8'}>
-                      {n}
-                    </text>
-                  );
-                })}
-                {/* Ponteiros giram como grupo: transform vai para a GPU, x2/y2 não. */}
-                <g style={{ transform: `rotate(${hourAngle}deg)`, transformBox: 'view-box', transformOrigin: '100px 100px', transition: 'transform var(--scene-duration) var(--ease-out)' }}>
-                  <line x1="100" y1="100" x2="100" y2="66" stroke={theme.hex} strokeWidth="7" strokeLinecap="round" />
-                </g>
-                <g style={{ transform: `rotate(${minAngle}deg)`, transformBox: 'view-box', transformOrigin: '100px 100px', transition: 'transform var(--scene-duration) var(--ease-out)' }}>
-                  <line x1="100" y1="100" x2="100" y2="46" stroke="#475569" strokeWidth="4" strokeLinecap="round" />
-                </g>
-                <circle cx="100" cy="100" r="6" fill="white" stroke={theme.hex} strokeWidth="3" />
-              </svg>
-            )}
-
-            {tab === 'time' && (
-              <div className="ml-4 text-center">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">{t('numOnSigns')}</p>
-                <p className="text-3xl font-extrabold tabular-nums whitespace-nowrap" style={{ color: theme.hex }}>{clockDisplay}</p>
-
-                <div className="mt-2 inline-flex rounded-lg bg-gray-100 p-0.5">
-                  {[false, true].map((twelve) => (
-                    <button
-                      key={String(twelve)}
-                      onClick={() => { playSound('toggle'); setTwelveHour(twelve); }}
-                      className={`tap rounded-md px-2 py-1 text-[10px] font-bold ${twelveHour === twelve ? 'bg-white shadow-sm' : 'text-gray-600'}`}
-                      style={twelveHour === twelve ? { color: theme.hex } : undefined}
-                    >
-                      {twelve ? 'AM/PM' : '24h'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {tab === 'price' && (
-              <div className="text-center">
-                <div className="inline-block rounded-2xl px-8 py-5 shadow-inner" style={{ backgroundColor: `${theme.hex}12` }}>
-                  <span className="text-5xl font-extrabold tabular-nums" style={{ color: theme.hex }}>{formatPriceTag(cents)}</span>
-                </div>
-                <div className="flex flex-wrap gap-2 justify-center mt-3">
-                  {PRICE_PRESETS.map((p) => (
-                    <button key={p} onClick={() => { playSound('click'); setCents(p); }} className={chip(cents === p)}>
-                      {formatPriceTag(p)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {tab === 'date' && (
-              <div className="text-center">
-                <div className="inline-block rounded-2xl overflow-hidden shadow border border-gray-100 w-32">
-                  <div className={`${theme.color} text-white text-xs font-bold uppercase tracking-widest py-1.5`}>{MONTHS[target][month]}</div>
-                  <div className="text-6xl font-extrabold text-gray-800 py-3 tabular-nums">{day}</div>
-                </div>
-              </div>
-            )}
-
-            {tab === 'number' && (
-              <span className="text-6xl font-extrabold tabular-nums" style={{ color: theme.hex }}>{plainStr}</span>
-            )}
-          </div>
-
-          {/* Frase */}
-          <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-            <div className="flex items-start gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-xl font-bold leading-snug" dir="auto">{sentence}</p>
-                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{sentenceNative}</p>}
-              </div>
-              <button onClick={() => speak(sentence)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
-                <Listen className="w-6 h-6" />
-              </button>
-            </div>
-
-            {shortPrice && (
-              <button onClick={() => speak(shortPrice)} className="mt-3 pt-3 border-t border-white/20 w-full flex items-center gap-2 text-left">
-                <Listen className="w-4 h-4 flex-shrink-0 text-white" />
-                <span className="text-xs text-white">{t('numAlsoSaid')}:</span>
-                <span className="font-bold" dir="auto">{shortPrice}</span>
-              </button>
-            )}
-          </div>
-
-          {/* Controles */}
-          {tab === 'time' && (
-            <>
-              <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numHour')}</h2>
-                <div className="grid grid-cols-6 gap-2">
-                  {HOURS.map((h) => (
-                    <button key={h} onClick={() => { playSound('click'); setHour(h); }} className={`${chip(hour === h)} tabular-nums`}>
-                      {String(h).padStart(2, '0')}
-                    </button>
-                  ))}
-                </div>
-              </section>
-              <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numMinute')}</h2>
-                <div className="grid grid-cols-6 gap-2">
-                  {MINUTES.map((m) => (
-                    <button key={m} onClick={() => { playSound('click'); setMinute(m); }} className={chip(minute === m)}>
-                      {String(m).padStart(2, '0')}
-                    </button>
-                  ))}
-                </div>
-              </section>
-            </>
-          )}
-
-          {(tab === 'price' || tab === 'number') && (
-            <section>
-              <div className="flex items-center justify-between mb-2 px-1">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                  {tab === 'price' ? t('numTypePrice') : t('numTypeNumber')}
-                </h2>
-                <button onClick={pressClear} className="text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-gray-600">
-                  {t('dirClear')}
+      {tab === 'date' && (
+        <>
+          <section>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numDay')}</h2>
+            <div className="grid grid-cols-7 gap-1.5">
+              {DAYS.map((d) => (
+                <button key={d} onClick={() => { playSound('click'); setDay(d); }} className={`rounded-lg py-2 text-sm font-bold tap active:scale-95 border ${day === d ? `${theme.color} text-white border-transparent` : 'bg-white text-gray-700 border-gray-100'}`}>
+                  {d}
                 </button>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => (
-                  <button key={d} onClick={() => pressDigit(d)} className="rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold text-gray-700 active:scale-95 transition-transform shadow-sm">
-                    {d}
-                  </button>
-                ))}
-                {tab === 'price' ? (
-                  <button onClick={pressDoubleZero} className="rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold text-gray-700 active:scale-95 transition-transform shadow-sm">00</button>
-                ) : (
-                  <button onClick={pressComma} disabled={hasComma} className={`rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold active:scale-95 transition-transform shadow-sm ${hasComma ? 'text-gray-200' : 'text-gray-700'}`}>,</button>
-                )}
-                <button onClick={() => pressDigit(0)} className="rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold text-gray-700 active:scale-95 transition-transform shadow-sm">0</button>
-                <button onClick={pressBack} className="rounded-2xl bg-white border border-gray-100 py-3 text-xl font-bold text-gray-500 active:scale-95 transition-transform shadow-sm">←</button>
-              </div>
-            </section>
-          )}
-
-          {tab === 'date' && (
-            <>
-              <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numDay')}</h2>
-                <div className="grid grid-cols-7 gap-1.5">
-                  {DAYS.map((d) => (
-                    <button key={d} onClick={() => { playSound('click'); setDay(d); }} className={`rounded-lg py-2 text-sm font-bold tap active:scale-95 border ${day === d ? `${theme.color} text-white border-transparent` : 'bg-white text-gray-700 border-gray-100'}`}>
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </section>
-              <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numMonth')}</h2>
-                <div className="grid grid-cols-3 gap-2">
-                  {MONTHS[target].map((m, i) => (
-                    <button key={m} onClick={() => { playSound('click'); setMonth(i); }} className={`${chip(month === i)} truncate`}>{m}</button>
-                  ))}
-                </div>
-              </section>
-            </>
-          )}
-
-          {/* Perguntas */}
-          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('numAsk')}</h2>
-            <ul className="divide-y divide-gray-100">
-              {NUM_QUESTIONS.map((q, i) => (
-                <li key={i}>
-                  <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
-                      {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
-                    </div>
-                    <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
-                  </button>
-                </li>
               ))}
-            </ul>
+            </div>
           </section>
-        </div>
-      </main>
-    </div>
+          <section>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numMonth')}</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {MONTHS[target].map((m, i) => (
+                <button key={m} onClick={() => { playSound('click'); setMonth(i); }} className={`${chip(month === i)} truncate`}>{m}</button>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* Perguntas */}
+      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('numAsk')}</h2>
+        <ul className="divide-y divide-gray-100">
+          {NUM_QUESTIONS.map((q, i) => (
+            <li key={i}>
+              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
+                  {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
+                </div>
+                <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </ModuleShell>
   );
 }

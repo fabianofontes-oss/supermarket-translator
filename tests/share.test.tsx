@@ -214,24 +214,41 @@ describe('11 — o QR aponta para a URL canônica', () => {
 // ------------------------------------------------------------- presença
 
 describe('12 — o botão está em todas as telas', () => {
-  it('nenhum header ficou sem o gatilho', () => {
-    // Antídoto para os headers duplicados: um décimo módulo que esqueça o
-    // botão não passa na CI.
-    const headers = [
-      'App.tsx',
-      'components/ModuleLayout.tsx',
-      'modules/LocationModule.tsx',
-      'modules/DirectionsModule.tsx',
-      'modules/NumbersModule.tsx',
-      'modules/BodyModule.tsx',
-      'modules/CafeModule.tsx',
-      'modules/PronounsModule.tsx',
-      'modules/SizesModule.tsx',
-      'modules/MakeupModule.tsx', 'modules/ElderCareModule.tsx',
-      'modules/HouseCleaningModule.tsx',
-    ];
-    for (const f of headers) {
+  /** Os dez módulos generativos. O catálogo tem moldura própria, o `ModuleLayout`. */
+  const GENERATIVOS = [
+    'modules/LocationModule.tsx',
+    'modules/DirectionsModule.tsx',
+    'modules/NumbersModule.tsx',
+    'modules/BodyModule.tsx',
+    'modules/CafeModule.tsx',
+    'modules/PronounsModule.tsx',
+    'modules/SizesModule.tsx',
+    'modules/MakeupModule.tsx',
+    'modules/ElderCareModule.tsx',
+    'modules/HouseCleaningModule.tsx',
+  ];
+
+  it('as três molduras têm o gatilho', () => {
+    // Antes esta lista tinha doze arquivos, porque o cabeçalho existia em dez
+    // cópias à mão. Com a moldura extraída sobraram três lugares onde o botão
+    // pode faltar, e é muito mais difícil esquecer em três do que em doze.
+    for (const f of ['App.tsx', 'components/ModuleLayout.tsx', 'components/ModuleShell.tsx']) {
       expect(ler(f), `${f} não tem o botão de compartilhar`).toContain('<ShareButton');
+    }
+  });
+
+  it('nenhum módulo desenha cabeçalho à mão', () => {
+    /**
+     * O antídoto de verdade para o defeito 8.17: não basta cada módulo TER o
+     * botão, ele não pode redesenhar a moldura. Um módulo novo que copie o
+     * cabeçalho de outro — que é exatamente como os dez saíram de sincronia —
+     * não passa daqui.
+     */
+    for (const f of GENERATIVOS) {
+      const fonte = ler(f);
+      expect(fonte, `${f} não usa a moldura comum`).toContain('<ModuleShell');
+      expect(fonte, `${f} voltou a desenhar o header à mão`).not.toContain('<header');
+      expect(fonte, `${f} voltou a desenhar o botão de compartilhar à mão`).not.toContain('<ShareButton');
     }
   });
 

@@ -576,12 +576,15 @@ o novo gatilho de categoria, de 56px, que mudou a conta. Deve ser medido, não f
 **8.16 — O painel de categorias entra deslizando e sai seco.** Ele desmonta na hora,
 sem transição de saída.
 
-**8.17 — O cabeçalho existe em dez cópias.** Nenhum dos dez módulos generativos usa
-[components/ModuleLayout.tsx](components/ModuleLayout.tsx): cada um redesenha à mão o
-mesmo cabeçalho com gradiente, botão de início, título e o par de bandeiras. Mexer no
-cabeçalho significa mexer em nove arquivos, e é assim que eles saem de sincronia.
-Cada um também redeclara a mesma interface de props com outro nome, e cinco redefinem
-a própria função `cap()`.
+**8.17 — RESOLVIDO. O cabeçalho existia em dez cópias.** Os dez módulos generativos
+redesenhavam à mão o mesmo cabeçalho; mexer nele significava mexer em dez arquivos, e
+era assim que saíam de sincronia. Agora usam [components/ModuleShell.tsx](components/ModuleShell.tsx),
+que traz o cabeçalho e a barra de baixo com o botão redondo da bandeira — o mesmo do
+Supermercado. `tests/share.test.tsx` recusa qualquer módulo que volte a escrever
+`<header>` ou `<ShareButton>` por conta própria.
+
+**Continua aberto do 8.17:** cada módulo ainda redeclara a mesma interface de props com
+outro nome, e cinco redefinem a própria função `cap()`.
 
 **8.18 — Rótulo de sistema de medidas fixo em português.**
 `SYSTEM_LABEL` em [modules/sizes/data/sizesData.ts:13](modules/sizes/data/sizesData.ts#L13)
@@ -724,7 +727,8 @@ do projeto inteiro, e não é trabalho de programação.
 | [modules/eldercare/data/elderCareData.ts](modules/eldercare/data/elderCareData.ts) | Cuidar de idosos: os dois eixos, as cinco tabelas, a regra de segurança |
 | [modules/eldercare/ElderCareGlyphs.tsx](modules/eldercare/ElderCareGlyphs.tsx) | os 14 glifos de objeto de cuidado, no pedaço adiado do módulo |
 | [modules/housecleaning/data/houseCleaningData.ts](modules/housecleaning/data/houseCleaningData.ts) | Limpeza da casa: tarefas, cômodos, o que se ouve e o que se diz |
-| [components/ModuleLayout.tsx](components/ModuleLayout.tsx) | moldura: cabeçalho, painel, barra de baixo |
+| [components/ModuleLayout.tsx](components/ModuleLayout.tsx) | moldura do catálogo: cabeçalho, busca, painéis, barra de baixo |
+| [components/ModuleShell.tsx](components/ModuleShell.tsx) | moldura dos dez generativos: cabeçalho, barra de baixo e dois slots opcionais |
 | [components/TranslationItem.tsx](components/TranslationItem.tsx) | o card de item |
 | [components/CategorySheet.tsx](components/CategorySheet.tsx) | painel de categorias, e o padrão de diálogo do projeto |
 | [components/categoryMeta.ts](components/categoryMeta.ts) | ícone e tom por categoria |

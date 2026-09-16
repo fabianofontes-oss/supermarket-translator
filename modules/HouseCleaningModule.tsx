@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
+import { ModuleShell } from '../components/ModuleShell';
 import type { Country } from '../types';
-import { HomeIcon, SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
+import { SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
-import { ShareButton } from '../components/ShareButton';
 import type { VoiceStatus } from '../utils/speech';
 import { toLangCode } from './location/data/locationData';
 import {
@@ -182,142 +182,122 @@ export default function HouseCleaningModule({
   };
 
   return (
-    <div className="w-full bg-slate-50 text-gray-800 flex flex-col h-[100dvh] relative overflow-hidden font-sans">
-      <header className="flex-shrink-0 text-white shadow-lg z-30 rounded-b-3xl" style={{ background: `linear-gradient(to bottom, ${theme.hex}, ${theme.hex}e6)` }}>
-        <div className="flex items-center justify-between px-4 pt-4 pb-4 max-w-3xl mx-auto">
-          <button onClick={() => { playSound('click'); onGoHome(); }} aria-label={t('a11yHome')} className="hit p-2 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors">
-            <HomeIcon className="w-5 h-5" />
-          </button>
-          {/* `hcTitle` e não `moduleHouseCleaning`: o <h1> tem 190px úteis a 375px
-              de largura, e "LIMPEZA DA CASA" não cabe. O cartão do hub tem a linha
-              inteira e quebra, então lá continua o nome completo. */}
-          <h1 className="flex-1 mx-2 text-center font-bold text-2xl uppercase tracking-tight truncate">{t('hcTitle')}</h1>
-          {/* Cluster da direita. `gap-2` não é escolha estética: a área de
-              toque de `.hit` é 44px centrada no botão, e com menos espaço
-              que isso as duas se sobrepõem e uma para de responder. */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <ShareButton onClick={onOpenShare} t={t} variant="onColor" />
-            <button onClick={() => { playSound('click'); onOpenLanguageModal(); }} aria-label={t('languageSettings')} className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors">
-              <div className="flex items-center -space-x-2">
-                <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
-                <img src={targetCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
-              </div>
+    <ModuleShell
+      title={t('hcTitle')}
+      theme={theme}
+      t={t}
+      targetCountry={targetCountry}
+      onGoHome={onGoHome}
+      onOpenLanguageModal={onOpenLanguageModal}
+      onOpenShare={onOpenShare}
+    >
+
+      {/* Seletor de modo. Dizer o que se vai fazer, ENTENDER o que mandaram e
+          combinar as condições são três coisas diferentes — e a do meio é a
+          única do app inteiro em que a frase é para ouvir, não para falar. */}
+      <div className="bg-gray-200/70 rounded-2xl p-1 flex gap-1" role="tablist" aria-label={t('moduleHouseCleaning')}>
+        {([['task', 'hcModeTask'], ['heard', 'hcModeHeard'], ['say', 'hcModeSay']] as const).map(([key, labelKey]) => {
+          const active = mode === key;
+          return (
+            <button
+              key={key}
+              role="tab"
+              aria-selected={active}
+              onClick={() => { playSound('page-turn'); setMode(key); }}
+              // py-3 e não py-2: com py-2 o botão fica em 36px de altura,
+              // que é exatamente o que a auditoria 8.9 lista como defeito.
+              className={`flex-1 rounded-xl py-3 text-sm font-bold tap ${active ? 'bg-white shadow-sm' : 'text-gray-600'}`}
+              style={active ? { color: theme.hex } : undefined}
+            >
+              <span dir="auto">{t(labelKey)}</span>
             </button>
-          </div>
-        </div>
-      </header>
+          );
+        })}
+      </div>
 
-      <main className="flex-1 overflow-y-auto pb-10">
-        <div className="px-4 pt-4 max-w-3xl mx-auto w-full space-y-4">
+      {/* ------------------------------------------------------ A TAREFA */}
+      {mode === 'task' && (
+        <>
+          <PhraseCard theme={theme} phrase={phrase} alt={showNative ? phraseNative : null} Listen={Listen} listenLabel={listen} onSpeak={speak} />
 
-          {/* Seletor de modo. Dizer o que se vai fazer, ENTENDER o que mandaram e
-              combinar as condições são três coisas diferentes — e a do meio é a
-              única do app inteiro em que a frase é para ouvir, não para falar. */}
-          <div className="bg-gray-200/70 rounded-2xl p-1 flex gap-1" role="tablist" aria-label={t('moduleHouseCleaning')}>
-            {([['task', 'hcModeTask'], ['heard', 'hcModeHeard'], ['say', 'hcModeSay']] as const).map(([key, labelKey]) => {
-              const active = mode === key;
-              return (
-                <button
-                  key={key}
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => { playSound('page-turn'); setMode(key); }}
-                  // py-3 e não py-2: com py-2 o botão fica em 36px de altura,
-                  // que é exatamente o que a auditoria 8.9 lista como defeito.
-                  className={`flex-1 rounded-xl py-3 text-sm font-bold tap ${active ? 'bg-white shadow-sm' : 'text-gray-600'}`}
-                  style={active ? { color: theme.hex } : undefined}
-                >
-                  <span dir="auto">{t(labelKey)}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* ------------------------------------------------------ A TAREFA */}
-          {mode === 'task' && (
-            <>
-              <PhraseCard theme={theme} phrase={phrase} alt={showNative ? phraseNative : null} Listen={Listen} listenLabel={listen} onSpeak={speak} />
-
-              {task.note && (
-                <p className="text-sm text-gray-600 leading-snug px-1" dir="auto">{task.note[read]}</p>
-              )}
-
-              <section>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('hcHowToSay')}</h2>
-                <Pills<TaskFrame>
-                  theme={theme}
-                  items={TASK_FRAMES}
-                  active={frame.key}
-                  onPick={setFrame}
-                  label={(f) => f.labels[read]}
-                />
-              </section>
-
-              {/* O cômodo só existe para a tarefa que o aceita. Some da tela em vez
-                  de ficar apagado — mesma regra que as Direções adotaram: botão que
-                  passa a vida apagado ensina a pessoa a parar de olhar para ali. */}
-              {task.placeMode && (
-                <section>
-                  <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('hcWhere')}</h2>
-                  {/* Um toque no cômodo já escolhido desfaz a escolha. */}
-                  <Pills<Place>
-                    theme={theme}
-                    items={PLACES}
-                    active={place?.key ?? null}
-                    onPick={(p) => setPlace(place?.key === p.key ? null : p)}
-                    label={(p) => p.labels[read]}
-                  />
-                </section>
-              )}
-
-              {TASK_GROUPS.map((g) => (
-                <section key={g}>
-                  <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1" dir="auto">{TASK_GROUP_LABELS[g][read]}</h2>
-                  <Chips<Task>
-                    theme={theme}
-                    items={TASKS.filter((x) => x.group === g)}
-                    active={task.key}
-                    onPick={pickTask}
-                    label={(x) => x.labels[read]}
-                  />
-                </section>
-              ))}
-            </>
+          {task.note && (
+            <p className="text-sm text-gray-600 leading-snug px-1" dir="auto">{task.note[read]}</p>
           )}
 
-          {/* ---------------------------------------------- O QUE ELA PEDE */}
-          {mode === 'heard' && (
-            <>
-              {/* Único lugar do app em que a frase é para RECONHECER, não para
-                  falar. Sem esta linha, a pessoa treina a pronúncia de uma ordem
-                  que ela mesma nunca vai dar. */}
-              <p className="text-sm text-gray-600 leading-snug bg-white rounded-3xl border border-gray-100 p-4" dir="auto">
-                {t('hcHeardNote')}
-              </p>
+          <section>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('hcHowToSay')}</h2>
+            <Pills<TaskFrame>
+              theme={theme}
+              items={TASK_FRAMES}
+              active={frame.key}
+              onPick={setFrame}
+              label={(f) => f.labels[read]}
+            />
+          </section>
 
-              <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-                <PhraseList
-                  items={HEARD.map((h) => ({ key: h.key, target: h.text[target], native: showNative ? h.text[native] : null, note: h.note?.[read] ?? null }))}
-                  Listen={Listen} listenLabel={listen} textColor={theme.textColor} onSpeak={speak}
-                />
-              </section>
-            </>
+          {/* O cômodo só existe para a tarefa que o aceita. Some da tela em vez
+              de ficar apagado — mesma regra que as Direções adotaram: botão que
+              passa a vida apagado ensina a pessoa a parar de olhar para ali. */}
+          {task.placeMode && (
+            <section>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('hcWhere')}</h2>
+              {/* Um toque no cômodo já escolhido desfaz a escolha. */}
+              <Pills<Place>
+                theme={theme}
+                items={PLACES}
+                active={place?.key ?? null}
+                onPick={(p) => setPlace(place?.key === p.key ? null : p)}
+                label={(p) => p.labels[read]}
+              />
+            </section>
           )}
 
-          {/* ------------------------------------------------------ COMBINAR */}
-          {mode === 'say' && SAY_GROUPS.map((g) => (
-            <section key={g} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-1" dir="auto">{SAY_GROUP_LABELS[g][read]}</h2>
-              <PhraseList
-                items={SAY_PHRASES.filter((s) => s.group === g).map((s) => ({
-                  key: s.key, target: s.text[target], native: showNative ? s.text[native] : null,
-                }))}
-                Listen={Listen} listenLabel={listen} textColor={theme.textColor} onSpeak={speak}
+          {TASK_GROUPS.map((g) => (
+            <section key={g}>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1" dir="auto">{TASK_GROUP_LABELS[g][read]}</h2>
+              <Chips<Task>
+                theme={theme}
+                items={TASKS.filter((x) => x.group === g)}
+                active={task.key}
+                onPick={pickTask}
+                label={(x) => x.labels[read]}
               />
             </section>
           ))}
-        </div>
-      </main>
-    </div>
+        </>
+      )}
+
+      {/* ---------------------------------------------- O QUE ELA PEDE */}
+      {mode === 'heard' && (
+        <>
+          {/* Único lugar do app em que a frase é para RECONHECER, não para
+              falar. Sem esta linha, a pessoa treina a pronúncia de uma ordem
+              que ela mesma nunca vai dar. */}
+          <p className="text-sm text-gray-600 leading-snug bg-white rounded-3xl border border-gray-100 p-4" dir="auto">
+            {t('hcHeardNote')}
+          </p>
+
+          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
+            <PhraseList
+              items={HEARD.map((h) => ({ key: h.key, target: h.text[target], native: showNative ? h.text[native] : null, note: h.note?.[read] ?? null }))}
+              Listen={Listen} listenLabel={listen} textColor={theme.textColor} onSpeak={speak}
+            />
+          </section>
+        </>
+      )}
+
+      {/* ------------------------------------------------------ COMBINAR */}
+      {mode === 'say' && SAY_GROUPS.map((g) => (
+        <section key={g} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-1" dir="auto">{SAY_GROUP_LABELS[g][read]}</h2>
+          <PhraseList
+            items={SAY_PHRASES.filter((s) => s.group === g).map((s) => ({
+              key: s.key, target: s.text[target], native: showNative ? s.text[native] : null,
+            }))}
+            Listen={Listen} listenLabel={listen} textColor={theme.textColor} onSpeak={speak}
+          />
+        </section>
+      ))}
+    </ModuleShell>
   );
 }

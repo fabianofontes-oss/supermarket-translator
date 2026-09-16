@@ -1,9 +1,9 @@
 
 import React, { useMemo, useState } from 'react';
+import { ModuleShell } from '../components/ModuleShell';
 import type { Country } from '../types';
-import { HomeIcon, SpeakerIcon, SpeakerOffIcon, InfoIcon } from '../components/Icons';
+import { SpeakerIcon, SpeakerOffIcon, InfoIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
-import { ShareButton } from '../components/ShareButton';
 import type { VoiceStatus } from '../utils/speech';
 import { toLangCode } from './location/data/locationData';
 import {
@@ -103,186 +103,169 @@ export default function PronounsModule({
     }`;
 
   return (
-    <div className="w-full bg-slate-50 text-gray-800 flex flex-col h-[100dvh] relative overflow-hidden font-sans">
-      <header className="flex-shrink-0 text-white shadow-lg z-30 rounded-b-3xl" style={{ background: `linear-gradient(to bottom, ${theme.hex}, ${theme.hex}e6)` }}>
-        <div className="flex items-center justify-between px-4 pt-4 pb-4 max-w-3xl mx-auto">
-          <button onClick={() => { playSound('click'); onGoHome(); }} aria-label={t('a11yHome')} className="hit p-2 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors">
-            <HomeIcon className="w-5 h-5" />
+    <ModuleShell
+      title={t('modulePronouns')}
+      theme={theme}
+      t={t}
+      targetCountry={targetCountry}
+      onGoHome={onGoHome}
+      onOpenLanguageModal={onOpenLanguageModal}
+      onOpenShare={onOpenShare}
+    >
+
+      {/* Frase */}
+      <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
+        <div className="flex items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-2xl font-bold leading-snug" dir="auto">{phrase}</p>
+            {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{phraseNative}</p>}
+          </div>
+          <button onClick={() => speak(phrase)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+            <Listen className="w-6 h-6" />
           </button>
-          <h1 className="flex-1 mx-2 text-center font-bold text-2xl uppercase tracking-tight truncate">{t('modulePronouns')}</h1>
-          {/* Cluster da direita. `gap-2` não é escolha estética: a área de
-              toque de `.hit` é 44px centrada no botão, e com menos espaço
-              que isso as duas se sobrepõem e uma para de responder. */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <ShareButton onClick={onOpenShare} t={t} variant="onColor" />
-            <button onClick={() => { playSound('click'); onOpenLanguageModal(); }} aria-label={t('languageSettings')} className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors">
-              <div className="flex items-center -space-x-2">
-                <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
-                <img src={targetCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
-              </div>
-            </button>
-          </div>
         </div>
-      </header>
 
-      <main className="flex-1 overflow-y-auto pb-10">
-        <div className="px-4 pt-4 max-w-3xl mx-auto w-full space-y-4">
-
-          {/* Frase */}
-          <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-            <div className="flex items-start gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-2xl font-bold leading-snug" dir="auto">{phrase}</p>
-                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{phraseNative}</p>}
-              </div>
-              <button onClick={() => speak(phrase)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
-                <Listen className="w-6 h-6" />
+        {/*
+          São duas dimensões diferentes, então recebem formas diferentes.
+          Quando: seletor único dentro de um trilho afundado.
+          Tipo de frase: botões soltos e arredondados, sem trilho.
+        */}
+        <div className="mt-3 pt-3 border-t border-white/20">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-white mb-1.5">{t('pronWhen')}</p>
+          <div className="flex gap-1 rounded-xl bg-black/20 p-1">
+            {TENSES.map((tn) => (
+              <button
+                key={tn}
+                onClick={() => { playSound('toggle'); setTense(tn); }}
+                className={`tap flex-1 rounded-lg py-1.5 text-xs font-bold ${tense === tn ? 'bg-white shadow-sm' : 'text-white'}`}
+                style={tense === tn ? { color: theme.hex } : undefined}
+              >
+                <span dir="auto">{TENSE_LABELS[tn][showNative ? native : target]}</span>
               </button>
-            </div>
-
-            {/*
-              São duas dimensões diferentes, então recebem formas diferentes.
-              Quando: seletor único dentro de um trilho afundado.
-              Tipo de frase: botões soltos e arredondados, sem trilho.
-            */}
-            <div className="mt-3 pt-3 border-t border-white/20">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white mb-1.5">{t('pronWhen')}</p>
-              <div className="flex gap-1 rounded-xl bg-black/20 p-1">
-                {TENSES.map((tn) => (
-                  <button
-                    key={tn}
-                    onClick={() => { playSound('toggle'); setTense(tn); }}
-                    className={`tap flex-1 rounded-lg py-1.5 text-xs font-bold ${tense === tn ? 'bg-white shadow-sm' : 'text-white'}`}
-                    style={tense === tn ? { color: theme.hex } : undefined}
-                  >
-                    <span dir="auto">{TENSE_LABELS[tn][showNative ? native : target]}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white mt-3 mb-1.5">{t('pronHow')}</p>
-            <div className="flex gap-2">
-              {MOODS.map((m) => (
-                <button
-                  key={m}
-                  onClick={() => { playSound('toggle'); setMood(m); }}
-                  className={`tap flex-1 rounded-full py-1.5 text-xs font-bold border ${
-                    mood === m ? 'bg-white border-white shadow-sm' : 'border-white/40 text-white hover:bg-white/10'
-                  }`}
-                  style={mood === m ? { color: theme.hex } : undefined}
-                >
-                  <span dir="auto">{MOOD_LABELS[m][showNative ? native : target]}</span>
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
-
-          {/* Aviso sobre tú / usted / vosotros */}
-          {note && (
-            <div className="rounded-2xl p-3 flex items-start gap-2 border" style={{ backgroundColor: `${theme.hex}0f`, borderColor: `${theme.hex}33` }}>
-              <InfoIcon className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: theme.hex }} />
-              <p className="text-sm text-gray-700 leading-snug" dir="auto">{note}</p>
-            </div>
-          )}
-
-          {/* Pronomes */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('pronWho')}</h2>
-            <div className="grid grid-cols-2 gap-2">
-              {PRONOUNS.map((p) => {
-                const active = p.key === pronoun.key;
-                const plural = p.person >= 3;
-                return (
-                  <button
-                    key={p.key}
-                    onClick={() => { playSound('click'); setPronoun(p); }}
-                    className={`rounded-2xl border p-2.5 flex items-center gap-2.5 text-left tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}
-                  >
-                    <PeopleIcon plural={plural} active={active} hex={theme.hex} />
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-sm font-bold leading-tight" dir="auto">{p.words[target]}</span>
-                        {p.tag && (
-                          <span
-                            className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-                            style={active ? { backgroundColor: 'rgba(255,255,255,0.25)' } : { backgroundColor: `${theme.hex}18`, color: theme.hex }}
-                          >
-                            {p.tag === 'formal' ? t('pronFormal') : t('pronSpainOnly')}
-                          </span>
-                        )}
-                      </span>
-                      {showNative && <span className={`block text-[10px] leading-tight ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{p.words[native]}</span>}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Verbos */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('pronVerb')}</h2>
-            <div className="flex flex-wrap gap-2">
-              {VERBS.map((v) => (
-                <button key={v.key} onClick={() => pickVerb(v)} className={chip(v.key === verb.key)}>
-                  <span dir="auto">{v.labels[target]}</span>
-                  {showNative && <span className="block text-[10px] font-medium opacity-70" dir="auto">{v.labels[native]}</span>}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          {/* Complementos */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('pronWhat')}</h2>
-            <div className="flex flex-wrap gap-2">
-              {/* "precisar de" sem objeto vira frase truncada em pt/fr/it, então
-                  o verbo declara que exige complemento e o chip não aparece. */}
-              {!verb.requiresComplement && (
-                <button onClick={() => { playSound('toggle'); setCompKey(null); }} className={chip(compKey === null)}>
-                  {t('pronNothing')}
-                </button>
-              )}
-              {verb.complements.map((c) => (
-                <button key={c.key} onClick={() => { playSound('click'); setCompKey(c.key); }} className={chip(compKey === c.key)}>
-                  <span dir="auto">{c.texts[target]}</span>
-                  {showNative && <span className="block text-[10px] font-medium opacity-70" dir="auto">{c.texts[native]}</span>}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          {/* Tabela do verbo escolhido */}
-          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
-              {verb.labels[target]} <span className="text-gray-400">·</span>{' '}
-              <span className="normal-case tracking-normal" dir="auto">{TENSE_LABELS[tense][showNative ? native : target]}</span>
-            </h2>
-            <ul className="divide-y divide-gray-100">
-              {PRONOUNS.map((p) => {
-                const active = p.key === pronoun.key;
-                return (
-                  <li key={p.key}>
-                    <button
-                      onClick={() => { playSound('click'); setPronoun(p); speak(buildPhrase(target, p, verb, null, 'affirm', tense)); }}
-                      className="w-full py-2 flex items-center gap-3 text-left"
-                    >
-                      <span className={`text-sm w-28 flex-shrink-0 truncate ${active ? `font-bold ${theme.textColor}` : 'text-gray-500'}`} dir="auto">
-                        {p.words[target]}
-                      </span>
-                      <span className={`text-sm font-bold flex-1 min-w-0 truncate ${active ? theme.textColor : 'text-gray-800'}`} dir="auto">
-                        {tenseTable[p.altPerson?.[target] ?? p.person]}
-                      </span>
-                      <Listen className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
         </div>
-      </main>
-    </div>
+
+        <p className="text-[10px] font-bold uppercase tracking-widest text-white mt-3 mb-1.5">{t('pronHow')}</p>
+        <div className="flex gap-2">
+          {MOODS.map((m) => (
+            <button
+              key={m}
+              onClick={() => { playSound('toggle'); setMood(m); }}
+              className={`tap flex-1 rounded-full py-1.5 text-xs font-bold border ${
+                mood === m ? 'bg-white border-white shadow-sm' : 'border-white/40 text-white hover:bg-white/10'
+              }`}
+              style={mood === m ? { color: theme.hex } : undefined}
+            >
+              <span dir="auto">{MOOD_LABELS[m][showNative ? native : target]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Aviso sobre tú / usted / vosotros */}
+      {note && (
+        <div className="rounded-2xl p-3 flex items-start gap-2 border" style={{ backgroundColor: `${theme.hex}0f`, borderColor: `${theme.hex}33` }}>
+          <InfoIcon className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: theme.hex }} />
+          <p className="text-sm text-gray-700 leading-snug" dir="auto">{note}</p>
+        </div>
+      )}
+
+      {/* Pronomes */}
+      <section>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('pronWho')}</h2>
+        <div className="grid grid-cols-2 gap-2">
+          {PRONOUNS.map((p) => {
+            const active = p.key === pronoun.key;
+            const plural = p.person >= 3;
+            return (
+              <button
+                key={p.key}
+                onClick={() => { playSound('click'); setPronoun(p); }}
+                className={`rounded-2xl border p-2.5 flex items-center gap-2.5 text-left tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}
+              >
+                <PeopleIcon plural={plural} active={active} hex={theme.hex} />
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-sm font-bold leading-tight" dir="auto">{p.words[target]}</span>
+                    {p.tag && (
+                      <span
+                        className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                        style={active ? { backgroundColor: 'rgba(255,255,255,0.25)' } : { backgroundColor: `${theme.hex}18`, color: theme.hex }}
+                      >
+                        {p.tag === 'formal' ? t('pronFormal') : t('pronSpainOnly')}
+                      </span>
+                    )}
+                  </span>
+                  {showNative && <span className={`block text-[10px] leading-tight ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{p.words[native]}</span>}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Verbos */}
+      <section>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('pronVerb')}</h2>
+        <div className="flex flex-wrap gap-2">
+          {VERBS.map((v) => (
+            <button key={v.key} onClick={() => pickVerb(v)} className={chip(v.key === verb.key)}>
+              <span dir="auto">{v.labels[target]}</span>
+              {showNative && <span className="block text-[10px] font-medium opacity-70" dir="auto">{v.labels[native]}</span>}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Complementos */}
+      <section>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('pronWhat')}</h2>
+        <div className="flex flex-wrap gap-2">
+          {/* "precisar de" sem objeto vira frase truncada em pt/fr/it, então
+              o verbo declara que exige complemento e o chip não aparece. */}
+          {!verb.requiresComplement && (
+            <button onClick={() => { playSound('toggle'); setCompKey(null); }} className={chip(compKey === null)}>
+              {t('pronNothing')}
+            </button>
+          )}
+          {verb.complements.map((c) => (
+            <button key={c.key} onClick={() => { playSound('click'); setCompKey(c.key); }} className={chip(compKey === c.key)}>
+              <span dir="auto">{c.texts[target]}</span>
+              {showNative && <span className="block text-[10px] font-medium opacity-70" dir="auto">{c.texts[native]}</span>}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Tabela do verbo escolhido */}
+      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
+          {verb.labels[target]} <span className="text-gray-400">·</span>{' '}
+          <span className="normal-case tracking-normal" dir="auto">{TENSE_LABELS[tense][showNative ? native : target]}</span>
+        </h2>
+        <ul className="divide-y divide-gray-100">
+          {PRONOUNS.map((p) => {
+            const active = p.key === pronoun.key;
+            return (
+              <li key={p.key}>
+                <button
+                  onClick={() => { playSound('click'); setPronoun(p); speak(buildPhrase(target, p, verb, null, 'affirm', tense)); }}
+                  className="w-full py-2 flex items-center gap-3 text-left"
+                >
+                  <span className={`text-sm w-28 flex-shrink-0 truncate ${active ? `font-bold ${theme.textColor}` : 'text-gray-500'}`} dir="auto">
+                    {p.words[target]}
+                  </span>
+                  <span className={`text-sm font-bold flex-1 min-w-0 truncate ${active ? theme.textColor : 'text-gray-800'}`} dir="auto">
+                    {tenseTable[p.altPerson?.[target] ?? p.person]}
+                  </span>
+                  <Listen className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    </ModuleShell>
   );
 }
