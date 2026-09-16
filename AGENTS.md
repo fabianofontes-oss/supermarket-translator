@@ -212,6 +212,13 @@ ativa por vez (onde há abas, cada aba tem a sua, mas só uma é renderizada), e
 permite um cartão só. Quem trocava uma palavra lá embaixo deixava de ver o que estava
 montando, e ver a frase se formar **é** o módulo.
 
+O cartão é [components/PhraseCard.tsx](components/PhraseCard.tsx), um só para os nove
+(Direções tem lista, não frase). **O tamanho sai do comprimento da própria frase** —
+30px até 30 caracteres, depois 24, 20 e 18 —, porque a Maquiagem com todas as dimensões
+produz 131 caracteres e a 30px isso viraria sete linhas empurrando a tela. Contar
+caracteres vale como medida porque a frase falada é **sempre** em alfabeto latino:
+ucraniano, árabe e lituano são `originOnly` e nunca podem ser destino.
+
 Todo módulo calcula o mesmo trio e mostra a língua de destino em destaque e a nativa
 como linha de apoio:
 

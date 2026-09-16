@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ModuleShell } from '../components/ModuleShell';
+import { PhraseCard } from '../components/PhraseCard';
 import type { Country } from '../types';
 import { SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
@@ -45,29 +46,6 @@ interface ElderCareModuleProps {
  * seriam funções novas a cada render, e o React desmontaria e remontaria a subárvore
  * inteira a cada toque — o foco do teclado escaparia no meio da escolha.
  */
-
-/** Cartão da frase. Destino grande; nativo logo abaixo, em 14px e não em 10. */
-const PhraseCard: React.FC<{
-  theme: Theme; phrase: string; alt: string | null;
-  Listen: Glyph; listenLabel: string; onSpeak: (text: string) => void;
-}> = ({ theme, phrase, alt, Listen, listenLabel, onSpeak }) => (
-  <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-    <div className="flex items-start gap-3">
-      <div className="flex-1 min-w-0">
-        <p className="text-xl font-bold leading-snug" dir="auto">{phrase}</p>
-        {alt && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{alt}</p>}
-      </div>
-      <button
-        onClick={() => onSpeak(phrase)}
-        className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0"
-        style={{ color: theme.hex }}
-        aria-label={listenLabel} title={listenLabel}
-      >
-        <Listen className="w-6 h-6" />
-      </button>
-    </div>
-  </div>
-);
 
 /** Alternador de duas posições. Serve ao tratamento e a quem se cuida. */
 function Toggle<T extends string>({ theme, label, hint, value, options, onPick }: {

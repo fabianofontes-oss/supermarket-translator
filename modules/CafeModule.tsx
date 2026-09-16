@@ -1,6 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { ModuleShell } from '../components/ModuleShell';
+import { PhraseCard } from '../components/PhraseCard';
 import type { Country } from '../types';
 import { SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
@@ -131,17 +132,14 @@ export default function CafeModule({
       pinned={(
         <>
           {/* Pedido */}
-          <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-            <div className="flex items-start gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-xl font-bold leading-snug" dir="auto">{order}</p>
-                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{orderNative}</p>}
-              </div>
-              <button onClick={() => speak(order)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
-                <Listen className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
+          <PhraseCard
+            theme={theme}
+            phrase={order}
+            alt={showNative ? orderNative : null}
+            Listen={Listen}
+            listenLabel={audioLabel(t('locListen'))}
+            onSpeak={speak}
+          />
         </>
       )}
     >
