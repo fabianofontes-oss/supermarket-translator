@@ -89,11 +89,14 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
   };
 
   return (
-    <div className="w-full bg-slate-50 text-gray-800 flex flex-col h-[100dvh] relative overflow-hidden font-sans">
+    <div className="w-full bg-slate-50 dark:bg-slate-900 text-gray-800 dark:text-slate-100 flex flex-col h-[100dvh] relative overflow-hidden font-sans">
 
       {/* Header with Gradient and Premium Feel */}
       <header
-        className={`flex-shrink-0 relative text-white shadow-lg z-30 tap flex flex-col ${hasTabs ? '' : 'rounded-b-3xl'}`}
+        /* Mesmo teto da moldura generativa: com o texto ampliado este cabeçalho
+           chegava a 374px de 640 — 58% da tela — porque carrega título, busca,
+           seletor de categoria e abas de subcategoria empilhados. */
+        className={`flex-shrink-0 relative text-white shadow-lg z-30 tap flex flex-col max-h-[55dvh] overflow-y-auto overscroll-contain ${hasTabs ? '' : 'rounded-b-3xl'}`}
         style={{ background: `linear-gradient(to bottom, ${theme.hex}, ${theme.hex}e6)` }}
       >
 
@@ -131,7 +134,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
                 <button
                     onClick={handleToggleSearch}
                     aria-label={t('searchLabel')}
-                    className={`hit p-2 rounded-full tap active:scale-95 ${isSearchActive ? 'bg-white text-current shadow-lg' : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'}`}
+                    className={`hit p-2 rounded-full tap active:scale-95 ${isSearchActive ? 'bg-white dark:bg-slate-800 text-current shadow-lg' : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'}`}
                     style={{ color: isSearchActive ? theme.hex : 'white' }}
                 >
                     <SearchIcon className="w-5 h-5" />
@@ -166,7 +169,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
       </header>
 
       {/* Main Content - Flex-1 to take remaining space */}
-      <main className="flex-1 bg-slate-50 overflow-y-auto pb-32 scroll-smooth relative w-full">
+      <main className="flex-1 bg-slate-50 dark:bg-slate-900 overflow-y-auto pb-32 scroll-smooth relative w-full">
         {/* Items Container */}
         <div className="px-4 pt-4 max-w-7xl mx-auto w-full">
             {children}
@@ -175,7 +178,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
 
       {/* Sliding Panel */}
       <div
-        className={`absolute inset-x-0 bottom-0 bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-40 flex flex-col overflow-hidden border-t border-gray-100 max-w-7xl mx-auto w-full left-0 right-0`}
+        className={`absolute inset-x-0 bottom-0 bg-white dark:bg-slate-800 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-40 flex flex-col overflow-hidden border-t border-gray-100 dark:border-slate-700 max-w-7xl mx-auto w-full left-0 right-0`}
         style={{
             top: '9rem',
             bottom: '0',
@@ -186,14 +189,14 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
         }}
       >
           {/* Panel Header Area */}
-          <div className={`w-full flex flex-col items-center pt-3 pb-2 relative transition-colors duration-300 ${panelTitle ? theme.color : 'bg-white'}`}>
+          <div className={`w-full flex flex-col items-center pt-3 pb-2 relative transition-colors duration-300 ${panelTitle ? theme.color : 'bg-white dark:bg-slate-800'}`}>
                {/* Alça: fecha o painel. Era uma div com onClick — sem papel, sem
                   nome e inalcançável pelo teclado. */}
               <button
                 type="button"
                 onClick={() => handleTabChange('home')}
                 aria-label={t('close')}
-                className={`hit w-12 h-1.5 rounded-full mb-3 tap active:scale-90 ${panelTitle ? 'bg-white/30' : 'bg-gray-200'}`}
+                className={`hit w-12 h-1.5 rounded-full mb-3 tap active:scale-90 ${panelTitle ? 'bg-white/30' : 'bg-gray-200 dark:bg-slate-700'}`}
               />
 
               {/* Panel Title */}
@@ -214,7 +217,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
               )}
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 pb-32 pt-4 bg-white">
+          <div className="flex-1 overflow-y-auto px-4 pb-32 pt-4 bg-white dark:bg-slate-800">
               <div className="max-w-7xl mx-auto">
                 {panelContent}
               </div>
@@ -229,7 +232,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
               onClick={() => handleTabChange(activeTab === 'favorites' ? 'home' : 'favorites')}
               className={`flex flex-col justify-end items-center w-full tap active:scale-[0.97] cursor-pointer relative overflow-hidden group ${
                   activeTab === 'favorites'
-                  ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10'
+                  ? 'bg-white dark:bg-slate-800 rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10'
                   : 'h-20 pb-6 translate-y-2 opacity-80 hover:opacity-100'
               }`}
            >
@@ -250,7 +253,7 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
                     onClick={handleOpenLanguage}
                     aria-label={t('languageSettings')}
                     className={`w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform tap hover:scale-105 active:scale-95 cursor-pointer absolute bottom-10 z-50 pointer-events-auto shadow-xl`}
-                    style={{ borderColor: theme.hex }}
+                    style={{ borderColor: 'var(--tema-texto)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full z-30 pointer-events-none"></div>
                     <div className="absolute inset-0 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] z-20 pointer-events-none"></div>
@@ -271,14 +274,14 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
               onClick={() => handleTabChange(activeTab === 'list' ? 'home' : 'list')}
               className={`flex flex-col justify-end items-center w-full tap active:scale-[0.97] cursor-pointer relative overflow-hidden group ${
                   activeTab === 'list'
-                  ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10'
+                  ? 'bg-white dark:bg-slate-800 rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10'
                   : 'h-20 pb-6 translate-y-2 opacity-80 hover:opacity-100'
               }`}
            >
               <div className="relative mb-1 transition-transform duration-300 group-hover:scale-110">
                   <ShoppingBagIconSolid className={`w-7 h-7 transition-colors duration-300 ${activeTab === 'list' ? theme.textColor : 'text-white'}`} />
                   {listCount > 0 && (
-                      <span className={`absolute -top-2 -right-2 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[9px] font-bold shadow-sm transition-colors ${activeTab === 'list' ? 'bg-red-600 text-white' : 'bg-white text-red-600'}`}>
+                      <span className={`absolute -top-2 -right-2 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[9px] font-bold shadow-sm transition-colors ${activeTab === 'list' ? 'bg-red-600 text-white' : 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-300'}`}>
                       {listCount}
                       </span>
                   )}

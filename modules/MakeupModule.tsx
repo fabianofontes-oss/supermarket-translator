@@ -1,6 +1,7 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useId, useMemo, useState } from 'react';
 import { ModuleShell } from '../components/ModuleShell';
+import { ModeTabs, panelProps } from '../components/ModeTabs';
 import { PhraseCard } from '../components/PhraseCard';
 import type { Country } from '../types';
 import { SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
@@ -45,7 +46,7 @@ const GROUPS: { key: ToolGroup; labelKey: string }[] = [
 ];
 
 /** Tom neutro de apoio, para quando nada foi escolhido ainda. */
-const SEM_COR = '#e2e8f0';
+const SEM_COR = 'var(--art-edge)';
 
 /**
  * A figura é o equivalente do copo desenhado do Café: não ilustra, é objeto de
@@ -53,14 +54,14 @@ const SEM_COR = '#e2e8f0';
  * `<defs>` e sem `id`, para o defeito 8.19 não ter como acontecer.
  */
 const Figure: React.FC<{ product: Product; fill: string }> = ({ product, fill }) => {
-  const traco = '#94a3b8';
+  const traco = 'var(--art-line)';
   const cheek = product.key === 'colorete';
 
   return (
     <svg viewBox="0 0 120 120" className="w-28 h-28" aria-hidden="true">
       {product.figure === 'face' && (
         <>
-          <ellipse cx="60" cy="60" rx="36" ry="44" fill={cheek ? '#f5e6db' : fill} stroke={traco} strokeWidth="3" />
+          <ellipse cx="60" cy="60" rx="36" ry="44" fill={cheek ? 'var(--art-skin)' : fill} stroke={traco} strokeWidth="3" />
           {cheek && (
             <>
               <ellipse cx="36" cy="68" rx="13" ry="9" fill={fill} />
@@ -106,7 +107,7 @@ const Figure: React.FC<{ product: Product; fill: string }> = ({ product, fill })
 
       {product.figure === 'nail' && (
         <>
-          <path d="M44 108q-6-26 0-52 4-18 16-18t16 18q6 26 0 52Z" fill="#f5e6db" stroke={traco} strokeWidth="3" />
+          <path d="M44 108q-6-26 0-52 4-18 16-18t16 18q6 26 0 52Z" fill="var(--art-skin)" stroke={traco} strokeWidth="3" />
           <path d="M44 60q-2-22 2-36 4-16 14-16t14 16q4 14 2 36Z" fill={fill} stroke={traco} strokeWidth="3" />
         </>
       )}
@@ -129,6 +130,8 @@ export default function MakeupModule({
   const native = toLangCode(nativeCountry.lang);
   const showNative = native !== target;
 
+  /** Liga cada aba ao seu painel. */
+  const tabsId = useId();
   const [mode, setMode] = useState<'products' | 'tools'>('products');
   const [product, setProduct] = useState<Product>(MAKEUP_PRODUCTS[0]); // base
   const [picks, setPicks] = useState<Partial<Record<DimKey, string>>>({});
@@ -223,25 +226,14 @@ export default function MakeupModule({
           {/* Seletor de modo. As duas metades são coisas diferentes — uma se
               configura, a outra se navega —, e juntas na mesma rolagem dariam
               dez seções e um cartão de frase ambíguo. */}
-          <div className="bg-gray-200/70 rounded-2xl p-1 flex gap-1" role="tablist" aria-label={t('moduleMakeup')}>
-            {([['products', 'mkModeProducts'], ['tools', 'mkModeTools']] as const).map(([key, labelKey]) => {
-              const active = mode === key;
-              return (
-                <button
-                  key={key}
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => { playSound('page-turn'); setMode(key); }}
-                  // py-3 e não py-2: com py-2 o botão fica em 36px de altura,
-                  // que é exatamente o que a auditoria 8.9 lista como defeito.
-                  className={`flex-1 rounded-xl py-3 text-sm font-bold tap ${active ? 'bg-white shadow-sm' : 'text-gray-600'}`}
-                  style={active ? { color: theme.hex } : undefined}
-                >
-                  <span dir="auto">{t(labelKey)}</span>
-                </button>
-              );
-            })}
-          </div>
+                    <ModeTabs<'products' | 'tools'>
+            idPrefix={tabsId}
+            label={t('moduleMakeup')}
+            value={mode}
+            options={[{ key: 'products', label: t('mkModeProducts') }, { key: 'tools', label: t('mkModeTools') }]}
+            onChange={setMode}
+            theme={theme}
+          />
           <PhraseCard
             theme={theme}
             phrase={shown}
@@ -255,195 +247,199 @@ export default function MakeupModule({
         </>
       )}
     >
+      {/* O painel que as abas apontam. Só o do modo escolhido existe, então
+          um `div` basta: ele assume o id e o rótulo do modo atual. */}
+      <div {...panelProps(tabsId, mode)} className="space-y-4">
 
 
-      {/* ---------------------------------------------------- PRODUTOS */}
-      {mode === 'products' && (
-        <>
-          {/* Figura + explicação */}
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-            <div className="flex-shrink-0"><Figure product={product} fill={fill} /></div>
-            <div className="min-w-0">
-              <p className="text-lg font-extrabold leading-tight" dir="auto">{product.names[target]}</p>
-              {showNative && <p className="text-xs text-gray-500 mb-1" dir="auto">{product.names[native]}</p>}
-              <p className="text-sm text-gray-600 leading-snug mt-1" dir="auto">{product.descs[showNative ? native : target]}</p>
-            </div>
-          </div>
-
-          {/* Produtos */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('mkProducts')}</h2>
-            <div className="grid grid-cols-3 gap-2">
-              {MAKEUP_PRODUCTS.map((p) => {
-                const active = p.key === product.key;
-                return (
-                  <button
-                    key={p.key}
-                    onClick={() => pickProduct(p)}
-                    aria-pressed={active}
-                    className={`rounded-2xl border p-2 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}
-                  >
-                    <span className="block text-xs font-bold leading-tight" dir="auto">{p.names[target]}</span>
-                    {showNative && <span className={`block text-[10px] leading-tight mt-0.5 ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{p.names[native]}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* As seções saem da tela junto com o toque quando o produto
-              não aceita a dimensão. É essa a resposta visual, e é por
-              isso que não há aviso escrito de "não se aplica". */}
-          {product.dims.map((key) => {
-            const dim = DIMENSIONS.find((d) => d.key === key);
-            if (!dim) return null;
-            const opcoes = optionsFor(dim, product);
-            return (
-              <section key={key}>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t(dim.labelKey)}</h2>
-                <div className="flex flex-wrap gap-2">
-                  {opcoes.map((o) => {
-                    const active = picks[key] === o.key;
-                    const cor = dim.visual ? corDaOpcao(key, o.key) : undefined;
-                    return (
-                      <button
-                        key={o.key}
-                        onClick={() => pickOption(key, o.key)}
-                        aria-pressed={active}
-                        className={`rounded-2xl border px-3 py-2 text-sm font-bold tap active:scale-95 ${active ? 'border-transparent shadow' : 'bg-white border-gray-100'}`}
-                        style={active ? { backgroundColor: `${theme.hex}18`, boxShadow: `inset 0 0 0 2px ${theme.hex}`, color: theme.hex } : undefined}
-                      >
-                        {dim.visual && (
-                          // Contorno obrigatório: tom muito claro sobre
-                          // card branco some sem ele. E "transparente"
-                          // não pode ser quadrado branco, que leria como
-                          // "muito claro" — vai como contorno com barra.
-                          <span
-                            className="block w-10 h-6 rounded-lg border border-slate-400 mx-auto mb-1"
-                            style={cor
-                              ? { backgroundColor: cor }
-                              : { backgroundImage: 'linear-gradient(to top right, transparent 46%, #94a3b8 46%, #94a3b8 54%, transparent 54%)' }}
-                          />
-                        )}
-                        {/* Nunca só cor: o rótulo em texto fica sempre. */}
-                        <span className="block" dir="auto">{o.labels[target]}</span>
-                        {showNative && <span className="block text-[10px] font-medium text-gray-500" dir="auto">{o.labels[native]}</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
-
-          <div className="flex items-center justify-between gap-3 px-1">
-            <p className="text-[11px] text-gray-500 leading-snug flex-1" dir="auto">{t('mkColorWarning')}</p>
-            {temEscolha && (
-              <button
-                onClick={() => { playSound('toggle'); setPicks({}); }}
-                className="text-xs font-bold rounded-xl border border-gray-200 bg-white px-3 py-2 tap active:scale-95 flex-shrink-0"
-              >
-                <span dir="auto">{t('mkClear')}</span>
-              </button>
-            )}
-          </div>
-        </>
-      )}
-
-      {/* -------------------------------------------------- ACESSÓRIOS */}
-      {mode === 'tools' && (
-        <>
-          {/* Objeto + nome + armadilha de nome */}
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex items-start gap-4">
-            <div className="flex-shrink-0 w-20 h-20 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${theme.hex}14`, color: theme.hex }}>
-              {ToolGlyph && <ToolGlyph className="w-12 h-12" />}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-start gap-2">
-                <div className="min-w-0 flex-1">
-                  <p className="text-lg font-extrabold leading-tight" dir="auto">{tool.names[target]}</p>
-                  {showNative && <p className="text-xs text-gray-500" dir="auto">{tool.names[native]}</p>}
-                </div>
-                <button
-                  onClick={() => speak(tool.names[target])}
-                  className={`hit p-1.5 rounded-full flex-shrink-0 tap active:scale-90 ${theme.textColor}`}
-                  aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}
-                >
-                  <Listen className="w-5 h-5" />
-                </button>
+        {/* ---------------------------------------------------- PRODUTOS */}
+        {mode === 'products' && (
+          <>
+            {/* Figura + explicação */}
+            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 flex items-center gap-4">
+              <div className="flex-shrink-0"><Figure product={product} fill={fill} /></div>
+              <div className="min-w-0">
+                <p className="text-lg font-extrabold leading-tight" dir="auto">{product.names[target]}</p>
+                {showNative && <p className="text-xs text-gray-500 dark:text-slate-400 mb-1" dir="auto">{product.names[native]}</p>}
+                <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug mt-1" dir="auto">{product.descs[showNative ? native : target]}</p>
               </div>
-              {tool.note && (
-                <p className="text-sm text-gray-600 leading-snug mt-2" dir="auto">
-                  {tool.note[showNative ? native : target]}
-                </p>
-              )}
             </div>
-          </div>
 
-          {/* Quadro da frase. A frase montada vive na banda fixa lá em cima. */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('mkAsk')}</h2>
-            <div className="flex flex-wrap gap-2">
-              {TOOL_FRAMES.map((f) => {
-                const active = f.key === frame.key;
-                return (
-                  <button
-                    key={f.key}
-                    onClick={() => { playSound('toggle'); setFrame(f); }}
-                    aria-pressed={active}
-                    className={`rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${active ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100'}`}
-                  >
-                    <span dir="auto">{f.labels[target]}</span>
-                    {showNative && <span className={`block text-[10px] font-medium ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{f.labels[native]}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {GROUPS.map((g) => (
-            <section key={g.key}>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t(g.labelKey)}</h2>
+            {/* Produtos */}
+            <section>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('mkProducts')}</h2>
               <div className="grid grid-cols-3 gap-2">
-                {TOOLS.filter((x) => x.group === g.key).map((x) => {
-                  const active = x.key === tool.key;
-                  const Glyph = TOOL_GLYPHS[x.key];
+                {MAKEUP_PRODUCTS.map((p) => {
+                  const active = p.key === product.key;
                   return (
                     <button
-                      key={x.key}
-                      onClick={() => { playSound('click'); setTool(x); }}
+                      key={p.key}
+                      onClick={() => pickProduct(p)}
                       aria-pressed={active}
-                      className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}
+                      className={`rounded-2xl border p-2 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
                     >
-                      {Glyph && <Glyph className="w-7 h-7" />}
-                      <span className="block text-xs font-bold leading-tight text-center" dir="auto">{x.names[target]}</span>
-                      {showNative && <span className={`block text-[10px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{x.names[native]}</span>}
+                      <span className="block text-xs font-bold leading-tight" dir="auto">{p.names[target]}</span>
+                      {showNative && <span className={`block text-[10px] leading-tight mt-0.5 ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{p.names[native]}</span>}
                     </button>
                   );
                 })}
               </div>
             </section>
-          ))}
-        </>
-      )}
 
-      {/* Frases da loja: servem às duas metades. */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('mkPhrases')}</h2>
-        <ul className="divide-y divide-gray-100">
-          {MAKEUP_QUESTIONS.map((q, i) => (
-            <li key={i}>
-              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
-                  {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
+            {/* As seções saem da tela junto com o toque quando o produto
+                não aceita a dimensão. É essa a resposta visual, e é por
+                isso que não há aviso escrito de "não se aplica". */}
+            {product.dims.map((key) => {
+              const dim = DIMENSIONS.find((d) => d.key === key);
+              if (!dim) return null;
+              const opcoes = optionsFor(dim, product);
+              return (
+                <section key={key}>
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t(dim.labelKey)}</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {opcoes.map((o) => {
+                      const active = picks[key] === o.key;
+                      const cor = dim.visual ? corDaOpcao(key, o.key) : undefined;
+                      return (
+                        <button
+                          key={o.key}
+                          onClick={() => pickOption(key, o.key)}
+                          aria-pressed={active}
+                          className={`rounded-2xl border px-3 py-2 text-sm font-bold tap active:scale-95 ${active ? 'border-transparent shadow' : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700'}`}
+                          style={active ? { backgroundColor: `${theme.hex}18`, boxShadow: 'inset 0 0 0 2px var(--tema-texto)', color: 'var(--tema-texto)' } : undefined}
+                        >
+                          {dim.visual && (
+                            // Contorno obrigatório: tom muito claro sobre
+                            // card branco some sem ele. E "transparente"
+                            // não pode ser quadrado branco, que leria como
+                            // "muito claro" — vai como contorno com barra.
+                            <span
+                              className="block w-10 h-6 rounded-lg border border-slate-400 dark:border-slate-500 mx-auto mb-1"
+                              style={cor
+                                ? { backgroundColor: cor }
+                                : { backgroundImage: 'linear-gradient(to top right, transparent 46%, var(--art-line) 46%, var(--art-line) 54%, transparent 54%)' }}
+                            />
+                          )}
+                          {/* Nunca só cor: o rótulo em texto fica sempre. */}
+                          <span className="block" dir="auto">{o.labels[target]}</span>
+                          {showNative && <span className="block text-[10px] font-medium text-gray-500 dark:text-slate-400" dir="auto">{o.labels[native]}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
+
+            <div className="flex items-center justify-between gap-3 px-1">
+              <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-snug flex-1" dir="auto">{t('mkColorWarning')}</p>
+              {temEscolha && (
+                <button
+                  onClick={() => { playSound('toggle'); setPicks({}); }}
+                  className="text-xs font-bold rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 tap active:scale-95 flex-shrink-0"
+                >
+                  <span dir="auto">{t('mkClear')}</span>
+                </button>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* -------------------------------------------------- ACESSÓRIOS */}
+        {mode === 'tools' && (
+          <>
+            {/* Objeto + nome + armadilha de nome */}
+            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 flex items-start gap-4">
+              <div className="flex-shrink-0 w-20 h-20 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${theme.hex}14`, color: 'var(--tema-texto)' }}>
+                {ToolGlyph && <ToolGlyph className="w-12 h-12" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-lg font-extrabold leading-tight" dir="auto">{tool.names[target]}</p>
+                    {showNative && <p className="text-xs text-gray-500 dark:text-slate-400" dir="auto">{tool.names[native]}</p>}
+                  </div>
+                  <button
+                    onClick={() => speak(tool.names[target])}
+                    className={`hit p-1.5 rounded-full flex-shrink-0 tap active:scale-90 ${theme.textColor}`}
+                    aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}
+                  >
+                    <Listen className="w-5 h-5" />
+                  </button>
                 </div>
-                <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
+                {tool.note && (
+                  <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug mt-2" dir="auto">
+                    {tool.note[showNative ? native : target]}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Quadro da frase. A frase montada vive na banda fixa lá em cima. */}
+            <section>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('mkAsk')}</h2>
+              <div className="flex flex-wrap gap-2">
+                {TOOL_FRAMES.map((f) => {
+                  const active = f.key === frame.key;
+                  return (
+                    <button
+                      key={f.key}
+                      onClick={() => { playSound('toggle'); setFrame(f); }}
+                      aria-pressed={active}
+                      className={`rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${active ? `${theme.color} text-white border-transparent shadow` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
+                    >
+                      <span dir="auto">{f.labels[target]}</span>
+                      {showNative && <span className={`block text-[10px] font-medium ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{f.labels[native]}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {GROUPS.map((g) => (
+              <section key={g.key}>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t(g.labelKey)}</h2>
+                <div className="grid grid-cols-3 gap-2">
+                  {TOOLS.filter((x) => x.group === g.key).map((x) => {
+                    const active = x.key === tool.key;
+                    const Glyph = TOOL_GLYPHS[x.key];
+                    return (
+                      <button
+                        key={x.key}
+                        onClick={() => { playSound('click'); setTool(x); }}
+                        aria-pressed={active}
+                        className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
+                      >
+                        {Glyph && <Glyph className="w-7 h-7" />}
+                        <span className="block text-xs font-bold leading-tight text-center" dir="auto">{x.names[target]}</span>
+                        {showNative && <span className={`block text-[10px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{x.names[native]}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </>
+        )}
+
+        {/* Frases da loja: servem às duas metades. */}
+        <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">{t('mkPhrases')}</h2>
+          <ul className="divide-y divide-gray-100 dark:divide-slate-700">
+            {MAKEUP_QUESTIONS.map((q, i) => (
+              <li key={i}>
+                <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
+                    {showNative && <p className="text-xs text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{q[native]}</p>}
+                  </div>
+                  <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
     </ModuleShell>
   );
 }

@@ -24,10 +24,10 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   onGoHome,
   onReload = () => window.location.reload(),
 }) => (
-  <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6 text-center">
+  <div className="min-h-screen bg-gray-50 dark:bg-slate-800 flex flex-col items-center justify-center px-6 text-center">
     <div className="w-full max-w-sm">
-      <h1 className="text-2xl font-bold text-gray-800 mb-2" dir="auto">{t('errorTitle')}</h1>
-      <p className="text-gray-600 mb-7 leading-snug" dir="auto">{t('errorHint')}</p>
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-slate-100 mb-2" dir="auto">{t('errorTitle')}</h1>
+      <p className="text-gray-600 dark:text-slate-300 mb-7 leading-snug" dir="auto">{t('errorHint')}</p>
 
       <div className="flex flex-col gap-3">
         <button
@@ -38,7 +38,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
         </button>
         <button
           onClick={onGoHome}
-          className="w-full min-h-[48px] py-3 px-4 rounded-xl border border-gray-200 bg-white text-gray-700 font-medium flex items-center justify-center gap-2 tap active:scale-95"
+          className="w-full min-h-[48px] py-3 px-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-medium flex items-center justify-center gap-2 tap active:scale-95"
         >
           <HomeIcon className="w-5 h-5" />
           <span dir="auto">{t('a11yHome')}</span>
@@ -47,8 +47,8 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
 
       {/* O app não tem telemetria: a mensagem precisa ficar acessível aqui. */}
       <details className="mt-7 text-left">
-        <summary className="text-xs text-gray-500 cursor-pointer">{error.name || 'Error'}</summary>
-        <pre className="mt-2 text-[11px] text-gray-600 whitespace-pre-wrap break-words overflow-x-auto">
+        <summary className="text-xs text-gray-500 dark:text-slate-400 cursor-pointer">{error.name || 'Error'}</summary>
+        <pre className="mt-2 text-[11px] text-gray-600 dark:text-slate-300 whitespace-pre-wrap break-words overflow-x-auto">
           {error.message}
         </pre>
       </details>

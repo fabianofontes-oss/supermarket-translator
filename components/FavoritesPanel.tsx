@@ -66,8 +66,8 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({
     if (favorites.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-12 opacity-50">
-                <StarIcon className="w-16 h-16 text-gray-400 mb-4" />
-                <p className="text-center text-gray-500">{t('noFavoritesYet')}</p>
+                <StarIcon className="w-16 h-16 text-gray-500 dark:text-slate-400 mb-4" />
+                <p className="text-center text-gray-500 dark:text-slate-400">{t('noFavoritesYet')}</p>
             </div>
         );
     }
@@ -78,7 +78,7 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({
         <div className="space-y-6 animate-fade-in">
             {Object.entries(groupedFavorites).map(([category, items]) => (
                 <div key={category}>
-                    <h2 className={`text-sm font-bold ${theme.textColor} uppercase tracking-wider mb-3 pb-2 border-b border-gray-100`}>{t(category)}</h2>
+                    <h2 className={`text-sm font-bold ${theme.textColor} uppercase tracking-wider mb-3 pb-2 border-b border-gray-100 dark:border-slate-700`}>{t(category)}</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {items.map(item => (
                             <TranslationItem

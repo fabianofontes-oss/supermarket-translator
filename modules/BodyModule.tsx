@@ -87,7 +87,7 @@ export default function BodyModule({
 
   const chip = (active: boolean, dim = false) =>
     `rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${
-      active ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
+      active ? `${theme.color} text-white border-transparent shadow` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
     } ${dim ? 'opacity-45' : ''}`;
 
   return (
@@ -116,9 +116,9 @@ export default function BodyModule({
     >
 
       {/* Boneco */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-3">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-3">
         <svg viewBox="0 0 200 400" className="w-full max-w-[210px] mx-auto block select-none" style={{ aspectRatio: '1 / 2' }}>
-          <g fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="2">
+          <g fill="var(--art-edge)" stroke="var(--art-fill)" strokeWidth="2">
             <circle cx="100" cy="42" r="30" />
             <rect x="92" y="68" width="16" height="18" />
             <rect x="66" y="82" width="68" height="112" rx="22" />
@@ -143,7 +143,7 @@ export default function BodyModule({
                   cy={p.y}
                   r={active ? 11 : 6}
                   fill={active ? theme.hex : 'white'}
-                  stroke={active ? 'white' : '#94a3b8'}
+                  stroke={active ? 'white' : 'var(--art-line)'}
                   strokeWidth={active ? 3 : 2}
                   style={{ transition: 'r var(--scene-duration) var(--ease-out), fill var(--scene-duration) var(--ease-out), stroke-width var(--scene-duration) var(--ease-out)' }}
                 />
@@ -156,15 +156,15 @@ export default function BodyModule({
 
       {/* Sintoma localizado */}
       <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('bodyWhereHurts')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('bodyWhereHurts')}</h2>
         <div className="grid grid-cols-4 gap-2">
           {LOCAL_SYMPTOMS.map((s) => {
             const active = s.key === symptom.key;
             return (
-              <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}>
+              <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}>
                 <span className="text-xl leading-none">{s.emoji}</span>
                 <span className="text-[11px] font-bold leading-tight text-center" dir="auto">{s.labels[target]}</span>
-                {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{s.labels[native]}</span>}
+                {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{s.labels[native]}</span>}
               </button>
             );
           })}
@@ -173,7 +173,7 @@ export default function BodyModule({
 
       {/* Partes do corpo */}
       <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('bodyPart')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('bodyPart')}</h2>
         <div className="flex flex-wrap gap-2">
           {BODY_PARTS.map((p) => (
             <button key={p.key} onClick={() => pickPart(p)} className={chip(p.key === part.key && !partsDimmed, partsDimmed)}>
@@ -186,15 +186,15 @@ export default function BodyModule({
 
       {/* Sintomas gerais */}
       <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('bodyHowFeel')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('bodyHowFeel')}</h2>
         <div className="grid grid-cols-4 gap-2">
           {GENERAL_SYMPTOMS.map((s) => {
             const active = s.key === symptom.key;
             return (
-              <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}>
+              <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}>
                 <span className="text-xl leading-none">{s.emoji}</span>
                 <span className="text-[11px] font-bold leading-tight text-center" dir="auto">{s.labels[target]}</span>
-                {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{s.labels[native]}</span>}
+                {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{s.labels[native]}</span>}
               </button>
             );
           })}
@@ -203,7 +203,7 @@ export default function BodyModule({
 
       {/* Duração */}
       <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('bodyDuration')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('bodyDuration')}</h2>
         <div className="flex flex-wrap gap-2">
           {DURATIONS.map((d) => (
             <button key={d.key} onClick={() => pickDuration(d)} className={chip(duration?.key === d.key)}>
@@ -214,15 +214,15 @@ export default function BodyModule({
       </section>
 
       {/* Frases da farmácia */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('bodyPhrases')}</h2>
-        <ul className="divide-y divide-gray-100">
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">{t('bodyPhrases')}</h2>
+        <ul className="divide-y divide-gray-100 dark:divide-slate-700">
           {BODY_QUESTIONS.map((q, i) => (
             <li key={i}>
               <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
-                  {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
+                  {showNative && <p className="text-xs text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{q[native]}</p>}
                 </div>
                 <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
               </button>

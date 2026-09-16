@@ -66,7 +66,7 @@ export const ModuleShell: React.FC<ModuleShellProps> = ({
   pinned,
   children,
 }) => (
-  <div className="w-full bg-slate-50 text-gray-800 flex flex-col h-[100dvh] relative overflow-hidden font-sans">
+  <div className="w-full bg-slate-50 dark:bg-slate-900 text-gray-800 dark:text-slate-100 flex flex-col h-[100dvh] relative overflow-hidden font-sans">
     {/* Sem o canto arredondado quando há banda: os dois se encostam e viram um
         bloco só de topo, distinguidos pela tonalidade e não por um vão. */}
     <header
@@ -111,7 +111,17 @@ export const ModuleShell: React.FC<ModuleShellProps> = ({
         conteúdo que some cortado no meio ao rolar. A sombra fecha o recado. */}
     {pinned && (
       <div
-        className="flex-shrink-0 z-20 w-full px-4 pt-3 pb-3 rounded-b-3xl shadow-[0_10px_18px_-8px_rgba(15,23,42,0.35)]"
+        /*
+         * `max-h-[45dvh]` com rolagem própria, e isto é correção de defeito, não
+         * enfeite: a banda é `flex-shrink-0` dentro de um contêiner de altura
+         * travada, então com o texto ampliado ela crescia sem limite. Medido a
+         * 320×640: com a raiz em 24px a banda ia a 492px e sobravam 60px de
+         * rolagem; a 32px ia a 734px — mais alta que a tela — e o topo da frase
+         * ficava inalcançável, que é falha de WCAG 1.4.4. Com o teto, a rolagem
+         * fica sempre com mais da metade da tela e a frase continua alcançável,
+         * rolando por dentro da banda.
+         */
+        className="flex-shrink-0 z-20 w-full px-4 pt-3 pb-3 rounded-b-3xl shadow-[0_10px_18px_-8px_rgba(15,23,42,0.35)] max-h-[45dvh] overflow-y-auto overscroll-contain"
         style={{ backgroundColor: `${theme.hex}14` }}
       >
         <div className="max-w-3xl mx-auto w-full space-y-3">{pinned}</div>

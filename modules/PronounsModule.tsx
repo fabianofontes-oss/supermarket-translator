@@ -100,7 +100,7 @@ export default function PronounsModule({
 
   const chip = (active: boolean) =>
     `rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${
-      active ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
+      active ? `${theme.color} text-white border-transparent shadow` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
     }`;
 
   return (
@@ -137,23 +137,23 @@ export default function PronounsModule({
         Saíram de dentro do cartão colorido quando a frase virou banda fixa, e por
         isso trocaram de paleta: antes eram brancos sobre a cor do módulo.
       */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5">{t('pronWhen')}</h2>
-        <div className="flex gap-1 rounded-xl bg-gray-200/70 p-1">
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-1.5">{t('pronWhen')}</h2>
+        <div className="flex gap-1 rounded-xl bg-gray-200/70 dark:bg-slate-700/70 p-1">
           {TENSES.map((tn) => (
             <button
               key={tn}
               onClick={() => { playSound('toggle'); setTense(tn); }}
               aria-pressed={tense === tn}
-              className={`tap flex-1 rounded-lg py-2 text-xs font-bold ${tense === tn ? 'bg-white shadow-sm' : 'text-gray-600'}`}
-              style={tense === tn ? { color: theme.hex } : undefined}
+              className={`tap flex-1 rounded-lg py-2 text-xs font-bold ${tense === tn ? 'bg-white dark:bg-slate-800 shadow-sm' : 'text-gray-600 dark:text-slate-300'}`}
+              style={tense === tn ? { color: 'var(--tema-texto)' } : undefined}
             >
               <span dir="auto">{TENSE_LABELS[tn][showNative ? native : target]}</span>
             </button>
           ))}
         </div>
 
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mt-3 mb-1.5">{t('pronHow')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mt-3 mb-1.5">{t('pronHow')}</h2>
         <div className="flex gap-2">
           {MOODS.map((m) => (
             <button
@@ -161,7 +161,7 @@ export default function PronounsModule({
               onClick={() => { playSound('toggle'); setMood(m); }}
               aria-pressed={mood === m}
               className={`tap flex-1 rounded-full py-2 text-xs font-bold border ${
-                mood === m ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100'
+                mood === m ? `${theme.color} text-white border-transparent shadow` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'
               }`}
             >
               <span dir="auto">{MOOD_LABELS[m][showNative ? native : target]}</span>
@@ -173,15 +173,15 @@ export default function PronounsModule({
 
       {/* Aviso sobre tú / usted / vosotros */}
       {note && (
-        <div className="rounded-2xl p-3 flex items-start gap-2 border" style={{ backgroundColor: `${theme.hex}0f`, borderColor: `${theme.hex}33` }}>
-          <InfoIcon className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: theme.hex }} />
-          <p className="text-sm text-gray-700 leading-snug" dir="auto">{note}</p>
+        <div className="rounded-2xl p-3 flex items-start gap-2 border" style={{ backgroundColor: `${theme.hex}0f`, borderColor: `var(--tema-texto)33` }}>
+          <InfoIcon className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--tema-texto)' }} />
+          <p className="text-sm text-gray-700 dark:text-slate-200 leading-snug" dir="auto">{note}</p>
         </div>
       )}
 
       {/* Pronomes */}
       <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('pronWho')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('pronWho')}</h2>
         <div className="grid grid-cols-2 gap-2">
           {PRONOUNS.map((p) => {
             const active = p.key === pronoun.key;
@@ -190,7 +190,7 @@ export default function PronounsModule({
               <button
                 key={p.key}
                 onClick={() => { playSound('click'); setPronoun(p); }}
-                className={`rounded-2xl border p-2.5 flex items-center gap-2.5 text-left tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}
+                className={`rounded-2xl border p-2.5 flex items-center gap-2.5 text-left tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
               >
                 <PeopleIcon plural={plural} active={active} hex={theme.hex} />
                 <span className="min-w-0 flex-1">
@@ -199,13 +199,13 @@ export default function PronounsModule({
                     {p.tag && (
                       <span
                         className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-                        style={active ? { backgroundColor: 'rgba(255,255,255,0.25)' } : { backgroundColor: `${theme.hex}18`, color: theme.hex }}
+                        style={active ? { backgroundColor: 'rgba(255,255,255,0.25)' } : { backgroundColor: `${theme.hex}18`, color: 'var(--tema-texto)' }}
                       >
                         {p.tag === 'formal' ? t('pronFormal') : t('pronSpainOnly')}
                       </span>
                     )}
                   </span>
-                  {showNative && <span className={`block text-[10px] leading-tight ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{p.words[native]}</span>}
+                  {showNative && <span className={`block text-[10px] leading-tight ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{p.words[native]}</span>}
                 </span>
               </button>
             );
@@ -215,7 +215,7 @@ export default function PronounsModule({
 
       {/* Verbos */}
       <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('pronVerb')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('pronVerb')}</h2>
         <div className="flex flex-wrap gap-2">
           {VERBS.map((v) => (
             <button key={v.key} onClick={() => pickVerb(v)} className={chip(v.key === verb.key)}>
@@ -228,7 +228,7 @@ export default function PronounsModule({
 
       {/* Complementos */}
       <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('pronWhat')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('pronWhat')}</h2>
         <div className="flex flex-wrap gap-2">
           {/* "precisar de" sem objeto vira frase truncada em pt/fr/it, então
               o verbo declara que exige complemento e o chip não aparece. */}
@@ -247,12 +247,12 @@ export default function PronounsModule({
       </section>
 
       {/* Tabela do verbo escolhido */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
-          {verb.labels[target]} <span className="text-gray-400">·</span>{' '}
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">
+          {verb.labels[target]} <span className="text-gray-500 dark:text-slate-400">·</span>{' '}
           <span className="normal-case tracking-normal" dir="auto">{TENSE_LABELS[tense][showNative ? native : target]}</span>
         </h2>
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-gray-100 dark:divide-slate-700">
           {PRONOUNS.map((p) => {
             const active = p.key === pronoun.key;
             return (
@@ -261,10 +261,10 @@ export default function PronounsModule({
                   onClick={() => { playSound('click'); setPronoun(p); speak(buildPhrase(target, p, verb, null, 'affirm', tense)); }}
                   className="w-full py-2 flex items-center gap-3 text-left tap active:scale-[0.98]"
                 >
-                  <span className={`text-sm w-28 flex-shrink-0 truncate ${active ? `font-bold ${theme.textColor}` : 'text-gray-500'}`} dir="auto">
+                  <span className={`text-sm w-28 flex-shrink-0 truncate ${active ? `font-bold ${theme.textColor}` : 'text-gray-500 dark:text-slate-400'}`} dir="auto">
                     {p.words[target]}
                   </span>
-                  <span className={`text-sm font-bold flex-1 min-w-0 truncate ${active ? theme.textColor : 'text-gray-800'}`} dir="auto">
+                  <span className={`text-sm font-bold flex-1 min-w-0 truncate ${active ? theme.textColor : 'text-gray-800 dark:text-slate-100'}`} dir="auto">
                     {tenseTable[p.altPerson?.[target] ?? p.person]}
                   </span>
                   <Listen className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />

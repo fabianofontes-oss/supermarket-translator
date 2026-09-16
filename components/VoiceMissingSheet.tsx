@@ -48,29 +48,29 @@ export const VoiceMissingSheet: React.FC<VoiceMissingSheetProps> = ({ country, o
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-slide-up max-h-[85vh] overflow-y-auto"
+        className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-slide-up max-h-[85vh] overflow-y-auto"
       >
         <div className="flex items-start gap-3 mb-4">
           <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: `${theme.hex}1a` }}>
             <SpeakerOffIcon className={`w-7 h-7 ${theme.textColor}`} />
           </div>
           <div className="min-w-0">
-            <h3 id={titleId} className="text-lg font-bold text-gray-900 leading-tight">
+            <h3 id={titleId} className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
               {t('voiceMissingTitle')}
             </h3>
             {/* Qual voz falta, em vez de um aviso genérico: é o que a pessoa
                 precisa procurar nas configurações do aparelho. */}
-            <p className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+            <p className="flex items-center gap-2 mt-1 text-sm text-gray-600 dark:text-slate-300">
               <img src={country.image} alt="" aria-hidden="true" className="w-5 h-5 rounded-full object-cover" />
               <span dir="auto">{country.name}</span>
-              <span className="font-mono text-xs text-gray-500">{country.lang}</span>
+              <span className="font-mono text-xs text-gray-500 dark:text-slate-400">{country.lang}</span>
             </p>
           </div>
         </div>
 
-        <p className="text-gray-600 mb-4 text-sm leading-relaxed" dir="auto">{t('voiceMissingBody')}</p>
+        <p className="text-gray-600 dark:text-slate-300 mb-4 text-sm leading-relaxed" dir="auto">{t('voiceMissingBody')}</p>
 
-        <ul className="bg-gray-50 rounded-xl p-4 mb-5 space-y-2.5 text-sm text-gray-700">
+        <ul className="bg-gray-50 dark:bg-slate-800 rounded-xl p-4 mb-5 space-y-2.5 text-sm text-gray-700 dark:text-slate-200">
           {steps.map((step) => (
             <li key={step} dir="auto" className="leading-snug">{step}</li>
           ))}

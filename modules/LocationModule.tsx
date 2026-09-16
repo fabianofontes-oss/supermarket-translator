@@ -53,8 +53,8 @@ const MiniPosition: React.FC<{ relKey: string; active: boolean; hex: string }> =
   const k = 0.13;
   return (
     <div className="relative w-9 h-9 flex items-center justify-center">
-      {p.ring && <div className="absolute w-6 h-6 rounded-full border border-dashed border-gray-300" />}
-      <div className={`w-3.5 h-3.5 rounded-sm ${active ? 'bg-white/70' : 'bg-gray-300'}`} style={{ zIndex: 1 }} />
+      {p.ring && <div className="absolute w-6 h-6 rounded-full border border-dashed border-gray-300 dark:border-slate-600" />}
+      <div className={`w-3.5 h-3.5 rounded-sm ${active ? 'bg-white/70' : 'bg-gray-300 dark:bg-slate-600'}`} style={{ zIndex: 1 }} />
       <div
         className="absolute w-2.5 h-2.5 rounded-full"
         style={{
@@ -162,15 +162,15 @@ export default function LocationModule({
     >
 
       {/* Cena */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-3">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-3">
         <div className="relative mx-auto w-[280px] h-[280px] select-none">
           {/* chão */}
-          <div className="absolute left-6 right-6 bottom-8 h-3 rounded-full bg-gray-200/70 blur-[2px]" />
+          <div className="absolute left-6 right-6 bottom-8 h-3 rounded-full bg-gray-200/70 dark:bg-slate-700/70 blur-[2px]" />
 
           {/* anel tracejado para dentro/fora */}
           <div
             className="absolute left-1/2 top-1/2 w-[132px] h-[132px] rounded-full border-2 border-dashed transition-opacity duration-500"
-            style={{ transform: 'translate(-50%, -50%)', borderColor: theme.hex, opacity: placement.ring ? 0.5 : 0 }}
+            style={{ transform: 'translate(-50%, -50%)', borderColor: 'var(--tema-texto)', opacity: placement.ring ? 0.5 : 0 }}
           />
 
           {/* referência (centro) */}
@@ -208,7 +208,7 @@ export default function LocationModule({
 
       {/* Relações */}
       <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('locRelation')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('locRelation')}</h2>
         <div className="grid grid-cols-3 gap-2">
           {LOC_RELATIONS.map((rel) => {
             const active = rel.key === relation.key;
@@ -217,13 +217,13 @@ export default function LocationModule({
                 key={rel.key}
                 onClick={() => pickRelation(rel)}
                 className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
-                  active ? `${theme.color} border-transparent text-white shadow-md` : 'bg-white border-gray-100 text-gray-700 hover:border-gray-300'
+                  active ? `${theme.color} border-transparent text-white shadow-md` : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-700 dark:text-slate-200 hover:border-gray-300 dark:hover:border-slate-600'
                 }`}
               >
                 <MiniPosition relKey={rel.key} active={active} hex={theme.hex} />
                 <span className="text-sm font-bold leading-tight text-center">{rel.labels[target]}</span>
                 {showNative && (
-                  <span className={`text-[11px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">
+                  <span className={`text-[11px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">
                     {rel.labels[native]}
                   </span>
                 )}
@@ -270,8 +270,8 @@ interface ObjectRowProps {
 
 const ObjectRow: React.FC<ObjectRowProps> = ({ title, selected, onPick, target, native, showNative, theme }) => (
   <section>
-    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">
-      {title} <span className="text-gray-400">·</span> <span className="text-gray-500 normal-case tracking-normal">{selected.emoji} {nounPhrase(target, selected)}</span>
+    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">
+      {title} <span className="text-gray-500 dark:text-slate-400">·</span> <span className="text-gray-500 dark:text-slate-400 normal-case tracking-normal">{selected.emoji} {nounPhrase(target, selected)}</span>
     </h2>
     <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
       {LOC_OBJECTS.map((obj) => {
@@ -281,13 +281,13 @@ const ObjectRow: React.FC<ObjectRowProps> = ({ title, selected, onPick, target, 
             key={obj.key}
             onClick={() => onPick(obj)}
             className={`flex-shrink-0 w-[84px] rounded-2xl border p-2 flex flex-col items-center gap-0.5 tap active:scale-95 ${
-              active ? `${theme.color} border-transparent text-white shadow-md` : 'bg-white border-gray-100 text-gray-700'
+              active ? `${theme.color} border-transparent text-white shadow-md` : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-700 dark:text-slate-200'
             }`}
           >
             <span className="text-3xl leading-none mb-1">{obj.emoji}</span>
             <span className="text-xs font-bold leading-tight text-center truncate w-full">{obj.names[target].n}</span>
             {showNative && (
-              <span className={`text-[10px] leading-tight text-center truncate w-full ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">
+              <span className={`text-[10px] leading-tight text-center truncate w-full ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">
                 {obj.names[native].n}
               </span>
             )}

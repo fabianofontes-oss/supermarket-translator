@@ -98,7 +98,7 @@ export default function SizesModule({
                 key={tb.key}
                 onClick={() => pickTable(tb)}
                 className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
-                  table.key === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-600 border-gray-100'
+                  table.key === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border-gray-100 dark:border-slate-700'
                 }`}
               >
                 <span className="text-2xl leading-none">{tb.emoji}</span>
@@ -121,39 +121,39 @@ export default function SizesModule({
 
 
       {/* Conversão */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
         <div className="flex items-center justify-center gap-4">
           <div className="text-center flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">
               {t('sizeYours')} · {t(SYSTEM_LABEL[fromSystem])}
             </p>
-            <p className="text-4xl font-extrabold text-gray-700 tabular-nums">{mySize}</p>
+            <p className="text-4xl font-extrabold text-gray-700 dark:text-slate-200 tabular-nums">{mySize}</p>
           </div>
 
-          <span className="text-2xl text-gray-400 flex-shrink-0">→</span>
+          <span className="text-2xl text-gray-500 dark:text-slate-400 flex-shrink-0">→</span>
 
           <div className="text-center flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: theme.hex }}>
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--tema-texto)' }}>
               {t('sizeHere')} · {t(SYSTEM_LABEL[toSystem])}
             </p>
-            <p className="text-4xl font-extrabold tabular-nums" style={{ color: theme.hex }}>{theirSize}</p>
+            <p className="text-4xl font-extrabold tabular-nums" style={{ color: 'var(--tema-texto)' }}>{theirSize}</p>
           </div>
         </div>
 
         {table.extraLabel && row.extra && (
-          <p className="text-center text-xs text-gray-500 mt-3 pt-3 border-t border-gray-100">
-            {table.extraLabel[showNative ? native : target]}: <span className="font-bold text-gray-600">{row.extra}</span>
+          <p className="text-center text-xs text-gray-500 dark:text-slate-400 mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
+            {table.extraLabel[showNative ? native : target]}: <span className="font-bold text-gray-600 dark:text-slate-300">{row.extra}</span>
           </p>
         )}
 
         {sameSystem && (
-          <p className="text-center text-xs text-gray-500 mt-3">{t('sizeSameSystem')}</p>
+          <p className="text-center text-xs text-gray-500 dark:text-slate-400 mt-3">{t('sizeSameSystem')}</p>
         )}
       </div>
 
       {/* Escolha do tamanho */}
       <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">
           {t('sizeYours')} · {t(SYSTEM_LABEL[fromSystem])}
         </h2>
         <div className="flex flex-wrap gap-2">
@@ -162,7 +162,7 @@ export default function SizesModule({
               key={r[fromSystem] + i}
               onClick={() => { playSound('click'); setRowIndex(i); }}
               className={`rounded-xl px-3 py-2 text-sm font-bold tabular-nums tap active:scale-95 border ${
-                i === rowIndex ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100'
+                i === rowIndex ? `${theme.color} text-white border-transparent shadow` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'
               }`}
             >
               {r[fromSystem]}
@@ -172,36 +172,39 @@ export default function SizesModule({
       </section>
 
       {/* Aviso */}
-      <div className="rounded-2xl p-3 flex items-start gap-2 border border-amber-200 bg-amber-50">
-        <InfoIcon className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600" />
-        <p className="text-sm text-amber-900 leading-snug" dir="auto">{SIZE_WARNING[showNative ? native : target]}</p>
+      <div className="rounded-2xl p-3 flex items-start gap-2 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950">
+        <InfoIcon className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600 dark:text-amber-300" />
+        <p className="text-sm text-amber-900 dark:text-amber-300 leading-snug" dir="auto">{SIZE_WARNING[showNative ? native : target]}</p>
       </div>
 
 
       {/* Tabela completa */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('sizeTable')}</h2>
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 overflow-x-auto">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">{t('sizeTable')}</h2>
         <table className="w-full text-sm tabular-nums">
           <thead>
-            <tr className="text-[10px] uppercase tracking-wider text-gray-500">
+            <tr className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400">
               {(['BR', 'EU', 'UK', 'US'] as const).map((sys) => (
                 <th key={sys} className="py-1 font-bold text-left">{sys}</th>
               ))}
               {table.extraLabel && <th className="py-1 font-bold text-left">{table.extraLabel[showNative ? native : target]}</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
             {table.rows.map((r, i) => (
               <tr
                 key={r.EU + i}
                 onClick={() => { playSound('click'); setRowIndex(i); }}
-                className={`cursor-pointer ${i === rowIndex ? 'font-bold' : 'text-gray-600'}`}
-                style={i === rowIndex ? { color: theme.hex, backgroundColor: `${theme.hex}0f` } : undefined}
+                className={`cursor-pointer ${i === rowIndex ? 'font-bold' : 'text-gray-600 dark:text-slate-300'}`}
+                style={i === rowIndex ? { color: 'var(--tema-texto)', backgroundColor: `${theme.hex}0f` } : undefined}
               >
                 {(['BR', 'EU', 'UK', 'US'] as const).map((sys) => (
                   <td key={sys} className="py-1.5">{r[sys]}</td>
                 ))}
-                {table.extraLabel && <td className="py-1.5 text-gray-500">{r.extra}</td>}
+                {/* gray-600, não gray-500: na linha escolhida há um véu da cor
+                    do módulo por baixo (`${theme.hex}0f`), e sobre ele o
+                    gray-500 media 4,42:1 — passa raspando por baixo dos 4,5. */}
+                {table.extraLabel && <td className="py-1.5 text-gray-600 dark:text-slate-300">{r.extra}</td>}
               </tr>
             ))}
           </tbody>
@@ -209,15 +212,15 @@ export default function SizesModule({
       </section>
 
       {/* Frases */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('sizePhrases')}</h2>
-        <ul className="divide-y divide-gray-100">
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">{t('sizePhrases')}</h2>
+        <ul className="divide-y divide-gray-100 dark:divide-slate-700">
           {SIZE_QUESTIONS.map((q, i) => (
             <li key={i}>
               <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
-                  {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
+                  {showNative && <p className="text-xs text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{q[native]}</p>}
                 </div>
                 <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
               </button>

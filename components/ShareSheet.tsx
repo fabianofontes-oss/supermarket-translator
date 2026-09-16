@@ -166,7 +166,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-slide-up max-h-[85vh] overflow-y-auto"
+        className="relative bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-slide-up max-h-[85vh] overflow-y-auto"
       >
         <div className="flex items-start gap-3 mb-5">
           {/* O mesmo glifo do botão que abriu a folha: é o que confirma para a
@@ -175,12 +175,12 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
             <ShareIcon className={`w-7 h-7 ${theme.textColor}`} />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 id={titleId} className="text-lg font-bold text-gray-900 leading-tight" dir="auto">
+            <h3 id={titleId} className="text-lg font-bold text-gray-900 dark:text-white leading-tight" dir="auto">
               {t('shareTitle')}
             </h3>
-            <p className="text-sm text-gray-600 mt-1 leading-snug" dir="auto">{t('shareSubtitle')}</p>
+            <p className="text-sm text-gray-600 dark:text-slate-300 mt-1 leading-snug" dir="auto">{t('shareSubtitle')}</p>
           </div>
-          <button onClick={close} aria-label={t('close')} className="hit p-1 -mt-1 -mr-1 shrink-0 text-gray-400 hover:text-gray-600 tap">
+          <button onClick={close} aria-label={t('close')} className="hit p-1 -mt-1 -mr-1 shrink-0 text-gray-500 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300 tap">
             <XIcon className="w-5 h-5" />
           </button>
         </div>
@@ -190,17 +190,17 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
             na moldura, onde não atrapalha o contraste do código. */}
         <div className="flex flex-col items-center gap-2 mb-5">
           <div
-            className="rounded-2xl border-[3px] bg-white p-3"
-            style={{ borderColor: theme.hex, boxShadow: `0 8px 30px ${theme.hex}26` }}
+            className="rounded-2xl border-[3px] bg-white dark:bg-slate-800 p-3"
+            style={{ borderColor: 'var(--tema-texto)', boxShadow: `0 8px 30px ${theme.hex}26` }}
           >
             {/* Decorativo: um QR não diz nada a um leitor de tela. Quem precisa
                 do endereço tem a URL em texto logo abaixo. */}
             <img src={SHARE_QR_SRC} alt="" aria-hidden="true" className="w-48 h-48 block" />
           </div>
-          <p className="text-xs text-gray-500 text-center leading-snug" dir="auto">{t('shareQrHint')}</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400 text-center leading-snug" dir="auto">{t('shareQrHint')}</p>
           {/* `dir="ltr"` próprio: em árabe o algoritmo bidi reordenaria os
               pedaços da URL e ela viraria um endereço que não existe. */}
-          <p className="url-mono text-gray-500 text-center select-all break-all" dir="ltr">{SHARE_URL}</p>
+          <p className="url-mono text-gray-500 dark:text-slate-400 text-center select-all break-all" dir="ltr">{SHARE_URL}</p>
         </div>
 
         {/*
@@ -242,7 +242,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
                 rel="noopener noreferrer"
                 onClick={() => playSound('click')}
                 aria-label={`${t('shareVia')} ${nome}`}
-                className="flex items-center justify-center gap-2 min-h-[48px] px-3 rounded-xl border border-gray-200 bg-white text-gray-700 font-semibold text-sm hover:bg-gray-50 active:scale-95 tap transition"
+                className="flex items-center justify-center gap-2 min-h-[48px] px-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-slate-800 active:scale-95 tap transition"
               >
                 <Glyph className="w-5 h-5 shrink-0" style={{ color: hex }} />
                 <span className="truncate">{nome}</span>
@@ -253,7 +253,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
           <button
             ref={botaoCopiarRef}
             onClick={handleCopiar}
-            className="flex items-center justify-center gap-2 w-full min-h-[48px] px-4 rounded-xl border border-gray-200 bg-white text-gray-700 font-semibold text-sm hover:bg-gray-50 active:scale-95 tap transition"
+            className="flex items-center justify-center gap-2 w-full min-h-[48px] px-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-slate-800 active:scale-95 tap transition"
           >
             <LinkIcon className="w-5 h-5 shrink-0" />
             <span dir="auto">
@@ -264,7 +264,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
           {temNativo && (
             <button
               onClick={handleNativo}
-              className="w-full min-h-[44px] px-4 rounded-xl text-sm font-semibold text-gray-500 hover:text-gray-700 hover:bg-gray-50 tap transition"
+              className="w-full min-h-[44px] px-4 rounded-xl text-sm font-semibold text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 tap transition"
             >
               <span dir="auto">{t('shareMoreOptions')}</span>
             </button>

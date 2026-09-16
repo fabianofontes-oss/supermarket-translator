@@ -42,24 +42,24 @@ export const UpdateSheet: React.FC<UpdateSheetProps> = ({ onApply, onDismiss, t,
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-slide-up"
+        className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-slide-up"
       >
         <div className="flex items-start gap-3 mb-4">
           <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: `${theme.hex}1a` }}>
             <RocketIcon className={`w-7 h-7 ${theme.textColor}`} />
           </div>
           <div className="min-w-0">
-            <h3 id={titleId} className="text-lg font-bold text-gray-900 leading-tight" dir="auto">
+            <h3 id={titleId} className="text-lg font-bold text-gray-900 dark:text-white leading-tight" dir="auto">
               {t('updateAvailableTitle')}
             </h3>
-            <p className="text-sm text-gray-600 mt-1 leading-snug" dir="auto">{t('updateAvailableBody')}</p>
+            <p className="text-sm text-gray-600 dark:text-slate-300 mt-1 leading-snug" dir="auto">{t('updateAvailableBody')}</p>
           </div>
         </div>
 
         <div className="flex gap-3">
           <button
             onClick={fechar}
-            className="flex-1 min-h-[44px] py-3 px-4 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+            className="flex-1 min-h-[44px] py-3 px-4 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 font-medium hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
           >
             {t('updateLater')}
           </button>

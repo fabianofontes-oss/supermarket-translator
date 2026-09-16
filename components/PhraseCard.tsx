@@ -67,8 +67,8 @@ export const PhraseCard: React.FC<{
       </div>
       <button
         onClick={() => onSpeak(phrase)}
-        className="p-3 rounded-full bg-white shadow tap active:scale-90 flex-shrink-0"
-        style={{ color: theme.hex }}
+        className="p-3 rounded-full bg-white dark:bg-slate-800 shadow tap active:scale-90 flex-shrink-0"
+        style={{ color: 'var(--tema-texto)' }}
         aria-label={listenLabel}
         title={listenLabel}
       >

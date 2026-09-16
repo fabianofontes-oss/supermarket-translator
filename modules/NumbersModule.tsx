@@ -175,7 +175,7 @@ export default function NumbersModule({
 
   const chip = (active: boolean) =>
     `rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${
-      active ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
+      active ? `${theme.color} text-white border-transparent shadow` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
     }`;
 
   // Ponteiros do relógio
@@ -207,7 +207,7 @@ export default function NumbersModule({
                 key={tb.key}
                 onClick={() => { playSound('page-turn'); setTab(tb.key); }}
                 className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
-                  tab === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-600 border-gray-100'
+                  tab === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border-gray-100 dark:border-slate-700'
                 }`}
               >
                 <span className="text-xl leading-none">{tb.icon}</span>
@@ -237,15 +237,15 @@ export default function NumbersModule({
 
 
       {/* Visual */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex items-center justify-center min-h-[190px]">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 flex items-center justify-center min-h-[190px]">
         {tab === 'time' && (
           <svg viewBox="0 0 200 200" className="w-48 h-48">
-            <circle cx="100" cy="100" r="92" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="4" />
+            <circle cx="100" cy="100" r="92" fill="var(--art-ground)" stroke="var(--art-edge)" strokeWidth="4" />
 
             {/* Marcas de minuto na borda */}
             {MINUTES.map((m) => {
               const a = (m * 6 - 90) * Math.PI / 180;
-              return <circle key={m} cx={100 + Math.cos(a) * 88} cy={100 + Math.sin(a) * 88} r={m === minute ? 3.5 : 1.8} fill={m === minute ? theme.hex : '#cbd5e1'} />;
+              return <circle key={m} cx={100 + Math.cos(a) * 88} cy={100 + Math.sin(a) * 88} r={m === minute ? 3.5 : 1.8} fill={m === minute ? theme.hex : 'var(--art-fill)'} />;
             })}
 
             {/* Anel de fora: 13 a 24, como está escrito nas placas */}
@@ -254,7 +254,7 @@ export default function NumbersModule({
               const a = (n * 30 - 90) * Math.PI / 180;
               const on = outer === outerActive;
               return (
-                <text key={`o${n}`} x={100 + Math.cos(a) * 75} y={100 + Math.sin(a) * 75 + 4} textAnchor="middle" fontSize="11" fontWeight="700" fill={on ? theme.hex : '#cbd5e1'}>
+                <text key={`o${n}`} x={100 + Math.cos(a) * 75} y={100 + Math.sin(a) * 75 + 4} textAnchor="middle" fontSize="11" fontWeight="700" fill={on ? theme.hex : 'var(--art-fill)'}>
                   {outer}
                 </text>
               );
@@ -264,7 +264,7 @@ export default function NumbersModule({
             {DIAL.map((n) => {
               const a = (n * 30 - 90) * Math.PI / 180;
               return (
-                <text key={n} x={100 + Math.cos(a) * 54} y={100 + Math.sin(a) * 54 + 6} textAnchor="middle" fontSize="16" fontWeight="700" fill={n === dialHour ? theme.hex : '#94a3b8'}>
+                <text key={n} x={100 + Math.cos(a) * 54} y={100 + Math.sin(a) * 54 + 6} textAnchor="middle" fontSize="16" fontWeight="700" fill={n === dialHour ? theme.hex : 'var(--art-label)'}>
                   {n}
                 </text>
               );
@@ -274,24 +274,24 @@ export default function NumbersModule({
               <line x1="100" y1="100" x2="100" y2="66" stroke={theme.hex} strokeWidth="7" strokeLinecap="round" />
             </g>
             <g style={{ transform: `rotate(${minAngle}deg)`, transformBox: 'view-box', transformOrigin: '100px 100px', transition: 'transform var(--scene-duration) var(--ease-out)' }}>
-              <line x1="100" y1="100" x2="100" y2="46" stroke="#475569" strokeWidth="4" strokeLinecap="round" />
+              <line x1="100" y1="100" x2="100" y2="46" stroke="var(--art-ink)" strokeWidth="4" strokeLinecap="round" />
             </g>
-            <circle cx="100" cy="100" r="6" fill="white" stroke={theme.hex} strokeWidth="3" />
+            <circle cx="100" cy="100" r="6" fill="var(--art-plate)" stroke={theme.hex} strokeWidth="3" />
           </svg>
         )}
 
         {tab === 'time' && (
           <div className="ml-4 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">{t('numOnSigns')}</p>
-            <p className="text-3xl font-extrabold tabular-nums whitespace-nowrap" style={{ color: theme.hex }}>{clockDisplay}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">{t('numOnSigns')}</p>
+            <p className="text-3xl font-extrabold tabular-nums whitespace-nowrap" style={{ color: 'var(--tema-texto)' }}>{clockDisplay}</p>
 
-            <div className="mt-2 inline-flex rounded-lg bg-gray-100 p-0.5">
+            <div className="mt-2 inline-flex rounded-lg bg-gray-100 dark:bg-slate-700 p-0.5">
               {[false, true].map((twelve) => (
                 <button
                   key={String(twelve)}
                   onClick={() => { playSound('toggle'); setTwelveHour(twelve); }}
-                  className={`tap rounded-md px-2 py-1 text-[10px] font-bold ${twelveHour === twelve ? 'bg-white shadow-sm' : 'text-gray-600'}`}
-                  style={twelveHour === twelve ? { color: theme.hex } : undefined}
+                  className={`tap rounded-md px-2 py-1 text-[10px] font-bold ${twelveHour === twelve ? 'bg-white dark:bg-slate-800 shadow-sm' : 'text-gray-600 dark:text-slate-300'}`}
+                  style={twelveHour === twelve ? { color: 'var(--tema-texto)' } : undefined}
                 >
                   {twelve ? 'AM/PM' : '24h'}
                 </button>
@@ -303,7 +303,7 @@ export default function NumbersModule({
         {tab === 'price' && (
           <div className="text-center">
             <div className="inline-block rounded-2xl px-8 py-5 shadow-inner" style={{ backgroundColor: `${theme.hex}12` }}>
-              <span className="text-5xl font-extrabold tabular-nums" style={{ color: theme.hex }}>{formatPriceTag(cents)}</span>
+              <span className="text-5xl font-extrabold tabular-nums" style={{ color: 'var(--tema-texto)' }}>{formatPriceTag(cents)}</span>
             </div>
             <div className="flex flex-wrap gap-2 justify-center mt-3">
               {PRICE_PRESETS.map((p) => (
@@ -317,15 +317,15 @@ export default function NumbersModule({
 
         {tab === 'date' && (
           <div className="text-center">
-            <div className="inline-block rounded-2xl overflow-hidden shadow border border-gray-100 w-32">
+            <div className="inline-block rounded-2xl overflow-hidden shadow border border-gray-100 dark:border-slate-700 w-32">
               <div className={`${theme.color} text-white text-xs font-bold uppercase tracking-widest py-1.5`}>{MONTHS[target][month]}</div>
-              <div className="text-6xl font-extrabold text-gray-800 py-3 tabular-nums">{day}</div>
+              <div className="text-6xl font-extrabold text-gray-800 dark:text-slate-100 py-3 tabular-nums">{day}</div>
             </div>
           </div>
         )}
 
         {tab === 'number' && (
-          <span className="text-6xl font-extrabold tabular-nums" style={{ color: theme.hex }}>{plainStr}</span>
+          <span className="text-6xl font-extrabold tabular-nums" style={{ color: 'var(--tema-texto)' }}>{plainStr}</span>
         )}
       </div>
 
@@ -334,7 +334,7 @@ export default function NumbersModule({
       {tab === 'time' && (
         <>
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numHour')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('numHour')}</h2>
 
             {/* Em AM/PM a grade tem DOZE números e um seletor de metade do dia.
                 Antes mostrava os mesmos 24 nos dois modos: quem escolhia AM/PM e
@@ -342,14 +342,14 @@ export default function NumbersModule({
                 nenhum — o seletor simplesmente não existia, e o modo não mudava
                 nada abaixo do relógio. */}
             {twelveHour && (
-              <div className="mb-2 inline-flex rounded-xl bg-gray-200/70 p-1">
+              <div className="mb-2 inline-flex rounded-xl bg-gray-200/70 dark:bg-slate-700/70 p-1">
                 {[false, true].map((pm) => (
                   <button
                     key={String(pm)}
                     aria-pressed={isPM === pm}
                     onClick={() => { playSound('toggle'); setFrom12(dialHour, pm); }}
-                    className={`tap rounded-lg px-5 py-1.5 text-xs font-bold ${isPM === pm ? 'bg-white shadow-sm' : 'text-gray-600'}`}
-                    style={isPM === pm ? { color: theme.hex } : undefined}
+                    className={`tap rounded-lg px-5 py-1.5 text-xs font-bold ${isPM === pm ? 'bg-white dark:bg-slate-800 shadow-sm' : 'text-gray-600 dark:text-slate-300'}`}
+                    style={isPM === pm ? { color: 'var(--tema-texto)' } : undefined}
                   >
                     {pm ? 'PM' : 'AM'}
                   </button>
@@ -374,7 +374,7 @@ export default function NumbersModule({
             </div>
           </section>
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numMinute')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('numMinute')}</h2>
             <div className="grid grid-cols-6 gap-2">
               {MINUTES.map((m) => (
                 <button key={m} onClick={() => { playSound('click'); setMinute(m); }} className={chip(minute === m)}>
@@ -389,26 +389,26 @@ export default function NumbersModule({
       {(tab === 'price' || tab === 'number') && (
         <section>
           <div className="flex items-center justify-between mb-2 px-1">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">
               {tab === 'price' ? t('numTypePrice') : t('numTypeNumber')}
             </h2>
-            <button onClick={pressClear} className="text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-gray-600">
+            <button onClick={pressClear} className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300">
               {t('dirClear')}
             </button>
           </div>
           <div className="grid grid-cols-3 gap-2">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => (
-              <button key={d} onClick={() => pressDigit(d)} className="rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold text-gray-700 active:scale-95 transition-transform shadow-sm">
+              <button key={d} onClick={() => pressDigit(d)} className="rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 py-3 text-2xl font-bold text-gray-700 dark:text-slate-200 active:scale-95 transition-transform shadow-sm">
                 {d}
               </button>
             ))}
             {tab === 'price' ? (
-              <button onClick={pressDoubleZero} className="rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold text-gray-700 active:scale-95 transition-transform shadow-sm">00</button>
+              <button onClick={pressDoubleZero} className="rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 py-3 text-2xl font-bold text-gray-700 dark:text-slate-200 active:scale-95 transition-transform shadow-sm">00</button>
             ) : (
-              <button onClick={pressComma} disabled={hasComma} className={`rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold active:scale-95 transition-transform shadow-sm ${hasComma ? 'text-gray-200' : 'text-gray-700'}`}>,</button>
+              <button onClick={pressComma} disabled={hasComma} className={`rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 py-3 text-2xl font-bold active:scale-95 transition-transform shadow-sm ${hasComma ? 'text-gray-200 dark:text-slate-600' : 'text-gray-700 dark:text-slate-200'}`}>,</button>
             )}
-            <button onClick={() => pressDigit(0)} className="rounded-2xl bg-white border border-gray-100 py-3 text-2xl font-bold text-gray-700 active:scale-95 transition-transform shadow-sm">0</button>
-            <button onClick={pressBack} className="rounded-2xl bg-white border border-gray-100 py-3 text-xl font-bold text-gray-500 active:scale-95 transition-transform shadow-sm">←</button>
+            <button onClick={() => pressDigit(0)} className="rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 py-3 text-2xl font-bold text-gray-700 dark:text-slate-200 active:scale-95 transition-transform shadow-sm">0</button>
+            <button onClick={pressBack} className="rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 py-3 text-xl font-bold text-gray-500 dark:text-slate-400 active:scale-95 transition-transform shadow-sm">←</button>
           </div>
         </section>
       )}
@@ -416,17 +416,17 @@ export default function NumbersModule({
       {tab === 'date' && (
         <>
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numDay')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('numDay')}</h2>
             <div className="grid grid-cols-7 gap-1.5">
               {DAYS.map((d) => (
-                <button key={d} onClick={() => { playSound('click'); setDay(d); }} className={`rounded-lg py-2 text-sm font-bold tap active:scale-95 border ${day === d ? `${theme.color} text-white border-transparent` : 'bg-white text-gray-700 border-gray-100'}`}>
+                <button key={d} onClick={() => { playSound('click'); setDay(d); }} className={`rounded-lg py-2 text-sm font-bold tap active:scale-95 border ${day === d ? `${theme.color} text-white border-transparent` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}>
                   {d}
                 </button>
               ))}
             </div>
           </section>
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('numMonth')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('numMonth')}</h2>
             <div className="grid grid-cols-3 gap-2">
               {MONTHS[target].map((m, i) => (
                 <button key={m} onClick={() => { playSound('click'); setMonth(i); }} className={`${chip(month === i)} truncate`}>{m}</button>
@@ -437,15 +437,15 @@ export default function NumbersModule({
       )}
 
       {/* Perguntas */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('numAsk')}</h2>
-        <ul className="divide-y divide-gray-100">
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">{t('numAsk')}</h2>
+        <ul className="divide-y divide-gray-100 dark:divide-slate-700">
           {NUM_QUESTIONS.map((q, i) => (
             <li key={i}>
               <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
-                  {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
+                  {showNative && <p className="text-xs text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{q[native]}</p>}
                 </div>
                 <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
               </button>

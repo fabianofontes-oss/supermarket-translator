@@ -17,7 +17,7 @@ interface ShareButtonProps {
  */
 const VARIANTES = {
   onColor: 'bg-white/10 border border-white/10 text-white hover:bg-white/20',
-  onLight: 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+  onLight: 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700',
 } as const;
 
 /**

@@ -250,7 +250,12 @@ describe('PARTE 12 — dir="auto" no texto traduzido', () => {
   it('o título do módulo e o par de termos do card marcam direção', () => {
     const card = ler('components/TranslationItem.tsx');
     expect(card).toMatch(/id=\{nameId\}[^>]*dir="auto"/s);
-    expect(card).toMatch(/id=\{termId\}[\s\S]{0,220}dir="auto"/);
+    // `[^>]*` e não uma janela de N caracteres: o que importa é que o `dir`
+    // esteja NA MESMA TAG, e a tag acaba no `>`. A janela de 220 media outra
+    // coisa — o comprimento da lista de classes — e caiu no dia em que cada
+    // classe neutra ganhou o seu par `dark:`, sem que o `dir` tivesse saído
+    // do lugar.
+    expect(card).toMatch(/id=\{termId\}[^>]*dir="auto"/s);
   });
 });
 

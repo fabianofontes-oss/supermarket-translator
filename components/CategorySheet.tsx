@@ -47,7 +47,7 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
 
       <div
         ref={panelRef}
-        className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] max-h-[85vh] flex flex-col animate-slide-up"
+        className="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] max-h-[85vh] flex flex-col animate-slide-up"
       >
         <div className={`${theme.color} rounded-t-[2.5rem] flex flex-col items-center pt-3 pb-3`}>
           <button onClick={close} aria-label={t('close')} className="hit w-12 h-1.5 rounded-full bg-white/40 mb-3 tap active:scale-90" />
@@ -77,14 +77,14 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
                   meta.wide
                     ? 'col-span-2 flex-row items-center gap-3 text-left'
                     : 'flex-col items-center justify-center gap-2'
-                } ${active ? 'ring-2' : 'ring-gray-100 bg-white'}`}
+                } ${active ? 'ring-2' : 'ring-gray-100 dark:ring-slate-700 bg-white dark:bg-slate-800'}`}
                 style={active ? { backgroundColor: `${theme.hex}14`, ['--tw-ring-color' as string]: theme.hex } : undefined}
               >
                 <span className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${meta.iconClass}`}>
                   <Icon className="w-6 h-6" />
                 </span>
                 <span
-                  className={`text-[13px] font-bold leading-tight break-words ${meta.wide ? 'text-left' : 'text-center'} ${active ? theme.textColor : 'text-gray-700'}`}
+                  className={`text-[13px] font-bold leading-tight break-words ${meta.wide ? 'text-left' : 'text-center'} ${active ? theme.textColor : 'text-gray-700 dark:text-slate-200'}`}
                   dir="auto"
                 >
                   {t(c.name)}

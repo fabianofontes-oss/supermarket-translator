@@ -80,10 +80,10 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
   const getButtonClasses = (locked: boolean, muted = false) =>
     `hit p-2 rounded-full tap active:scale-90 ${
       locked
-        ? 'bg-red-50 hover:bg-red-100'
+        ? 'bg-red-50 dark:bg-red-950 hover:bg-red-100'
         : muted
-        ? 'text-gray-400 hover:bg-gray-100'
-        : `hover:bg-gray-100 text-gray-500 hover:${theme.textColor}`
+        ? 'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700'
+        : `hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 hover:${theme.textColor}`
     }`;
 
   // Ids estáveis para ligar o gatilho ao painel (aria-controls) e ao próprio
@@ -101,7 +101,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
   useEffect(() => {
     if (highlighted && itemRef.current) {
       itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      const tempHighlightClass = 'bg-blue-100';
+      const tempHighlightClass = 'bg-blue-100 dark:bg-blue-950';
       itemRef.current.classList.add(tempHighlightClass, 'tap', 'duration-300');
       const timer = setTimeout(() => {
         itemRef.current?.classList.remove(tempHighlightClass);
@@ -220,9 +220,9 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
   return (
     <div
       ref={itemRef}
-      className={`rounded-xl tap bg-white ${
+      className={`rounded-xl tap bg-white dark:bg-slate-800 ${
         isExpanded ? `shadow-md border-2 ${theme.textColor.replace('text', 'border')}` : 'shadow-sm'
-      } ${isHighlighted ? 'bg-yellow-100' : 'bg-white'} overflow-hidden`}
+      } ${isHighlighted ? 'bg-yellow-100 dark:bg-yellow-950' : 'bg-white dark:bg-slate-800'} overflow-hidden`}
     >
       {/*
         Antes o card inteiro era uma `div` com `onClick`: invisível para o
@@ -244,7 +244,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
             {contextLabel && (
               <span
                 id={contextId}
-                className="text-[10px] font-bold uppercase tracking-wide text-gray-500 truncate"
+                className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400 truncate"
                 dir="auto"
               >
                 {contextLabel}
@@ -253,7 +253,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
 
             {/* Linha 1: termo de origem */}
             <span className="flex items-center gap-3 overflow-hidden">
-                <span className="w-7 h-7 rounded-full border border-slate-300 shadow-sm overflow-hidden relative flex-shrink-0 bg-white">
+                <span className="w-7 h-7 rounded-full border border-slate-300 dark:border-slate-600 shadow-sm overflow-hidden relative flex-shrink-0 bg-white dark:bg-slate-800">
                   <img
                     src={nativeCountry.image}
                     alt=""
@@ -263,12 +263,12 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     decoding="async"
                   />
                 </span>
-                <span id={nameId} className="text-gray-800 font-bold text-lg truncate pr-2 leading-tight" dir="auto">{item.source_term}</span>
+                <span id={nameId} className="text-gray-800 dark:text-slate-100 font-bold text-lg truncate pr-2 leading-tight" dir="auto">{item.source_term}</span>
             </span>
 
             {/* Linha 2: termo de destino */}
             <span className="flex items-center gap-3 overflow-hidden">
-                 <span className="w-7 h-7 rounded-full border border-slate-300 shadow-sm overflow-hidden relative flex-shrink-0 bg-white">
+                 <span className="w-7 h-7 rounded-full border border-slate-300 dark:border-slate-600 shadow-sm overflow-hidden relative flex-shrink-0 bg-white dark:bg-slate-800">
                     <img
                       src={targetCountry.image}
                       alt=""
@@ -287,8 +287,8 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     <span
                       id={termId}
                       className={localNameUnknown
-                        ? 'text-gray-500 font-medium italic text-sm'
-                        : 'text-gray-600 font-medium uppercase'}
+                        ? 'text-gray-500 dark:text-slate-400 font-medium italic text-sm'
+                        : 'text-gray-600 dark:text-slate-300 font-medium uppercase'}
                       dir="auto"
                     >
                         {localNameUnknown ? t('pharmacyNoLocalName') : displayTerm}
@@ -298,8 +298,8 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                         id={badgeId}
                         className={`mt-0.5 self-start text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded ${
                           availability.travel
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-slate-100 text-slate-700'
+                            ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200'
                         }`}
                         dir="auto"
                       >
@@ -321,7 +321,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     playSound(isFavorite ? 'click' : 'success');
                     onToggleFavorite(item);
                 }}
-                className="hit p-1 rounded-full flex-shrink-0 -mr-1 text-gray-500 hover:text-gray-500 tap active:scale-90"
+                className="hit p-1 rounded-full flex-shrink-0 -mr-1 text-gray-500 dark:text-slate-400 hover:text-gray-500 dark:hover:text-slate-400 tap active:scale-90"
                 aria-label={t('favorites')}
                 aria-pressed={isFavorite}
             >
@@ -358,7 +358,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
         }`}
       >
         {isExpanded && (
-          <div className="px-4 pb-4 pt-2 border-t border-gray-100 bg-slate-50/50">
+          <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
             
             {/* PHARMACY SPECIFIC UI */}
             {isPharmacy ? (
@@ -373,10 +373,10 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                       data-testid="pharmacy-status"
                       className={`flex items-center gap-2 text-sm font-bold px-3 py-2 rounded-lg shadow-sm ${
                         availability?.travel
-                          ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                          ? 'bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                           : availability
-                            ? 'bg-slate-100 text-slate-700 border border-slate-200'
-                            : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                            ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
+                            : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                       }`}
                     >
                         {availability ? (
@@ -395,7 +395,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     </div>
 
                     {availability && (
-                      <p className="text-[11px] text-gray-500 leading-snug -mt-1" dir="auto">
+                      <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-snug -mt-1" dir="auto">
                         {t('pharmacyCountryInfoNote')}
                       </p>
                     )}
@@ -407,24 +407,24 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                       lugar do nome.
                     */}
                     <div>
-                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5" dir="auto">
+                        <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-0.5" dir="auto">
                           {t('pharmacyGenericName')}
                         </p>
                         {localNameUnknown ? (
-                          <p className="text-sm text-gray-500 italic leading-tight" dir="auto">{t('pharmacyNoLocalName')}</p>
+                          <p className="text-sm text-gray-500 dark:text-slate-400 italic leading-tight" dir="auto">{t('pharmacyNoLocalName')}</p>
                         ) : (
-                          <p className="text-lg font-bold text-gray-800 leading-tight" dir="auto">{generic}</p>
+                          <p className="text-lg font-bold text-gray-800 dark:text-slate-100 leading-tight" dir="auto">{generic}</p>
                         )}
                     </div>
 
                     {!localNameUnknown && brands.length > 0 && (
                         <div>
-                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-2" dir="auto">
+                            <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-2" dir="auto">
                               {t('pharmacyBrands')}
                             </p>
                             <div className="flex flex-wrap gap-2">
                                 {brands.slice(0, 5).map((brand, idx) => (
-                                    <span key={idx} className="px-3 py-1 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 shadow-sm font-medium">
+                                    <span key={idx} className="px-3 py-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-sm text-gray-700 dark:text-slate-200 shadow-sm font-medium">
                                         {brand}
                                     </span>
                                 ))}
@@ -434,15 +434,15 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
 
                     {/* Sugestão que já vinha no próprio catálogo. */}
                     {availability?.alternative && (
-                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                            <p className="text-[10px] text-blue-500 uppercase font-bold mb-1" dir="auto">{t('pharmacyAskInstead')}</p>
-                            <p className="text-blue-800 font-bold text-sm" dir="auto">{availability.alternative}</p>
+                        <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
+                            <p className="text-[10px] text-blue-500 dark:text-blue-400 uppercase font-bold mb-1" dir="auto">{t('pharmacyAskInstead')}</p>
+                            <p className="text-blue-800 dark:text-blue-300 font-bold text-sm" dir="auto">{availability.alternative}</p>
                         </div>
                     )}
 
                     {/* Add to List Button - Replaces Audio Button in Expanded View */}
                     {!isPhrase && (
-                         <div className="pt-2 border-t border-gray-200/50 flex justify-end">
+                         <div className="pt-2 border-t border-gray-200/50 dark:border-slate-700/50 flex justify-end">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -451,7 +451,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                                 }}
                                 className={`flex items-center gap-2 font-semibold py-2 px-6 rounded-full text-sm transition-transform hover:scale-105 shadow-lg flex-shrink-0 ${
                                     isInShoppingList
-                                    ? 'bg-gray-700 text-white hover:bg-gray-800'
+                                    ? 'bg-gray-700 dark:bg-slate-600 text-white hover:bg-gray-800 dark:hover:bg-slate-500'
                                     : `${theme.color} text-white hover:opacity-90`
                                 }`}
                             >
@@ -476,8 +476,8 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     <div className="flex items-center gap-4 flex-1">
                     {item.phonetic && (
                         <div className="text-left">
-                        <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">{t('pronunciation')}</p>
-                        <p className="text-gray-800 font-mono text-lg">{item.phonetic}</p>
+                        <p className="text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider mb-1">{t('pronunciation')}</p>
+                        <p className="text-gray-800 dark:text-slate-100 font-mono text-lg">{item.phonetic}</p>
                         </div>
                     )}
                     </div>
@@ -491,7 +491,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                         }}
                         className={`flex items-center gap-2 font-semibold py-2 px-6 rounded-full text-sm transition-transform hover:scale-105 shadow-lg flex-shrink-0 ml-4 ${
                             isInShoppingList
-                            ? 'bg-gray-700 text-white hover:bg-gray-800'
+                            ? 'bg-gray-700 dark:bg-slate-600 text-white hover:bg-gray-800 dark:hover:bg-slate-500'
                             : `${theme.color} text-white hover:opacity-90`
                         }`}
                         >

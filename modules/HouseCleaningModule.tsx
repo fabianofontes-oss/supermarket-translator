@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useId, useMemo, useState } from 'react';
 import { ModuleShell } from '../components/ModuleShell';
+import { ModeTabs, panelProps } from '../components/ModeTabs';
 import { PhraseCard } from '../components/PhraseCard';
 import type { Country } from '../types';
 import { SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
@@ -54,7 +55,7 @@ function Chips<T extends { key: string }>({ theme, items, active, onPick, label 
             key={item.key}
             aria-pressed={on}
             onClick={() => { playSound('click'); onPick(item); }}
-            className={`rounded-2xl border p-3 text-left tap active:scale-95 ${on ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-700 border-gray-100'}`}
+            className={`rounded-2xl border p-3 text-left tap active:scale-95 ${on ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
           >
             <span className="block text-sm font-bold leading-tight" dir="auto">{label(item)}</span>
           </button>
@@ -77,7 +78,7 @@ function Pills<T extends { key: string }>({ theme, items, active, onPick, label 
             key={item.key}
             aria-pressed={on}
             onClick={() => { playSound('toggle'); onPick(item); }}
-            className={`rounded-xl px-3 py-2.5 text-sm font-bold tap active:scale-95 border ${on ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100'}`}
+            className={`rounded-xl px-3 py-2.5 text-sm font-bold tap active:scale-95 border ${on ? `${theme.color} text-white border-transparent shadow` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
           >
             <span dir="auto">{label(item)}</span>
           </button>
@@ -92,19 +93,19 @@ const PhraseList: React.FC<{
   items: { key: string; target: string; native: string | null; note?: string | null }[];
   Listen: Glyph; listenLabel: string; textColor: string; onSpeak: (text: string) => void;
 }> = ({ items, Listen, listenLabel, textColor, onSpeak }) => (
-  <ul className="divide-y divide-gray-100">
+  <ul className="divide-y divide-gray-100 dark:divide-slate-700">
     {items.map((item) => (
       <li key={item.key} className="py-1">
         <button onClick={() => onSpeak(item.target)} className="w-full py-2 flex items-center gap-3 text-left tap active:scale-[0.98]" aria-label={listenLabel}>
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold leading-snug" dir="auto">{item.target}</p>
-            {item.native && <p className="text-sm text-gray-500 leading-snug" dir="auto">{item.native}</p>}
+            {item.native && <p className="text-sm text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{item.native}</p>}
           </div>
           <Listen className={`w-6 h-6 flex-shrink-0 ${textColor}`} />
         </button>
         {/* A nota fica FORA do botão: é para ler, não para falar, e dentro dele
             entraria no nome acessível da frase. */}
-        {item.note && <p className="text-sm text-gray-600 leading-snug pb-2 pr-9" dir="auto">{item.note}</p>}
+        {item.note && <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug pb-2 pr-9" dir="auto">{item.note}</p>}
       </li>
     ))}
   </ul>
@@ -127,6 +128,9 @@ export default function HouseCleaningModule({
   /** A língua em que se EXPLICA: a de quem lê. A frase sai sempre no destino. */
   const read = showNative ? native : target;
 
+  /** Liga cada aba ao seu painel. `useId` evita colisão se dois módulos
+   *  chegarem a existir na mesma árvore. */
+  const tabsId = useId();
   const [mode, setMode] = useState<'task' | 'heard' | 'say'>('task');
   const [task, setTask] = useState<Task>(TASKS[0]);
   const [frame, setFrame] = useState<TaskFrame>(TASK_FRAMES[0]);
@@ -174,25 +178,14 @@ export default function HouseCleaningModule({
         {/* Seletor de modo. Dizer o que se vai fazer, ENTENDER o que mandaram e
             combinar as condições são três coisas diferentes — e a do meio é a
             única do app inteiro em que a frase é para ouvir, não para falar. */}
-        <div className="bg-gray-200/70 rounded-2xl p-1 flex gap-1" role="tablist" aria-label={t('moduleHouseCleaning')}>
-          {([['task', 'hcModeTask'], ['heard', 'hcModeHeard'], ['say', 'hcModeSay']] as const).map(([key, labelKey]) => {
-            const active = mode === key;
-            return (
-              <button
-                key={key}
-                role="tab"
-                aria-selected={active}
-                onClick={() => { playSound('page-turn'); setMode(key); }}
-                // py-3 e não py-2: com py-2 o botão fica em 36px de altura,
-                // que é exatamente o que a auditoria 8.9 lista como defeito.
-                className={`flex-1 rounded-xl py-3 text-sm font-bold tap ${active ? 'bg-white shadow-sm' : 'text-gray-600'}`}
-                style={active ? { color: theme.hex } : undefined}
-              >
-                <span dir="auto">{t(labelKey)}</span>
-              </button>
-            );
-          })}
-        </div>
+                <ModeTabs<'task' | 'heard' | 'say'>
+          idPrefix={tabsId}
+          label={t('moduleHouseCleaning')}
+          value={mode}
+          options={[{ key: 'task', label: t('hcModeTask') }, { key: 'heard', label: t('hcModeHeard') }, { key: 'say', label: t('hcModeSay') }]}
+          onChange={setMode}
+          theme={theme}
+        />
           {/* Só o modo `A tarefa` monta frase. Nos outros dois as frases já vêm
               prontas em lista, e não há o que ver se formando — a banda fica só
               com as abas, e isso é resposta, não falta. */}
@@ -202,89 +195,93 @@ export default function HouseCleaningModule({
         </>
       )}
     >
+      {/* O painel que as abas apontam. Só o do modo escolhido existe, então
+          um `div` basta: ele assume o id e o rótulo do modo atual. */}
+      <div {...panelProps(tabsId, mode)} className="space-y-4">
 
 
-      {/* ------------------------------------------------------ A TAREFA */}
-      {mode === 'task' && (
-        <>
-          {task.note && (
-            <p className="text-sm text-gray-600 leading-snug px-1" dir="auto">{task.note[read]}</p>
-          )}
+        {/* ------------------------------------------------------ A TAREFA */}
+        {mode === 'task' && (
+          <>
+            {task.note && (
+              <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug px-1" dir="auto">{task.note[read]}</p>
+            )}
 
-          <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('hcHowToSay')}</h2>
-            <Pills<TaskFrame>
-              theme={theme}
-              items={TASK_FRAMES}
-              active={frame.key}
-              onPick={setFrame}
-              label={(f) => f.labels[read]}
-            />
-          </section>
-
-          {/* O cômodo só existe para a tarefa que o aceita. Some da tela em vez
-              de ficar apagado — mesma regra que as Direções adotaram: botão que
-              passa a vida apagado ensina a pessoa a parar de olhar para ali. */}
-          {task.placeMode && (
             <section>
-              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('hcWhere')}</h2>
-              {/* Um toque no cômodo já escolhido desfaz a escolha. */}
-              <Pills<Place>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('hcHowToSay')}</h2>
+              <Pills<TaskFrame>
                 theme={theme}
-                items={PLACES}
-                active={place?.key ?? null}
-                onPick={(p) => setPlace(place?.key === p.key ? null : p)}
-                label={(p) => p.labels[read]}
+                items={TASK_FRAMES}
+                active={frame.key}
+                onPick={setFrame}
+                label={(f) => f.labels[read]}
               />
             </section>
-          )}
 
-          {TASK_GROUPS.map((g) => (
-            <section key={g}>
-              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1" dir="auto">{TASK_GROUP_LABELS[g][read]}</h2>
-              <Chips<Task>
-                theme={theme}
-                items={TASKS.filter((x) => x.group === g)}
-                active={task.key}
-                onPick={pickTask}
-                label={(x) => x.labels[read]}
+            {/* O cômodo só existe para a tarefa que o aceita. Some da tela em vez
+                de ficar apagado — mesma regra que as Direções adotaram: botão que
+                passa a vida apagado ensina a pessoa a parar de olhar para ali. */}
+            {task.placeMode && (
+              <section>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('hcWhere')}</h2>
+                {/* Um toque no cômodo já escolhido desfaz a escolha. */}
+                <Pills<Place>
+                  theme={theme}
+                  items={PLACES}
+                  active={place?.key ?? null}
+                  onPick={(p) => setPlace(place?.key === p.key ? null : p)}
+                  label={(p) => p.labels[read]}
+                />
+              </section>
+            )}
+
+            {TASK_GROUPS.map((g) => (
+              <section key={g}>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1" dir="auto">{TASK_GROUP_LABELS[g][read]}</h2>
+                <Chips<Task>
+                  theme={theme}
+                  items={TASKS.filter((x) => x.group === g)}
+                  active={task.key}
+                  onPick={pickTask}
+                  label={(x) => x.labels[read]}
+                />
+              </section>
+            ))}
+          </>
+        )}
+
+        {/* ---------------------------------------------- O QUE ELA PEDE */}
+        {mode === 'heard' && (
+          <>
+            {/* Único lugar do app em que a frase é para RECONHECER, não para
+                falar. Sem esta linha, a pessoa treina a pronúncia de uma ordem
+                que ela mesma nunca vai dar. */}
+            <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 p-4" dir="auto">
+              {t('hcHeardNote')}
+            </p>
+
+            <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+              <PhraseList
+                items={HEARD.map((h) => ({ key: h.key, target: h.text[target], native: showNative ? h.text[native] : null, note: h.note?.[read] ?? null }))}
+                Listen={Listen} listenLabel={listen} textColor={theme.textColor} onSpeak={speak}
               />
             </section>
-          ))}
-        </>
-      )}
+          </>
+        )}
 
-      {/* ---------------------------------------------- O QUE ELA PEDE */}
-      {mode === 'heard' && (
-        <>
-          {/* Único lugar do app em que a frase é para RECONHECER, não para
-              falar. Sem esta linha, a pessoa treina a pronúncia de uma ordem
-              que ela mesma nunca vai dar. */}
-          <p className="text-sm text-gray-600 leading-snug bg-white rounded-3xl border border-gray-100 p-4" dir="auto">
-            {t('hcHeardNote')}
-          </p>
-
-          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
+        {/* ------------------------------------------------------ COMBINAR */}
+        {mode === 'say' && SAY_GROUPS.map((g) => (
+          <section key={g} className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-1" dir="auto">{SAY_GROUP_LABELS[g][read]}</h2>
             <PhraseList
-              items={HEARD.map((h) => ({ key: h.key, target: h.text[target], native: showNative ? h.text[native] : null, note: h.note?.[read] ?? null }))}
+              items={SAY_PHRASES.filter((s) => s.group === g).map((s) => ({
+                key: s.key, target: s.text[target], native: showNative ? s.text[native] : null,
+              }))}
               Listen={Listen} listenLabel={listen} textColor={theme.textColor} onSpeak={speak}
             />
           </section>
-        </>
-      )}
-
-      {/* ------------------------------------------------------ COMBINAR */}
-      {mode === 'say' && SAY_GROUPS.map((g) => (
-        <section key={g} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-1" dir="auto">{SAY_GROUP_LABELS[g][read]}</h2>
-          <PhraseList
-            items={SAY_PHRASES.filter((s) => s.group === g).map((s) => ({
-              key: s.key, target: s.text[target], native: showNative ? s.text[native] : null,
-            }))}
-            Listen={Listen} listenLabel={listen} textColor={theme.textColor} onSpeak={speak}
-          />
-        </section>
-      ))}
+        ))}
+      </div>
     </ModuleShell>
   );
 }

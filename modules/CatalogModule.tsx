@@ -54,19 +54,19 @@ export interface CatalogModuleProps {
 
 // Cores pastel das abas inativas (efeito de pastas de arquivo)
 const FOLDER_COLORS = [
-  'bg-orange-100 text-orange-900 border-orange-200',
-  'bg-amber-100 text-amber-900 border-amber-200',
-  'bg-yellow-100 text-yellow-900 border-yellow-200',
-  'bg-lime-100 text-lime-900 border-lime-200',
-  'bg-emerald-100 text-emerald-900 border-emerald-200',
-  'bg-teal-100 text-teal-900 border-teal-200',
-  'bg-cyan-100 text-cyan-900 border-cyan-200',
-  'bg-sky-100 text-sky-900 border-sky-200',
-  'bg-indigo-100 text-indigo-900 border-indigo-200',
-  'bg-violet-100 text-violet-900 border-violet-200',
-  'bg-fuchsia-100 text-fuchsia-900 border-fuchsia-200',
-  'bg-pink-100 text-pink-900 border-pink-200',
-  'bg-rose-100 text-rose-900 border-rose-200',
+  'bg-orange-100 dark:bg-orange-950 text-orange-900 dark:text-orange-300 border-orange-200 dark:border-orange-800',
+  'bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+  'bg-yellow-100 dark:bg-yellow-950 text-yellow-900 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800',
+  'bg-lime-100 dark:bg-lime-950 text-lime-900 dark:text-lime-300 border-lime-200 dark:border-lime-800',
+  'bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+  'bg-teal-100 dark:bg-teal-950 text-teal-900 dark:text-teal-300 border-teal-200 dark:border-teal-800',
+  'bg-cyan-100 dark:bg-cyan-950 text-cyan-900 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800',
+  'bg-sky-100 dark:bg-sky-950 text-sky-900 dark:text-sky-300 border-sky-200 dark:border-sky-800',
+  'bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+  'bg-violet-100 dark:bg-violet-950 text-violet-900 dark:text-violet-300 border-violet-200 dark:border-violet-800',
+  'bg-fuchsia-100 dark:bg-fuchsia-950 text-fuchsia-900 dark:text-fuchsia-300 border-fuchsia-200 dark:border-fuchsia-800',
+  'bg-pink-100 dark:bg-pink-950 text-pink-900 dark:text-pink-300 border-pink-200 dark:border-pink-800',
+  'bg-rose-100 dark:bg-rose-950 text-rose-900 dark:text-rose-300 border-rose-200 dark:border-rose-800',
 ];
 
 /** O que a tela precisa saber para decidir o que mostrar. */
@@ -301,14 +301,14 @@ export default function CatalogModule({
   const searchBarContent = (
     <div className="px-4 pb-2 pt-1">
       <div className="relative group flex items-center max-w-3xl mx-auto w-full">
-        <SearchIcon className="absolute left-3 w-5 h-5 text-gray-500 pointer-events-none z-10" />
+        <SearchIcon className="absolute left-3 w-5 h-5 text-gray-500 dark:text-slate-400 pointer-events-none z-10" />
         <input
           ref={searchInputRef}
           type="text"
           placeholder={t('searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => { setSearchTerm(e.target.value); setExpandedItemKey(null); }}
-          className="w-full bg-white text-gray-800 rounded-xl py-3 pl-10 pr-20 text-sm shadow-md focus:ring-2 focus:ring-black/10 transition-shadow h-12"
+          className="w-full bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-100 rounded-xl py-3 pl-10 pr-20 text-sm shadow-md focus:ring-2 focus:ring-black/10 transition-shadow h-12"
         />
         <div className="absolute right-1.5 flex items-center gap-1">
           <button
@@ -322,14 +322,14 @@ export default function CatalogModule({
               }
             }}
             aria-label={t('dirClear')}
-            className="hit p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-600 tap active:scale-90"
+            className="hit p-2 rounded-full text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300 tap active:scale-90"
           >
             <XIcon className="w-5 h-5" />
           </button>
           <button
             onClick={() => { playSound('click'); startListening(); }}
             aria-label={t('a11yVoice')}
-            className={`hit p-2 rounded-full tap shadow-sm border ${isListening ? `${theme.color} text-white scale-110 border-transparent animate-pulse` : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200 active:scale-90'}`}
+            className={`hit p-2 rounded-full tap shadow-sm border ${isListening ? `${theme.color} text-white scale-110 border-transparent animate-pulse` : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 active:scale-90'}`}
           >
             <MicrophoneIcon className="w-5 h-5" />
           </button>
@@ -350,13 +350,13 @@ export default function CatalogModule({
       aria-haspopup="dialog"
       aria-expanded={isCategorySheetOpen}
       aria-label={`${t('categoryLabel')}: ${t(selectedCategory.name)}`}
-      className="w-full h-14 flex items-center gap-3 px-3 rounded-2xl bg-white shadow-md ring-1 ring-black/5 tap active:scale-[0.98]"
+      className="w-full h-14 flex items-center gap-3 px-3 rounded-2xl bg-white dark:bg-slate-800 shadow-md ring-1 ring-black/5 tap active:scale-[0.98]"
     >
       <span className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${currentMeta.iconClass}`}>
         <CurrentIcon className="w-5 h-5" />
       </span>
       <span className="flex-1 min-w-0 text-left">
-        <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 leading-none" dir="auto">
+        <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 leading-none" dir="auto">
           {t('categoryLabel')}
         </span>
         <span className={`block text-base font-bold truncate leading-tight ${theme.textColor}`} dir="auto">
@@ -387,7 +387,7 @@ export default function CatalogModule({
                 onClick={() => handleSubCategoryClick(sub, index)}
                 className={`hit relative px-4 py-2.5 rounded-t-xl text-sm font-medium tap active:scale-[0.97] whitespace-nowrap flex-shrink-0 mb-0 border-t border-l border-r ${
                   isActive
-                    ? `bg-slate-50 ${theme.textColor} font-bold shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-20 scale-105 -translate-y-0.5 border-white pb-3`
+                    ? `bg-slate-50 dark:bg-slate-900 ${theme.textColor} font-bold shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-20 scale-105 -translate-y-0.5 border-white pb-3`
                     : `${folderColor} opacity-95 hover:opacity-100 hover:scale-100 scale-95 translate-y-0.5 z-0 border-white/20 shadow-inner`
                 }`}
               >
@@ -482,16 +482,16 @@ export default function CatalogModule({
       <div className="space-y-4">
         {/* Uma letra não é "nada encontrado": é um pedido de mais letras. */}
         {search.mode === 'tooShort' && (
-          <p className="text-center text-gray-500 mt-10" dir="auto">{t('searchMinChars')}</p>
+          <p className="text-center text-gray-500 dark:text-slate-400 mt-10" dir="auto">{t('searchMinChars')}</p>
         )}
 
         {search.mode === 'results' && search.total === 0 && (
-          <p className="text-center text-gray-500 mt-10" dir="auto">{t('noItemsFoundFor')}</p>
+          <p className="text-center text-gray-500 dark:text-slate-400 mt-10" dir="auto">{t('noItemsFoundFor')}</p>
         )}
 
         {/* Nunca esconder em silêncio que existem mais. */}
         {search.mode === 'results' && search.total > searchResults.length && (
-          <p className="text-center text-xs text-gray-500 -mb-1" dir="auto">
+          <p className="text-center text-xs text-gray-500 dark:text-slate-400 -mb-1" dir="auto">
             {t('searchShowingOf')
               .replace('{shown}', String(searchResults.length))
               .replace('{total}', String(search.total))}
@@ -504,8 +504,8 @@ export default function CatalogModule({
               const subCategoryItems = PREPOPULATED_TRANSLATIONS['phrases']?.[sub] || [];
               if (subCategoryItems.length === 0) return null;
               return (
-                <div key={sub} id={`section-${sub}`} className="scroll-mt-40 bg-white rounded-3xl p-5 shadow-sm border border-gray-50">
-                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2 ml-1">
+                <div key={sub} id={`section-${sub}`} className="scroll-mt-40 bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-slate-700">
+                  <h3 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-4 border-b border-gray-100 dark:border-slate-700 pb-2 ml-1">
                     {t(sub)}
                   </h3>
                   <div className="space-y-3">

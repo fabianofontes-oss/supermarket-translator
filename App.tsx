@@ -66,64 +66,64 @@ type Tab = 'home' | 'search' | 'favorites' | 'list';
 export interface Theme { color: string; textColor: string; hex: string; borderColor: string }
 
 const THEMES: Record<ModuleKey, Theme> = {
-  supermarket: { color: 'bg-red-600',     textColor: 'text-red-600',     hex: '#dc2626', borderColor: 'border-red-600' },
-  pharmacy:    { color: 'bg-emerald-700', textColor: 'text-emerald-700', hex: '#047857', borderColor: 'border-emerald-700' },
-  location:    { color: 'bg-blue-600',    textColor: 'text-blue-600',    hex: '#2563eb', borderColor: 'border-blue-600' },
-  directions:  { color: 'bg-amber-700',   textColor: 'text-amber-700',   hex: '#b45309', borderColor: 'border-amber-700' },
-  numbers:     { color: 'bg-violet-600',  textColor: 'text-violet-600',  hex: '#7c3aed', borderColor: 'border-violet-600' },
-  body:        { color: 'bg-rose-600',    textColor: 'text-rose-600',    hex: '#e11d48', borderColor: 'border-rose-600' },
-  cafe:        { color: 'bg-orange-800',  textColor: 'text-orange-800',  hex: '#9a3412', borderColor: 'border-orange-800' },
-  pronouns:    { color: 'bg-teal-700',    textColor: 'text-teal-700',    hex: '#0f766e', borderColor: 'border-teal-700' },
-  sizes:       { color: 'bg-indigo-600',  textColor: 'text-indigo-600',  hex: '#4f46e5', borderColor: 'border-indigo-600' },
+  supermarket: { color: 'bg-red-600',     textColor: 'text-red-600 dark:text-red-300',     hex: '#dc2626', borderColor: 'border-red-600' },
+  pharmacy:    { color: 'bg-emerald-700', textColor: 'text-emerald-700 dark:text-emerald-300', hex: '#047857', borderColor: 'border-emerald-700' },
+  location:    { color: 'bg-blue-600',    textColor: 'text-blue-600 dark:text-blue-300',    hex: '#2563eb', borderColor: 'border-blue-600' },
+  directions:  { color: 'bg-amber-700',   textColor: 'text-amber-700 dark:text-amber-300',   hex: '#b45309', borderColor: 'border-amber-700' },
+  numbers:     { color: 'bg-violet-600',  textColor: 'text-violet-600 dark:text-violet-300',  hex: '#7c3aed', borderColor: 'border-violet-600' },
+  body:        { color: 'bg-rose-600',    textColor: 'text-rose-600 dark:text-rose-300',    hex: '#e11d48', borderColor: 'border-rose-600' },
+  cafe:        { color: 'bg-orange-800',  textColor: 'text-orange-800 dark:text-orange-300',  hex: '#9a3412', borderColor: 'border-orange-800' },
+  pronouns:    { color: 'bg-teal-700',    textColor: 'text-teal-700 dark:text-teal-300',    hex: '#0f766e', borderColor: 'border-teal-700' },
+  sizes:       { color: 'bg-indigo-600',  textColor: 'text-indigo-600 dark:text-indigo-300',  hex: '#4f46e5', borderColor: 'border-indigo-600' },
   // fuchsia-700 e não 600: no sólido o 600 dá 4,71:1, e no pé do gradiente do
   // header (`${hex}e6`) cai abaixo de 4,5:1 — foi onde Farmácia, Direções e
   // Pronomes reprovaram antes de subirem para o tom 700.
-  makeup:      { color: 'bg-fuchsia-700', textColor: 'text-fuchsia-700', hex: '#a21caf', borderColor: 'border-fuchsia-700' },
+  makeup:      { color: 'bg-fuchsia-700', textColor: 'text-fuchsia-700 dark:text-fuchsia-300', hex: '#a21caf', borderColor: 'border-fuchsia-700' },
   // sky-700: 5,93:1 com branco no sólido e 4,87:1 no pé do gradiente do header
   // (`${hex}e6`). O sky-600 dá 4,10:1 e já reprova no sólido, antes mesmo do
   // gradiente. Mesma armadilha de Farmácia, Direções, Pronomes e Maquiagem,
   // que subiram todos para o tom 700.
-  eldercare:   { color: 'bg-sky-700',     textColor: 'text-sky-700',     hex: '#0369a1', borderColor: 'border-sky-700' },
+  eldercare:   { color: 'bg-sky-700',     textColor: 'text-sky-700 dark:text-sky-300',     hex: '#0369a1', borderColor: 'border-sky-700' },
   // lime-800: 7,08:1 com branco no solido e 5,53:1 no pe do gradiente. O verde
   // obvio para limpeza seria o green-700, e ele da 4,17:1 no pe — reprova. O
   // lime-800 tambem nao se confunde com o emerald-700 da Farmacia, que e mais azulado.
-  housecleaning: { color: 'bg-lime-800',  textColor: 'text-lime-800',    hex: '#3f6212', borderColor: 'border-lime-800' },
+  housecleaning: { color: 'bg-lime-800',  textColor: 'text-lime-800 dark:text-lime-300',    hex: '#3f6212', borderColor: 'border-lime-800' },
 };
 
 // Módulos ativos do hub (classes escritas por extenso para o Tailwind gerar o CSS)
 // needsCatalog: depende dos 1.333 itens traduzidos; fica bloqueado para países só de origem (uk, ar).
 const ACTIVE_MODULES: { key: ModuleKey; labelKey: string; icon: React.FC<{ className?: string }>; iconClass: string; needsCatalog?: boolean }[] = [
-  { key: 'supermarket', labelKey: 'supermarketGuide', icon: ShoppingBagIconSolid, iconClass: 'bg-red-100 text-red-600', needsCatalog: true },
-  { key: 'pharmacy',    labelKey: 'modulePharmacy',   icon: PillIcon,             iconClass: 'bg-emerald-100 text-emerald-700', needsCatalog: true },
-  { key: 'location',    labelKey: 'moduleLocation',   icon: MapPinIcon,           iconClass: 'bg-blue-100 text-blue-600' },
-  { key: 'directions',  labelKey: 'moduleDirections', icon: SignpostIcon,         iconClass: 'bg-amber-100 text-amber-700' },
-  { key: 'numbers',     labelKey: 'moduleNumbers',    icon: NumbersIcon,          iconClass: 'bg-violet-100 text-violet-600' },
-  { key: 'body',        labelKey: 'moduleBody',       icon: BodyIcon,             iconClass: 'bg-rose-100 text-rose-600' },
-  { key: 'cafe',        labelKey: 'moduleCafe',       icon: CafeIcon,             iconClass: 'bg-orange-100 text-orange-800' },
-  { key: 'pronouns',    labelKey: 'modulePronouns',   icon: PronounsIcon,         iconClass: 'bg-teal-100 text-teal-700' },
-  { key: 'sizes',       labelKey: 'moduleSizes',      icon: SizesIcon,            iconClass: 'bg-indigo-100 text-indigo-600' },
-  { key: 'makeup',      labelKey: 'moduleMakeup',     icon: MakeupIcon,           iconClass: 'bg-fuchsia-100 text-fuchsia-700' },
+  { key: 'supermarket', labelKey: 'supermarketGuide', icon: ShoppingBagIconSolid, iconClass: 'bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-300', needsCatalog: true },
+  { key: 'pharmacy',    labelKey: 'modulePharmacy',   icon: PillIcon,             iconClass: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300', needsCatalog: true },
+  { key: 'location',    labelKey: 'moduleLocation',   icon: MapPinIcon,           iconClass: 'bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-300' },
+  { key: 'directions',  labelKey: 'moduleDirections', icon: SignpostIcon,         iconClass: 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300' },
+  { key: 'numbers',     labelKey: 'moduleNumbers',    icon: NumbersIcon,          iconClass: 'bg-violet-100 dark:bg-violet-950 text-violet-600 dark:text-violet-300' },
+  { key: 'body',        labelKey: 'moduleBody',       icon: BodyIcon,             iconClass: 'bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-300' },
+  { key: 'cafe',        labelKey: 'moduleCafe',       icon: CafeIcon,             iconClass: 'bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-300' },
+  { key: 'pronouns',    labelKey: 'modulePronouns',   icon: PronounsIcon,         iconClass: 'bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300' },
+  { key: 'sizes',       labelKey: 'moduleSizes',      icon: SizesIcon,            iconClass: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300' },
+  { key: 'makeup',      labelKey: 'moduleMakeup',     icon: MakeupIcon,           iconClass: 'bg-fuchsia-100 dark:bg-fuchsia-950 text-fuchsia-700 dark:text-fuchsia-300' },
   // Sem `needsCatalog`: e generativo, entao abre tambem para ucraniana,
   // marroquina e lituana — que sao justamente quem faz este trabalho.
-  { key: 'eldercare',   labelKey: 'moduleElderCare',  icon: ElderCareIcon,        iconClass: 'bg-sky-100 text-sky-700' },
-  { key: 'housecleaning', labelKey: 'moduleHouseCleaning', icon: HouseCleaningIcon, iconClass: 'bg-lime-100 text-lime-800' },
+  { key: 'eldercare',   labelKey: 'moduleElderCare',  icon: ElderCareIcon,        iconClass: 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300' },
+  { key: 'housecleaning', labelKey: 'moduleHouseCleaning', icon: HouseCleaningIcon, iconClass: 'bg-lime-100 dark:bg-lime-950 text-lime-800 dark:text-lime-300' },
 ];
 
 // Módulos ainda não implementados (aparecem desativados)
 const COMING_SOON: { labelKey: string; icon: React.FC<{ className?: string }>; iconClass: string }[] = [
-  { labelKey: 'moduleRestaurant', icon: UtensilsIcon,    iconClass: 'bg-orange-100 text-orange-500' },
-  { labelKey: 'moduleTransport',  icon: TruckIcon,       iconClass: 'bg-blue-100 text-blue-500' },
-  { labelKey: 'moduleHotel',      icon: BedIcon,         iconClass: 'bg-indigo-100 text-indigo-500' },
-  { labelKey: 'moduleBank',       icon: BankIcon,        iconClass: 'bg-green-100 text-green-500' },
-  { labelKey: 'moduleGym',        icon: DumbbellIcon,    iconClass: 'bg-purple-100 text-purple-500' },
-  { labelKey: 'moduleHospital',   icon: HospitalIcon,    iconClass: 'bg-red-100 text-red-500' },
-  { labelKey: 'moduleShopping',   icon: ShoppingBagIcon, iconClass: 'bg-pink-100 text-pink-500' },
-  { labelKey: 'moduleFuel',       icon: FuelIcon,        iconClass: 'bg-yellow-100 text-yellow-500' },
-  { labelKey: 'moduleSchool',     icon: SchoolIcon,      iconClass: 'bg-cyan-100 text-cyan-500' },
-  { labelKey: 'moduleMechanic',   icon: WrenchIcon,      iconClass: 'bg-slate-100 text-slate-500' },
-  { labelKey: 'modulePet',        icon: PawIcon,         iconClass: 'bg-orange-100 text-orange-500' },
-  { labelKey: 'modulePolice',     icon: ShieldCheckIcon, iconClass: 'bg-blue-100 text-blue-500' },
-  { labelKey: 'modulePost',       icon: EnvelopeIcon,    iconClass: 'bg-yellow-100 text-yellow-500' },
+  { labelKey: 'moduleRestaurant', icon: UtensilsIcon,    iconClass: 'bg-orange-100 dark:bg-orange-950 text-orange-500 dark:text-orange-400' },
+  { labelKey: 'moduleTransport',  icon: TruckIcon,       iconClass: 'bg-blue-100 dark:bg-blue-950 text-blue-500 dark:text-blue-400' },
+  { labelKey: 'moduleHotel',      icon: BedIcon,         iconClass: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-500 dark:text-indigo-400' },
+  { labelKey: 'moduleBank',       icon: BankIcon,        iconClass: 'bg-green-100 dark:bg-green-950 text-green-500 dark:text-green-400' },
+  { labelKey: 'moduleGym',        icon: DumbbellIcon,    iconClass: 'bg-purple-100 dark:bg-purple-950 text-purple-500 dark:text-purple-400' },
+  { labelKey: 'moduleHospital',   icon: HospitalIcon,    iconClass: 'bg-red-100 dark:bg-red-950 text-red-500 dark:text-red-400' },
+  { labelKey: 'moduleShopping',   icon: ShoppingBagIcon, iconClass: 'bg-pink-100 dark:bg-pink-950 text-pink-500 dark:text-pink-400' },
+  { labelKey: 'moduleFuel',       icon: FuelIcon,        iconClass: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-500 dark:text-yellow-400' },
+  { labelKey: 'moduleSchool',     icon: SchoolIcon,      iconClass: 'bg-cyan-100 dark:bg-cyan-950 text-cyan-500 dark:text-cyan-400' },
+  { labelKey: 'moduleMechanic',   icon: WrenchIcon,      iconClass: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' },
+  { labelKey: 'modulePet',        icon: PawIcon,         iconClass: 'bg-orange-100 dark:bg-orange-950 text-orange-500 dark:text-orange-400' },
+  { labelKey: 'modulePolice',     icon: ShieldCheckIcon, iconClass: 'bg-blue-100 dark:bg-blue-950 text-blue-500 dark:text-blue-400' },
+  { labelKey: 'modulePost',       icon: EnvelopeIcon,    iconClass: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-500 dark:text-yellow-400' },
 ];
 
 export default function App() {
@@ -185,6 +185,23 @@ export default function App() {
    * igual ao `lang` do documento que `useCountryPair` já mantém.
    */
   useEffect(() => { document.title = t('hubTitle'); }, [t]);
+
+  /*
+   * A cor do módulo atual, publicada na RAIZ do documento.
+   *
+   * Ela vem do JS, então nenhuma variante `dark:` do Tailwind a alcança — e no
+   * escuro as doze cores reprovam como texto (o vermelho do Supermercado dá
+   * 3,03:1 sobre o cartão escuro). Publicada aqui, o CSS pode derivar dela um
+   * tom legível em `--tema-texto`, e quem pinta texto, borda ou anel com a cor
+   * do módulo usa o derivado.
+   *
+   * Na raiz do documento, e não na moldura do módulo: folhas e modais são
+   * portais, vivem fora da árvore da moldura, e ali a variável não chegaria.
+   */
+  useEffect(() => {
+    const { hex } = currentModule ? THEMES[currentModule] : THEMES.supermarket;
+    document.documentElement.style.setProperty('--tema', hex);
+  }, [currentModule]);
 
   // Zera abas ao trocar de módulo
   useEffect(() => {
@@ -423,19 +440,19 @@ export default function App() {
         return <HouseCleaningModule {...commonProps} />;
       default: {
         return (
-          <div className="min-h-screen bg-gray-50 flex flex-col">
-            <header className="bg-white shadow-sm pt-12 pb-6 px-6 sticky top-0 z-10">
+          <div className="min-h-screen bg-gray-50 dark:bg-slate-800 flex flex-col">
+            <header className="bg-white dark:bg-slate-800 shadow-sm pt-12 pb-6 px-6 sticky top-0 z-10">
               <div className="flex justify-between items-center">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-800">{t('hubTitle')}</h1>
-                  <p className="text-gray-500 text-sm">{t('hubSubtitle')}</p>
+                  <h1 className="text-2xl font-bold text-gray-800 dark:text-slate-100">{t('hubTitle')}</h1>
+                  <p className="text-gray-500 dark:text-slate-400 text-sm">{t('hubSubtitle')}</p>
                 </div>
                 {/* Cluster da direita. `gap-2` não é escolha estética: a área
                     de toque de `.hit` é 44px centrada no botão, e com menos
                     espaço as duas se sobrepõem e uma delas para de responder. */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <ShareButton onClick={() => setIsShareOpen(true)} t={t} variant="onLight" />
-                  <button onClick={() => setIsLanguageModalOpen(true)} aria-label={t('languageSettings')} className="hit p-2 rounded-full bg-gray-100 hover:bg-gray-200 tap active:scale-90">
+                  <button onClick={() => setIsLanguageModalOpen(true)} aria-label={t('languageSettings')} className="hit p-2 rounded-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-700 tap active:scale-90">
                     <div className="flex items-center -space-x-2">
                       <img src={nativeCountry.image} alt={nativeCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
                       <img src={targetCountry.image} alt={targetCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
@@ -456,14 +473,14 @@ export default function App() {
                       style={stagger ? { animationDelay: `${i * 40}ms` } : undefined}
                       onClick={() => { playSound('click'); setCurrentModule(mod.key); }}
                       className={`${blocked
-                        ? 'bg-gray-50 p-5 rounded-2xl border border-gray-100 flex flex-col items-center gap-3 opacity-60'
-                        : 'bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center gap-3 hover:shadow-md tap active:scale-95'} ${stagger ? 'animate-rise-in' : ''}`}
+                        ? 'bg-gray-50 dark:bg-slate-800 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 opacity-60'
+                        : 'bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 hover:shadow-md tap active:scale-95'} ${stagger ? 'animate-rise-in' : ''}`}
                     >
                       <div className={`w-14 h-14 rounded-full flex items-center justify-center ${mod.iconClass} ${blocked ? 'grayscale' : ''}`}>
                         <mod.icon className="w-7 h-7" />
                       </div>
-                      <span className={`text-sm ${blocked ? 'font-medium text-gray-500' : 'font-bold text-gray-700'}`}>{t(mod.labelKey)}</span>
-                      {blocked && <span className="text-[10px] uppercase tracking-wider text-gray-500 -mt-2">{t('comingSoon')}</span>}
+                      <span className={`text-sm ${blocked ? 'font-medium text-gray-500 dark:text-slate-400' : 'font-bold text-gray-700 dark:text-slate-200'}`}>{t(mod.labelKey)}</span>
+                      {blocked && <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 -mt-2">{t('comingSoon')}</span>}
                     </button>
                   );
                 })}
@@ -472,12 +489,12 @@ export default function App() {
                   <button
                     key={mod.labelKey}
                     disabled
-                    className="bg-gray-50 p-5 rounded-2xl border border-gray-100 flex flex-col items-center gap-3 opacity-60"
+                    className="bg-gray-50 dark:bg-slate-800 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 opacity-60"
                   >
                     <div className={`w-14 h-14 rounded-full flex items-center justify-center grayscale ${mod.iconClass}`}>
                       <mod.icon className="w-7 h-7" />
                     </div>
-                    <span className="font-medium text-gray-500 text-sm">{t(mod.labelKey)}</span>
+                    <span className="font-medium text-gray-500 dark:text-slate-400 text-sm">{t(mod.labelKey)}</span>
                   </button>
                 ))}
               </div>
@@ -507,7 +524,7 @@ export default function App() {
           />
         )}
       >
-        <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 dark:bg-slate-800" />}>
           {renderContent()}
         </Suspense>
       </ErrorBoundary>
@@ -555,32 +572,32 @@ export default function App() {
             role="dialog"
             aria-modal="true"
             aria-labelledby={installTitleId}
-            className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl transform tap animate-slide-up"
+            className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl transform tap animate-slide-up"
           >
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-red-100 rounded-xl">
-                <ShoppingBagIconSolid className="w-8 h-8 text-red-600" />
+              <div className="p-3 bg-red-100 dark:bg-red-950 rounded-xl">
+                <ShoppingBagIconSolid className="w-8 h-8 text-red-600 dark:text-red-300" />
               </div>
-              <button onClick={handleDismissInstall} aria-label={t('close')} className="hit text-gray-500 hover:text-gray-600 p-1 tap active:scale-90">
+              <button onClick={handleDismissInstall} aria-label={t('close')} className="hit text-gray-500 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300 p-1 tap active:scale-90">
                 <span aria-hidden="true" className="text-2xl">&times;</span>
               </button>
             </div>
-            <h3 id={installTitleId} className="text-xl font-bold text-gray-900 mb-2">{t('installApp')}</h3>
-            <p className="text-gray-600 mb-6">{t('installAppDesc')}</p>
+            <h3 id={installTitleId} className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('installApp')}</h3>
+            <p className="text-gray-600 dark:text-slate-300 mb-6">{t('installAppDesc')}</p>
 
             {isIOS ? (
-              <div className="bg-gray-50 rounded-xl p-4 mb-4 text-sm text-gray-700 space-y-2">
+              <div className="bg-gray-50 dark:bg-slate-800 rounded-xl p-4 mb-4 text-sm text-gray-700 dark:text-slate-200 space-y-2">
                 <p className="flex items-center gap-2">
                   1. {t('iosStep1')}
-                  <span className="text-blue-500">
+                  <span className="text-blue-500 dark:text-blue-400">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
                   </span>
                 </p>
-                <p className="flex items-center gap-2">2. {t('iosStep2')} <span className="text-gray-900 font-bold">+</span></p>
+                <p className="flex items-center gap-2">2. {t('iosStep2')} <span className="text-gray-900 dark:text-white font-bold">+</span></p>
               </div>
             ) : (
               <div className="flex gap-3">
-                <button onClick={handleDismissInstall} className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 tap active:scale-95">
+                <button onClick={handleDismissInstall} className="flex-1 py-3 px-4 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 font-medium hover:bg-gray-50 dark:hover:bg-slate-800 tap active:scale-95">
                   {t('notNow')}
                 </button>
                 <button onClick={handleInstallClick} className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 tap active:scale-95">

@@ -236,12 +236,12 @@ export default function DirectionsModule({
       <button
         key={s.key}
         onClick={() => addStep(s)}
-        className="rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 bg-white border-gray-100 text-gray-700 hover:border-gray-300"
-        style={deLugar ? { borderColor: theme.hex, backgroundColor: `${theme.hex}0d` } : undefined}
+        className="rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-700 dark:text-slate-200 hover:border-gray-300 dark:hover:border-slate-600"
+        style={deLugar ? { borderColor: 'var(--tema-texto)', backgroundColor: `${theme.hex}0d` } : undefined}
       >
         <span className="text-2xl leading-none">{s.icon}</span>
         <span className={`text-[11px] font-bold leading-tight text-center ${deLugar ? theme.textColor : ''}`}>{s.labels[target]}</span>
-        {showNative && <span className="text-[10px] leading-tight text-center text-gray-500" dir="auto">{s.labels[native]}</span>}
+        {showNative && <span className="text-[10px] leading-tight text-center text-gray-500 dark:text-slate-400" dir="auto">{s.labels[native]}</span>}
       </button>
     );
   };
@@ -315,8 +315,8 @@ export default function DirectionsModule({
             {steps.length > 1 && (
               <button
                 onClick={() => speak(fullRoute)}
-                className="mt-3 w-full py-2.5 rounded-xl bg-white font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-                style={{ color: theme.hex }}
+                className="mt-3 w-full py-2.5 rounded-xl bg-white dark:bg-slate-800 font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                style={{ color: 'var(--tema-texto)' }}
               >
                 <Listen className="w-5 h-5" /> {t('dirPlayAll')}
               </button>
@@ -327,7 +327,7 @@ export default function DirectionsModule({
     >
 
       {/* MAPA */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-3">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-3">
         <svg viewBox="0 0 300 300" className="w-full max-w-[320px] mx-auto block select-none" style={{ aspectRatio: '1 / 1' }}>
           <defs>
             {/* Setas brancas dentro do traço do percurso: dizem o SENTIDO.
@@ -351,11 +351,11 @@ export default function DirectionsModule({
               tom é o que conta, sem legenda, até onde o percurso pode ir.
             */}
             <pattern id={cidadeId} patternUnits="userSpaceOnUse" x={OFF} y={OFF} width={SP} height={SP}>
-              <rect x={9} y={9} width={SP - 18} height={SP - 18} rx={7} fill="#f8fafc" stroke="#eef2f7" />
+              <rect x={9} y={9} width={SP - 18} height={SP - 18} rx={7} fill="var(--art-ground)" stroke="var(--art-tint)" />
               {[0, SP].map((d) => (
                 <g key={d}>
-                  <line x1={d} y1={-SP} x2={d} y2={SP * 2} stroke="#e8edf3" strokeWidth={11} />
-                  <line x1={-SP} y1={d} x2={SP * 2} y2={d} stroke="#e8edf3" strokeWidth={11} />
+                  <line x1={d} y1={-SP} x2={d} y2={SP * 2} stroke="var(--art-edge)" strokeWidth={11} />
+                  <line x1={-SP} y1={d} x2={SP * 2} y2={d} stroke="var(--art-edge)" strokeWidth={11} />
                 </g>
               ))}
             </pattern>
@@ -384,15 +384,15 @@ export default function DirectionsModule({
             {/* o bairro onde dá para andar, em tom mais forte */}
             {Array.from({ length: GRID - 1 }).map((_, bx) =>
               Array.from({ length: GRID - 1 }).map((_, by) => (
-                <rect key={`${bx}-${by}`} x={px(bx) + 9} y={px(by) + 9} width={SP - 18} height={SP - 18} rx={7} fill="#f1f5f9" stroke="#e2e8f0" />
+                <rect key={`${bx}-${by}`} x={px(bx) + 9} y={px(by) + 9} width={SP - 18} height={SP - 18} rx={7} fill="var(--art-tint)" stroke="var(--art-edge)" />
               ))
             )}
             {Array.from({ length: GRID }).map((_, i) => (
               <g key={i}>
-                <line x1={px(0)} y1={px(i)} x2={px(GRID - 1)} y2={px(i)} stroke="#cbd5e1" strokeWidth={11} strokeLinecap="round" />
-                <line x1={px(i)} y1={px(0)} x2={px(i)} y2={px(GRID - 1)} stroke="#cbd5e1" strokeWidth={11} strokeLinecap="round" />
-                <line x1={px(0)} y1={px(i)} x2={px(GRID - 1)} y2={px(i)} stroke="white" strokeWidth={1.3} strokeDasharray="5 7" />
-                <line x1={px(i)} y1={px(0)} x2={px(i)} y2={px(GRID - 1)} stroke="white" strokeWidth={1.3} strokeDasharray="5 7" />
+                <line x1={px(0)} y1={px(i)} x2={px(GRID - 1)} y2={px(i)} stroke="var(--art-fill)" strokeWidth={11} strokeLinecap="round" />
+                <line x1={px(i)} y1={px(0)} x2={px(i)} y2={px(GRID - 1)} stroke="var(--art-fill)" strokeWidth={11} strokeLinecap="round" />
+                <line x1={px(0)} y1={px(i)} x2={px(GRID - 1)} y2={px(i)} stroke="var(--art-paint)" strokeWidth={1.3} strokeDasharray="5 7" />
+                <line x1={px(i)} y1={px(0)} x2={px(i)} y2={px(GRID - 1)} stroke="var(--art-paint)" strokeWidth={1.3} strokeDasharray="5 7" />
               </g>
             ))}
 
@@ -407,13 +407,13 @@ export default function DirectionsModule({
             */}
             {DIAGONAIS.map((e, i) => (
               <g key={i}>
-                <line x1={px(e.a.x)} y1={px(e.a.y)} x2={px(e.b.x)} y2={px(e.b.y)} stroke="#cbd5e1" strokeWidth={11} strokeLinecap="round" />
-                <line x1={px(e.a.x)} y1={px(e.a.y)} x2={px(e.b.x)} y2={px(e.b.y)} stroke="white" strokeWidth={1.3} strokeDasharray="5 7" />
+                <line x1={px(e.a.x)} y1={px(e.a.y)} x2={px(e.b.x)} y2={px(e.b.y)} stroke="var(--art-fill)" strokeWidth={11} strokeLinecap="round" />
+                <line x1={px(e.a.x)} y1={px(e.a.y)} x2={px(e.b.x)} y2={px(e.b.y)} stroke="var(--art-paint)" strokeWidth={1.3} strokeDasharray="5 7" />
               </g>
             ))}
-            <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={23} fill="none" stroke="#cbd5e1" strokeWidth={11} />
-            <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={23} fill="none" stroke="white" strokeWidth={1.3} strokeDasharray="5 7" />
-            <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={16} fill="#dcfce7" stroke="#bbf7d0" strokeWidth={2} />
+            <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={23} fill="none" stroke="var(--art-fill)" strokeWidth={11} />
+            <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={23} fill="none" stroke="var(--art-paint)" strokeWidth={1.3} strokeDasharray="5 7" />
+            <circle cx={px(ROTATORIA.x)} cy={px(ROTATORIA.y)} r={16} fill="var(--art-green)" stroke="var(--art-green-edge)" strokeWidth={2} />
             <Upright x={px(ROTATORIA.x)} y={px(ROTATORIA.y)} deg={pose.spin * 45}>
               <text x={px(ROTATORIA.x)} y={px(ROTATORIA.y) + 6} textAnchor="middle" fontSize={17}>🌳</text>
             </Upright>
@@ -440,7 +440,7 @@ export default function DirectionsModule({
               markerMid={`url(#${setaId})`}
             />
             {/* início: anel vazado, o símbolo de origem */}
-            <circle cx={px(START.x)} cy={px(START.y)} r={8} fill="white" stroke={theme.hex} strokeWidth={3} />
+            <circle cx={px(START.x)} cy={px(START.y)} r={8} fill="var(--art-plate)" stroke={theme.hex} strokeWidth={3} />
             <circle cx={px(START.x)} cy={px(START.y)} r={3} fill={theme.hex} />
 
             {/* número de cada passo, casando com a lista numerada abaixo */}
@@ -485,7 +485,7 @@ export default function DirectionsModule({
           */}
           {pose.placa && (
             <g style={{ transform: `translate(${ANCORA.x}px, ${ANCORA.y}px)` }}>
-              <rect x={-27} y={-88} width={54} height={46} rx={13} fill="white" stroke="#e2e8f0" strokeWidth={1.5} />
+              <rect x={-27} y={-88} width={54} height={46} rx={13} fill="var(--art-plate)" stroke="var(--art-edge)" strokeWidth={1.5} />
               <text x={0} y={-54} textAnchor="middle" fontSize={28}>{pose.placa}</text>
             </g>
           )}
@@ -502,9 +502,9 @@ export default function DirectionsModule({
               transition: `transform ${DESLIZE}ms var(--ease-out)`,
             }}
           >
-            <circle cx={266} cy={34} r={18} fill="white" stroke="#e2e8f0" strokeWidth={1.5} />
+            <circle cx={266} cy={34} r={18} fill="var(--art-plate)" stroke="var(--art-edge)" strokeWidth={1.5} />
             <polygon points="266,20 270,34 262,34" fill={theme.hex} />
-            <polygon points="266,48 270,34 262,34" fill="#cbd5e1" />
+            <polygon points="266,48 270,34 262,34" fill="var(--art-fill)" />
             <Upright x={266} y={17} deg={pose.spin * 45}>
               <text x={266} y={17} textAnchor="middle" fontSize={10} fontWeight={700} fill={theme.hex}>
                 {compassNorth}
@@ -513,7 +513,7 @@ export default function DirectionsModule({
           </g>
         </svg>
 
-        <p className="text-xs text-gray-500 text-center leading-snug mt-1 px-2" dir="auto">{t('dirMapTurns')}</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400 text-center leading-snug mt-1 px-2" dir="auto">{t('dirMapTurns')}</p>
       </div>
 
       {/*
@@ -541,9 +541,9 @@ export default function DirectionsModule({
         logo acima, e ela troca de texto quando a pessoa chega na rotatória ou
         na bifurcação, que é onde a explicação vale.
       */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">{t('dirSteps')}</h2>
-        <p className="text-xs text-gray-500 mb-3 leading-snug" dir="auto">
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-1">{t('dirSteps')}</h2>
+        <p className="text-xs text-gray-500 dark:text-slate-400 mb-3 leading-snug" dir="auto">
           {emLugar && (
             <strong className={`font-bold ${theme.textColor}`}>
               {t(naRotatoria ? 'dirAtRoundabout' : 'dirAtFork')}{' — '}
@@ -556,32 +556,32 @@ export default function DirectionsModule({
             {passosNaTela.map(botaoPasso)}
           </div>
         ) : (
-          <p className="text-sm text-gray-600 leading-snug" dir="auto">{t('dirNoSteps')}</p>
+          <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug" dir="auto">{t('dirNoSteps')}</p>
         )}
       </section>
 
 
       {/* BÚSSOLA */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">{t('dirCompass')}</h2>
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-3">{t('dirCompass')}</h2>
         <div className="flex items-center gap-4">
           <svg viewBox="0 0 120 120" className="w-32 h-32 flex-shrink-0">
-            <circle cx={60} cy={60} r={54} fill="#f8fafc" stroke="#e2e8f0" strokeWidth={2} />
+            <circle cx={60} cy={60} r={54} fill="var(--art-ground)" stroke="var(--art-edge)" strokeWidth={2} />
             {COMPASS.map((c) => {
               const rad = (c.deg - 90) * Math.PI / 180;
               const x = 60 + Math.cos(rad) * 42;
               const y = 60 + Math.sin(rad) * 42 + 5;
               const active = c.key === compass.key;
               return (
-                <text key={c.key} x={x} y={y} textAnchor="middle" fontSize={14} fontWeight={700} fill={active ? theme.hex : '#94a3b8'}>
+                <text key={c.key} x={x} y={y} textAnchor="middle" fontSize={14} fontWeight={700} fill={active ? theme.hex : 'var(--art-label)'}>
                   {c.names[target].charAt(0)}
                 </text>
               );
             })}
             <g style={{ transform: `translate(60px, 60px) rotate(${compass.deg}deg)`, transition: 'transform var(--scene-duration) var(--ease-out)' }}>
               <polygon points="0,-30 7,0 -7,0" fill={theme.hex} />
-              <polygon points="0,30 7,0 -7,0" fill="#cbd5e1" />
-              <circle r={4} fill="white" stroke={theme.hex} strokeWidth={2} />
+              <polygon points="0,30 7,0 -7,0" fill="var(--art-fill)" />
+              <circle r={4} fill="var(--art-plate)" stroke={theme.hex} strokeWidth={2} />
             </g>
           </svg>
           <div className="flex-1 min-w-0">
@@ -592,10 +592,10 @@ export default function DirectionsModule({
                   <button
                     key={c.key}
                     onClick={() => { setCompassPick(i); speak(c.names[target]); }}
-                    className={`rounded-xl border px-2 py-1.5 text-left tap active:scale-95 ${active ? `${theme.color} border-transparent text-white` : 'bg-white border-gray-100 text-gray-700'}`}
+                    className={`rounded-xl border px-2 py-1.5 text-left tap active:scale-95 ${active ? `${theme.color} border-transparent text-white` : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-700 dark:text-slate-200'}`}
                   >
                     <div className="text-sm font-bold leading-tight">{c.names[target]}</div>
-                    {showNative && <div className={`text-[10px] leading-tight ${active ? 'text-white' : 'text-gray-500'}`} dir="auto">{c.names[native]}</div>}
+                    {showNative && <div className={`text-[10px] leading-tight ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{c.names[native]}</div>}
                   </button>
                 );
               })}
@@ -604,7 +604,7 @@ export default function DirectionsModule({
               <Listen className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
               <div className="min-w-0">
                 <p className="text-sm font-semibold leading-snug">{headingSentence(target, compass)}</p>
-                {showNative && <p className="text-[11px] text-gray-500 leading-snug" dir="auto">{headingSentence(native, compass)}</p>}
+                {showNative && <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{headingSentence(native, compass)}</p>}
               </div>
             </button>
           </div>
@@ -612,15 +612,15 @@ export default function DirectionsModule({
       </section>
 
       {/* PERGUNTAS */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{t('dirQuestions')}</h2>
-        <ul className="divide-y divide-gray-100">
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">{t('dirQuestions')}</h2>
+        <ul className="divide-y divide-gray-100 dark:divide-slate-700">
           {DIR_QUESTIONS.map((q, i) => (
             <li key={i}>
               <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold leading-snug">{q[target]}</p>
-                  {showNative && <p className="text-xs text-gray-500 leading-snug" dir="auto">{q[native]}</p>}
+                  {showNative && <p className="text-xs text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{q[native]}</p>}
                 </div>
                 <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
               </button>
@@ -666,18 +666,18 @@ interface VocabGroupProps {
 
 const VocabGroup: React.FC<VocabGroupProps> = ({ title, items, target, native, showNative, onSpeak }) => (
   <section>
-    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{title}</h2>
+    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{title}</h2>
     <div className="grid grid-cols-2 gap-2">
       {items.map((v, i) => (
         <button
           key={i}
           onClick={() => onSpeak(v.names[target])}
-          className="bg-white rounded-2xl border border-gray-100 p-2.5 flex items-center gap-2 text-left active:scale-95 transition-transform"
+          className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-2.5 flex items-center gap-2 text-left active:scale-95 transition-transform"
         >
           <span className="text-2xl leading-none flex-shrink-0">{v.emoji}</span>
           <div className="min-w-0">
             <p className="text-sm font-bold leading-tight">{v.names[target]}</p>
-            {showNative && <p className="text-[11px] text-gray-500 leading-tight" dir="auto">{v.names[native]}</p>}
+            {showNative && <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-tight" dir="auto">{v.names[native]}</p>}
           </div>
         </button>
       ))}

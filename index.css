@@ -11,12 +11,117 @@
 
   /* Duração das animações que explicam algo: a cena, o mapa, o relógio. */
   --scene-duration: 550ms;
+
+  /*
+   * ---------------------------------------------------------------------
+   * A PALETA DOS DESENHOS
+   * ---------------------------------------------------------------------
+   * O mapa das Direções, o relógio dos Números, o boneco do Onde dói, a xícara
+   * do Café, o rosto da Maquiagem: todos eram hex cravado dentro do SVG, 41 ao
+   * todo, espalhados por sete arquivos. Enquanto estavam cravados o modo escuro
+   * era impossível — um desenho de traço cinza-claro sobre fundo escuro some.
+   *
+   * São PAPÉIS, não valores. Os nomes dizem o que a cor faz no desenho, e é por
+   * isso que a rampa inteira pode inverter de uma vez no escuro sem que nenhum
+   * desenho troque de figura e fundo: a ordem de claro para escuro se mantém
+   * invertida, ponta a ponta.
+   *
+   *   ground → tint → edge → fill → line → ink
+   *   mais claro ....................... mais escuro   (no claro)
+   *   mais escuro ...................... mais claro    (no escuro)
+   *
+   * `--art-line` é o mesmo cinza nos dois temas, de propósito: fica no meio da
+   * faixa de luminância e aguenta os dois fundos (6,9:1 no escuro).
+   */
+  --art-ground: #f8fafc; /* o fundo do desenho, um degrau atrás do cartão */
+  --art-tint: #f1f5f9; /* uma camada acima do fundo: o quarteirão no mapa */
+  --art-edge: #e2e8f0; /* contorno tênue, borda de placa */
+  --art-fill: #cbd5e1; /* massa: a rua, o marcador apagado */
+  --art-line: #94a3b8; /* o traço padrão do desenho */
+  --art-ink: #475569; /* traço forte: o ponteiro do relógio */
+  --art-plate: #ffffff; /* a placa por cima do desenho */
+  --art-paint: #ffffff; /* a faixa pintada no meio da rua */
+
+  /*
+   * Texto DENTRO do desenho tem papel próprio, e isto é correção de defeito:
+   * os números das horas e as letras da bússola usavam `--art-line` sobre
+   * `--art-ground`, o que dá 2,44:1 — reprovado em WCAG 1.4.3, e não é
+   * decoração, é onde a pessoa toca para escolher a hora. Em slate-500 dá
+   * 4,56:1. Traço de desenho pode ser mais claro que texto; texto não.
+   */
+  --art-label: #64748b;
+
+  /* Fora da rampa: cor com significado próprio. */
+  --art-skin: #f5e6db; /* o rosto da Maquiagem */
+  --art-green: #dcfce7; /* o canteiro da rotatória */
+  --art-green-edge: #bbf7d0;
+}
+
+/*
+ * A COR DO MÓDULO COMO TEXTO
+ *
+ * As doze cores de módulo foram escolhidas para texto sobre branco, e sobre
+ * branco elas passam. Sobre o cartão escuro, não: o vermelho do Supermercado
+ * (#dc2626) sobre slate-800 dá 3,03:1, reprovado para texto. E como essa cor
+ * chega por `style` inline — ela vem do JS, não do Tailwind —, nenhuma variante
+ * `dark:` alcança esses catorze pontos.
+ *
+ * A saída é um token derivado: quem pinta texto com a cor do módulo usa
+ * `--tema-texto`, e é aqui que ele clareia.
+ *
+ * Os dois vivem na RAIZ do documento: `App.tsx` escreve `--tema` ali a cada
+ * troca de módulo. Propriedade personalizada resolve no elemento onde é
+ * declarada, então os dois PRECISAM estar no mesmo elemento — e a raiz é o
+ * único que alcança também as folhas e os modais, que são portais e vivem fora
+ * da árvore da moldura.
+ */
+:root {
+  --tema-texto: var(--tema, #334155);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 52% de branco: medido, leva as doze cores para a faixa de 5,7:1 a 6,2:1
+       sobre o cartão escuro. A mais escura delas (Café, #9a3412) é a que manda
+       no número, e ela fecha em 5,69:1. */
+    --tema-texto: color-mix(in srgb, var(--tema, #334155) 52%, white);
+
+    /* A rampa dos desenhos inverte inteira, na mesma ordem. */
+    --art-ground: #0f172a;
+    --art-tint: #1e293b;
+    --art-edge: #334155;
+    --art-fill: #475569;
+    --art-line: #94a3b8;
+    --art-ink: #e2e8f0;
+    --art-plate: #1e293b;
+    /* A faixa da rua não é branco puro no escuro: numa tela apagada, branco
+       sobre cinza-escuro vira o ponto mais brilhante da tela por engano. */
+    --art-paint: #cbd5e1;
+    --art-label: #94a3b8;
+    /* Pele em luz baixa é pele na sombra, não pele clareada. */
+    --art-skin: #7c5f4e;
+    --art-green: #14532d;
+    --art-green-edge: #166534;
+  }
 }
 
 /* Global Styles & Animations */
 body {
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none; /* Prevents pull-to-refresh on mobile */
+  /*
+   * Sem isto o app fica escuro e o que o NAVEGADOR desenha continua claro: a
+   * barra de rolagem, o campo de busca, o menu de `select`, o fundo branco que
+   * pisca antes do React montar. `color-scheme` é o que avisa a engine.
+   */
+  color-scheme: light dark;
+  background-color: #f8fafc;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #0f172a;
+  }
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

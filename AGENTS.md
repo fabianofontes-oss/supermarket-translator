@@ -459,6 +459,26 @@ para aquele idioma, não uma data futura.
 8. Cor de tema vem de `THEMES` em [App.tsx](App.tsx), que tem as quatro formas da cor
    (`color`, `textColor`, `hex`, `borderColor`) justamente para nunca precisar montar
    classe.
+9. **Toda superfície neutra tem par no escuro.** `bg-white` sem `dark:bg-slate-800`
+   ao lado é defeito, e [tests/darkMode.test.ts](tests/darkMode.test.ts) reprova.
+   Duas coisas ficam **de fora** e nunca devem ganhar par: `text-white` e
+   `bg-white/NN` — os dois vivem sobre a cor do módulo, que é a mesma nos dois
+   temas. É por isso que a barra do alfa entra na fronteira do regex.
+10. **Desenho não tem cor cravada.** As cores dos SVGs são papéis declarados em
+    [index.css](index.css) — `--art-ground`, `--art-tint`, `--art-edge`,
+    `--art-fill`, `--art-line`, `--art-ink`, `--art-plate`, `--art-paint`,
+    mais `--art-label` para texto dentro do desenho e `--art-skin`/`--art-green`
+    fora da rampa. A rampa inverte inteira no escuro, na mesma ordem, e é por isso
+    que nenhum desenho troca de figura e fundo. Cor de marca (WhatsApp, Telegram,
+    Facebook, em [components/BrandIcons.tsx](components/BrandIcons.tsx)) é a única
+    exceção: marca é fixa por definição.
+11. **A cor do módulo como texto passa por `--tema-texto`, nunca por `theme.hex`.**
+    `App.tsx` publica `--tema` na raiz do documento a cada troca de módulo; o CSS
+    deriva dali um tom legível. As doze cores foram escolhidas para texto sobre
+    branco e reprovam sobre o cartão escuro — o vermelho do Supermercado dá
+    3,03:1. E como `theme.hex` chega por `style` inline, vindo do JS, **nenhuma
+    variante `dark:` o alcança**: o token é o único caminho. Vale para texto,
+    borda e anel; onde a cor do módulo É o fundo, o hex cru continua certo.
 
 ## 8. Auditoria: o que está quebrado
 

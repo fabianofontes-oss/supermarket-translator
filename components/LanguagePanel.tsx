@@ -77,7 +77,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
         isBlocked
           ? 'opacity-25 grayscale cursor-not-allowed'
           : isSelected
-          ? 'bg-white shadow-xl scale-110 z-10 ring-2 ring-offset-1'
+          ? 'bg-white dark:bg-slate-800 shadow-xl scale-110 z-10 ring-2 ring-offset-1'
           : 'hover:bg-white/40 hover:scale-105 opacity-80 hover:opacity-100 grayscale hover:grayscale-0'
       }`}
       style={isSelected ? ({ '--tw-ring-color': ringColor } as React.CSSProperties) : undefined}
@@ -101,7 +101,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label={t('languageSettings')}
-        className="relative w-full max-w-[16rem] bg-white rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[85vh] overflow-y-auto animate-expand-up no-scrollbar"
+        className="relative w-full max-w-[16rem] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[85vh] overflow-y-auto animate-expand-up no-scrollbar"
       >
 
         {/* Close Button */}
@@ -114,8 +114,8 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
         </button>
 
         {/* Top Section: Native Language (Blue Theme) */}
-        <div className="bg-slate-100 flex flex-col shrink-0">
-             <div id={nativeGroupId} className="bg-slate-700 text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2">
+        <div className="bg-slate-100 dark:bg-slate-800 flex flex-col shrink-0">
+             <div id={nativeGroupId} className="bg-slate-700 dark:bg-slate-600 text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2">
                 {t('myLanguage')}...
              </div>
              {/* Optimized padding and gap for small screens */}
@@ -126,7 +126,10 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
                         opt,
                         isSelected,
                         () => onNativeChange(opt),
-                        '#475569',
+                        // Tinta forte, e não o hex: #475569 sobre o chip escuro
+                        // dá 1,95:1 e o anel de seleção some. `--art-ink` é o
+                        // papel que inverte — 7,5:1 no claro, 11,9:1 no escuro.
+                        'var(--art-ink)',
                         targetCountry.code === opt.code || (blockOriginOnly && !!opt.originOnly),
                         isSelected ? nativeSelectedRef : undefined,
                     );
@@ -169,7 +172,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
           não instalado" — que é a confusão que produziu as reprovações.
           Fechado por padrão: quem não procurar, não vê.
         */}
-        <div className="border-t border-gray-100 bg-white rounded-b-2xl">
+        <div className="border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-b-2xl">
           {/*
             Botão + aria-expanded em vez de <details>: o elemento nativo entra
             na árvore como role="group" e passaria a contar como um terceiro
@@ -179,7 +182,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
             onClick={() => setShowDiagnostics((v) => !v)}
             aria-expanded={showDiagnostics}
             aria-controls={diagnosticsId}
-            className="w-full px-4 py-2.5 text-left text-[11px] uppercase tracking-wider text-gray-500 hover:text-gray-700"
+            className="w-full px-4 py-2.5 text-left text-[11px] uppercase tracking-wider text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
           >
             {t('voiceDiagnosticsTitle')}
           </button>
@@ -201,12 +204,12 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
 
               return (
                 <li key={opt.code} className="text-[11px] leading-tight space-y-0.5">
-                  <span className="flex items-baseline gap-1.5 text-gray-700">
+                  <span className="flex items-baseline gap-1.5 text-gray-700 dark:text-slate-200">
                     <span className="font-medium" dir="auto">{opt.name}</span>
-                    <span className="font-mono text-gray-500">{opt.lang}</span>
+                    <span className="font-mono text-gray-500 dark:text-slate-400">{opt.lang}</span>
                   </span>
 
-                  <span className="flex items-start gap-1 text-gray-500">
+                  <span className="flex items-start gap-1 text-gray-500 dark:text-slate-400">
                     <span aria-hidden="true">{noAparelho ? '✅' : aindaLendo ? '…' : '—'}</span>
                     <span dir="auto">
                       {t('voiceDeviceLabel')}:{' '}
@@ -214,7 +217,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
                     </span>
                   </span>
 
-                  <span className="flex items-start gap-1 text-gray-500">
+                  <span className="flex items-start gap-1 text-gray-500 dark:text-slate-400">
                     <span aria-hidden="true">{online ? '✅' : '—'}</span>
                     <span dir="auto">
                       {t('voiceInternetLabel')}:{' '}
@@ -231,10 +234,10 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
             painel está justamente tentando entender por que umas línguas
             falam e outras não. Descobrir isso no momento do erro é tarde.
           */}
-          <div hidden={!showDiagnostics} className="px-4 pb-4 pt-1 border-t border-gray-100 space-y-2">
-            <p className="text-[11px] leading-snug text-gray-600" dir="auto">{t('voiceOfflineNote')}</p>
-            <p className="text-[10px] uppercase tracking-wider text-gray-500" dir="auto">{t('voiceHowToInstall')}</p>
-            <ul className="space-y-1.5 text-[11px] leading-snug text-gray-500">
+          <div hidden={!showDiagnostics} className="px-4 pb-4 pt-1 border-t border-gray-100 dark:border-slate-700 space-y-2">
+            <p className="text-[11px] leading-snug text-gray-600 dark:text-slate-300" dir="auto">{t('voiceOfflineNote')}</p>
+            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400" dir="auto">{t('voiceHowToInstall')}</p>
+            <ul className="space-y-1.5 text-[11px] leading-snug text-gray-500 dark:text-slate-400">
               {[t('voiceMissingAndroid'), t('voiceMissingIOS'), t('voiceMissingWindows')].map((passo) => (
                 <li key={passo} dir="auto">{passo}</li>
               ))}
