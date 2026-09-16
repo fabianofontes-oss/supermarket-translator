@@ -180,7 +180,7 @@ export const CARE_ACTIONS: CareAction[] = [
   {
     key: 'waterTemp', group: 'hygiene',
     labels: { es: 'La temperatura', pt: 'A temperatura', en: 'Temperature', fr: 'La température', it: 'La temperatura', uk: 'Температура', lt: 'Temperatūra', ar: 'الحرارة' },
-    says: { kind: 'same', text: { es: '¿Está bien el agua?', pt: 'A água está boa?', en: 'Is the water okay?', fr: "L'eau est bonne ?", it: "L'acqua va bene?", uk: 'Вода нормальна?', lt: 'Ar vanduo geras?', ar: 'هل الماء مناسب؟' } },
+    says: { kind: 'same', text: { es: '¿Está buena el agua?', pt: 'A água está boa?', en: 'Is the water okay?', fr: "L'eau est bonne ?", it: "L'acqua va bene?", uk: 'Вода нормальна?', lt: 'Ar vanduo geras?', ar: 'هل الماء مناسب؟' } },
   },
   {
     key: 'jacket', group: 'dress',
@@ -255,11 +255,11 @@ export const CARE_ACTIONS: CareAction[] = [
   },
   {
     key: 'lieDown', group: 'rest',
-    labels: { es: 'Acostarse', pt: 'Deitar', en: 'Lie down', fr: "S'allonger", it: 'Sdraiarsi', uk: 'Лягти', lt: 'Atsigulti', ar: 'الاستلقاء' },
+    labels: { es: 'Echarse', pt: 'Deitar', en: 'Lie down', fr: "S'allonger", it: 'Sdraiarsi', uk: 'Лягти', lt: 'Atsigulti', ar: 'الاستلقاء' },
     says: {
       kind: 'treat',
-      usted: { es: '¿Quiere acostarse un rato?', pt: 'Quer deitar um pouco?', en: 'Would you like to lie down for a while?', fr: 'Voulez-vous vous allonger un moment ?', it: 'Vuole sdraiarsi un momento?', uk: 'Хочете трохи полежати?', lt: 'Ar norite šiek tiek pagulėti?', ar: 'هل تريدين الاستلقاء قليلاً؟' },
-      tu: { es: '¿Quieres acostarte un rato?', pt: 'Quer deitar um pouco?', fr: "Tu veux t'allonger un moment ?", it: 'Vuoi sdraiarti un momento?', uk: 'Хочеш трохи полежати?', lt: 'Ar nori šiek tiek pagulėti?' },
+      usted: { es: '¿Quiere echarse un rato?', pt: 'Quer deitar um pouco?', en: 'Would you like to lie down for a while?', fr: 'Voulez-vous vous allonger un moment ?', it: 'Vuole sdraiarsi un momento?', uk: 'Хочете трохи полежати?', lt: 'Ar norite šiek tiek pagulėti?', ar: 'هل تريدين الاستلقاء قليلاً؟' },
+      tu: { es: '¿Quieres echarte un rato?', pt: 'Quer deitar um pouco?', fr: "Tu veux t'allonger un moment ?", it: 'Vuoi sdraiarti un momento?', uk: 'Хочеш трохи полежати?', lt: 'Ar nori šiek tiek pagulėti?' },
       arM: 'هل تريد الاستلقاء قليلاً؟',
     },
   },
@@ -412,9 +412,11 @@ export const REPORT_EVENTS: ReportEvent[] = [
   {
     key: 'leak', group: 'incident',
     labels: { es: 'Escape', pt: 'Escape', en: 'Accident', fr: 'Fuite', it: 'Incidente', uk: 'Конфуз', lt: 'Nelaimė', ar: 'تسرب' },
-    // Impessoal nos oito: não há sujeito para concordar. Sem `m` de propósito.
+    // Sem `m` de propósito, e o motivo muda de língua para língua: em es/pt/it o
+    // verbo não concorda com ninguém (`ha tenido`, `houve`), e nas outras a
+    // construção é impessoal de raiz. O resultado é o mesmo: uma forma só.
     says: {
-      f: { es: 'ha habido un escape', pt: 'houve um escape', en: 'there was an accident', fr: 'il y a eu une fuite', it: "c'è stato un incidente", uk: 'стався конфуз', lt: 'įvyko nelaimė', ar: 'حدث تسرب' },
+      f: { es: 'ha tenido un escape', pt: 'houve um escape', en: 'there was an accident', fr: 'il y a eu une fuite', it: "c'è stato un incidente", uk: 'стався конфуз', lt: 'įvyko nelaimė', ar: 'حدث تسرب' },
     },
   },
   {
@@ -437,7 +439,7 @@ export const WHEN_TAGS: WhenTag[] = [
   { key: 'morning', phrases: { es: 'esta mañana', pt: 'hoje de manhã', en: 'this morning', fr: 'ce matin', it: 'stamattina', uk: 'сьогодні вранці', lt: 'šį rytą', ar: 'هذا الصباح' } },
   { key: 'night', phrases: { es: 'esta noche', pt: 'esta noite', en: 'last night', fr: 'cette nuit', it: 'stanotte', uk: 'цієї ночі', lt: 'šią naktį', ar: 'الليلة الماضية' } },
   { key: 'yesterday', phrases: { es: 'desde ayer', pt: 'desde ontem', en: 'since yesterday', fr: 'depuis hier', it: 'da ieri', uk: 'від учора', lt: 'nuo vakar', ar: 'منذ أمس' } },
-  { key: 'week', phrases: { es: 'toda la semana', pt: 'a semana toda', en: 'all week', fr: 'toute la semaine', it: 'tutta la settimana', uk: 'цілий тиждень', lt: 'visą savaitę', ar: 'طوال الأسبوع' } },
+  { key: 'week', phrases: { es: 'esta semana', pt: 'esta semana', en: 'this week', fr: 'cette semaine', it: 'questa settimana', uk: 'цього тижня', lt: 'šią savaitę', ar: 'هذا الأسبوع' } },
 ];
 
 // ---------------------------------------------------------------------------
@@ -618,8 +620,8 @@ export const CARE_TOOLS: CareTool[] = [
   },
   {
     key: 'nonSlipMat', group: 'bath',
-    names: { es: 'la alfombra antideslizante', pt: 'o tapete antiderrapante', en: 'the non-slip mat', fr: 'le tapis antidérapant', it: 'il tappetino antiscivolo', uk: 'нековзний килимок', lt: 'neslystantis kilimėlis', ar: 'سجادة مانعة للانزلاق' },
-    askFor: { es: 'una alfombra antideslizante', pt: 'um tapete antiderrapante', en: 'a non-slip mat', fr: 'un tapis antidérapant', it: 'un tappetino antiscivolo', uk: 'нековзний килимок', lt: 'neslystantį kilimėlį', ar: 'سجادة مانعة للانزلاق' },
+    names: { es: 'la alfombrilla antideslizante', pt: 'o tapete antiderrapante', en: 'the non-slip mat', fr: 'le tapis antidérapant', it: 'il tappetino antiscivolo', uk: 'нековзний килимок', lt: 'neslystantis kilimėlis', ar: 'سجادة مانعة للانزلاق' },
+    askFor: { es: 'una alfombrilla antideslizante', pt: 'um tapete antiderrapante', en: 'a non-slip mat', fr: 'un tapis antidérapant', it: 'un tappetino antiscivolo', uk: 'нековзний килимок', lt: 'neslystantį kilimėlį', ar: 'سجادة مانعة للانزلاق' },
     gen: { uk: 'нековзного килимка', lt: 'neslystančio kilimėlio' },
   },
   {
@@ -646,8 +648,8 @@ export interface ToolFrame {
 export const TOOL_FRAMES: ToolFrame[] = [
   {
     key: 'have', use: 'askFor',
-    labels: { es: '¿Tenéis…?', pt: 'Vocês têm…?', en: 'Do you have…?', fr: 'Avez-vous… ?', it: 'Avete…?', uk: 'Ви маєте…?', lt: 'Ar turite…?', ar: 'هل لديكم…؟' },
-    templates: { es: '¿Tenéis {item}?', pt: 'Vocês têm {item}?', en: 'Do you have {item}?', fr: 'Avez-vous {item} ?', it: 'Avete {item}?', uk: 'Ви маєте {item}?', lt: 'Ar turite {item}?', ar: 'هل لديكم {item}؟' },
+    labels: { es: '¿Tienen…?', pt: 'Vocês têm…?', en: 'Do you have…?', fr: 'Avez-vous… ?', it: 'Avete…?', uk: 'Ви маєте…?', lt: 'Ar turite…?', ar: 'هل لديكم…؟' },
+    templates: { es: '¿Tienen {item}?', pt: 'Vocês têm {item}?', en: 'Do you have {item}?', fr: 'Avez-vous {item} ?', it: 'Avete {item}?', uk: 'Ви маєте {item}?', lt: 'Ar turite {item}?', ar: 'هل لديكم {item}؟' },
   },
   {
     key: 'looking', use: 'askFor',
@@ -687,7 +689,7 @@ export const EMERGENCY: Text[] = [
   { es: 'La persona no responde.', pt: 'A pessoa não responde.', en: 'The person is not responding.', fr: 'La personne ne réagit pas.', it: 'La persona non risponde.', uk: 'Людина не реагує.', lt: 'Žmogus nereaguoja.', ar: 'الشخص لا يستجيب.' },
   { es: 'La persona tiene dificultad para respirar.', pt: 'A pessoa está com dificuldade para respirar.', en: 'The person is having trouble breathing.', fr: 'La personne a du mal à respirer.', it: 'La persona ha difficoltà a respirare.', uk: 'Людині важко дихати.', lt: 'Žmogui sunku kvėpuoti.', ar: 'الشخص يجد صعوبة في التنفس.' },
   { es: 'Es urgente, por favor vengan.', pt: 'É urgente, por favor venham.', en: 'It is urgent, please come.', fr: "C'est urgent, venez s'il vous plaît.", it: 'È urgente, per favore venite.', uk: 'Це терміново, будь ласка, приїздіть.', lt: 'Tai skubu, prašau atvykite.', ar: 'الأمر عاجل، أرجوكم تعالوا.' },
-  { es: 'Llamo desde el domicilio.', pt: 'Estou ligando da casa.', en: 'I am calling from the home address.', fr: 'Je téléphone depuis le domicile.', it: 'Chiamo dal domicilio.', uk: 'Я телефоную з дому.', lt: 'Skambinu iš namų.', ar: 'أتصل من المنزل.' },
+  { es: 'Ahora le doy la dirección.', pt: 'Vou passar o endereço.', en: 'I will give you the address now.', fr: "Je vous donne l'adresse.", it: "Ora le do l'indirizzo.", uk: 'Зараз продиктую адресу.', lt: 'Dabar pasakysiu adresą.', ar: 'سأعطيكم العنوان الآن.' },
 ];
 
 // ---------------------------------------------------------------------------

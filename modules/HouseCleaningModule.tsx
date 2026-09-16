@@ -253,7 +253,7 @@ export default function HouseCleaningModule({
               {/* O cômodo só existe para a tarefa que o aceita. Some da tela em vez
                   de ficar apagado — mesma regra que as Direções adotaram: botão que
                   passa a vida apagado ensina a pessoa a parar de olhar para ali. */}
-              {task.takesPlace && (
+              {task.placeMode && (
                 <section>
                   <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('hcWhere')}</h2>
                   {/* Um toque no cômodo já escolhido desfaz a escolha. */}

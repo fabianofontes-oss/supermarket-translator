@@ -73,6 +73,21 @@ export const TASK_GROUP_LABELS: Record<TaskGroup, Text> = {
   laundry: { es: 'La ropa', pt: 'A roupa', en: 'The laundry', fr: 'Le linge', it: 'Il bucato', uk: 'Білизна', lt: 'Skalbiniai', ar: 'الغسيل' },
 };
 
+/**
+ * COMO O CÔMODO SE PRENDE À TAREFA. Não é detalhe: é onde a primeira versão
+ * errou feio, e o erro só aparece em duas das cinco tarefas.
+ *
+ *   'of'  → complemento de NOME:   fregar el suelo **de la cocina**
+ *   'in'  → adjunto de LUGAR:      pasar la aspiradora **por el salón**
+ *   'obj' → objeto DIRETO:         ordenar **el salón**
+ *
+ * Com um fragmento único (`del salón`) para tudo, saíam "pasar la aspiradora del
+ * salón" — que quer dizer *o aspirador do salão*, não *aspirar o salão* — e
+ * "ordenar del salón", que não é português nem espanhol. Cada tarefa declara o que
+ * rege, e há teste varrendo TODAS elas, e não só uma.
+ */
+export type PlaceMode = 'of' | 'in' | 'obj';
+
 export interface Task {
   key: string;
   group: TaskGroup;
@@ -82,15 +97,16 @@ export interface Task {
   inf: Text;
   /** "Já está feito", oração fechada e sem sujeito de 1ª pessoa flexionado. */
   done: Text;
-  /** Aceita um cômodo depois? Onde não aceita, a seção some da tela. */
-  takesPlace?: boolean;
+  /** Como o cômodo se prende, se é que se prende. Ausente = tarefa sem cômodo,
+   *  e aí a seção some da tela. */
+  placeMode?: PlaceMode;
   /** Armadilha de palavra, na língua de quem lê. */
   note?: Text;
 }
 
 export const TASKS: Task[] = [
   {
-    key: 'mopFloor', group: 'rooms', takesPlace: true,
+    key: 'mopFloor', group: 'rooms', placeMode: 'of',
     labels: { es: 'Fregar el suelo', pt: 'Passar pano no chão', en: 'Mop the floor', fr: 'Laver le sol', it: 'Lavare il pavimento', uk: 'Мити підлогу', lt: 'Plauti grindis', ar: 'مسح الأرضية' },
     inf: { es: 'fregar el suelo', pt: 'passar pano no chão', en: 'mop the floor', fr: 'laver le sol', it: 'lavare il pavimento', uk: 'мити підлогу', lt: 'plauti grindis', ar: 'مسح الأرضية' },
     done: { es: 'ya he fregado el suelo', pt: 'já passei pano no chão', en: "I've already mopped the floor", fr: "j'ai déjà lavé le sol", it: 'ho già lavato il pavimento', uk: 'підлогу вже помито', lt: 'grindys jau išplautos', ar: 'تم مسح الأرضية' },
@@ -106,7 +122,7 @@ export const TASKS: Task[] = [
     },
   },
   {
-    key: 'vacuum', group: 'rooms', takesPlace: true,
+    key: 'vacuum', group: 'rooms', placeMode: 'in',
     labels: { es: 'Pasar la aspiradora', pt: 'Passar o aspirador', en: 'Vacuum', fr: "Passer l'aspirateur", it: "Passare l'aspirapolvere", uk: 'Пилососити', lt: 'Siurbti dulkes', ar: 'الكنس بالمكنسة' },
     inf: { es: 'pasar la aspiradora', pt: 'passar o aspirador', en: 'vacuum', fr: "passer l'aspirateur", it: "passare l'aspirapolvere", uk: 'пилососити', lt: 'siurbti dulkes', ar: 'الكنس بالمكنسة' },
     done: { es: 'ya he pasado la aspiradora', pt: 'já passei o aspirador', en: "I've already vacuumed", fr: "j'ai déjà passé l'aspirateur", it: "ho già passato l'aspirapolvere", uk: 'вже пропилососено', lt: 'dulkės jau išsiurbtos', ar: 'تم الكنس بالمكنسة' },
@@ -122,13 +138,13 @@ export const TASKS: Task[] = [
     },
   },
   {
-    key: 'dust', group: 'rooms', takesPlace: true,
+    key: 'dust', group: 'rooms', placeMode: 'of',
     labels: { es: 'Quitar el polvo', pt: 'Tirar o pó', en: 'Dust', fr: 'Faire la poussière', it: 'Spolverare', uk: 'Витирати пил', lt: 'Valyti dulkes', ar: 'إزالة الغبار' },
     inf: { es: 'quitar el polvo', pt: 'tirar o pó', en: 'dust', fr: 'faire la poussière', it: 'spolverare', uk: 'витирати пил', lt: 'valyti dulkes', ar: 'إزالة الغبار' },
     done: { es: 'ya he quitado el polvo', pt: 'já tirei o pó', en: "I've already dusted", fr: "j'ai déjà fait la poussière", it: 'ho già spolverato', uk: 'пил уже витерто', lt: 'dulkės jau nuvalytos', ar: 'تمت إزالة الغبار' },
   },
   {
-    key: 'windows', group: 'rooms', takesPlace: true,
+    key: 'windows', group: 'rooms', placeMode: 'of',
     labels: { es: 'Limpiar los cristales', pt: 'Limpar os vidros', en: 'Clean the windows', fr: 'Faire les vitres', it: 'Pulire i vetri', uk: 'Мити вікна', lt: 'Valyti langus', ar: 'تنظيف الزجاج' },
     inf: { es: 'limpiar los cristales', pt: 'limpar os vidros', en: 'clean the windows', fr: 'faire les vitres', it: 'pulire i vetri', uk: 'мити вікна', lt: 'valyti langus', ar: 'تنظيف الزجاج' },
     done: { es: 'ya he limpiado los cristales', pt: 'já limpei os vidros', en: "I've already cleaned the windows", fr: "j'ai déjà fait les vitres", it: 'ho già pulito i vetri', uk: 'вікна вже помито', lt: 'langai jau nuvalyti', ar: 'تم تنظيف الزجاج' },
@@ -144,10 +160,10 @@ export const TASKS: Task[] = [
     },
   },
   {
-    key: 'tidyUp', group: 'rooms', takesPlace: true,
+    key: 'tidyUp', group: 'rooms', placeMode: 'obj',
     labels: { es: 'Ordenar', pt: 'Arrumar', en: 'Tidy up', fr: 'Ranger', it: 'Mettere in ordine', uk: 'Прибирати', lt: 'Tvarkyti', ar: 'الترتيب' },
     inf: { es: 'ordenar', pt: 'arrumar', en: 'tidy up', fr: 'ranger', it: 'mettere in ordine', uk: 'прибирати', lt: 'tvarkyti', ar: 'الترتيب' },
-    done: { es: 'ya lo he ordenado todo', pt: 'já arrumei tudo', en: "I've already tidied up", fr: "j'ai déjà tout rangé", it: 'ho già messo tutto in ordine', uk: 'уже прибрано', lt: 'jau sutvarkyta', ar: 'تم الترتيب' },
+    done: { es: 'ya he ordenado', pt: 'já arrumei', en: "I've already tidied up", fr: "j'ai déjà rangé", it: 'ho già messo in ordine', uk: 'уже прибрано', lt: 'jau sutvarkyta', ar: 'تم الترتيب' },
   },
   {
     key: 'makeBeds', group: 'beds',
@@ -270,54 +286,83 @@ export const TASKS: Task[] = [
 // ---------------------------------------------------------------------------
 // O CÔMODO
 // ---------------------------------------------------------------------------
-// `where` já vem com a preposição pronta e sem espaço na ponta: quem junta é o
-// builder. As contrações do espanhol e do português (`del salón`, `do corredor`)
-// são escritas à mão, como em `locationData.ts` — regra de contração aqui seria
-// maior que a tabela.
+// Três formas, porque três construções diferentes precisam dele — ver `PlaceMode`.
+// Os fragmentos já vêm com a preposição pronta e sem espaço na ponta: quem junta é
+// o builder. As contrações do espanhol e do português (`del salón`, `do corredor`)
+// são escritas à mão, como em `locationData.ts`.
+//
+// `in` e `obj` são `Partial` com fallback para `of`, e isso não é economia: em
+// ucraniano, lituano e árabe as três construções usam o MESMO locativo. "Прибирати
+// кухню" (acusativo) seria possível, mas "прибирати на кухні" é o que se diz, e
+// evita que o lituano produza "jau sutvarkyta virtuvę" — passivo com acusativo, que
+// não existe. Em inglês só `obj` difere, porque lá tudo o mais é locativo.
 
 export interface Place {
   key: string;
   labels: Text;
-  where: Text;
+  /** Complemento de nome. Nas línguas sem essa construção, já é o locativo. */
+  of: Text;
+  /** Adjunto de lugar. Idioma ausente = igual a `of`. */
+  in?: Partial<Record<LangCode, string>>;
+  /** Objeto direto. Idioma ausente = igual a `of`. */
+  obj?: Partial<Record<LangCode, string>>;
 }
 
 export const PLACES: Place[] = [
   {
     key: 'kitchen',
     labels: { es: 'La cocina', pt: 'A cozinha', en: 'The kitchen', fr: 'La cuisine', it: 'La cucina', uk: 'Кухня', lt: 'Virtuvė', ar: 'المطبخ' },
-    where: { es: 'de la cocina', pt: 'da cozinha', en: 'in the kitchen', fr: 'de la cuisine', it: 'della cucina', uk: 'на кухні', lt: 'virtuvėje', ar: 'في المطبخ' },
+    of: { es: 'de la cocina', pt: 'da cozinha', en: 'in the kitchen', fr: 'de la cuisine', it: 'della cucina', uk: 'на кухні', lt: 'virtuvėje', ar: 'في المطبخ' },
+    in: { es: 'por la cocina', pt: 'na cozinha', fr: 'dans la cuisine', it: 'in cucina' },
+    obj: { es: 'la cocina', pt: 'a cozinha', en: 'the kitchen', fr: 'la cuisine', it: 'la cucina' },
   },
   {
     key: 'living',
     labels: { es: 'El salón', pt: 'A sala', en: 'The living room', fr: 'Le salon', it: 'Il soggiorno', uk: 'Вітальня', lt: 'Svetainė', ar: 'الصالة' },
-    where: { es: 'del salón', pt: 'da sala', en: 'in the living room', fr: 'du salon', it: 'del soggiorno', uk: 'у вітальні', lt: 'svetainėje', ar: 'في الصالة' },
+    of: { es: 'del salón', pt: 'da sala', en: 'in the living room', fr: 'du salon', it: 'del soggiorno', uk: 'у вітальні', lt: 'svetainėje', ar: 'في الصالة' },
+    in: { es: 'por el salón', pt: 'na sala', fr: 'dans le salon', it: 'in soggiorno' },
+    obj: { es: 'el salón', pt: 'a sala', en: 'the living room', fr: 'le salon', it: 'il soggiorno' },
   },
   {
     key: 'bath',
     labels: { es: 'El baño', pt: 'O banheiro', en: 'The bathroom', fr: 'La salle de bain', it: 'Il bagno', uk: 'Ванна', lt: 'Vonia', ar: 'الحمام' },
-    where: { es: 'del baño', pt: 'do banheiro', en: 'in the bathroom', fr: 'de la salle de bain', it: 'del bagno', uk: 'у ванній', lt: 'vonioje', ar: 'في الحمام' },
+    of: { es: 'del baño', pt: 'do banheiro', en: 'in the bathroom', fr: 'de la salle de bain', it: 'del bagno', uk: 'у ванній', lt: 'vonioje', ar: 'في الحمام' },
+    in: { es: 'por el baño', pt: 'no banheiro', fr: 'dans la salle de bain', it: 'in bagno' },
+    obj: { es: 'el baño', pt: 'o banheiro', en: 'the bathroom', fr: 'la salle de bain', it: 'il bagno' },
   },
   {
     key: 'bedroom',
     labels: { es: 'El dormitorio', pt: 'O quarto', en: 'The bedroom', fr: 'La chambre', it: 'La camera', uk: 'Спальня', lt: 'Miegamasis', ar: 'غرفة النوم' },
-    where: { es: 'del dormitorio', pt: 'do quarto', en: 'in the bedroom', fr: 'de la chambre', it: 'della camera', uk: 'у спальні', lt: 'miegamajame', ar: 'في غرفة النوم' },
+    of: { es: 'del dormitorio', pt: 'do quarto', en: 'in the bedroom', fr: 'de la chambre', it: 'della camera', uk: 'у спальні', lt: 'miegamajame', ar: 'في غرفة النوم' },
+    in: { es: 'por el dormitorio', pt: 'no quarto', fr: 'dans la chambre', it: 'in camera' },
+    obj: { es: 'el dormitorio', pt: 'o quarto', en: 'the bedroom', fr: 'la chambre', it: 'la camera' },
   },
   {
     key: 'hall',
     labels: { es: 'El pasillo', pt: 'O corredor', en: 'The hallway', fr: 'Le couloir', it: 'Il corridoio', uk: 'Коридор', lt: 'Koridorius', ar: 'الممر' },
-    where: { es: 'del pasillo', pt: 'do corredor', en: 'in the hallway', fr: 'du couloir', it: 'del corridoio', uk: 'у коридорі', lt: 'koridoriuje', ar: 'في الممر' },
+    of: { es: 'del pasillo', pt: 'do corredor', en: 'in the hallway', fr: 'du couloir', it: 'del corridoio', uk: 'у коридорі', lt: 'koridoriuje', ar: 'في الممر' },
+    in: { es: 'por el pasillo', pt: 'no corredor', fr: 'dans le couloir', it: 'in corridoio' },
+    obj: { es: 'el pasillo', pt: 'o corredor', en: 'the hallway', fr: 'le couloir', it: 'il corridoio' },
   },
   {
     key: 'terrace',
     labels: { es: 'La terraza', pt: 'A varanda', en: 'The terrace', fr: 'La terrasse', it: 'Il terrazzo', uk: 'Тераса', lt: 'Terasa', ar: 'الشرفة' },
-    where: { es: 'de la terraza', pt: 'da varanda', en: 'on the terrace', fr: 'de la terrasse', it: 'del terrazzo', uk: 'на терасі', lt: 'terasoje', ar: 'في الشرفة' },
+    of: { es: 'de la terraza', pt: 'da varanda', en: 'on the terrace', fr: 'de la terrasse', it: 'del terrazzo', uk: 'на терасі', lt: 'terasoje', ar: 'في الشرفة' },
+    in: { es: 'por la terraza', pt: 'na varanda', fr: 'sur la terrasse', it: 'sul terrazzo' },
+    obj: { es: 'la terraza', pt: 'a varanda', en: 'the terrace', fr: 'la terrasse', it: 'il terrazzo' },
   },
   {
     key: 'entrance',
     labels: { es: 'La entrada', pt: 'A entrada', en: 'The entryway', fr: "L'entrée", it: "L'ingresso", uk: 'Передпокій', lt: 'Prieškambaris', ar: 'المدخل' },
-    where: { es: 'de la entrada', pt: 'da entrada', en: 'in the entryway', fr: "de l'entrée", it: "dell'ingresso", uk: 'у передпокої', lt: 'prieškambaryje', ar: 'في المدخل' },
+    of: { es: 'de la entrada', pt: 'da entrada', en: 'in the entryway', fr: "de l'entrée", it: "dell'ingresso", uk: 'у передпокої', lt: 'prieškambaryje', ar: 'في المدخل' },
+    in: { es: 'por la entrada', pt: 'na entrada', fr: "dans l'entrée", it: "nell'ingresso" },
+    obj: { es: 'la entrada', pt: 'a entrada', en: 'the entryway', fr: "l'entrée", it: "l'ingresso" },
   },
 ];
+
+/** A forma do cômodo que aquela regência pede. Fallback documentado para `of`. */
+export const placeForm = (place: Place, lang: LangCode, mode: PlaceMode): string =>
+  (mode === 'in' ? place.in?.[lang] : mode === 'obj' ? place.obj?.[lang] : undefined) ?? place.of[lang];
 
 // ---------------------------------------------------------------------------
 // OS QUADROS
@@ -427,7 +472,8 @@ export const SAY_PHRASES: SayPhrase[] = [
 /** Primeira letra em maiúscula. Em árabe e nas escritas sem caixa é operação nula. */
 const cap = (s: string): string => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
-/** "Voy a fregar el suelo de la cocina." — o cômodo só entra onde a tarefa aceita. */
+/** "Voy a fregar el suelo de la cocina." / "Voy a ordenar el salón." — o cômodo só
+ *  entra onde a tarefa aceita, e na forma que aquela tarefa rege. */
 export const buildTaskPhrase = (
   lang: LangCode,
   frame: TaskFrame,
@@ -435,6 +481,6 @@ export const buildTaskPhrase = (
   place: Place | null,
 ): string => {
   const body = frame.use === 'done' ? task.done[lang] : task.inf[lang];
-  const full = place && task.takesPlace ? `${body} ${place.where[lang]}` : body;
+  const full = place && task.placeMode ? `${body} ${placeForm(place, lang, task.placeMode)}` : body;
   return cap(frame.templates[lang].replace('{t}', full));
 };

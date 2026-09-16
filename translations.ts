@@ -1054,7 +1054,7 @@ const esCL = {
   ecModeTalk: 'Hablar con ella',
   ecModeReport: 'Contar a la familia',
   ecModeTools: 'Los objetos',
-  ecTreatment: 'Cómo la trata',
+  ecTreatment: 'Tratamiento',
   ecFormal: 'Usted',
   ecInformal: 'Tú',
   ecTreatmentSame: 'En este idioma los dos tratamientos son iguales, así que la línea de apoyo no cambia. La frase hablada sí cambia.',
@@ -1070,9 +1070,9 @@ const esCL = {
   hcTitle: 'Limpieza',
   hcModeTask: 'La tarea',
   hcModeHeard: 'Lo que le piden',
-  hcModeSay: 'Acordar',
+  hcModeSay: 'Condiciones',
   hcHowToSay: 'Cómo decirlo',
-  hcWhere: 'En qué habitación',
+  hcWhere: '¿En qué parte?',
   hcHeardNote: 'Estas frases son para RECONOCER, no para decir. En casa suelen tutear a quien limpia, mientras usted trata de usted — "puedes" y "puede" son la misma orden.',
 };
 

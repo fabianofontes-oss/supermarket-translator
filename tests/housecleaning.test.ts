@@ -3,6 +3,7 @@ import {
   TASKS, TASK_GROUPS, TASK_GROUP_LABELS, PLACES, TASK_FRAMES,
   HEARD, SAY_PHRASES, SAY_GROUPS, SAY_GROUP_LABELS,
   buildTaskPhrase,
+  placeForm,
 } from '../modules/housecleaning/data/houseCleaningData';
 import * as dados from '../modules/housecleaning/data/houseCleaningData';
 import { SUPPORTED_LANGS, type LangCode } from '../modules/location/data/locationData';
@@ -124,6 +125,52 @@ describe('PARTE 2 — o cômodo entra só onde cabe', () => {
     expect(buildTaskPhrase('uk', done, mop, null)).toBe('Підлогу вже помито.');
     expect(buildTaskPhrase('lt', done, mop, null)).toBe('Grindys jau išplautos.');
   });
+
+  it('cada tarefa prende o cômodo do jeito que ela rege', () => {
+    /**
+     * As duas que estavam erradas, e o motivo de este teste existir. Com um
+     * fragmento único para tudo saíam "Voy a pasar la aspiradora del salón"
+     * (= o aspirador DO salão) e "Voy a ordenar del salón" (agramatical).
+     * A versão anterior deste arquivo só conferia `mopFloor`, que por acaso é o
+     * caso que funcionava — por isso passou.
+     */
+    const going = TASK_FRAMES.find((f) => f.key === 'going')!;
+    const living = PLACES.find((p) => p.key === 'living')!;
+    const vacuum = TASKS.find((t) => t.key === 'vacuum')!;
+    const tidy = TASKS.find((t) => t.key === 'tidyUp')!;
+
+    expect(buildTaskPhrase('es', going, vacuum, living)).toBe('Voy a pasar la aspiradora por el salón.');
+    expect(buildTaskPhrase('pt', going, vacuum, living)).toBe('Vou passar o aspirador na sala.');
+    expect(buildTaskPhrase('fr', going, vacuum, living)).toBe("Je vais passer l'aspirateur dans le salon.");
+    expect(buildTaskPhrase('it', going, vacuum, living)).toBe("Sto per passare l'aspirapolvere in soggiorno.");
+
+    expect(buildTaskPhrase('es', going, tidy, living)).toBe('Voy a ordenar el salón.');
+    expect(buildTaskPhrase('pt', going, tidy, living)).toBe('Vou arrumar a sala.');
+    expect(buildTaskPhrase('fr', going, tidy, living)).toBe('Je vais ranger le salon.');
+    expect(buildTaskPhrase('it', going, tidy, living)).toBe('Sto per mettere in ordine il soggiorno.');
+
+    // E o "já está feito" tem de aceitar o cômodo igualmente.
+    const done = TASK_FRAMES.find((f) => f.key === 'done')!;
+    expect(buildTaskPhrase('es', done, tidy, living)).toBe('Ya he ordenado el salón.');
+    expect(buildTaskPhrase('es', done, tidy, null)).toBe('Ya he ordenado.');
+  });
+
+  /**
+   * A regra geral por trás das asserções acima: infinitivo colado a preposição
+   * quer dizer que o objeto sumiu no caminho. Vale para es e pt; o italiano fica
+   * de fora porque "mettere in ordine" é exatamente isso e é correto.
+   */
+  invariante(
+    'nenhum infinitivo colado a preposição em es',
+    TAREFAS.filter((c) => c.lang === 'es'),
+    (c) => /\b(fregar|pasar|quitar|limpiar|ordenar|hacer|cambiar|sacar|poner|tender|planchar)\s+(de|del|por|en)\b/.test(c.frase),
+  );
+
+  invariante(
+    'nenhum infinitivo colado a preposição em pt',
+    TAREFAS.filter((c) => c.lang === 'pt'),
+    (c) => /\b(passar|tirar|limpar|arrumar|trocar|lavar|levar|botar|estender)\s+(de|da|do|na|no|em)\b/.test(c.frase),
+  );
 
   it('três dos quatro quadros vivem do infinitivo', () => {
     // É o que fez a tabela caber em duas formas por tarefa em vez de quatro.
@@ -254,7 +301,9 @@ describe('PARTE 6 — integridade das tabelas', () => {
       }
       for (const p of PLACES) {
         expect(p.labels[lang], `${p.key}/${lang}`).toBeTruthy();
-        expect(p.where[lang], `${p.key}/${lang}`).toBeTruthy();
+        for (const mode of ['of', 'in', 'obj'] as const) {
+          expect(placeForm(p, lang, mode), `${p.key}/${lang}/${mode}`).toBeTruthy();
+        }
       }
       for (const f of TASK_FRAMES) {
         expect(f.labels[lang], `${f.key}/${lang}`).toBeTruthy();
@@ -274,7 +323,12 @@ describe('PARTE 6 — integridade das tabelas', () => {
 
   it('o fragmento de cômodo não traz espaço na ponta', () => {
     for (const p of PLACES) {
-      for (const lang of SUPPORTED_LANGS) expect(p.where[lang]).toBe(p.where[lang].trim());
+      for (const lang of SUPPORTED_LANGS) {
+        for (const mode of ['of', 'in', 'obj'] as const) {
+          const f = placeForm(p, lang, mode);
+          expect(f, `${p.key}/${lang}/${mode}`).toBe(f.trim());
+        }
+      }
     }
   });
 });
