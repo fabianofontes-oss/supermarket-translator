@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 import { ShareSheet } from '../components/ShareSheet';
 import { ShareButton } from '../components/ShareButton';
 import { translations } from '../translations';
-import { SHARE_URL } from '../constants';
+import { SHARE_URL, APP_NAME } from '../constants';
 
 /**
  * O que estes testes trancam.
@@ -250,6 +250,42 @@ describe('12 — o botão está em todas as telas', () => {
       expect(fonte, `${f} voltou a desenhar o header à mão`).not.toContain('<header');
       expect(fonte, `${f} voltou a desenhar o botão de compartilhar à mão`).not.toContain('<ShareButton');
     }
+  });
+
+  it('o nome antigo não voltou para o código', () => {
+    /**
+     * O app se chamava "Translator Hub", e o nome contradizia o produto: ele não
+     * traduz, mostra o equivalente — pão francês vira marraqueta, que é outro pão,
+     * não uma tradução. Chegaram a circular SETE nomes ao mesmo tempo (Translator
+     * Hub, Translator, translator-hub, com.translatorhub.app, Manual do Imigrante,
+     * Guia do Imigrante, supermarket-translator). Esta varredura existe para o
+     * próximo não voltar a espalhar.
+     *
+     * Documentação e testes ficam de fora de propósito: lá o nome antigo aparece
+     * contando a história, e "Segunda Auditoria Translator Hub" é o nome de uma
+     * auditoria passada, não do app.
+     */
+    const arquivos = [
+      'App.tsx', 'translations.ts', 'constants.ts', 'index.html',
+      'vite.config.ts', 'capacitor.config.json', 'package.json',
+      'components/ShareSheet.tsx', 'components/ModuleShell.tsx', 'components/ModuleLayout.tsx',
+    ];
+    for (const f of arquivos) {
+      const fonte = ler(f);
+      expect(fonte, `${f} ainda cita o nome antigo`).not.toMatch(/Translator Hub|translator-hub|translatorhub/i);
+    }
+  });
+
+  it('o nome se traduz, e é uma frase em cada idioma', () => {
+    // O nome é frase, não marca inventada: frase serve para ser entendida. Se as
+    // oito voltarem a ser iguais, alguém transformou o nome em marca de novo.
+    const nomes = Object.values(translations).map((bloco) => bloco.hubTitle);
+    expect(new Set(nomes).size, 'o nome parou de seguir a língua').toBeGreaterThan(5);
+    expect(translations['pt-BR'].hubTitle).toBe('Aqui se diz');
+    expect(translations['es-ES'].hubTitle).toBe('Aquí se dice');
+    expect(translations['uk-UA'].hubTitle).toBe('Тут кажуть');
+    // E o que o sistema resolve na instalação fica numa forma só, em espanhol.
+    expect(APP_NAME).toBe('Aquí se dice');
   });
 
   it('todo módulo fixa a frase que monta', () => {

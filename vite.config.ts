@@ -40,8 +40,10 @@ export default defineConfig({
       injectRegister: null,
       includeAssets: ['icons/favicon.svg', 'icons/apple-touch-icon.png', 'flags/*.svg', 'robots.txt'],
       manifest: {
-        name: 'Translator Hub',
-        short_name: 'Translator',
+        // Resolvido na instalação, não em tempo de execução: só cabe uma forma,
+        // e vale o espanhol. Dentro do app o nome se traduz. Ver `APP_NAME`.
+        name: 'Aquí se dice',
+        short_name: 'Aquí se dice',
         description: 'Guia de sobrevivência para imigrantes: supermercado, farmácia, direções e mais.',
         lang: 'pt-BR',
         start_url: '/',

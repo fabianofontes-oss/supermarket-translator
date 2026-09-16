@@ -1,6 +1,6 @@
 {
-  "appId": "com.translatorhub.app",
-  "appName": "Translator Hub",
+  "appId": "com.aquisedice.app",
+  "appName": "Aquí se dice",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

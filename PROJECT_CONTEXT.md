@@ -1,5 +1,5 @@
 
-# 📘 Manual do Imigrante (Translator Hub) - Contexto do Projeto
+# 📘 Aqui se diz — Contexto do Projeto
 
 **IMPORTANTE:** Cole este arquivo no início de um novo chat para restaurar o contexto do desenvolvimento.
 
@@ -325,6 +325,21 @@ Ao reiniciar o chat, peça para:
 *   **A moldura fica.** Ela nunca foi sobre a barra: era sobre o cabeçalho em dez cópias (defeito 8.17). E agora é o lugar da banda — o que fez a mudança ser num arquivo, e não em dez.
 *   **A Emergência do Cuidar voltou para o topo da rolagem**, onde estava antes da barra. Saíram o `sosRef`, o `abrirEmergencia` e o `AlertIcon`: com a banda no alto, a faixa vermelha é a primeira coisa abaixo dela.
 *   **O acabamento da banda passou por três versões, e a terceira é do dono.** Na cor da página ela não parecia camada — parecia conteúdo cortado no meio ao rolar. Branca com sombra virava uma terceira cor de fundo na tela. A que ficou: **encostada no cabeçalho, sem canto arredondado entre os dois, com um tom claro da própria cor do módulo** (`${hex}14`, uns 8%) e sombra embaixo. O bloco de cima vira uma peça só, e a tonalidade mostra onde acaba o menu e começa a frase.
+
+### O nome: de "Translator Hub" para "Aqui se diz"
+
+*   **O que disparou:** "uma coisa me incomoda, é o nome tradutor... não é um tradutor." E a contradição já estava escrita aqui mesmo, na seção 1: *"é um Guia de Sobrevivência para Imigrantes e Viajantes, **não um tradutor literal**"*. O primeiro commit do projeto diz o mesmo em dados: `"Pão Francês"` vira `Marraqueta` no Chile — outro pão que ocupa o mesmo lugar na vida, não uma tradução.
+*   **Circulavam SETE nomes ao mesmo tempo:** `Translator Hub` (tela e docs), `Translator` (rótulo do Android, sozinho embaixo do ícone), `translator-hub` (npm), `com.translatorhub.app` (appId), `Manual do Imigrante` (título deste arquivo), `Guia do Imigrante` (README) e `supermarket-translator` (remote do git).
+*   **O nome novo diz o que o app faz:** mostra como se diz **aqui**, no país onde a pessoa está. Nega o "tradutor" sem precisar argumentar.
+*   **E ele se traduz.** A primeira decisão foi marca fixa, e foi revista: o argumento mais forte para marca fixa é ser encontrada na loja de apps, e este app não está em loja nenhuma — é PWA, instalado por link e por QR, e o botão de compartilhar existe justamente para isso. Do outro lado, "Aqui se diz" é **frase**, não marca inventada, e frase serve para ser entendida: em português, para a lituana, seria ruído — exatamente o que "Translator Hub" era. O nome era a única coisa da tela fora da língua de quem lê, num app cujo princípio é mostrar tudo na língua dela.
+*   **As oito formas:** `Aqui se diz` · `Aquí se dice` · `Here they say` · `Ici on dit` · `Qui si dice` · `Тут кажуть` · `Čia sako` · `هنا يقولون`.
+*   **Onde não dá para traduzir, vale o espanhol.** Manifesto do PWA, rótulo do iPhone e nome do APK são resolvidos na instalação, não em tempo de execução: só cabe uma forma, e é `Aquí se dice` (12 caracteres, cabe no rótulo do Android). Espanhol porque é a língua do país onde toda usuária está, e a única que os quatro públicos têm em comum — o português seria legível para um só deles. Mora em `APP_NAME`, em `constants.ts`.
+*   **A aba do navegador acompanha:** o `<title>` do `index.html` é só o texto inicial, antes de o React montar; daí em diante o `App.tsx` reescreve `document.title` com `t('hubTitle')`, junto do `lang` que o `useCountryPair` já mantém.
+*   **`shareTitle` foi reescrito, não substituído.** Era frase conjugada com o nome dentro — "Compartilhe **o** Translator Hub" — e "Compartilhe o Aqui se diz" não é português. Virou ação sem o nome ("Compartilhe o app"); o nome continua saindo no `shareMessage`, que é o texto que chega em terceiros.
+*   **O `appId` mudou agora porque agora é de graça.** Trocar o `appId` de um app publicado cria um app diferente na loja e mata as atualizações de quem já instalou. Como `android/` e `ios/` ainda não existem no repositório, nada foi publicado — depois seria irreversível.
+*   **O que NÃO mudou, e por quê.** A URL da Vercel: está codificada nos pixels do QR de `public/qr-share.svg` e em links já distribuídos; trocar mata o que já saiu por aí. E a chave `th_schemaVersion`: o prefixo vem de *Translator Hub*, mas ela marca que a migração v1→v2 já rodou — renomear faria todo aparelho instalado parecer "nunca migrado" e a migração re-rodaria sobre dados migrados.
+*   ⚠️ **O ícone continua dizendo "tradutor" sem usar palavras.** É um balão de fala com um globo dentro — o pictograma universal de tradução. Não tem letra nenhuma, então o rename não obrigou a mexer, mas a imagem contradiz o nome novo. Fica como assunto à parte.
+*   `tests/share.test.tsx` varre o código e as configurações atrás do nome antigo, e confere que as oito formas continuam diferentes entre si. Documentação e testes ficam de fora: lá o nome antigo aparece contando a história, e "Segunda Auditoria Translator Hub" é o nome de uma auditoria, não do app.
 
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.333 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.

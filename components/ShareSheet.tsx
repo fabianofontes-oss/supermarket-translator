@@ -148,7 +148,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
   const handleNativo = () => {
     playSound('click');
     try {
-      const r = navigator.share({ title: 'Translator Hub', text: mensagem, url: SHARE_URL });
+      const r = navigator.share({ title: t('hubTitle'), text: mensagem, url: SHARE_URL });
       if (r && typeof r.catch === 'function') r.catch(() => {});
     } catch {
       /* alguns navegadores lançam em vez de rejeitar */

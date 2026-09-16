@@ -20,7 +20,7 @@
 
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Translator Hub" />
+    <meta name="apple-mobile-web-app-title" content="Aquí se dice" />
     <meta name="theme-color" content="#c83745" />
     <meta name="description" content="Guia de sobrevivência para imigrantes: supermercado, farmácia, direções e mais, com o produto equivalente no país de destino." />
 
@@ -35,14 +35,16 @@
          causa de algo que só o crawler lê. A URL aqui é a mesma `SHARE_URL` de
          `constants.ts`; HTML não importa constante, então são dois lugares. -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Translator Hub" />
+    <meta property="og:title" content="Aquí se dice" />
     <meta property="og:description" content="Guia de sobrevivência para imigrantes: supermercado, farmácia, direções e mais, com o produto equivalente no país de destino." />
     <meta property="og:url" content="https://translator-zeta-weld.vercel.app" />
     <meta property="og:image" content="https://translator-zeta-weld.vercel.app/icons/pwa-512x512.png" />
     <meta property="og:locale" content="pt_BR" />
     <meta name="twitter:card" content="summary" />
 
-    <title>Translator Hub</title>
+    <!-- Texto inicial: `App.tsx` reescreve o título em tempo de execução, na
+         língua de quem lê, junto com o `lang` do documento. -->
+    <title>Aquí se dice</title>
   </head>
   <body>
     <div id="root"></div>

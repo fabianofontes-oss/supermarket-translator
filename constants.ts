@@ -18,6 +18,17 @@ import type { Category, Country } from './types';
  */
 export const SHARE_URL = 'https://translator-zeta-weld.vercel.app';
 
+/**
+ * O nome do app onde ele NÃO pode seguir a língua de quem lê: manifesto do PWA,
+ * rótulo do iPhone, nome do APK. Esses são resolvidos na instalação, não em tempo
+ * de execução, e só cabe uma forma.
+ *
+ * Fica em espanhol porque é a língua do país onde toda usuária está, e a única que
+ * os quatro públicos — brasileira, marroquina, ucraniana e lituana — têm em comum.
+ * Dentro do app rodando o nome se traduz, e vem de `t('hubTitle')`.
+ */
+export const APP_NAME = 'Aquí se dice';
+
 /** QR pré-gerado por `scripts/generate-qr.mjs`. Precacheado pelo service worker. */
 export const SHARE_QR_SRC = '/qr-share.svg';
 

@@ -1,7 +1,7 @@
 
 const enUS = {
   welcomeBack: 'Welcome back',
-  hubTitle: 'Translator Hub',
+  hubTitle: 'Here they say',
   hubSubtitle: 'Select a module',
   supermarketGuide: 'Supermarket',
   modulePharmacy: 'Pharmacy',
@@ -313,7 +313,7 @@ const enUS = {
   // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
   // nao sao chave: 'WhatsApp' e igual nos 12 locales.
   shareApp: 'Share the app',
-  shareTitle: 'Share Translator Hub',
+  shareTitle: 'Share the app',
   shareSubtitle: 'Send it to someone who needs it. It works offline.',
   shareQrHint: 'Point the other phone camera at the code',
   shareVia: 'Share via',
@@ -321,7 +321,7 @@ const enUS = {
   shareCopied: 'Link copied',
   shareCopyFailed: 'Copy the link below',
   shareMoreOptions: 'More options',
-  shareMessage: 'Translator Hub: a free offline guide for the supermarket, the pharmacy and asking for directions.',
+  shareMessage: 'Here they say: a free offline guide for the supermarket, the pharmacy and asking for directions.',
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'The map turns with you: the arrow always points where you are going.',
@@ -360,7 +360,7 @@ const enUS = {
 
 const ptBR = {
   welcomeBack: 'Bem-vindo de volta',
-  hubTitle: 'Translator Hub',
+  hubTitle: 'Aqui se diz',
   hubSubtitle: 'Selecione um módulo',
   supermarketGuide: 'Supermercado',
   modulePharmacy: 'Farmácia',
@@ -672,7 +672,7 @@ const ptBR = {
   // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
   // nao sao chave: 'WhatsApp' e igual nos 12 locales.
   shareApp: 'Compartilhar o app',
-  shareTitle: 'Compartilhe o Translator Hub',
+  shareTitle: 'Compartilhe o app',
   shareSubtitle: 'Mande para quem precisa. Funciona sem internet.',
   shareQrHint: 'Aponte a câmera do outro celular para o código',
   shareVia: 'Compartilhar pelo',
@@ -680,7 +680,7 @@ const ptBR = {
   shareCopied: 'Link copiado',
   shareCopyFailed: 'Copie o link abaixo',
   shareMoreOptions: 'Mais opções',
-  shareMessage: 'Translator Hub: um guia grátis e sem internet para o supermercado, a farmácia e pedir informação na rua.',
+  shareMessage: 'Aqui se diz: um guia grátis e sem internet para o supermercado, a farmácia e pedir informação na rua.',
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'O mapa gira com você: a seta aponta sempre para onde você está indo.',
@@ -719,7 +719,7 @@ const ptBR = {
 
 const esCL = {
   welcomeBack: 'Bienvenido de nuevo',
-  hubTitle: 'Translator Hub',
+  hubTitle: 'Aquí se dice',
   hubSubtitle: 'Selecciona un módulo',
   supermarketGuide: 'Supermercado',
   modulePharmacy: 'Farmacia',
@@ -1031,7 +1031,7 @@ const esCL = {
   // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
   // nao sao chave: 'WhatsApp' e igual nos 12 locales.
   shareApp: 'Compartir la app',
-  shareTitle: 'Comparte Translator Hub',
+  shareTitle: 'Comparte la app',
   shareSubtitle: 'Mándalo a quien lo necesite. Funciona sin internet.',
   shareQrHint: 'Apunta la cámara del otro móvil al código',
   shareVia: 'Compartir por',
@@ -1039,7 +1039,7 @@ const esCL = {
   shareCopied: 'Enlace copiado',
   shareCopyFailed: 'Copia el enlace de abajo',
   shareMoreOptions: 'Más opciones',
-  shareMessage: 'Translator Hub: una guía gratis y sin internet para el supermercado, la farmacia y preguntar en la calle.',
+  shareMessage: 'Aquí se dice: una guía gratis y sin internet para el supermercado, la farmacia y preguntar en la calle.',
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'El mapa gira contigo: la flecha apunta siempre hacia donde vas.',
@@ -1079,7 +1079,7 @@ const esCL = {
 
 const frFR = {
   welcomeBack: 'Bon retour',
-  hubTitle: 'Translator Hub',
+  hubTitle: 'Ici on dit',
   hubSubtitle: 'Choisissez un module',
   supermarketGuide: 'Supermarché',
   modulePharmacy: 'Pharmacie',
@@ -1391,7 +1391,7 @@ const frFR = {
   // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
   // nao sao chave: 'WhatsApp' e igual nos 12 locales.
   shareApp: 'Partager l\'appli',
-  shareTitle: 'Partagez Translator Hub',
+  shareTitle: "Partagez l'appli",
   shareSubtitle: 'Envoyez-le à quelqu\'un qui en a besoin. Ça marche sans internet.',
   shareQrHint: 'Dirigez la caméra de l\'autre téléphone vers le code',
   shareVia: 'Partager via',
@@ -1399,7 +1399,7 @@ const frFR = {
   shareCopied: 'Lien copié',
   shareCopyFailed: 'Copiez le lien ci-dessous',
   shareMoreOptions: 'Plus d\'options',
-  shareMessage: 'Translator Hub : un guide gratuit et hors ligne pour le supermarché, la pharmacie et demander son chemin.',
+  shareMessage: 'Ici on dit : un guide gratuit et hors ligne pour le supermarché, la pharmacie et demander son chemin.',
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'La carte tourne avec vous : la flèche pointe toujours vers où vous allez.',
@@ -1438,7 +1438,7 @@ const frFR = {
 
 const itIT = {
   welcomeBack: 'Bentornato',
-  hubTitle: 'Translator Hub',
+  hubTitle: 'Qui si dice',
   hubSubtitle: 'Scegli un modulo',
   supermarketGuide: 'Supermercato',
   modulePharmacy: 'Farmacia',
@@ -1750,7 +1750,7 @@ const itIT = {
   // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
   // nao sao chave: 'WhatsApp' e igual nos 12 locales.
   shareApp: 'Condividi l\'app',
-  shareTitle: 'Condividi Translator Hub',
+  shareTitle: "Condividi l'app",
   shareSubtitle: 'Mandalo a chi ne ha bisogno. Funziona senza internet.',
   shareQrHint: 'Inquadra il codice con la fotocamera dell\'altro telefono',
   shareVia: 'Condividi su',
@@ -1758,7 +1758,7 @@ const itIT = {
   shareCopied: 'Link copiato',
   shareCopyFailed: 'Copia il link qui sotto',
   shareMoreOptions: 'Altre opzioni',
-  shareMessage: 'Translator Hub: una guida gratuita e offline per il supermercato, la farmacia e chiedere indicazioni.',
+  shareMessage: 'Qui si dice: una guida gratuita e offline per il supermercato, la farmacia e chiedere indicazioni.',
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'La mappa gira con te: la freccia punta sempre dove stai andando.',
@@ -1798,7 +1798,7 @@ const itIT = {
 
 const ukUA = {
   welcomeBack: 'З поверненням',
-  hubTitle: 'Translator Hub',
+  hubTitle: 'Тут кажуть',
   hubSubtitle: 'Оберіть модуль',
   supermarketGuide: 'Супермаркет',
   modulePharmacy: 'Аптека',
@@ -2110,7 +2110,7 @@ const ukUA = {
   // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
   // nao sao chave: 'WhatsApp' e igual nos 12 locales.
   shareApp: 'Поділитися застосунком',
-  shareTitle: 'Поділіться Translator Hub',
+  shareTitle: 'Поділіться застосунком',
   shareSubtitle: 'Надішліть тому, кому це потрібно. Працює без інтернету.',
   shareQrHint: 'Наведіть камеру іншого телефона на код',
   shareVia: 'Поділитися через',
@@ -2118,7 +2118,7 @@ const ukUA = {
   shareCopied: 'Посилання скопійовано',
   shareCopyFailed: 'Скопіюйте посилання нижче',
   shareMoreOptions: 'Більше варіантів',
-  shareMessage: 'Translator Hub: безкоштовний офлайн-довідник для супермаркету, аптеки та запитань на вулиці.',
+  shareMessage: 'Тут кажуть: безкоштовний офлайн-довідник для супермаркету, аптеки та запитань на вулиці.',
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'Карта повертається разом з вами: стрілка завжди вказує туди, куди ви йдете.',
@@ -2157,7 +2157,7 @@ const ukUA = {
 
 const arMA = {
   welcomeBack: 'مرحبًا بعودتك',
-  hubTitle: 'Translator Hub',
+  hubTitle: 'هنا يقولون',
   hubSubtitle: 'اختر وحدة',
   supermarketGuide: 'السوبر ماركت',
   modulePharmacy: 'الصيدلية',
@@ -2469,7 +2469,7 @@ const arMA = {
   // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
   // nao sao chave: 'WhatsApp' e igual nos 12 locales.
   shareApp: 'شارك التطبيق',
-  shareTitle: 'شارك Translator Hub',
+  shareTitle: 'شارك التطبيق',
   shareSubtitle: 'أرسله لمن يحتاجه. يعمل بدون إنترنت.',
   shareQrHint: 'وجّه كاميرا الهاتف الآخر نحو الرمز',
   shareVia: 'مشاركة عبر',
@@ -2477,7 +2477,7 @@ const arMA = {
   shareCopied: 'تم نسخ الرابط',
   shareCopyFailed: 'انسخ الرابط أدناه',
   shareMoreOptions: 'خيارات أخرى',
-  shareMessage: 'Translator Hub: دليل مجاني يعمل بدون إنترنت للسوق والصيدلية والسؤال عن الطريق.',
+  shareMessage: 'هنا يقولون: دليل مجاني يعمل بدون إنترنت للسوق والصيدلية والسؤال عن الطريق.',
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'الخريطة تدور معك: السهم يشير دائمًا إلى حيث تتجه.',
@@ -2517,7 +2517,7 @@ const arMA = {
 
 const ltLT = {
   welcomeBack: 'Sveiki sugrįžę',
-  hubTitle: 'Translator Hub',
+  hubTitle: 'Čia sako',
   hubSubtitle: 'Pasirinkite modulį',
   supermarketGuide: 'Prekybos centras',
   modulePharmacy: 'Vaistinė',
@@ -2829,7 +2829,7 @@ const ltLT = {
   // SHARE_URL, senao envelheceria em oito lugares. Nomes de marca tambem
   // nao sao chave: 'WhatsApp' e igual nos 12 locales.
   shareApp: 'Dalintis programėle',
-  shareTitle: 'Pasidalykite Translator Hub',
+  shareTitle: 'Pasidalykite programėle',
   shareSubtitle: 'Nusiųskite tam, kam jos reikia. Veikia be interneto.',
   shareQrHint: 'Nukreipkite kito telefono kamerą į kodą',
   shareVia: 'Dalintis per',
@@ -2837,7 +2837,7 @@ const ltLT = {
   shareCopied: 'Nuoroda nukopijuota',
   shareCopyFailed: 'Nukopijuokite nuorodą žemiau',
   shareMoreOptions: 'Daugiau parinkčių',
-  shareMessage: 'Translator Hub: nemokamas neprisijungus veikiantis vadovas parduotuvei, vaistinei ir klausimams gatvėje.',
+  shareMessage: 'Čia sako: nemokamas neprisijungus veikiantis vadovas parduotuvei, vaistinei ir klausimams gatvėje.',
   // O mapa de Direções gira com o caminhante em vez de manter o norte em
   // cima. Sem esta linha, um mapa que roda sozinho vira outra confusao.
   dirMapTurns: 'Žemėlapis sukasi kartu su jumis: rodyklė visada rodo ten, kur einate.',

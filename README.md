@@ -1,4 +1,4 @@
-# Translator Hub - Guia do Imigrante (PWA & APK)
+# Aqui se diz — guia do imigrante (PWA & APK)
 
 Guia de sobrevivência para imigrantes e viajantes. Em vez de traduzir literalmente, mostra o **produto equivalente real** no país de destino (supermercado, farmácia), além de módulos de posição de objetos ("Onde está?") e direções na rua.
 

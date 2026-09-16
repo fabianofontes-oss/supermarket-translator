@@ -177,6 +177,15 @@ export default function App() {
     return terms[key] || key;
   }, [nativeCountry.lang]);
 
+  /**
+   * O nome do app se traduz, e a aba do navegador tem de acompanhar.
+   * O `<title>` do `index.html` é só o texto inicial, antes de o React montar —
+   * e ele fica em espanhol, como o manifesto, porque também é resolvido antes de
+   * existir alguém para quem traduzir. Daqui em diante manda a língua de quem lê,
+   * igual ao `lang` do documento que `useCountryPair` já mantém.
+   */
+  useEffect(() => { document.title = t('hubTitle'); }, [t]);
+
   // Zera abas ao trocar de módulo
   useEffect(() => {
     setActiveTab('home');

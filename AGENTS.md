@@ -1,4 +1,4 @@
-# Translator Hub — entrega técnica
+# Aqui se diz — entrega técnica
 
 Documento de transferência. Foi escrito para que outra IA, ou outra pessoa, consiga
 trabalhar neste repositório sem ter acompanhado nada do que veio antes.
