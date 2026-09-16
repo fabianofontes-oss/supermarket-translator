@@ -352,6 +352,28 @@ TRABALHO, não a compra, e por isso **não tem lista de objetos para navegar** �
 aparece dentro da frase de uma tarefa. `tests/housecleaning.test.ts` falha se alguém
 exportar uma tabela com `TOOLS`, `PRODUCTS`, `ITEMS` ou `OBJECTS` no nome.
 
+### O campo `note` é o lugar da equivalência
+
+Vale para os dois módulos de trabalho, e é a regra que os liga ao que o app sempre foi.
+O primeiro commit do projeto traz `"Pão Francês"` virando **`Marraqueta`** no Chile e
+**`Papo-seco`** em Portugal: não é tradução, é outro pão que ocupa o mesmo lugar na vida.
+O app nasceu dicionário de **equivalência**.
+
+Como cada origem tem sua língua (pt = Brasil, uk = Ucrânia, ar = Marrocos, lt = Lituânia),
+**`note[lang]` já é uma nota por país de origem** — a mesma chave que o catálogo usa com
+`cl`, `ar`, `pt`, `us`. Não falta estrutura; o que falta é conteúdo do tipo certo.
+
+**A regra do conteúdo, e ela não é estilo:** a nota diz o que se faz **na Espanha**, na
+língua de quem lê — **nunca** o que se faz no país dela. Dá para conferir que aqui a roupa
+vai no *tendedero*; não dá para afirmar como se seca roupa em Vílnius sem inventar
+etnografia sobre a casa da própria leitora. Dizer com segurança o lado espanhol já entrega
+a diferença: ela mesma nota.
+
+E a **glosa continua fiel**: a linha no idioma dela é para conferir que vai dizer a coisa
+certa, e se fosse "adaptada" ela perderia a única forma de verificar. Equivalência mora na
+`note`, nunca na glosa — a mesma separação que Café e Maquiagem já fazem entre
+`names[target]` e `descs[read]`.
+
 **Medidas.** Seis tabelas de conversão entre Brasil, Europa, Reino Unido e Estados
 Unidos. `systemForCountry` manda tudo que não é `br`, `cl`, `ar`, `gb` ou `us` para o
 sistema europeu, o que cobre Ucrânia, Marrocos e Lituânia. Este arquivo importa

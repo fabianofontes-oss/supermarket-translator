@@ -293,6 +293,18 @@ Ao reiniciar o chat, peça para:
 *   **Lacunas do catálogo cobertas de passagem:** `fregona` e `aspiradora` não existiam em lugar nenhum do repositório, e são os dois objetos número um da limpeza espanhola. Entram como tarefa e como nota, não como verbete de catálogo.
 *   ⚠️ **Conteúdo não revisado por falante nativo.** Pontos de maior risco: `fregona`, `encimera`, `váter`, `tender`, `trastero`, `persiana` e o uso de `coger` — que na Espanha é corriqueiro e em boa parte da América Latina é vulgar.
 
+### A nota como equivalência (e não como dicionário)
+
+*   **O que disparou.** Olhando o app pronto: "uma lituana tem sua forma de falar passar o rodo no banheiro, e cada país tem a sua — não pode só traduzir literalmente". Fui ao primeiro commit e a observação se confirma com mais força do que qualquer documento: o primeiro arquivo de dados já traz `"Pão Francês"` → `Marraqueta` (cl), `Papo-seco` (pt), e `"Pão de Queijo"` → `Chipá`. **Marraqueta não é tradução de pão francês.** O app nasceu dicionário de equivalência.
+*   **Onde os dois módulos de trabalho já honravam isso:** na gramática (o ucraniano usa o impessoal em `-но`, o lituano usa particípio passivo, o árabe usa masdar — nenhum é decalque do espanhol) e nas armadilhas de palavra (`fregona` × `mopa`, `bengala` × `bastón`, `resguardo` × `empapador`).
+*   **Onde não honravam, e era o ponto:** a direção estava invertida. O catálogo parte do que a imigrante **já conhece**; os módulos partiam da **prática espanhola** e glosavam nas outras sete línguas. Ensinavam a *dizer* o costume, sem avisar que o costume é outro. E as notas que existiam eram quase todas de *palavra*, não de *costume*.
+*   **A descoberta que tornou o conserto barato:** como cada origem tem sua língua, `note[lang]` **já é uma nota por país de origem** — a mesma chave que o catálogo usa com `cl`, `ar`, `pt`, `us`. Estrutura pronta; faltava conteúdo do tipo certo.
+*   **A regra que as notas novas seguem:** dizem o que se faz **na Espanha**, na língua de quem lê, **nunca** o que se faz no país dela. Dá para conferir que aqui a roupa vai no *tendedero*; não dá para afirmar como se seca roupa em Vílnius sem inventar etnografia sobre a casa da leitora. O lado espanhol dito com segurança já entrega a diferença.
+*   **A glosa continua fiel, e isso é deliberado.** A linha no idioma dela serve para conferir que vai dizer a coisa certa; se fosse culturalmente adaptada, e portanto diferente do espanhol, ela perderia a única forma de verificar. Equivalência na `note`, nunca na glosa — a separação que Café e Maquiagem já fazem entre `names[target]` e `descs[read]`.
+*   **O que ganhou nota:** `tender la ropa` (o tendedero, e que secadora é rara), `el trastero` (fica no porão do prédio, e não é despensa), `la persiana` (é externa, sobe com fita, e se diz *subir*/*bajar*), `coger` (na Espanha é só pegar), `el absorbente` (pede-se por *talla* e por absorção, nunca por marca) e `la cuña` (compra-se na farmácia, no balcão, sem receita).
+*   **Mudança estrutural mínima:** `HEARD` era `Text[]` e não tinha onde pendurar nota. Virou `{ key, text, note? }[]`, a mesma forma de `Task` e `CareTool` — e de quebra as chaves do React deixaram de ser índices.
+*   **A nota fica FORA do botão de áudio.** Dentro, ela entraria no nome acessível da frase, e quem usa leitor de tela ouviria o parágrafo inteiro antes de saber o que a frase diz.
+
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.333 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

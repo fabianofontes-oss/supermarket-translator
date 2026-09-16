@@ -109,21 +109,24 @@ function Pills<T extends { key: string }>({ theme, items, active, onPick, label 
   );
 }
 
-/** Lista de frases prontas, com áudio por linha. */
+/** Lista de frases prontas, com áudio por linha e o costume que a frase supõe. */
 const PhraseList: React.FC<{
-  items: { key: string; target: string; native: string | null }[];
+  items: { key: string; target: string; native: string | null; note?: string | null }[];
   Listen: Glyph; listenLabel: string; textColor: string; onSpeak: (text: string) => void;
 }> = ({ items, Listen, listenLabel, textColor, onSpeak }) => (
   <ul className="divide-y divide-gray-100">
     {items.map((item) => (
-      <li key={item.key}>
-        <button onClick={() => onSpeak(item.target)} className="w-full py-3 flex items-center gap-3 text-left" aria-label={listenLabel}>
+      <li key={item.key} className="py-1">
+        <button onClick={() => onSpeak(item.target)} className="w-full py-2 flex items-center gap-3 text-left" aria-label={listenLabel}>
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold leading-snug" dir="auto">{item.target}</p>
             {item.native && <p className="text-sm text-gray-500 leading-snug" dir="auto">{item.native}</p>}
           </div>
           <Listen className={`w-6 h-6 flex-shrink-0 ${textColor}`} />
         </button>
+        {/* A nota fica FORA do botão: é para ler, não para falar, e dentro dele
+            entraria no nome acessível da frase. */}
+        {item.note && <p className="text-sm text-gray-600 leading-snug pb-2 pr-9" dir="auto">{item.note}</p>}
       </li>
     ))}
   </ul>
@@ -294,7 +297,7 @@ export default function HouseCleaningModule({
 
               <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
                 <PhraseList
-                  items={HEARD.map((h, i) => ({ key: `h${i}`, target: h[target], native: showNative ? h[native] : null }))}
+                  items={HEARD.map((h) => ({ key: h.key, target: h.text[target], native: showNative ? h.text[native] : null, note: h.note?.[read] ?? null }))}
                   Listen={Listen} listenLabel={listen} textColor={theme.textColor} onSpeak={speak}
                 />
               </section>

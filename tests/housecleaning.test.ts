@@ -43,7 +43,10 @@ const todasAsTarefas = function* (): Generator<Caso> {
 
 const todasAsFrases = function* (): Generator<Caso> {
   for (const lang of SUPPORTED_LANGS) {
-    for (const [i, h] of HEARD.entries()) yield { tag: `${lang}/ouve${i}`, lang, frase: h[lang] };
+    for (const h of HEARD) yield { tag: `${lang}/ouve:${h.key}`, lang, frase: h.text[lang] };
+    // A nota entra na varredura: ela é texto que vai para a tela como qualquer outro.
+    for (const h of HEARD) if (h.note) yield { tag: `${lang}/nota:${h.key}`, lang, frase: h.note[lang] };
+    for (const t of TASKS) if (t.note) yield { tag: `${lang}/nota:${t.key}`, lang, frase: t.note[lang] };
     for (const s of SAY_PHRASES) yield { tag: `${lang}/${s.key}`, lang, frase: s.text[lang] };
   }
 };
@@ -234,7 +237,7 @@ describe('PARTE 4 — o que ela pede é fala de outra pessoa', () => {
      * `usted`; a patroa trata quem limpa de `tú`. Se alguém uniformizar os dois
      * lados, o módulo passa a ensinar um registro que ninguém usa.
      */
-    const ouvidoEmTu = HEARD.filter((h) => /\b(deja|ten|no uses|puedes|termines|subas)\b/i.test(h.es));
+    const ouvidoEmTu = HEARD.filter((h) => /\b(deja|ten|no uses|puedes|termines|subas)\b/i.test(h.text.es));
     expect(ouvidoEmTu.length).toBeGreaterThanOrEqual(5);
 
     const ditoEmUsted = SAY_PHRASES.filter((s) => /\b(le|deja|guarda|parece)\b/i.test(s.text.es));
@@ -242,15 +245,33 @@ describe('PARTE 4 — o que ela pede é fala de outra pessoa', () => {
 
     // E nada de `vosotros` em lado nenhum: a patroa é uma pessoa, não um balcão.
     for (const s of SAY_PHRASES) expect(s.text.es, s.key).not.toMatch(/\b(vosotros|vosotras)\b|\w+(áis|éis)\b/);
-    for (const h of HEARD) expect(h.es).not.toMatch(/\b(vosotros|vosotras)\b|\w+(áis|éis)\b/);
+    for (const h of HEARD) expect(h.text.es, h.key).not.toMatch(/\b(vosotros|vosotras)\b|\w+(áis|éis)\b/);
   });
 
   it('a glosa árabe do que se ouve não é imperativo', () => {
     // O imperativo árabe concorda com o gênero de quem ouve, e a glosa não pode
     // supor o gênero de quem lê. Mesma lição do módulo irmão.
-    for (const [i, h] of HEARD.entries()) {
-      expect(h.ar, `ouve${i}`).not.toMatch(/^(اتركي|انتبهي|أغلقي|استعملي|خذي)/);
+    for (const h of HEARD) {
+      expect(h.text.ar, h.key).not.toMatch(/^(اتركي|انتبهي|أغلقي|استعملي|خذي)/);
     }
+  });
+
+  it('a nota de costume existe nos oito idiomas, e diz do lado espanhol', () => {
+    /**
+     * A nota descreve o que se faz NA ESPANHA, na língua de quem lê. Nunca o que
+     * se faz no país dela: eu posso conferir que aqui a roupa vai no tendedero,
+     * não posso afirmar como se seca roupa em Vílnius. Aqui o teste garante o que
+     * dá para garantir por máquina — que a nota está completa e que não sobrou
+     * ninguém sem ela onde ela foi prometida.
+     */
+    const comNota = HEARD.filter((h) => h.note).map((h) => h.key);
+    expect(comNota).toEqual(['trastero', 'fridge', 'blind']);
+    for (const h of HEARD) {
+      if (!h.note) continue;
+      for (const lang of SUPPORTED_LANGS) expect(h.note[lang], `${h.key}/${lang}`).toBeTruthy();
+    }
+    // E a tarefa mais carregada de costume do módulo também tem a sua.
+    expect(TASKS.find((t) => t.key === 'hang')?.note).toBeTruthy();
   });
 });
 

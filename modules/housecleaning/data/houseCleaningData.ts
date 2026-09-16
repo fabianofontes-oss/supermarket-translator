@@ -264,6 +264,16 @@ export const TASKS: Task[] = [
     labels: { es: 'Tender la ropa', pt: 'Estender a roupa', en: 'Hang the washing', fr: 'Étendre le linge', it: 'Stendere il bucato', uk: 'Розвішувати білизну', lt: 'Džiauti skalbinius', ar: 'نشر الغسيل' },
     inf: { es: 'tender la ropa', pt: 'estender a roupa', en: 'hang the washing', fr: 'étendre le linge', it: 'stendere il bucato', uk: 'розвішувати білизну', lt: 'džiauti skalbinius', ar: 'نشر الغسيل' },
     done: { es: 'ya he tendido la ropa', pt: 'já estendi a roupa', en: "I've already hung the washing", fr: "j'ai déjà étendu le linge", it: 'ho già steso il bucato', uk: 'білизну вже розвішано', lt: 'skalbiniai jau išdžiauti', ar: 'تم نشر الغسيل' },
+    note: {
+      es: 'La ropa se tiende en el tendedero, en la terraza o en la ventana. Pocas casas tienen secadora, así que tender es tarea de todos los días.',
+      pt: 'Na Espanha a roupa vai no "tendedero" — a armação que fica na varanda ou na janela. Poucas casas têm secadora, então estender é tarefa de todo dia, e cada casa tem seu jeito de pendurar.',
+      en: 'Washing is hung on the tendedero, on the terrace or at the window. Few homes have a tumble dryer, so hanging the washing is a daily task.',
+      fr: 'Le linge se met sur le « tendedero », sur la terrasse ou à la fenêtre. Peu de logements ont un sèche-linge : étendre est une tâche quotidienne.',
+      it: 'Il bucato si stende sul "tendedero", in terrazza o alla finestra. Poche case hanno l\'asciugatrice, quindi stendere è cosa di ogni giorno.',
+      uk: 'Білизну розвішують на «tendedero» — сушарці на терасі або біля вікна. Сушильні машини вдома трапляються рідко, тож це щоденна робота.',
+      lt: 'Skalbiniai džiaunami ant „tendedero“ – džiovyklės terasoje arba prie lango. Džiovyklės mašinos namuose retos, tad tai kasdienis darbas.',
+      ar: 'يُنشر الغسيل على «tendedero» في الشرفة أو عند النافذة. قلّة من البيوت فيها مجفف ملابس، فالنشر عمل يومي.',
+    },
   },
   {
     key: 'iron', group: 'laundry',
@@ -414,19 +424,73 @@ export const TASK_FRAMES: TaskFrame[] = [
 // o imperativo árabe concorda com o gênero de quem ouve, e a glosa não deve supor
 // o gênero de quem lê. Mesma lição do módulo irmão.
 
-export const HEARD: Text[] = [
-  { es: 'Hoy no hace falta planchar.', pt: 'Hoje não precisa passar roupa.', en: "You don't need to iron today.", fr: "Pas besoin de repasser aujourd'hui.", it: 'Oggi non serve stirare.', uk: 'Сьогодні прасувати не треба.', lt: 'Šiandien lyginti nereikia.', ar: 'اليوم لا داعي للكي.' },
-  { es: 'Deja el baño para el final.', pt: 'Deixe o banheiro para o final.', en: 'Leave the bathroom for last.', fr: 'Garde la salle de bain pour la fin.', it: 'Lascia il bagno per ultimo.', uk: 'Ванну залиш наостанок.', lt: 'Vonią palik pabaigai.', ar: 'الحمام في الأخير.' },
-  { es: 'Ten cuidado con eso, que es delicado.', pt: 'Cuidado com isso, é delicado.', en: 'Careful with that, it is delicate.', fr: "Fais attention, c'est fragile.", it: 'Attenzione, è delicato.', uk: 'Обережно з цим, воно делікатне.', lt: 'Atsargiai su tuo, tai trapu.', ar: 'انتباه: هذا شيء حساس.' },
-  { es: 'No uses lejía en el parqué.', pt: 'Não use água sanitária no piso de madeira.', en: "Don't use bleach on the wooden floor.", fr: "N'utilise pas d'eau de Javel sur le parquet.", it: 'Non usare la candeggina sul parquet.', uk: 'Не використовуй хлорку на паркеті.', lt: 'Nenaudok baliklio ant parketo.', ar: 'لا تُستعمل مادة التبييض على الباركيه.' },
-  { es: 'La ropa de color, aparte.', pt: 'A roupa colorida, separada.', en: 'Colours separately.', fr: 'Le linge de couleur à part.', it: 'I capi colorati a parte.', uk: 'Кольорове — окремо.', lt: 'Spalvotus – atskirai.', ar: 'الملابس الملونة على حدة.' },
-  { es: 'Los cristales solo por dentro.', pt: 'Os vidros só por dentro.', en: 'The windows only on the inside.', fr: "Les vitres seulement à l'intérieur.", it: 'I vetri solo dentro.', uk: 'Вікна — лише зсередини.', lt: 'Langus tik iš vidaus.', ar: 'الزجاج من الداخل فقط.' },
-  { es: 'El aspirador está en el trastero.', pt: 'O aspirador está no depósito.', en: 'The vacuum is in the storage room.', fr: "L'aspirateur est dans le débarras.", it: "L'aspirapolvere è nello sgabuzzino.", uk: 'Пилосос у комірці.', lt: 'Dulkių siurblys sandėliuke.', ar: 'المكنسة في غرفة التخزين.' },
-  { es: 'Cuando termines, cierra con llave.', pt: 'Quando terminar, tranque a porta.', en: 'When you finish, lock the door.', fr: 'Quand tu as fini, ferme à clé.', it: 'Quando finisci, chiudi a chiave.', uk: 'Коли закінчиш, замкни двері.', lt: 'Kai baigsi, užrakink duris.', ar: 'عند الانتهاء، إغلاق الباب بالمفتاح.' },
-  { es: 'Puedes coger algo de la nevera.', pt: 'Pode pegar algo na geladeira.', en: 'You can take something from the fridge.', fr: 'Tu peux prendre quelque chose dans le frigo.', it: 'Puoi prendere qualcosa dal frigo.', uk: 'Можеш узяти щось із холодильника.', lt: 'Gali pasiimti ko nors iš šaldytuvo.', ar: 'يمكن أخذ شيء من الثلاجة.' },
-  { es: 'Si no llego, deja la llave en el buzón.', pt: 'Se eu não chegar, deixe a chave na caixa de correio.', en: "If I'm not back, leave the key in the letterbox.", fr: "Si je ne suis pas là, laisse la clé dans la boîte aux lettres.", it: 'Se non arrivo, lascia la chiave nella cassetta della posta.', uk: 'Якщо мене не буде, залиш ключ у поштовій скриньці.', lt: 'Jei negrįšiu, palik raktą pašto dėžutėje.', ar: 'إن لم أصل، ترك المفتاح في صندوق البريد.' },
-  { es: 'No hace falta que subas la persiana.', pt: 'Não precisa levantar a persiana.', en: "You don't need to open the blind.", fr: 'Pas besoin de lever le store.', it: 'Non serve alzare la tapparella.', uk: 'Жалюзі піднімати не треба.', lt: 'Žaliuzių kelti nereikia.', ar: 'لا داعي لرفع الستارة.' },
-  { es: 'Hoy vengo antes, sobre la hora de comer.', pt: 'Hoje eu chego mais cedo, por volta do almoço.', en: "I'll be back earlier today, around lunchtime.", fr: "Je rentre plus tôt aujourd'hui, vers l'heure du déjeuner.", it: 'Oggi torno prima, verso ora di pranzo.', uk: 'Сьогодні повернуся раніше, десь на обід.', lt: 'Šiandien grįšiu anksčiau, apie pietus.', ar: 'اليوم سأعود مبكراً، حوالي وقت الغداء.' },
+export interface HeardPhrase {
+  key: string;
+  text: Text;
+  /**
+   * O costume espanhol que a frase supõe, na língua de quem lê.
+   *
+   * REGRA, e ela não é estilo: a nota diz o que se faz NA ESPANHA, nunca o que se
+   * faz no país de quem lê. Dá para verificar que aqui a roupa vai no tendedero;
+   * não dá para afirmar como se seca roupa em Vílnius sem inventar etnografia
+   * sobre a casa da própria leitora. Dizer o lado espanhol já entrega a diferença
+   * — é o que o catálogo faz ao dizer que no Chile o pão francês é marraqueta.
+   */
+  note?: Text;
+}
+
+export const HEARD: HeardPhrase[] = [
+  { key: 'noIron', text: { es: 'Hoy no hace falta planchar.', pt: 'Hoje não precisa passar roupa.', en: "You don't need to iron today.", fr: "Pas besoin de repasser aujourd'hui.", it: 'Oggi non serve stirare.', uk: 'Сьогодні прасувати не треба.', lt: 'Šiandien lyginti nereikia.', ar: 'اليوم لا داعي للكي.' } },
+  { key: 'bathLast', text: { es: 'Deja el baño para el final.', pt: 'Deixe o banheiro para o final.', en: 'Leave the bathroom for last.', fr: 'Garde la salle de bain pour la fin.', it: 'Lascia il bagno per ultimo.', uk: 'Ванну залиш наостанок.', lt: 'Vonią palik pabaigai.', ar: 'الحمام في الأخير.' } },
+  { key: 'delicate', text: { es: 'Ten cuidado con eso, que es delicado.', pt: 'Cuidado com isso, é delicado.', en: 'Careful with that, it is delicate.', fr: "Fais attention, c'est fragile.", it: 'Attenzione, è delicato.', uk: 'Обережно з цим, воно делікатне.', lt: 'Atsargiai su tuo, tai trapu.', ar: 'انتباه: هذا شيء حساس.' } },
+  { key: 'noBleach', text: { es: 'No uses lejía en el parqué.', pt: 'Não use água sanitária no piso de madeira.', en: "Don't use bleach on the wooden floor.", fr: "N'utilise pas d'eau de Javel sur le parquet.", it: 'Non usare la candeggina sul parquet.', uk: 'Не використовуй хлорку на паркеті.', lt: 'Nenaudok baliklio ant parketo.', ar: 'لا تُستعمل مادة التبييض على الباركيه.' } },
+  { key: 'colours', text: { es: 'La ropa de color, aparte.', pt: 'A roupa colorida, separada.', en: 'Colours separately.', fr: 'Le linge de couleur à part.', it: 'I capi colorati a parte.', uk: 'Кольорове — окремо.', lt: 'Spalvotus – atskirai.', ar: 'الملابس الملونة على حدة.' } },
+  { key: 'insideOnly', text: { es: 'Los cristales solo por dentro.', pt: 'Os vidros só por dentro.', en: 'The windows only on the inside.', fr: "Les vitres seulement à l'intérieur.", it: 'I vetri solo dentro.', uk: 'Вікна — лише зсередини.', lt: 'Langus tik iš vidaus.', ar: 'الزجاج من الداخل فقط.' } },
+  {
+    key: 'trastero',
+    text: { es: 'El aspirador está en el trastero.', pt: 'O aspirador está no depósito.', en: 'The vacuum is in the storage room.', fr: "L'aspirateur est dans le débarras.", it: "L'aspirapolvere è nello sgabuzzino.", uk: 'Пилосос у комірці.', lt: 'Dulkių siurblys sandėliuke.', ar: 'المكنسة في غرفة التخزين.' },
+    note: {
+      es: 'El trastero es el cuarto de guardar, muchas veces fuera del piso, en el sótano del edificio. No es la despensa.',
+      pt: 'O "trastero" é o quartinho de guardar coisas — muitas vezes nem fica dentro do apartamento, e sim na garagem ou no porão do prédio. Não é despensa, que é de comida.',
+      en: 'The trastero is the storage room, often outside the flat, in the building basement. It is not the food pantry.',
+      fr: "Le « trastero » est le débarras, souvent hors de l'appartement, à la cave de l'immeuble. Ce n'est pas le garde-manger.",
+      it: 'Il "trastero" è il ripostiglio, spesso fuori dall\'appartamento, nel seminterrato del palazzo. Non è la dispensa.',
+      uk: '«Trastero» — комірка для речей, часто не в самій квартирі, а в підвалі будинку. Це не комора з їжею.',
+      lt: '„Trastero“ – daiktų sandėliukas, dažnai ne bute, o namo rūsyje. Tai ne maisto sandėliukas.',
+      ar: '«trastero» غرفة تخزين، وغالباً ليست داخل الشقة بل في قبو العمارة. وليست مخزن الطعام.',
+    },
+  },
+  { key: 'lockUp', text: { es: 'Cuando termines, cierra con llave.', pt: 'Quando terminar, tranque a porta.', en: 'When you finish, lock the door.', fr: 'Quand tu as fini, ferme à clé.', it: 'Quando finisci, chiudi a chiave.', uk: 'Коли закінчиш, замкни двері.', lt: 'Kai baigsi, užrakink duris.', ar: 'عند الانتهاء، إغلاق الباب بالمفتاح.' } },
+  {
+    key: 'fridge',
+    text: { es: 'Puedes coger algo de la nevera.', pt: 'Pode pegar algo na geladeira.', en: 'You can take something from the fridge.', fr: 'Tu peux prendre quelque chose dans le frigo.', it: 'Puoi prendere qualcosa dal frigo.', uk: 'Можеш узяти щось із холодильника.', lt: 'Gali pasiimti ko nors iš šaldytuvo.', ar: 'يمكن أخذ شيء من الثلاجة.' },
+    note: {
+      es: 'En España "coger" es simplemente tomar o agarrar, y se usa a todas horas.',
+      pt: '"Coger" na Espanha é só pegar, e se usa o tempo todo: coger el metro, coger el teléfono. Quem aprendeu espanhol da América Latina estranha, porque lá a palavra é vulgar — na Espanha não é.',
+      en: 'In Spain "coger" simply means to take or pick up, and it is used constantly.',
+      fr: "En Espagne, « coger » veut simplement dire prendre, et s'emploie à tout bout de champ.",
+      it: 'In Spagna "coger" vuol dire semplicemente prendere, e si usa in continuazione.',
+      uk: 'В Іспанії «coger» означає просто «взяти» і вживається постійно.',
+      lt: 'Ispanijoje „coger“ reiškia tiesiog paimti ir vartojamas nuolat.',
+      ar: 'في إسبانيا «coger» تعني ببساطة «يأخذ»، وتُستعمل طوال الوقت.',
+    },
+  },
+  { key: 'letterbox', text: { es: 'Si no llego, deja la llave en el buzón.', pt: 'Se eu não chegar, deixe a chave na caixa de correio.', en: "If I'm not back, leave the key in the letterbox.", fr: "Si je ne suis pas là, laisse la clé dans la boîte aux lettres.", it: 'Se non arrivo, lascia la chiave nella cassetta della posta.', uk: 'Якщо мене не буде, залиш ключ у поштовій скриньці.', lt: 'Jei negrįšiu, palik raktą pašto dėžutėje.', ar: 'إن لم أصل، ترك المفتاح في صندوق البريد.' } },
+  {
+    key: 'blind',
+    text: { es: 'No hace falta que subas la persiana.', pt: 'Não precisa levantar a persiana.', en: "You don't need to open the blind.", fr: 'Pas besoin de lever le store.', it: 'Non serve alzare la tapparella.', uk: 'Жалюзі піднімати не треба.', lt: 'Žaliuzių kelti nereikia.', ar: 'لا داعي لرفع الستارة.' },
+    note: {
+      es: 'La persiana va por fuera de la ventana y se sube con una cinta desde dentro. Se dice subir y bajar, no abrir y cerrar.',
+      pt: 'A persiana espanhola fica por fora da janela e se levanta puxando uma fita de dentro. Subir de manhã e descer à noite faz parte da rotina da casa — e se diz "subir" e "bajar", nunca "abrir" e "fechar".',
+      en: 'The Spanish blind sits outside the window and is raised with a strap from inside. You say raise and lower, not open and close.',
+      fr: "Le « persiana » est à l'extérieur de la fenêtre et se lève avec une sangle depuis l'intérieur. On dit monter et descendre, pas ouvrir et fermer.",
+      it: 'La "persiana" sta fuori dalla finestra e si alza con una cinghia da dentro. Si dice alzare e abbassare, non aprire e chiudere.',
+      uk: '«Persiana» — зовнішні ролети, які піднімають стрічкою зсередини. Кажуть «підняти» й «опустити», а не «відчинити» й «зачинити».',
+      lt: '„Persiana“ – išorinės žaliuzės, keliamos juosta iš vidaus. Sakoma pakelti ir nuleisti, ne atidaryti ir uždaryti.',
+      ar: '«persiana» ستارة خارجية تُرفع بشريط من الداخل. يُقال رفعها وإنزالها، لا فتحها وإغلاقها.',
+    },
+  },
+  { key: 'backEarly', text: { es: 'Hoy vengo antes, sobre la hora de comer.', pt: 'Hoje eu chego mais cedo, por volta do almoço.', en: "I'll be back earlier today, around lunchtime.", fr: "Je rentre plus tôt aujourd'hui, vers l'heure du déjeuner.", it: 'Oggi torno prima, verso ora di pranzo.', uk: 'Сьогодні повернуся раніше, десь на обід.', lt: 'Šiandien grįšiu anksčiau, apie pietus.', ar: 'اليوم سأعود مبكراً، حوالي وقت الغداء.' } },
 ];
 
 // ---------------------------------------------------------------------------
