@@ -5,24 +5,37 @@ import type { Country } from '../types';
 import { playSound } from '../utils/soundUtils';
 
 /**
- * A moldura dos módulos generativos.
+ * A moldura dos dez módulos generativos.
  *
  * Nasceu de um defeito anotado: o cabeçalho existia em DEZ cópias idênticas,
  * variando só a chave do título (AGENTS.md 8.17). Mexer nele significava mexer em
- * dez arquivos, e era assim que eles saíam de sincronia. Aqui é um.
+ * dez arquivos, e era assim que saíam de sincronia. Aqui é um.
  *
- * E traz a barra de baixo com o botão redondo grande da bandeira, igual à do
- * Supermercado e da Farmácia — antes os generativos tinham um par de bandeirinhas
- * de 24px num canto do cabeçalho, para a troca de idioma, que é o controle mais
- * tocado do app. Mesmo tamanho, mesmo anel, mesma sombra do `ModuleLayout`, de
- * propósito: a graça é o app inteiro parecer um app só.
+ * ---------------------------------------------------------------------------
+ * A BANDA FIXA (`pinned`) — e é a razão de a moldura existir hoje
+ * ---------------------------------------------------------------------------
+ * Fica ENTRE o cabeçalho e a área de rolagem, e não rola. É onde mora a frase que
+ * o módulo monta, mais as abas de quem as tem.
  *
- * OS DOIS SLOTS LATERAIS SÃO OPCIONAIS, e isso é o desenho, não preguiça.
- * No Supermercado os botões de baixo são Favoritos e Lista, que fazem sentido LÁ;
- * em cada módulo outra coisa faz sentido, e em muitos não faz nenhuma. Slot vazio
- * é resposta legítima — a barra fica só com a bandeira no meio. Botão que passa a
- * vida sem função ensina a pessoa a ignorar aquele canto da tela, e o projeto já
- * aprendeu isso nas Direções.
+ * O problema que ela resolve: a frase rolava junto com o resto, então quem descia
+ * para trocar uma palavra parava de ver o que estava montando — e ver a frase se
+ * formar É o módulo. No "Onde dói" o boneco tem uns 420px, então o cartão já
+ * começava quase fora da tela.
+ *
+ * Por que banda, e não `position: sticky`: o `space-y-4` do contêiner injeta margem
+ * no elemento grudado; o cartão de Acessórios da Maquiagem vive dentro de uma
+ * `<section>` curta e descolaria quase na hora; e `scrollIntoView` passaria a mirar
+ * pontos cobertos. A banda não tem nenhum desses problemas — está fora do contêiner
+ * de rolagem, e por isso não depende de onde o cartão está no JSX.
+ *
+ * ---------------------------------------------------------------------------
+ * NÃO HÁ BARRA DE BAIXO, e isso foi uma volta atrás deliberada
+ * ---------------------------------------------------------------------------
+ * Houve uma, com o botão redondo da bandeira, copiada do Supermercado. Ela só se
+ * justificava se os slots laterais tivessem função — e em nove dos dez módulos não
+ * tinham. Viraram 96px de nada em troca de um botão que já cabia no canto do
+ * cabeçalho, e com a banda fixa em cima o preço ficou alto demais. O par de
+ * bandeiras voltou para o cabeçalho, onde sempre esteve.
  */
 
 export type ShellTheme = { color: string; textColor: string; hex: string; borderColor: string };
@@ -31,63 +44,33 @@ interface ModuleShellProps {
   title: string;
   theme: ShellTheme;
   t: (key: string) => string;
-  /** Só o destino: é a bandeira que a barra mostra, como no Supermercado. */
+  nativeCountry: Country;
   targetCountry: Country;
   onGoHome: () => void;
   onOpenLanguageModal: () => void;
   onOpenShare: () => void;
-  /** Ação da esquerda da barra. Ausente = nada ali. */
-  left?: React.ReactNode;
-  /** Ação da direita da barra. Ausente = nada ali. */
-  right?: React.ReactNode;
+  /** A frase montada, e as abas de quem as tem. Não rola. */
+  pinned?: React.ReactNode;
   children: React.ReactNode;
 }
-
-/** Botão de slot, para os módulos não reinventarem o estilo da barra. */
-export const ShellAction: React.FC<{
-  icon: React.FC<{ className?: string }>;
-  label: string;
-  onClick: () => void;
-  /** Aberto: vira pastilha branca, como a aba ativa do Supermercado. */
-  active?: boolean;
-  theme: ShellTheme;
-}> = ({ icon: Icon, label, onClick, active = false, theme }) => (
-  <button
-    onClick={() => { playSound('page-turn'); onClick(); }}
-    aria-pressed={active}
-    className={`flex flex-col justify-end items-center w-full tap cursor-pointer relative overflow-hidden group ${
-      active
-        ? 'bg-white rounded-t-2xl h-24 pb-6 pt-4 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] translate-y-0 z-10'
-        : 'h-20 pb-6 translate-y-2 opacity-90 hover:opacity-100'
-    }`}
-  >
-    <Icon className={`w-7 h-7 mb-1 transition-colors duration-300 ${active ? theme.textColor : 'text-white'}`} />
-    {/* text-xs e não text-[10px]: é o piso de 14px dos módulos de trabalho
-        aplicado também à barra, e aqui cabe sem cortar. */}
-    <span
-      className={`text-xs font-bold uppercase tracking-widest px-2 text-center leading-tight ${active ? theme.textColor : 'text-white'}`}
-      dir="auto"
-    >
-      {label}
-    </span>
-  </button>
-);
 
 export const ModuleShell: React.FC<ModuleShellProps> = ({
   title,
   theme,
   t,
+  nativeCountry,
   targetCountry,
   onGoHome,
   onOpenLanguageModal,
   onOpenShare,
-  left,
-  right,
+  pinned,
   children,
 }) => (
   <div className="w-full bg-slate-50 text-gray-800 flex flex-col h-[100dvh] relative overflow-hidden font-sans">
+    {/* Sem o canto arredondado quando há banda: os dois se encostam e viram um
+        bloco só de topo, distinguidos pela tonalidade e não por um vão. */}
     <header
-      className="flex-shrink-0 text-white shadow-lg z-30 rounded-b-3xl"
+      className={`flex-shrink-0 text-white shadow-lg z-30 ${pinned ? '' : 'rounded-b-3xl'}`}
       style={{ background: `linear-gradient(to bottom, ${theme.hex}, ${theme.hex}e6)` }}
     >
       <div className="flex items-center justify-between px-4 pt-4 pb-4 max-w-3xl mx-auto">
@@ -99,43 +82,44 @@ export const ModuleShell: React.FC<ModuleShellProps> = ({
           <HomeIcon className="w-5 h-5" />
         </button>
         <h1 className="flex-1 mx-2 text-center font-bold text-2xl uppercase tracking-tight truncate">{title}</h1>
-        {/* O par de bandeirinhas saiu daqui: a troca de idioma passou para o botão
-            redondo da barra, como no Supermercado. Sobra o compartilhar, e por isso
-            não há mais o `gap-2` que separava dois botões sobrepostos. */}
-        <ShareButton onClick={onOpenShare} t={t} variant="onColor" />
-      </div>
-    </header>
-
-    {/* pb-32 e não pb-10: a barra de baixo tem 96px e cobriria o fim da rolagem. */}
-    <main className="flex-1 overflow-y-auto pb-32">
-      <div className="px-4 pt-4 max-w-3xl mx-auto w-full space-y-4">{children}</div>
-    </main>
-
-    <nav className={`absolute bottom-0 w-full ${theme.color} z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.15)]`}>
-      <div className="max-w-3xl mx-auto grid grid-cols-3 h-24 items-end pb-4 tap">
-        <div className="flex items-end h-full">{left}</div>
-
-        {/* O botão redondo. Copiado do `ModuleLayout` para serem o mesmo botão de
-            verdade — mesmo diâmetro, mesmo anel de 6px na cor do módulo, mesmos
-            dois brilhos. Só a bandeira de DESTINO, como lá: a de origem já é a
-            língua em que a tela inteira está escrita. */}
-        <div className="relative h-full w-full flex justify-center pointer-events-none">
+        {/* Cluster da direita. `gap-2` não é escolha estética: a área de toque de
+            `.hit` é 44px centrada no botão, e com menos espaço que isso as duas se
+            sobrepõem e uma para de responder. */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <ShareButton onClick={onOpenShare} t={t} variant="onColor" />
           <button
             onClick={() => { playSound('click'); onOpenLanguageModal(); }}
             aria-label={t('languageSettings')}
-            className="w-20 h-20 rounded-full border-[6px] flex items-center justify-center bg-slate-800 overflow-hidden transform tap hover:scale-105 cursor-pointer absolute bottom-10 z-50 pointer-events-auto shadow-xl"
-            style={{ borderColor: theme.hex }}
+            className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors"
           >
-            <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full z-30 pointer-events-none" />
-            <div className="absolute inset-0 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] z-20 pointer-events-none" />
-            {/* Decorativa: o nome do botão já diz o que ele faz, e o `alt` do país
-                o rebatizaria de "Espanha". Mesma decisão do `ModuleLayout`. */}
-            <img src={targetCountry.image} alt="" aria-hidden="true" className="w-full h-full object-cover rounded-full" />
+            <div className="flex items-center -space-x-2">
+              <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
+              <img src={targetCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
+            </div>
           </button>
         </div>
-
-        <div className="flex items-end h-full">{right}</div>
       </div>
-    </nav>
+    </header>
+
+    {/* A banda. `flex-shrink-0` para ela não ser espremida quando a lista embaixo
+        for longa, e `z-20` para ficar acima da rolagem sem cobrir o cabeçalho.
+        O fundo vai de ponta a ponta — sem margem lateral, sem borda — e é um tom
+        CLARO da cor do próprio módulo (`${hex}14`, uns 8%). Assim ela se encosta no
+        cabeçalho e o bloco de cima vira uma peça só, com duas tonalidades: dá para
+        ver onde acaba o menu e começa a frase, sem inventar uma terceira cor de
+        fundo na tela. Na cor da página ela não parecia camada nenhuma — parecia
+        conteúdo que some cortado no meio ao rolar. A sombra fecha o recado. */}
+    {pinned && (
+      <div
+        className="flex-shrink-0 z-20 w-full px-4 pt-3 pb-3 rounded-b-3xl shadow-[0_10px_18px_-8px_rgba(15,23,42,0.35)]"
+        style={{ backgroundColor: `${theme.hex}14` }}
+      >
+        <div className="max-w-3xl mx-auto w-full space-y-3">{pinned}</div>
+      </div>
+    )}
+
+    <main className="flex-1 overflow-y-auto pb-10">
+      <div className="px-4 pt-3 max-w-3xl mx-auto w-full space-y-4">{children}</div>
+    </main>
   </div>
 );

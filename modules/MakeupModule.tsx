@@ -199,6 +199,12 @@ export default function MakeupModule({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product, picks.color, picks.depth, picks.undertone]);
 
+  /**
+   * A frase que vai para a banda fixa. As duas metades têm cada uma a sua, mas só
+   * uma existe por vez — daí um cartão só, no alto, que não rola.
+   */
+  const [shown, shownNative] = mode === 'products' ? [request, requestNative] : [toolPhrase, toolPhraseNative];
+
   const ToolGlyph = TOOL_GLYPHS[tool.key];
 
   return (
@@ -206,34 +212,51 @@ export default function MakeupModule({
       title={t('moduleMakeup')}
       theme={theme}
       t={t}
+      nativeCountry={nativeCountry}
       targetCountry={targetCountry}
       onGoHome={onGoHome}
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
+      pinned={(
+        <>
+          {/* Seletor de modo. As duas metades são coisas diferentes — uma se
+              configura, a outra se navega —, e juntas na mesma rolagem dariam
+              dez seções e um cartão de frase ambíguo. */}
+          <div className="bg-gray-200/70 rounded-2xl p-1 flex gap-1" role="tablist" aria-label={t('moduleMakeup')}>
+            {([['products', 'mkModeProducts'], ['tools', 'mkModeTools']] as const).map(([key, labelKey]) => {
+              const active = mode === key;
+              return (
+                <button
+                  key={key}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => { playSound('page-turn'); setMode(key); }}
+                  // py-3 e não py-2: com py-2 o botão fica em 36px de altura,
+                  // que é exatamente o que a auditoria 8.9 lista como defeito.
+                  className={`flex-1 rounded-xl py-3 text-sm font-bold tap ${active ? 'bg-white shadow-sm' : 'text-gray-600'}`}
+                  style={active ? { color: theme.hex } : undefined}
+                >
+                  <span dir="auto">{t(labelKey)}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-xl font-bold leading-snug" dir="auto">{shown}</p>
+                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{shownNative}</p>}
+              </div>
+              <button onClick={() => speak(shown)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+                <Listen className="w-6 h-6" />
+              </button>
+            </div>
+            {mode === 'products' && <p className="text-[11px] text-white mt-2 leading-snug" dir="auto">{t('mkShowScreen')}</p>}
+          </div>
+        </>
+      )}
     >
 
-      {/* Seletor de modo. As duas metades são coisas diferentes — uma se
-          configura, a outra se navega —, e juntas na mesma rolagem dariam
-          dez seções e um cartão de frase ambíguo. */}
-      <div className="bg-gray-200/70 rounded-2xl p-1 flex gap-1" role="tablist" aria-label={t('moduleMakeup')}>
-        {([['products', 'mkModeProducts'], ['tools', 'mkModeTools']] as const).map(([key, labelKey]) => {
-          const active = mode === key;
-          return (
-            <button
-              key={key}
-              role="tab"
-              aria-selected={active}
-              onClick={() => { playSound('page-turn'); setMode(key); }}
-              // py-3 e não py-2: com py-2 o botão fica em 36px de altura,
-              // que é exatamente o que a auditoria 8.9 lista como defeito.
-              className={`flex-1 rounded-xl py-3 text-sm font-bold tap ${active ? 'bg-white shadow-sm' : 'text-gray-600'}`}
-              style={active ? { color: theme.hex } : undefined}
-            >
-              <span dir="auto">{t(labelKey)}</span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* ---------------------------------------------------- PRODUTOS */}
       {mode === 'products' && (
@@ -246,20 +269,6 @@ export default function MakeupModule({
               {showNative && <p className="text-xs text-gray-500 mb-1" dir="auto">{product.names[native]}</p>}
               <p className="text-sm text-gray-600 leading-snug mt-1" dir="auto">{product.descs[showNative ? native : target]}</p>
             </div>
-          </div>
-
-          {/* Pedido */}
-          <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-            <div className="flex items-start gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-xl font-bold leading-snug" dir="auto">{request}</p>
-                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{requestNative}</p>}
-              </div>
-              <button onClick={() => speak(request)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
-                <Listen className="w-6 h-6" />
-              </button>
-            </div>
-            <p className="text-[11px] text-white mt-2 leading-snug" dir="auto">{t('mkShowScreen')}</p>
           </div>
 
           {/* Produtos */}
@@ -372,10 +381,10 @@ export default function MakeupModule({
             </div>
           </div>
 
-          {/* Quadro de frase + frase montada */}
+          {/* Quadro da frase. A frase montada vive na banda fixa lá em cima. */}
           <section>
             <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('mkAsk')}</h2>
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-2">
               {TOOL_FRAMES.map((f) => {
                 const active = f.key === frame.key;
                 return (
@@ -390,17 +399,6 @@ export default function MakeupModule({
                   </button>
                 );
               })}
-            </div>
-            <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-              <div className="flex items-start gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xl font-bold leading-snug" dir="auto">{toolPhrase}</p>
-                  {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{toolPhraseNative}</p>}
-                </div>
-                <button onClick={() => speak(toolPhrase)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
-                  <Listen className="w-6 h-6" />
-                </button>
-              </div>
             </div>
           </section>
 

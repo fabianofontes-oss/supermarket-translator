@@ -107,61 +107,71 @@ export default function PronounsModule({
       title={t('modulePronouns')}
       theme={theme}
       t={t}
+      nativeCountry={nativeCountry}
       targetCountry={targetCountry}
       onGoHome={onGoHome}
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
+      pinned={(
+        <>
+          {/* Só a frase fica na banda. Os seis botões de tempo e de tipo desceram
+              para a rolagem: eram metade da altura do cartão, e são justamente as
+              palavras que se trocam olhando a frase aqui em cima. */}
+          <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-2xl font-bold leading-snug" dir="auto">{phrase}</p>
+                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{phraseNative}</p>}
+              </div>
+              <button onClick={() => speak(phrase)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+                <Listen className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     >
 
-      {/* Frase */}
-      <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-        <div className="flex items-start gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-2xl font-bold leading-snug" dir="auto">{phrase}</p>
-            {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{phraseNative}</p>}
-          </div>
-          <button onClick={() => speak(phrase)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
-            <Listen className="w-6 h-6" />
-          </button>
+      {/*
+        São duas dimensões diferentes, então recebem formas diferentes.
+        Quando: seletor único dentro de um trilho afundado.
+        Tipo de frase: botões soltos e arredondados, sem trilho.
+        Saíram de dentro do cartão colorido quando a frase virou banda fixa, e por
+        isso trocaram de paleta: antes eram brancos sobre a cor do módulo.
+      */}
+      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5">{t('pronWhen')}</h2>
+        <div className="flex gap-1 rounded-xl bg-gray-200/70 p-1">
+          {TENSES.map((tn) => (
+            <button
+              key={tn}
+              onClick={() => { playSound('toggle'); setTense(tn); }}
+              aria-pressed={tense === tn}
+              className={`tap flex-1 rounded-lg py-2 text-xs font-bold ${tense === tn ? 'bg-white shadow-sm' : 'text-gray-600'}`}
+              style={tense === tn ? { color: theme.hex } : undefined}
+            >
+              <span dir="auto">{TENSE_LABELS[tn][showNative ? native : target]}</span>
+            </button>
+          ))}
         </div>
 
-        {/*
-          São duas dimensões diferentes, então recebem formas diferentes.
-          Quando: seletor único dentro de um trilho afundado.
-          Tipo de frase: botões soltos e arredondados, sem trilho.
-        */}
-        <div className="mt-3 pt-3 border-t border-white/20">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-white mb-1.5">{t('pronWhen')}</p>
-          <div className="flex gap-1 rounded-xl bg-black/20 p-1">
-            {TENSES.map((tn) => (
-              <button
-                key={tn}
-                onClick={() => { playSound('toggle'); setTense(tn); }}
-                className={`tap flex-1 rounded-lg py-1.5 text-xs font-bold ${tense === tn ? 'bg-white shadow-sm' : 'text-white'}`}
-                style={tense === tn ? { color: theme.hex } : undefined}
-              >
-                <span dir="auto">{TENSE_LABELS[tn][showNative ? native : target]}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <p className="text-[10px] font-bold uppercase tracking-widest text-white mt-3 mb-1.5">{t('pronHow')}</p>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mt-3 mb-1.5">{t('pronHow')}</h2>
         <div className="flex gap-2">
           {MOODS.map((m) => (
             <button
               key={m}
               onClick={() => { playSound('toggle'); setMood(m); }}
-              className={`tap flex-1 rounded-full py-1.5 text-xs font-bold border ${
-                mood === m ? 'bg-white border-white shadow-sm' : 'border-white/40 text-white hover:bg-white/10'
+              aria-pressed={mood === m}
+              className={`tap flex-1 rounded-full py-2 text-xs font-bold border ${
+                mood === m ? `${theme.color} text-white border-transparent shadow` : 'bg-white text-gray-700 border-gray-100'
               }`}
-              style={mood === m ? { color: theme.hex } : undefined}
             >
               <span dir="auto">{MOOD_LABELS[m][showNative ? native : target]}</span>
             </button>
           ))}
         </div>
-      </div>
+      </section>
+
 
       {/* Aviso sobre tú / usted / vosotros */}
       {note && (

@@ -1,7 +1,7 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { ModuleShell, ShellAction } from '../components/ModuleShell';
+import React, { useMemo, useState } from 'react';
+import { ModuleShell } from '../components/ModuleShell';
 import type { Country } from '../types';
-import { AlertIcon, SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
+import { SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
 import type { VoiceStatus } from '../utils/speech';
 import { toLangCode } from './location/data/locationData';
@@ -180,24 +180,13 @@ export default function ElderCareModule({
   const [when, setWhen] = useState<WhenTag | null>(WHEN_TAGS[0]);
   const [tool, setTool] = useState<CareTool>(CARE_TOOLS[0]);
   const [frame, setFrame] = useState<ToolFrame>(TOOL_FRAMES[0]);
-  const [sos, setSos] = useState(false);
-  const sosRef = useRef<HTMLElement>(null);
-
   /**
-   * A emergência tem o único slot da barra deste módulo — e é o que você apontou:
-   * em cada módulo faz sentido outra coisa, e aqui faz sentido esta. A faixa
-   * vermelha continua no topo da rolagem, onde já estava; o botão da barra abre e
-   * ROLA ATÉ ELA, para a frase estar a um toque mesmo com a tela no fim da lista.
-   * Emergência não é coisa que se procura rolando.
+   * A faixa de emergência é o primeiro elemento da rolagem, logo abaixo da banda
+   * fixa. Houve uma versão com botão na barra de baixo que abria e rolava até ela;
+   * a barra saiu, e com a banda no topo a faixa já é a primeira coisa que aparece
+   * ao rolar — um gesto a alcança, sem `scrollIntoView` nenhum.
    */
-  const abrirEmergencia = () => {
-    setSos(true);
-    // Sem `behavior: 'smooth'`, e isto foi medido, não suposto: com ele a rolagem
-    // simplesmente não acontece no WebView em que o app roda — o painel abria e a
-    // tela ficava onde estava. Num botão de emergência, chegar lá vale mais que
-    // chegar bonito.
-    sosRef.current?.scrollIntoView({ block: 'start' });
-  };
+  const [sos, setSos] = useState(false);
 
   const careLine = useMemo(() => buildCareLine(target, action, treat), [target, action, treat]);
   const careLineNative = useMemo(() => buildCareLine(native, action, treat), [native, action, treat]);
@@ -205,6 +194,15 @@ export default function ElderCareModule({
   const reportNative = useMemo(() => buildReport(native, event, when, gender), [native, event, when, gender]);
   const toolPhrase = useMemo(() => buildToolPhrase(target, frame, tool), [target, frame, tool]);
   const toolPhraseNative = useMemo(() => buildToolPhrase(native, frame, tool), [native, frame, tool]);
+
+  /**
+   * A frase que vai para a banda fixa. Os três modos têm cada um a sua, mas só uma
+   * existe por vez — é isso que permite um cartão só, no alto, que não rola.
+   */
+  const [shown, shownNative] =
+    mode === 'talk' ? [careLine, careLineNative]
+      : mode === 'report' ? [report, reportNative]
+        : [toolPhrase, toolPhraseNative];
 
   // Sem voz do idioma de destino, `handlePlayAudio` recusa falar e abre o
   // aviso — falar com a voz padrão ensinaria outra pronúncia. Aqui só o botão
@@ -232,40 +230,45 @@ export default function ElderCareModule({
       title={t('ecTitle')}
       theme={theme}
       t={t}
+      nativeCountry={nativeCountry}
       targetCountry={targetCountry}
       onGoHome={onGoHome}
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
-      left={<ShellAction icon={AlertIcon} label={t('ecEmergency')} onClick={abrirEmergencia} active={sos} theme={theme} />}
+      pinned={(
+        <>
+        {/* Seletor de modo. Falar com ela, contar dela e pedir um objeto são
+            três interações diferentes; numa rolagem só dariam um cartão de
+            frase ambíguo. Precedente: Maquiagem e Números. */}
+        <div className="bg-gray-200/70 rounded-2xl p-1 flex gap-1" role="tablist" aria-label={t('moduleElderCare')}>
+          {([['talk', 'ecModeTalk'], ['report', 'ecModeReport'], ['tools', 'ecModeTools']] as const).map(([key, labelKey]) => {
+            const active = mode === key;
+            return (
+              <button
+                key={key}
+                role="tab"
+                aria-selected={active}
+                onClick={() => { playSound('page-turn'); setMode(key); }}
+                // py-3 e não py-2: com py-2 o botão fica em 36px de altura,
+                // que é exatamente o que a auditoria 8.9 lista como defeito.
+                className={`flex-1 rounded-xl py-3 text-sm font-bold tap ${active ? 'bg-white shadow-sm' : 'text-gray-600'}`}
+                style={active ? { color: theme.hex } : undefined}
+              >
+                <span dir="auto">{t(labelKey)}</span>
+              </button>
+            );
+          })}
+        </div>
+          <PhraseCard theme={theme} phrase={shown} alt={showNative ? shownNative : null} Listen={Listen} listenLabel={listen} onSpeak={speak} />
+        </>
+      )}
     >
 
-      {/* Seletor de modo. Falar com ela, contar dela e pedir um objeto são
-          três interações diferentes; numa rolagem só dariam um cartão de
-          frase ambíguo. Precedente: Maquiagem e Números. */}
-      <div className="bg-gray-200/70 rounded-2xl p-1 flex gap-1" role="tablist" aria-label={t('moduleElderCare')}>
-        {([['talk', 'ecModeTalk'], ['report', 'ecModeReport'], ['tools', 'ecModeTools']] as const).map(([key, labelKey]) => {
-          const active = mode === key;
-          return (
-            <button
-              key={key}
-              role="tab"
-              aria-selected={active}
-              onClick={() => { playSound('page-turn'); setMode(key); }}
-              // py-3 e não py-2: com py-2 o botão fica em 36px de altura,
-              // que é exatamente o que a auditoria 8.9 lista como defeito.
-              className={`flex-1 rounded-xl py-3 text-sm font-bold tap ${active ? 'bg-white shadow-sm' : 'text-gray-600'}`}
-              style={active ? { color: theme.hex } : undefined}
-            >
-              <span dir="auto">{t(labelKey)}</span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* Emergência. Não é um modo que se navega: é uma coisa que se agarra,
           e por isso fica fora das abas, visível o tempo todo. Vermelha, e não
           na cor do módulo, porque aqui a cor precisa dizer outra coisa. */}
-      <section ref={sosRef} className="rounded-3xl border-2 border-red-600 bg-red-50 overflow-hidden scroll-mt-4">
+      <section className="rounded-3xl border-2 border-red-600 bg-red-50 overflow-hidden">
         <button
           onClick={() => { playSound('page-turn'); setSos((v) => !v); }}
           aria-expanded={sos}
@@ -306,8 +309,6 @@ export default function ElderCareModule({
             onPick={setTreat}
           />
 
-          <PhraseCard theme={theme} phrase={careLine} alt={showNative ? careLineNative : null} Listen={Listen} listenLabel={listen} onSpeak={speak} />
-
           {action.note && (
             <p className="text-sm text-gray-600 leading-snug px-1" dir="auto">{action.note[read]}</p>
           )}
@@ -337,8 +338,6 @@ export default function ElderCareModule({
             options={[{ key: 'f', text: t('ecWhoF') }, { key: 'm', text: t('ecWhoM') }]}
             onPick={setGender}
           />
-
-          <PhraseCard theme={theme} phrase={report} alt={showNative ? reportNative : null} Listen={Listen} listenLabel={listen} onSpeak={speak} />
 
           <section>
             <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('ecWhen')}</h2>
@@ -381,8 +380,6 @@ export default function ElderCareModule({
               {tool.note && <p className="text-sm text-gray-600 leading-snug mt-1" dir="auto">{tool.note[read]}</p>}
             </div>
           </div>
-
-          <PhraseCard theme={theme} phrase={toolPhrase} alt={showNative ? toolPhraseNative : null} Listen={Listen} listenLabel={listen} onSpeak={speak} />
 
           <section>
             <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">{t('ecHowToAsk')}</h2>

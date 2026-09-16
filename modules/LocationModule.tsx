@@ -126,10 +126,50 @@ export default function LocationModule({
       title={t('moduleLocation')}
       theme={theme}
       t={t}
+      nativeCountry={nativeCountry}
       targetCountry={targetCountry}
       onGoHome={onGoHome}
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
+      pinned={(
+        <>
+          {/* Frase */}
+          <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-xl font-bold leading-snug">{sentence}</p>
+                {showNative && (
+                  <p className="text-sm text-white mt-1 leading-snug" dir="auto">{sentenceNative}</p>
+                )}
+              </div>
+              <button
+                onClick={() => speak(sentence)}
+                className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0"
+                style={{ color: theme.hex }}
+                aria-label={audioLabel(t('locListen'))}
+                title={audioLabel(t('locListen'))}
+              >
+                <Listen className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-white/20 flex items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold leading-snug">{question}</p>
+                {showNative && <p className="text-xs text-white leading-snug" dir="auto">{questionNative}</p>}
+              </div>
+              <button
+                onClick={() => speak(question)}
+                className="p-2 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 transition flex-shrink-0"
+                aria-label={audioLabel(t('locAsk'))}
+                title={audioLabel(t('locAsk'))}
+              >
+                <QuestionMarkCircleIcon className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     >
 
       {/* Cena */}
@@ -176,41 +216,6 @@ export default function LocationModule({
         </div>
       </div>
 
-      {/* Frase */}
-      <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-        <div className="flex items-start gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-xl font-bold leading-snug">{sentence}</p>
-            {showNative && (
-              <p className="text-sm text-white mt-1 leading-snug" dir="auto">{sentenceNative}</p>
-            )}
-          </div>
-          <button
-            onClick={() => speak(sentence)}
-            className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0"
-            style={{ color: theme.hex }}
-            aria-label={audioLabel(t('locListen'))}
-            title={audioLabel(t('locListen'))}
-          >
-            <Listen className="w-6 h-6" />
-          </button>
-        </div>
-
-        <div className="mt-3 pt-3 border-t border-white/20 flex items-center gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold leading-snug">{question}</p>
-            {showNative && <p className="text-xs text-white leading-snug" dir="auto">{questionNative}</p>}
-          </div>
-          <button
-            onClick={() => speak(question)}
-            className="p-2 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 transition flex-shrink-0"
-            aria-label={audioLabel(t('locAsk'))}
-            title={audioLabel(t('locAsk'))}
-          >
-            <QuestionMarkCircleIcon className="w-6 h-6" />
-          </button>
-        </div>
-      </div>
 
       {/* Relações */}
       <section>

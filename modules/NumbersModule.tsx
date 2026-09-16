@@ -188,27 +188,52 @@ export default function NumbersModule({
       title={t('moduleNumbers')}
       theme={theme}
       t={t}
+      nativeCountry={nativeCountry}
       targetCountry={targetCountry}
       onGoHome={onGoHome}
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
+      pinned={(
+        <>
+          {/* Abas */}
+          <div className="grid grid-cols-4 gap-2">
+            {TABS.map((tb) => (
+              <button
+                key={tb.key}
+                onClick={() => { playSound('page-turn'); setTab(tb.key); }}
+                className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
+                  tab === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-600 border-gray-100'
+                }`}
+              >
+                <span className="text-xl leading-none">{tb.icon}</span>
+                <span className="text-[11px] font-bold leading-tight text-center">{t(tb.labelKey)}</span>
+              </button>
+            ))}
+          </div>
+          {/* Frase */}
+          <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-xl font-bold leading-snug" dir="auto">{sentence}</p>
+                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{sentenceNative}</p>}
+              </div>
+              <button onClick={() => speak(sentence)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+                <Listen className="w-6 h-6" />
+              </button>
+            </div>
+
+            {shortPrice && (
+              <button onClick={() => speak(shortPrice)} className="mt-3 pt-3 border-t border-white/20 w-full flex items-center gap-2 text-left">
+                <Listen className="w-4 h-4 flex-shrink-0 text-white" />
+                <span className="text-xs text-white">{t('numAlsoSaid')}:</span>
+                <span className="font-bold" dir="auto">{shortPrice}</span>
+              </button>
+            )}
+          </div>
+        </>
+      )}
     >
 
-      {/* Abas */}
-      <div className="grid grid-cols-4 gap-2">
-        {TABS.map((tb) => (
-          <button
-            key={tb.key}
-            onClick={() => { playSound('page-turn'); setTab(tb.key); }}
-            className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
-              tab === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-600 border-gray-100'
-            }`}
-          >
-            <span className="text-xl leading-none">{tb.icon}</span>
-            <span className="text-[11px] font-bold leading-tight text-center">{t(tb.labelKey)}</span>
-          </button>
-        ))}
-      </div>
 
       {/* Visual */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex items-center justify-center min-h-[190px]">
@@ -303,26 +328,6 @@ export default function NumbersModule({
         )}
       </div>
 
-      {/* Frase */}
-      <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-        <div className="flex items-start gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-xl font-bold leading-snug" dir="auto">{sentence}</p>
-            {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{sentenceNative}</p>}
-          </div>
-          <button onClick={() => speak(sentence)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
-            <Listen className="w-6 h-6" />
-          </button>
-        </div>
-
-        {shortPrice && (
-          <button onClick={() => speak(shortPrice)} className="mt-3 pt-3 border-t border-white/20 w-full flex items-center gap-2 text-left">
-            <Listen className="w-4 h-4 flex-shrink-0 text-white" />
-            <span className="text-xs text-white">{t('numAlsoSaid')}:</span>
-            <span className="font-bold" dir="auto">{shortPrice}</span>
-          </button>
-        )}
-      </div>
 
       {/* Controles */}
       {tab === 'time' && (

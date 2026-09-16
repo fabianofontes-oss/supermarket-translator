@@ -357,12 +357,3 @@ export const HouseCleaningIcon: React.FC<{ className?: string }> = ({ className 
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.3 15.5h5.4" />
   </svg>
 );
-
-/** Alerta: triângulo com exclamação. Usado no slot de Emergência da barra. */
-export const AlertIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M10.3 3.9 2.5 17.5a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
-    <path strokeLinecap="round" d="M12 9v4.5" />
-    <circle cx="12" cy="17" r=".9" fill="currentColor" stroke="none" />
-  </svg>
-);

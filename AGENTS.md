@@ -206,6 +206,12 @@ Esse `Record` completo é a defesa central do projeto: esquecer um idioma numa t
 nova não compila. As duas únicas exceções são `Pronoun.altPerson` e `Pronoun.dative`,
 que são `Partial` de propósito.
 
+**A frase montada mora na banda fixa da moldura**, entre o cabeçalho e a rolagem, e
+nunca sai da tela — junto com as abas, onde o módulo as tem. Cada módulo tem UMA frase
+ativa por vez (onde há abas, cada aba tem a sua, mas só uma é renderizada), e é isso que
+permite um cartão só. Quem trocava uma palavra lá embaixo deixava de ver o que estava
+montando, e ver a frase se formar **é** o módulo.
+
 Todo módulo calcula o mesmo trio e mostra a língua de destino em destaque e a nativa
 como linha de apoio:
 
@@ -579,9 +585,9 @@ sem transição de saída.
 **8.17 — RESOLVIDO. O cabeçalho existia em dez cópias.** Os dez módulos generativos
 redesenhavam à mão o mesmo cabeçalho; mexer nele significava mexer em dez arquivos, e
 era assim que saíam de sincronia. Agora usam [components/ModuleShell.tsx](components/ModuleShell.tsx),
-que traz o cabeçalho e a barra de baixo com o botão redondo da bandeira — o mesmo do
-Supermercado. `tests/share.test.tsx` recusa qualquer módulo que volte a escrever
-`<header>` ou `<ShareButton>` por conta própria.
+que traz o cabeçalho e a **banda fixa** onde mora a frase montada.
+`tests/share.test.tsx` recusa qualquer módulo que volte a escrever `<header>` ou
+`<ShareButton>` por conta própria, ou que esqueça o `pinned`.
 
 **Continua aberto do 8.17:** cada módulo ainda redeclara a mesma interface de props com
 outro nome, e cinco redefinem a própria função `cap()`.
@@ -728,7 +734,7 @@ do projeto inteiro, e não é trabalho de programação.
 | [modules/eldercare/ElderCareGlyphs.tsx](modules/eldercare/ElderCareGlyphs.tsx) | os 14 glifos de objeto de cuidado, no pedaço adiado do módulo |
 | [modules/housecleaning/data/houseCleaningData.ts](modules/housecleaning/data/houseCleaningData.ts) | Limpeza da casa: tarefas, cômodos, o que se ouve e o que se diz |
 | [components/ModuleLayout.tsx](components/ModuleLayout.tsx) | moldura do catálogo: cabeçalho, busca, painéis, barra de baixo |
-| [components/ModuleShell.tsx](components/ModuleShell.tsx) | moldura dos dez generativos: cabeçalho, barra de baixo e dois slots opcionais |
+| [components/ModuleShell.tsx](components/ModuleShell.tsx) | moldura dos dez generativos: cabeçalho e a banda fixa da frase |
 | [components/TranslationItem.tsx](components/TranslationItem.tsx) | o card de item |
 | [components/CategorySheet.tsx](components/CategorySheet.tsx) | painel de categorias, e o padrão de diálogo do projeto |
 | [components/categoryMeta.ts](components/categoryMeta.ts) | ícone e tom por categoria |

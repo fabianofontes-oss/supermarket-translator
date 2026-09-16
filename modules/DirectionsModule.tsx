@@ -269,10 +269,61 @@ export default function DirectionsModule({
       title={t('moduleDirections')}
       theme={theme}
       t={t}
+      nativeCountry={nativeCountry}
       targetCountry={targetCountry}
       onGoHome={onGoHome}
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
+      pinned={(
+        <>
+          {/* O percurso é a frase deste módulo, e vai crescendo passo a passo.
+              A lista tem teto e rolagem própria: dez passos encheriam meia tela, e
+              aí o mapa — que é onde a pessoa olha para escolher o próximo — sairia
+              da vista. Desfazer, Limpar e Tocar tudo ficam sempre visíveis. */}
+          <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-white">{t('dirRoute')}</h2>
+              <div className="flex gap-2">
+                {steps.length > 0 && (
+                  <>
+                    <button onClick={undo} className="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-xs font-bold">{t('dirUndo')}</button>
+                    <button onClick={clear} className="p-1 rounded-full bg-white/20 hover:bg-white/30" aria-label={t('dirClear')}><XIcon className="w-4 h-4" /></button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {steps.length === 0 ? (
+              <p className="text-white text-sm py-3">{t('dirEmpty')}</p>
+            ) : (
+              <ol className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                {steps.map((s, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="w-6 h-6 rounded-full bg-white/25 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold leading-snug">{s.phrases[target]}</p>
+                      {showNative && <p className="text-xs text-white leading-snug" dir="auto">{s.phrases[native]}</p>}
+                    </div>
+                    <button onClick={() => speak(s.phrases[target])} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 flex-shrink-0" aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+                      <Listen className="w-4 h-4" />
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
+
+            {steps.length > 1 && (
+              <button
+                onClick={() => speak(fullRoute)}
+                className="mt-3 w-full py-2.5 rounded-xl bg-white font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                style={{ color: theme.hex }}
+              >
+                <Listen className="w-5 h-5" /> {t('dirPlayAll')}
+              </button>
+            )}
+          </div>
+        </>
+      )}
     >
 
       {/* MAPA */}
@@ -509,49 +560,6 @@ export default function DirectionsModule({
         )}
       </section>
 
-      {/* PERCURSO (frases) */}
-      <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-white">{t('dirRoute')}</h2>
-          <div className="flex gap-2">
-            {steps.length > 0 && (
-              <>
-                <button onClick={undo} className="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-xs font-bold">{t('dirUndo')}</button>
-                <button onClick={clear} className="p-1 rounded-full bg-white/20 hover:bg-white/30" aria-label={t('dirClear')}><XIcon className="w-4 h-4" /></button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {steps.length === 0 ? (
-          <p className="text-white text-sm py-3">{t('dirEmpty')}</p>
-        ) : (
-          <ol className="space-y-2">
-            {steps.map((s, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <span className="w-6 h-6 rounded-full bg-white/25 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold leading-snug">{s.phrases[target]}</p>
-                  {showNative && <p className="text-xs text-white leading-snug" dir="auto">{s.phrases[native]}</p>}
-                </div>
-                <button onClick={() => speak(s.phrases[target])} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 flex-shrink-0" aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
-                  <Listen className="w-4 h-4" />
-                </button>
-              </li>
-            ))}
-          </ol>
-        )}
-
-        {steps.length > 1 && (
-          <button
-            onClick={() => speak(fullRoute)}
-            className="mt-3 w-full py-2.5 rounded-xl bg-white font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-            style={{ color: theme.hex }}
-          >
-            <Listen className="w-5 h-5" /> {t('dirPlayAll')}
-          </button>
-        )}
-      </div>
 
       {/* BÚSSOLA */}
       <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">

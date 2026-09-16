@@ -83,27 +83,44 @@ export default function SizesModule({
       title={t('moduleSizes')}
       theme={theme}
       t={t}
+      nativeCountry={nativeCountry}
       targetCountry={targetCountry}
       onGoHome={onGoHome}
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
+      pinned={(
+        <>
+          {/* Categorias */}
+          <div className="grid grid-cols-3 gap-2">
+            {SIZE_TABLES.map((tb) => (
+              <button
+                key={tb.key}
+                onClick={() => pickTable(tb)}
+                className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
+                  table.key === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-600 border-gray-100'
+                }`}
+              >
+                <span className="text-2xl leading-none">{tb.emoji}</span>
+                <span className="text-[11px] font-bold leading-tight text-center" dir="auto">{tb.labels[showNative ? native : target]}</span>
+              </button>
+            ))}
+          </div>
+          {/* Pergunta gerada */}
+          <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-xl font-bold leading-snug" dir="auto">{question}</p>
+                {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{questionNative}</p>}
+              </div>
+              <button onClick={() => speak(question)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+                <Listen className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     >
 
-      {/* Categorias */}
-      <div className="grid grid-cols-3 gap-2">
-        {SIZE_TABLES.map((tb) => (
-          <button
-            key={tb.key}
-            onClick={() => pickTable(tb)}
-            className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
-              table.key === tb.key ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white text-gray-600 border-gray-100'
-            }`}
-          >
-            <span className="text-2xl leading-none">{tb.emoji}</span>
-            <span className="text-[11px] font-bold leading-tight text-center" dir="auto">{tb.labels[showNative ? native : target]}</span>
-          </button>
-        ))}
-      </div>
 
       {/* Conversão */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
@@ -162,18 +179,6 @@ export default function SizesModule({
         <p className="text-sm text-amber-900 leading-snug" dir="auto">{SIZE_WARNING[showNative ? native : target]}</p>
       </div>
 
-      {/* Pergunta gerada */}
-      <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-        <div className="flex items-start gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-xl font-bold leading-snug" dir="auto">{question}</p>
-            {showNative && <p className="text-sm text-white mt-1 leading-snug" dir="auto">{questionNative}</p>}
-          </div>
-          <button onClick={() => speak(question)} className="p-3 rounded-full bg-white shadow active:scale-95 transition-transform flex-shrink-0" style={{ color: theme.hex }} aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
-            <Listen className="w-6 h-6" />
-          </button>
-        </div>
-      </div>
 
       {/* Tabela completa */}
       <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 overflow-x-auto">

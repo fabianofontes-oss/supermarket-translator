@@ -252,6 +252,18 @@ describe('12 — o botão está em todas as telas', () => {
     }
   });
 
+  it('todo módulo fixa a frase que monta', () => {
+    /**
+     * A frase montada rolava junto com o resto, e quem descia para trocar uma
+     * palavra parava de ver o que estava montando — sendo que ver a frase se formar
+     * É o módulo. Agora ela vive na banda fixa da moldura. Um módulo novo que
+     * esqueça o `pinned` nasce com o defeito de volta, e não passa daqui.
+     */
+    for (const f of GENERATIVOS) {
+      expect(ler(f), `${f} não fixa a frase`).toContain('pinned={(');
+    }
+  });
+
   it('o gatilho é um botão nomeado, não um ícone mudo', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();

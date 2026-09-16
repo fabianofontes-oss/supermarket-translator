@@ -186,40 +186,49 @@ export default function HouseCleaningModule({
       title={t('hcTitle')}
       theme={theme}
       t={t}
+      nativeCountry={nativeCountry}
       targetCountry={targetCountry}
       onGoHome={onGoHome}
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
+      pinned={(
+        <>
+        {/* Seletor de modo. Dizer o que se vai fazer, ENTENDER o que mandaram e
+            combinar as condições são três coisas diferentes — e a do meio é a
+            única do app inteiro em que a frase é para ouvir, não para falar. */}
+        <div className="bg-gray-200/70 rounded-2xl p-1 flex gap-1" role="tablist" aria-label={t('moduleHouseCleaning')}>
+          {([['task', 'hcModeTask'], ['heard', 'hcModeHeard'], ['say', 'hcModeSay']] as const).map(([key, labelKey]) => {
+            const active = mode === key;
+            return (
+              <button
+                key={key}
+                role="tab"
+                aria-selected={active}
+                onClick={() => { playSound('page-turn'); setMode(key); }}
+                // py-3 e não py-2: com py-2 o botão fica em 36px de altura,
+                // que é exatamente o que a auditoria 8.9 lista como defeito.
+                className={`flex-1 rounded-xl py-3 text-sm font-bold tap ${active ? 'bg-white shadow-sm' : 'text-gray-600'}`}
+                style={active ? { color: theme.hex } : undefined}
+              >
+                <span dir="auto">{t(labelKey)}</span>
+              </button>
+            );
+          })}
+        </div>
+          {/* Só o modo `A tarefa` monta frase. Nos outros dois as frases já vêm
+              prontas em lista, e não há o que ver se formando — a banda fica só
+              com as abas, e isso é resposta, não falta. */}
+          {mode === 'task' && (
+            <PhraseCard theme={theme} phrase={phrase} alt={showNative ? phraseNative : null} Listen={Listen} listenLabel={listen} onSpeak={speak} />
+          )}
+        </>
+      )}
     >
 
-      {/* Seletor de modo. Dizer o que se vai fazer, ENTENDER o que mandaram e
-          combinar as condições são três coisas diferentes — e a do meio é a
-          única do app inteiro em que a frase é para ouvir, não para falar. */}
-      <div className="bg-gray-200/70 rounded-2xl p-1 flex gap-1" role="tablist" aria-label={t('moduleHouseCleaning')}>
-        {([['task', 'hcModeTask'], ['heard', 'hcModeHeard'], ['say', 'hcModeSay']] as const).map(([key, labelKey]) => {
-          const active = mode === key;
-          return (
-            <button
-              key={key}
-              role="tab"
-              aria-selected={active}
-              onClick={() => { playSound('page-turn'); setMode(key); }}
-              // py-3 e não py-2: com py-2 o botão fica em 36px de altura,
-              // que é exatamente o que a auditoria 8.9 lista como defeito.
-              className={`flex-1 rounded-xl py-3 text-sm font-bold tap ${active ? 'bg-white shadow-sm' : 'text-gray-600'}`}
-              style={active ? { color: theme.hex } : undefined}
-            >
-              <span dir="auto">{t(labelKey)}</span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* ------------------------------------------------------ A TAREFA */}
       {mode === 'task' && (
         <>
-          <PhraseCard theme={theme} phrase={phrase} alt={showNative ? phraseNative : null} Listen={Listen} listenLabel={listen} onSpeak={speak} />
-
           {task.note && (
             <p className="text-sm text-gray-600 leading-snug px-1" dir="auto">{task.note[read]}</p>
           )}
