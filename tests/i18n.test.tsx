@@ -129,7 +129,8 @@ describe('PARTE 13 — nada de texto solto fora do sistema de tradução', () =>
                     // crua e nenhum teste pegaria. Estender aos outros sete
                     // é trabalho próprio, e vale.
                     'modules/MakeupModule.tsx',
-                    'modules/ElderCareModule.tsx'];
+                    'modules/ElderCareModule.tsx',
+                    'modules/HouseCleaningModule.tsx'];
     const usadas = new Set<string>();
     for (const f of fontes) {
       for (const m of ler(f).matchAll(/\bt\('([A-Za-z0-9_]+)'\)/g)) usadas.add(m[1]);

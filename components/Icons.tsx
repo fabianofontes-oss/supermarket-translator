@@ -344,3 +344,16 @@ export const ElderCareIcon: React.FC<{ className?: string }> = ({ className }) =
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 17.5c0 2 1.6 3.5 3.6 3.5H9" />
   </svg>
 );
+
+/** Limpeza da casa: a fregona — cabo, tiras e o balde com escurridor ao lado.
+ *  É o objeto que dá nome ao trabalho na Espanha, e não existe como emoji. */
+export const HouseCleaningIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 3v10" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5.5 13h7l-1 6h-5z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 13v6" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 13v6" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12h6l-.8 8a1 1 0 0 1-1 .9h-2.4a1 1 0 0 1-1-.9z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.3 15.5h5.4" />
+  </svg>
+);

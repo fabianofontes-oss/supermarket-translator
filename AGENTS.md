@@ -93,7 +93,7 @@ Não existe roteador. Não existe gerenciador de estado. `App.tsx` guarda tudo e
 `useState` e escolhe o módulo com um `switch`:
 
 ```
-index.tsx  →  App.tsx  →  switch (currentModule)  →  um dos onze módulos
+index.tsx  →  App.tsx  →  switch (currentModule)  →  um dos doze módulos
 ```
 
 `currentModule === null` desenha o hub, que é a grade de módulos. Cada módulo é
@@ -188,13 +188,13 @@ idiomas sem oito listas de frases.
 
 ### Como um módulo generativo é montado
 
-Os nove recebem exatamente os mesmos sete campos de `commonProps` e nada mais: os dois
+Os dez recebem exatamente os mesmos sete campos de `commonProps` e nada mais: os dois
 países, `t`, o tema, `onGoHome`, `onOpenLanguageModal` e `handlePlayAudio`. Nenhum
 deles conhece favoritos, lista ou busca.
 
 O núcleo de idiomas mora em
 [modules/location/data/locationData.ts](modules/location/data/locationData.ts), que
-exporta `LangCode`, `SUPPORTED_LANGS` e `toLangCode`. **Os oito componentes e os sete
+exporta `LangCode`, `SUPPORTED_LANGS` e `toLangCode`. **Os nove componentes e os oito
 outros arquivos de dados importam de lá.** Location é, na prática, o módulo base.
 
 ```ts
@@ -215,7 +215,7 @@ const native = toLangCode(nativeCountry.lang);
 const showNative = native !== target;
 ```
 
-### Os nove
+### Os dez
 
 | Módulo | Dados | Função que monta a frase |
 |---|---|---|
@@ -228,6 +228,7 @@ const showNative = native !== target;
 | **Medidas** | 6 tabelas, 47 linhas | `buildSizeQuestion` |
 | **Maquiagem** | 9 produtos, 9 dimensões (36 opções), 21 acessórios, 4 quadros | `buildMakeupRequest`, `buildToolPhrase` |
 | **Cuidar de idosos** | 17 falas, 12 relatos, 5 marcadores de tempo, 14 objetos, 4 quadros, 6 frases de emergência | `buildCareLine`, `buildReport`, `buildToolPhrase` |
+| **Limpeza da casa** | 16 tarefas, 7 cômodos, 4 quadros, 12 frases que se ouvem, 12 que se dizem | `buildTaskPhrase` |
 
 **Onde está?** Uma cena com dois emoji: um objeto de referência grande e um menor que
 se move para a posição escolhida. Implementa contração românica (`de o → do`,
@@ -321,8 +322,35 @@ O único algarismo permitido no arquivo é o `112`, e só em `EMERGENCY`.
 dose, quantidade e princípio ativo. **É o único teste do projeto cuja falha não é bug: é
 motivo para não publicar.**
 
-É também o único módulo com **piso de 14px** — os outros dez descem a `text-[10px]` na
-linha de apoio. Divergência deliberada, registrada no PROJECT_CONTEXT.md.
+É também o primeiro módulo com **piso de 14px** — os outros dez descem a `text-[10px]`
+na linha de apoio. Divergência deliberada, registrada no PROJECT_CONTEXT.md, e a
+Limpeza da casa já nasceu seguindo o mesmo piso.
+
+**Limpeza da casa.** O irmão do anterior, e a comparação entre os dois é o que ensina a
+regra: lá a frase flexiona porque o objeto dela é uma **pessoa**; aqui o objeto é o
+**chão**, não há o que concordar, e por isso o módulo **não tem seletor nenhum**. Isso é
+decisão, não descuido — e está escrito no cabeçalho dos dados para o próximo agente não
+"consertar" acrescentando um botão.
+
+O achado do módulo é uma **assimetria de registro**: quem limpa trata a patroa de
+`usted`, e a patroa costuma tratar quem limpa de `tú`. Por isso *A tarefa* e *Combinar*
+estão em `usted` e *O que ela pede* está em `tú` — e este é o **único modo do app inteiro
+em que a frase é para RECONHECER, não para falar**. Uma linha na tela diz isso, senão a
+pessoa treina a pronúncia de uma ordem que ela nunca vai dar.
+
+A regra de conteúdo aqui é a de 1ª pessoa: **quem fala é sempre a própria pessoa, e o app
+não sabe o gênero dela.** Nenhum predicativo pode concordar com quem fala — nada de
+"vou chegar atrasada", `je suis désolée`, `non sono riuscita` nem `я не змогла`. O quadro
+"já está feito" é o ponto mais fácil de estragar: `done.uk` usa o impessoal em -но/-то
+(`підлогу вже помито`) e `done.lt` o particípio passivo (`grindys jau išplautos`), e é só
+por isso que a tarefa guarda duas formas em vez de uma. Os outros três quadros vivem do
+infinitivo, e foi assim que a tabela coube em duas formas em vez de quatro.
+
+A **fronteira com o catálogo** é o ponto mais importante do arquivo: o Supermercado já é
+dono de 96 produtos de limpeza em `supermarket/data/cleaningData.ts`. Este módulo é o
+TRABALHO, não a compra, e por isso **não tem lista de objetos para navegar** — objeto só
+aparece dentro da frase de uma tarefa. `tests/housecleaning.test.ts` falha se alguém
+exportar uma tabela com `TOOLS`, `PRODUCTS`, `ITEMS` ou `OBJECTS` no nome.
 
 **Medidas.** Seis tabelas de conversão entre Brasil, Europa, Reino Unido e Estados
 Unidos. `systemForCountry` manda tudo que não é `br`, `cl`, `ar`, `gb` ou `us` para o
@@ -347,7 +375,7 @@ Doze países em [constants.ts](constants.ts), oito blocos de tradução em
 | `esCL` | `es-CL`, `es-AR`, **`es-ES`** |
 | `frFR`, `itIT`, `ukUA`, `arMA`, `ltLT` | um cada |
 
-Os oito blocos têm **333 chaves cada, sem uma diferença**. Verificado por script:
+Os oito blocos têm **341 chaves cada, sem uma diferença**. Verificado por script:
 nenhuma chave duplicada, nenhuma chave usada no código que não exista. Essa parte
 está sólida.
 
@@ -526,10 +554,10 @@ o novo gatilho de categoria, de 56px, que mudou a conta. Deve ser medido, não f
 **8.16 — O painel de categorias entra deslizando e sai seco.** Ele desmonta na hora,
 sem transição de saída.
 
-**8.17 — O cabeçalho existe em nove cópias.** Nenhum dos nove módulos generativos usa
+**8.17 — O cabeçalho existe em dez cópias.** Nenhum dos dez módulos generativos usa
 [components/ModuleLayout.tsx](components/ModuleLayout.tsx): cada um redesenha à mão o
 mesmo cabeçalho com gradiente, botão de início, título e o par de bandeiras. Mexer no
-cabeçalho significa mexer em oito arquivos, e é assim que eles saem de sincronia.
+cabeçalho significa mexer em nove arquivos, e é assim que eles saem de sincronia.
 Cada um também redeclara a mesma interface de props com outro nome, e cinco redefinem
 a própria função `cap()`.
 
@@ -578,7 +606,7 @@ Vale registrar, porque foi conquistado e é fácil quebrar sem perceber.
 | Verificação | Resultado |
 |---|---|
 | Contraste de texto, em 6 telas | **zero falhas** |
-| Paridade das traduções | 333 chaves × 8 blocos, exatas |
+| Paridade das traduções | 341 chaves × 8 blocos, exatas |
 | Chaves usadas no código sem definição | zero |
 | `tsc --noEmit` | limpo |
 | Alvos de toque nas telas de catálogo | zero abaixo de 44px |
@@ -666,13 +694,14 @@ do projeto inteiro, e não é trabalho de programação.
 | [App.tsx](App.tsx) | hub, temas, áudio, estado compartilhado, `switch` de módulo |
 | [constants.ts](constants.ts) | países e categorias |
 | [types.ts](types.ts) | os três tipos do domínio |
-| [translations.ts](translations.ts) | 333 chaves × 8 idiomas, paridade exata |
+| [translations.ts](translations.ts) | 341 chaves × 8 idiomas, paridade exata |
 | [data/catalog.ts](data/catalog.ts) | junta os 12 arquivos de dados do catálogo |
 | [modules/CatalogModule.tsx](modules/CatalogModule.tsx) | Supermercado e Farmácia |
 | [modules/makeup/data/makeupData.ts](modules/makeup/data/makeupData.ts) | Maquiagem: produtos, dimensões, 21 acessórios, os dois builders |
 | [modules/makeup/MakeupGlyphs.tsx](modules/makeup/MakeupGlyphs.tsx) | os 21 glifos de acessório, no pedaço adiado do módulo |
 | [modules/eldercare/data/elderCareData.ts](modules/eldercare/data/elderCareData.ts) | Cuidar de idosos: os dois eixos, as cinco tabelas, a regra de segurança |
 | [modules/eldercare/ElderCareGlyphs.tsx](modules/eldercare/ElderCareGlyphs.tsx) | os 14 glifos de objeto de cuidado, no pedaço adiado do módulo |
+| [modules/housecleaning/data/houseCleaningData.ts](modules/housecleaning/data/houseCleaningData.ts) | Limpeza da casa: tarefas, cômodos, o que se ouve e o que se diz |
 | [components/ModuleLayout.tsx](components/ModuleLayout.tsx) | moldura: cabeçalho, painel, barra de baixo |
 | [components/TranslationItem.tsx](components/TranslationItem.tsx) | o card de item |
 | [components/CategorySheet.tsx](components/CategorySheet.tsx) | painel de categorias, e o padrão de diálogo do projeto |

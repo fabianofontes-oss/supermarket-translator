@@ -13,6 +13,7 @@ const PronounsModule = lazyWithRetry(() => import('./modules/PronounsModule'));
 const SizesModule = lazyWithRetry(() => import('./modules/SizesModule'));
 const MakeupModule = lazyWithRetry(() => import('./modules/MakeupModule'));
 const ElderCareModule = lazyWithRetry(() => import('./modules/ElderCareModule'));
+const HouseCleaningModule = lazyWithRetry(() => import('./modules/HouseCleaningModule'));
 import { translations } from './translations';
 import { useListManager } from './hooks/useListManager';
 import { useFavorites } from './hooks/useFavorites';
@@ -54,11 +55,12 @@ import {
   SizesIcon,
   MakeupIcon,
   ElderCareIcon,
+  HouseCleaningIcon,
 } from './components/Icons';
 
 type ModuleKey =
   | 'supermarket' | 'pharmacy' | 'location' | 'directions'
-  | 'numbers' | 'body' | 'cafe' | 'pronouns' | 'sizes' | 'makeup' | 'eldercare';
+  | 'numbers' | 'body' | 'cafe' | 'pronouns' | 'sizes' | 'makeup' | 'eldercare' | 'housecleaning';
 type Tab = 'home' | 'search' | 'favorites' | 'list';
 
 export interface Theme { color: string; textColor: string; hex: string; borderColor: string }
@@ -82,6 +84,10 @@ const THEMES: Record<ModuleKey, Theme> = {
   // gradiente. Mesma armadilha de Farmácia, Direções, Pronomes e Maquiagem,
   // que subiram todos para o tom 700.
   eldercare:   { color: 'bg-sky-700',     textColor: 'text-sky-700',     hex: '#0369a1', borderColor: 'border-sky-700' },
+  // lime-800: 7,08:1 com branco no solido e 5,53:1 no pe do gradiente. O verde
+  // obvio para limpeza seria o green-700, e ele da 4,17:1 no pe — reprova. O
+  // lime-800 tambem nao se confunde com o emerald-700 da Farmacia, que e mais azulado.
+  housecleaning: { color: 'bg-lime-800',  textColor: 'text-lime-800',    hex: '#3f6212', borderColor: 'border-lime-800' },
 };
 
 // Módulos ativos do hub (classes escritas por extenso para o Tailwind gerar o CSS)
@@ -100,6 +106,7 @@ const ACTIVE_MODULES: { key: ModuleKey; labelKey: string; icon: React.FC<{ class
   // Sem `needsCatalog`: e generativo, entao abre tambem para ucraniana,
   // marroquina e lituana — que sao justamente quem faz este trabalho.
   { key: 'eldercare',   labelKey: 'moduleElderCare',  icon: ElderCareIcon,        iconClass: 'bg-sky-100 text-sky-700' },
+  { key: 'housecleaning', labelKey: 'moduleHouseCleaning', icon: HouseCleaningIcon, iconClass: 'bg-lime-100 text-lime-800' },
 ];
 
 // Módulos ainda não implementados (aparecem desativados)
@@ -403,6 +410,8 @@ export default function App() {
         return <MakeupModule {...commonProps} />;
       case 'eldercare':
         return <ElderCareModule {...commonProps} />;
+      case 'housecleaning':
+        return <HouseCleaningModule {...commonProps} />;
       default: {
         return (
           <div className="min-h-screen bg-gray-50 flex flex-col">

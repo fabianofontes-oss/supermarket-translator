@@ -228,6 +228,7 @@ describe('12 — o botão está em todas as telas', () => {
       'modules/PronounsModule.tsx',
       'modules/SizesModule.tsx',
       'modules/MakeupModule.tsx', 'modules/ElderCareModule.tsx',
+      'modules/HouseCleaningModule.tsx',
     ];
     for (const f of headers) {
       expect(ler(f), `${f} não tem o botão de compartilhar`).toContain('<ShareButton');

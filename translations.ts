@@ -348,6 +348,14 @@ const enUS = {
   ecEmergency: 'Emergency',
   ecEmergencyHint: 'Give the address first, then the phrase. 112 works anywhere in the European Union and answers in several languages.',
   ecSafety: 'This module never gives a medicine name or a dose: ask about the time, not the amount. For medicines, use the Pharmacy module and the doctor.',
+  moduleHouseCleaning: 'House cleaning',
+  hcTitle: 'Cleaning',
+  hcModeTask: 'The task',
+  hcModeHeard: 'What she asks',
+  hcModeSay: 'Agreeing',
+  hcHowToSay: 'How to say it',
+  hcWhere: 'Which room',
+  hcHeardNote: 'These are phrases you will HEAR, not say. Employers usually use the informal "tú" with the person who cleans, while you address them with "usted" — "puedes" and "puede" are the same instruction.',
 };
 
 const ptBR = {
@@ -699,6 +707,14 @@ const ptBR = {
   ecEmergency: 'Emergência',
   ecEmergencyHint: 'Diga primeiro o endereço, depois a frase. O 112 funciona em toda a União Europeia e atende em vários idiomas.',
   ecSafety: 'Este módulo nunca diz nome de remédio nem dose: pergunte pelo horário, nunca pela quantidade. Para remédio, use o módulo Farmácia e o médico.',
+  moduleHouseCleaning: 'Limpeza da casa',
+  hcTitle: 'Limpeza',
+  hcModeTask: 'A tarefa',
+  hcModeHeard: 'O que ela pede',
+  hcModeSay: 'Combinar',
+  hcHowToSay: 'Como dizer',
+  hcWhere: 'Em que cômodo',
+  hcHeardNote: 'Estas frases são para OUVIR, não para falar. A patroa costuma tratar por "tú" quem limpa, enquanto você trata ela por "usted" — "puedes" e "puede" são a mesma ordem.',
 };
 
 const esCL = {
@@ -1050,6 +1066,14 @@ const esCL = {
   ecEmergency: 'Emergencia',
   ecEmergencyHint: 'Diga primero la dirección y después la frase. El 112 funciona en toda la Unión Europea y atiende en varios idiomas.',
   ecSafety: 'Este módulo nunca dice el nombre de un medicamento ni la dosis: pregunte por el momento, nunca por la cantidad. Para medicamentos, use el módulo Farmacia y el médico.',
+  moduleHouseCleaning: 'Limpieza del hogar',
+  hcTitle: 'Limpieza',
+  hcModeTask: 'La tarea',
+  hcModeHeard: 'Lo que le piden',
+  hcModeSay: 'Acordar',
+  hcHowToSay: 'Cómo decirlo',
+  hcWhere: 'En qué habitación',
+  hcHeardNote: 'Estas frases son para RECONOCER, no para decir. En casa suelen tutear a quien limpia, mientras usted trata de usted — "puedes" y "puede" son la misma orden.',
 };
 
 
@@ -1402,6 +1426,14 @@ const frFR = {
   ecEmergency: 'Urgence',
   ecEmergencyHint: 'Donnez d\'abord l\'adresse, puis la phrase. Le 112 fonctionne dans toute l\'Union européenne et répond en plusieurs langues.',
   ecSafety: 'Ce module ne donne jamais de nom de médicament ni de dose : demandez le moment, jamais la quantité. Pour les médicaments, utilisez le module Pharmacie et le médecin.',
+  moduleHouseCleaning: 'Ménage à domicile',
+  hcTitle: 'Ménage',
+  hcModeTask: 'La tâche',
+  hcModeHeard: 'Ce qu\'on vous demande',
+  hcModeSay: 'Se mettre d’accord',
+  hcHowToSay: 'Comment le dire',
+  hcWhere: 'Dans quelle pièce',
+  hcHeardNote: 'Ces phrases sont à RECONNAÎTRE, pas à dire. L\'employeuse tutoie souvent la personne qui fait le ménage, alors que vous la vouvoyez — « puedes » et « puede », c\'est la même consigne.',
 };
 
 const itIT = {
@@ -1753,6 +1785,14 @@ const itIT = {
   ecEmergency: 'Emergenza',
   ecEmergencyHint: 'Dica prima l\'indirizzo, poi la frase. Il 112 funziona in tutta l\'Unione europea e risponde in più lingue.',
   ecSafety: 'Questo modulo non dice mai il nome di un farmaco né la dose: chieda il momento, mai la quantità. Per i farmaci, usi il modulo Farmacia e il medico.',
+  moduleHouseCleaning: 'Pulizie di casa',
+  hcTitle: 'Pulizie',
+  hcModeTask: 'Il lavoro',
+  hcModeHeard: 'Quello che le chiedono',
+  hcModeSay: 'Mettersi d’accordo',
+  hcHowToSay: 'Come dirlo',
+  hcWhere: 'In quale stanza',
+  hcHeardNote: 'Queste frasi servono a RICONOSCERE, non a dire. In casa spesso danno del tu a chi pulisce, mentre lei dà del Lei — "puedes" e "puede" sono lo stesso ordine.',
 };
 
 
@@ -2105,6 +2145,14 @@ const ukUA = {
   ecEmergency: 'Екстрений випадок',
   ecEmergencyHint: 'Спершу назвіть адресу, потім фразу. Номер 112 працює в усьому Євросоюзі й відповідає кількома мовами.',
   ecSafety: 'Цей модуль ніколи не називає ліки й дозу: питайте про час, а не про кількість. Щодо ліків — модуль «Аптека» і лікар.',
+  moduleHouseCleaning: 'Прибирання в домі',
+  hcTitle: 'Прибирання',
+  hcModeTask: 'Робота',
+  hcModeHeard: 'Що просять',
+  hcModeSay: 'Домовитися',
+  hcHowToSay: 'Як сказати',
+  hcWhere: 'У якій кімнаті',
+  hcHeardNote: 'Ці фрази треба ВПІЗНАВАТИ, а не говорити. Господиня зазвичай звертається до прибиральниці на «ти», а ви до неї — на «ви»: «puedes» і «puede» означають те саме.',
 };
 
 const arMA = {
@@ -2456,6 +2504,14 @@ const arMA = {
   ecEmergency: 'حالة طارئة',
   ecEmergencyHint: 'قولي العنوان أولاً ثم الجملة. الرقم 112 يعمل في كل الاتحاد الأوروبي ويجيب بعدة لغات.',
   ecSafety: 'هذا القسم لا يذكر اسم دواء ولا جرعة أبداً: اسألي عن الوقت لا عن الكمية. أما الأدوية فمن قسم الصيدلية ومن الطبيب.',
+  moduleHouseCleaning: 'تنظيف المنازل',
+  hcTitle: 'التنظيف',
+  hcModeTask: 'المهمة',
+  hcModeHeard: 'ما يُطلب منكِ',
+  hcModeSay: 'الاتفاق',
+  hcHowToSay: 'كيف تقولينها',
+  hcWhere: 'في أي غرفة',
+  hcHeardNote: 'هذه الجمل للفهم عند سماعها، لا لقولها. صاحبة البيت تخاطب من تنظف بصيغة «tú» غير الرسمية، بينما تخاطبينها أنتِ بصيغة «usted» — و«puedes» و«puede» أمر واحد.',
 };
 
 
@@ -2808,6 +2864,14 @@ const ltLT = {
   ecEmergency: 'Skubi pagalba',
   ecEmergencyHint: 'Pirma pasakykite adresą, paskui frazę. Numeris 112 veikia visoje Europos Sąjungoje ir atsako keliomis kalbomis.',
   ecSafety: 'Šis modulis niekada nenurodo vaisto pavadinimo nei dozės: klauskite apie laiką, ne apie kiekį. Dėl vaistų — Vaistinės modulis ir gydytojas.',
+  moduleHouseCleaning: 'Namų valymas',
+  hcTitle: 'Valymas',
+  hcModeTask: 'Darbas',
+  hcModeHeard: 'Ko prašo',
+  hcModeSay: 'Susitarti',
+  hcHowToSay: 'Kaip pasakyti',
+  hcWhere: 'Kuriame kambaryje',
+  hcHeardNote: 'Šios frazės skirtos ATPAŽINTI, o ne sakyti. Šeimininkė valytojai paprastai sako „tú“, o jūs jai – „usted“: „puedes“ ir „puede“ reiškia tą patį nurodymą.',
 };
 
 /**
