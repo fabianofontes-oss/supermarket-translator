@@ -77,11 +77,9 @@ export const ModuleShell: React.FC<ModuleShellProps> = ({
         <button
           onClick={() => { playSound('click'); onGoHome(); }}
           aria-label={t('a11yHome')}
-          className="hit p-1.5 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 tap active:scale-90"
+          className="hit p-2 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 tap active:scale-90"
         >
-          {/* 24px, para acompanhar o Compartilhar do outro lado do cabeçalho. O
-              botão segue com 36px; só o glifo cresceu. */}
-          <HomeIcon className="w-6 h-6" />
+          <HomeIcon className="w-5 h-5" />
         </button>
         <h1 className="flex-1 mx-2 text-center font-bold text-2xl uppercase tracking-tight truncate">{title}</h1>
         {/* Cluster da direita. `gap-2` não é escolha estética: a área de toque de
@@ -89,25 +87,14 @@ export const ModuleShell: React.FC<ModuleShellProps> = ({
             sobrepõem e uma para de responder. */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <ShareButton onClick={onOpenShare} t={t} variant="onColor" />
-          {/*
-            Sem pílula, e as bandeiras ocupam o botão inteiro — o mesmo tratamento
-            do cabeçalho do hub, e pelo mesmo motivo: `p-1.5` mais 24px de bandeira
-            já dava os 36px do Compartilhar e do Início ao lado, então o botão
-            nunca foi pequeno. Pequena era a bandeira, que é justamente o que a
-            pessoa precisa reconhecer.
-
-            Sobre o cabeçalho colorido o anel branco ainda trabalha mais que no
-            hub: ele separa as duas bandeiras entre si E as descola do fundo do
-            módulo, que aqui é uma cor forte.
-          */}
           <button
             onClick={() => { playSound('click'); onOpenLanguageModal(); }}
             aria-label={t('languageSettings')}
-            className="hit rounded-full tap active:scale-90"
+            className="hit p-1.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 tap active:scale-90"
           >
-            <div className="flex items-center -space-x-2.5">
-              <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-9 h-9 rounded-full ring-2 ring-white object-cover" />
-              <img src={targetCountry.image} alt="" aria-hidden="true" className="w-9 h-9 rounded-full ring-2 ring-white object-cover" />
+            <div className="flex items-center -space-x-2">
+              <img src={nativeCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
+              <img src={targetCountry.image} alt="" aria-hidden="true" className="w-6 h-6 rounded-full border border-white object-cover" />
             </div>
           </button>
         </div>

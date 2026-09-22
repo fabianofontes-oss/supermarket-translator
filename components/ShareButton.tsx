@@ -29,18 +29,8 @@ export const ShareButton: React.FC<ShareButtonProps> = ({ onClick, t, variant = 
   <button
     onClick={() => { playSound('click'); onClick(); }}
     aria-label={t('shareApp')}
-    /*
-     * `p-1.5` e ícone de 24px, no lugar de `p-2` com 24px de folga e um glifo de
-     * 20px. O botão continua com os mesmos 36px — nada no cabeçalho se desloca —
-     * e o desenho dentro cresce 20%.
-     *
-     * É o mesmo raciocínio das bandeiras ao lado: o botão nunca foi pequeno, o
-     * que era pequeno é o que a pessoa precisa enxergar. E este é o botão por
-     * onde o app se espalha: quem gosta mostra para uma amiga, e é aqui que
-     * isso acontece.
-     */
-    className={`hit p-1.5 rounded-full tap active:scale-95 transition-colors ${VARIANTES[variant]}`}
+    className={`hit p-2 rounded-full tap active:scale-95 transition-colors ${VARIANTES[variant]}`}
   >
-    <ShareIcon className="w-6 h-6" />
+    <ShareIcon className="w-5 h-5" />
   </button>
 );
