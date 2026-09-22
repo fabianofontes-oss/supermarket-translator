@@ -15,22 +15,35 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      // NÃO trocar para 'autoUpdate' sem ler isto.
+      // ESTA DECISÃO FOI REVERTIDA. O raciocínio antigo está preservado abaixo
+      // porque ele não estava errado — o mundo é que mudou.
       //
-      // Com 'autoUpdate' o plugin força `skipWaiting` + `clientsClaim`
-      // (vite-plugin-pwa/dist/index.js:874-877, atribuição — ignora override no
-      // bloco `workbox`). O service worker novo assume a sessão que já está
-      // aberta e, no `activate`, o PrecacheController apaga do cache toda
-      // entrada fora do manifesto novo. A partir daí a página antiga pede
-      // chunks com hash antigo que não existem mais em lugar nenhum.
+      // Era assim: 'prompt' em vez de 'autoUpdate' para o service worker novo
+      // INSTALAR E ESPERAR, em vez de assumir a sessão aberta. Com `skipWaiting`
+      // + `clientsClaim`, o SW novo assume na hora e o PrecacheController apaga
+      // no `activate` toda entrada fora do manifesto novo; a página antiga
+      // continua rodando e passa a pedir chunks com hash que não existe mais.
+      // Evitar isso era o ponto, e o custo aceito era "a atualização entra na
+      // próxima abertura".
       //
-      // Com 'prompt', `clientsClaim` some e `skipWaiting` só roda se a página
-      // mandar a mensagem SKIP_WAITING — nós nunca mandamos. O service worker
-      // novo instala, espera, e assume quando todas as abas fecham. A sessão
-      // aberta continua com o precache dela inteiro.
+      // O QUE QUEBROU: essa próxima abertura nunca chega. Num PWA instalado no
+      // Android a janela não fecha de verdade, então o SW novo espera para
+      // sempre. E quem mandaria ele assumir é o `pwaUpdate.ts`, que vive dentro
+      // do bundle — quando o bundle é justamente o que não carrega, não há
+      // ninguém para mandar. A pessoa fica presa numa versão cujos arquivos o
+      // deploy seguinte já apagou, vendo tela branca, sem nada que possa fazer
+      // de dentro do app. Aconteceu de verdade, num celular.
       //
-      // Custo aceito: a atualização entra na próxima abertura, não na hora.
-      // Não há prompt na tela: seria interface nova numa fase de robustez.
+      // POR QUE AGORA PODE: o perigo do `skipWaiting` — página viva pedindo
+      // chunk que sumiu — passou a ter duas redes por baixo, as duas testadas.
+      // O `utils/chunkRecovery.ts` recarrega uma vez quando um `import()`
+      // dinâmico falha, e a rede de segurança inline no `index.html` recupera o
+      // caso extremo, quando nem o bundle principal chega. O risco que
+      // justificava esperar está coberto; o de ficar preso, não estava.
+      //
+      // Seguimos em 'prompt' e não 'autoUpdate': assim a folha de atualização
+      // continua avisando, e `skipWaiting`/`clientsClaim` ficam declarados
+      // explicitamente no bloco `workbox` abaixo, onde dá para ler e reverter.
       registerType: 'prompt',
       // Quem registra é `utils/pwaUpdate.ts`, porque o registro injetado só
       // chama `register()` e não tem como avisar que existe versão esperando.
@@ -61,6 +74,25 @@ export default defineConfig({
         // Pré-cacheia tudo que o build gera: o app inteiro funciona offline.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         navigateFallback: '/index.html',
+
+        /*
+         * Os dois que tiram a pessoa do impasse. Ver o comentário extenso em
+         * `registerType` acima antes de mexer.
+         *
+         * `skipWaiting` faz o service worker novo ativar sem esperar a janela
+         * fechar — e a janela de um PWA no Android não fecha. `clientsClaim` faz
+         * ele assumir as abas que já estão abertas, em vez de só as próximas.
+         *
+         * Juntos, eles garantem que o `sw.js` seja o caminho de recuperação: o
+         * `vercel.json` já serve esse arquivo com `max-age=0, must-revalidate`,
+         * então o navegador o revalida a cada abertura. Mesmo um aparelho preso
+         * numa versão antiga busca o SW novo, ele ativa na hora, o precache dele
+         * traz o `index.html` novo com os hashes que existem, e a abertura
+         * seguinte funciona. Sem estes dois, o SW novo instalava e ficava
+         * esperando um fechamento que nunca vem.
+         */
+        skipWaiting: true,
+        clientsClaim: true,
         // Só apaga precaches de versões antigas do próprio Workbox (nomes de
         // cache diferentes). Não tem relação com os chunks do deploy anterior
         // — quem apaga esses é o PrecacheController no `activate`. Mantido

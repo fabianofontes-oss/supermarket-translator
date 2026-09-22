@@ -53,10 +53,15 @@
           }
         }
 
-        function recuperar() {
+        // `limpar` só é verdadeiro no caminho em que apagar o cache RESOLVE:
+        // o bundle deu 404 porque o HTML em cache aponta para um arquivo que
+        // não existe mais. Ver `porTempo` abaixo para o outro caminho.
+        function recuperar(limpar) {
           if (montou()) return;
           if (navigator.onLine === false) return;
           if (!reservarTentativa()) return;
+
+          if (!limpar) { window.location.reload(); return; }
 
           var tarefas = [];
           try {
@@ -87,13 +92,16 @@
         // borbulha.
         window.addEventListener('error', function (evento) {
           var alvo = evento.target;
-          if (alvo && alvo !== window && alvo.tagName === 'SCRIPT') recuperar();
+          if (alvo && alvo !== window && alvo.tagName === 'SCRIPT') recuperar(true);
         }, true);
 
-        // Cinto e suspensório: cobre o caso em que o script chega mas morre
-        // antes de montar. 8s é folgado para 3G ruim, que é a rede de quem usa
-        // este app.
-        setTimeout(recuperar, 8000);
+        // Cinto e suspensório, para o script CHEGAR e morrer antes de montar.
+        // Aqui NÃO se apaga cache: apagar só resolve quando o arquivo não
+        // existe, e nesse caso o `error` acima já tratou. Numa primeira carga
+        // em 3G ruim — que é a rede de quem usa este app — passar de 8s é
+        // normal, e limpar o cache de quem só estava esperando trocaria uma
+        // demora por um app sem nada offline. 20s, e só recarrega.
+        setTimeout(function () { recuperar(false); }, 20000);
       })();
     </script>
 
