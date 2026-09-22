@@ -65,7 +65,7 @@ export const UpdateSheet: React.FC<UpdateSheetProps> = ({ onApply, onDismiss, t,
           </button>
           <button
             onClick={() => { playSound('click'); onApply(); }}
-            className={`flex-1 min-h-[44px] py-3 px-4 rounded-xl ${theme.color} text-white font-bold shadow-md hover:brightness-90 active:scale-95 tap transition`}
+            className={`flex-1 min-h-[44px] py-3 px-4 rounded-xl ${theme.color} text-white font-bold shadow-md hover:brightness-90 active:scale-95 tap`}
           >
             {t('updateNow')}
           </button>

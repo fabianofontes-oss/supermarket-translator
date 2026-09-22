@@ -225,7 +225,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
               rel="noopener noreferrer"
               onClick={() => playSound('click')}
               aria-label={`${t('shareVia')} ${nome}`}
-              className="flex items-center justify-center gap-3 w-full min-h-[52px] px-4 rounded-xl text-white font-bold shadow-md hover:brightness-95 active:scale-95 tap transition"
+              className="flex items-center justify-center gap-3 w-full min-h-[52px] px-4 rounded-xl text-white font-bold shadow-md hover:brightness-95 active:scale-95 tap"
               style={{ backgroundColor: hex }}
             >
               <Glyph className="w-6 h-6 shrink-0" />
@@ -242,7 +242,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
                 rel="noopener noreferrer"
                 onClick={() => playSound('click')}
                 aria-label={`${t('shareVia')} ${nome}`}
-                className="flex items-center justify-center gap-2 min-h-[48px] px-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-slate-800 active:scale-95 tap transition"
+                className="flex items-center justify-center gap-2 min-h-[48px] px-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-slate-800 active:scale-95 tap"
               >
                 <Glyph className="w-5 h-5 shrink-0" style={{ color: hex }} />
                 <span className="truncate">{nome}</span>
@@ -253,7 +253,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
           <button
             ref={botaoCopiarRef}
             onClick={handleCopiar}
-            className="flex items-center justify-center gap-2 w-full min-h-[48px] px-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-slate-800 active:scale-95 tap transition"
+            className="flex items-center justify-center gap-2 w-full min-h-[48px] px-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-slate-800 active:scale-95 tap"
           >
             <LinkIcon className="w-5 h-5 shrink-0" />
             <span dir="auto">
@@ -264,7 +264,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
           {temNativo && (
             <button
               onClick={handleNativo}
-              className="w-full min-h-[44px] px-4 rounded-xl text-sm font-semibold text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 tap transition"
+              className="w-full min-h-[44px] px-4 rounded-xl text-sm font-semibold text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 tap"
             >
               <span dir="auto">{t('shareMoreOptions')}</span>
             </button>

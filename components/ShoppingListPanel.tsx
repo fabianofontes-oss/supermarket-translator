@@ -82,7 +82,7 @@ export const ShoppingListPanel: React.FC<ShoppingListPanelProps> = ({
     }
     
     return (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6 animate-rise-in">
             {Object.entries(groupedShoppingList).map(([category, subCategories]) => (
             <div key={category}>
                 <h3 className={`font-bold text-sm ${theme.textColor} uppercase tracking-wider mb-3 pb-2 border-b border-gray-100 dark:border-slate-700`}>{t(category)}</h3>

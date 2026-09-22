@@ -75,7 +75,7 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({
     const groupedFavorites = groupItemsByCategory(favorites);
 
     return (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6 animate-rise-in">
             {Object.entries(groupedFavorites).map(([category, items]) => (
                 <div key={category}>
                     <h2 className={`text-sm font-bold ${theme.textColor} uppercase tracking-wider mb-3 pb-2 border-b border-gray-100 dark:border-slate-700`}>{t(category)}</h2>

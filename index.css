@@ -176,9 +176,18 @@ body {
     opacity 150ms ease;
 }
 
+/*
+ * Só opacidade, e isto é correção. Quem usa esta classe são véus
+ * `absolute inset-0` puros: CategorySheet, ShareSheet, UpdateSheet,
+ * VoiceMissingSheet, LanguagePanel e o modal de instalação. Um véu que entra
+ * deslocado 10px descobre uma faixa no topo e arrasta a borda do desfoque
+ * junto — dois defeitos visíveis em troca de um movimento que ninguém pediu.
+ * O bloco de movimento reduzido já definia este keyframe como opacidade pura;
+ * agora os dois concordam, em vez de o app ter dois comportamentos.
+ */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .animate-fade-in {
   animation: fadeIn 0.25s var(--ease-out) forwards;
@@ -193,15 +202,6 @@ body {
   animation: expandUp 0.25s var(--ease-out) forwards;
 }
 
-/* Expand Down Animation for Flag Menu (Top Header) */
-@keyframes expandDown {
-  from { opacity: 0; transform: scale(0.95) translateY(-12px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-.animate-expand-down {
-  animation: expandDown 0.25s var(--ease-out) forwards;
-}
-
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
@@ -210,7 +210,11 @@ body {
   animation: slideUp 0.25s var(--ease-out) forwards;
 }
 
-/* Entrada em cascata do hub, só na primeira abertura do app. */
+/*
+ * Entrada curta de conteúdo: a cascata do hub na primeira abertura, e os
+ * painéis de Favoritos e Lista, que antes subiam pela `fadeIn` — e subir é
+ * papel de conteúdo, não de véu.
+ */
 @keyframes riseIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -304,7 +308,6 @@ html[lang^='uk'] .text-xl         { font-size: 1.375rem;  line-height: 1.875rem;
 
   @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
   @keyframes expandUp { from { opacity: 0 } to { opacity: 1 } }
-  @keyframes expandDown { from { opacity: 0 } to { opacity: 1 } }
   @keyframes slideUp { from { opacity: 0 } to { opacity: 1 } }
   @keyframes riseIn { from { opacity: 0 } to { opacity: 1 } }
 

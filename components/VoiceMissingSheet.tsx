@@ -78,7 +78,7 @@ export const VoiceMissingSheet: React.FC<VoiceMissingSheetProps> = ({ country, o
 
         <button
           onClick={handleClose}
-          className={`w-full min-h-[44px] py-3 px-4 rounded-xl ${theme.color} text-white font-bold shadow-md hover:brightness-90 active:scale-95 tap transition`}
+          className={`w-full min-h-[44px] py-3 px-4 rounded-xl ${theme.color} text-white font-bold shadow-md hover:brightness-90 active:scale-95 tap`}
         >
           {t('voiceMissingDismiss')}
         </button>

@@ -237,12 +237,12 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
               }`}
            >
               <div className="relative mb-1 transition-transform duration-300 group-hover:scale-110">
-                  <StarIconSolid className={`w-7 h-7 transition-colors duration-300 ${activeTab === 'favorites' ? theme.textColor : 'text-white'}`} />
+                  <StarIconSolid className={`w-7 h-7 transition-colors duration-150 ${activeTab === 'favorites' ? theme.textColor : 'text-white'}`} />
                   {favoritesCount > 0 && activeTab !== 'favorites' && (
                       <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full ring-2 ring-red-600/50 shadow-sm"></span>
                   )}
               </div>
-              <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 px-2 text-center leading-tight ${activeTab === 'favorites' ? theme.textColor : 'text-white'}`}>
+              <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-150 px-2 text-center leading-tight ${activeTab === 'favorites' ? theme.textColor : 'text-white'}`}>
                   {t('favorites')}
               </span>
            </button>
@@ -279,14 +279,14 @@ export const ModuleLayout: React.FC<ModuleLayoutProps> = ({
               }`}
            >
               <div className="relative mb-1 transition-transform duration-300 group-hover:scale-110">
-                  <ShoppingBagIconSolid className={`w-7 h-7 transition-colors duration-300 ${activeTab === 'list' ? theme.textColor : 'text-white'}`} />
+                  <ShoppingBagIconSolid className={`w-7 h-7 transition-colors duration-150 ${activeTab === 'list' ? theme.textColor : 'text-white'}`} />
                   {listCount > 0 && (
                       <span className={`absolute -top-2 -right-2 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[9px] font-bold shadow-sm transition-colors ${activeTab === 'list' ? 'bg-red-600 text-white' : 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-300'}`}>
                       {listCount}
                       </span>
                   )}
               </div>
-              <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 px-1 text-center leading-tight ${activeTab === 'list' ? theme.textColor : 'text-white'}`}>
+              <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-150 px-1 text-center leading-tight ${activeTab === 'list' ? theme.textColor : 'text-white'}`}>
                   {t('shoppingListLabel')}
               </span>
            </button>
