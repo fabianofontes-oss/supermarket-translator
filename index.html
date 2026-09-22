@@ -2,6 +2,101 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
+
+    <!--
+      REDE DE SEGURANÇA DO BOOT
+
+      Isto existe porque o app já ficou com tela branca num celular, e o motivo
+      era estrutural: TODA a recuperação que o projeto construiu — o
+      `chunkRecovery`, o `pwaUpdate`, a `ErrorBoundary`, a folha de atualização
+      — mora DENTRO do bundle. Quando é o próprio bundle que não carrega, nada
+      disso roda. O socorro estava trancado do lado de dentro.
+
+      O cenário real: um deploy novo entra e apaga os arquivos com hash antigo.
+      Um service worker de uma versão anterior continua servindo o `index.html`
+      dela, que aponta para um `.js` que agora dá 404. O navegador pede, não
+      recebe, e a página fica em branco para sempre — não há segunda tentativa,
+      porque quem tentaria de novo era o código que não chegou.
+
+      Este script é inline de propósito: ele precisa sobreviver exatamente à
+      falha que vai consertar. Se `#root` continuar vazio, ele desregistra os
+      service workers, limpa os caches e recarrega.
+
+      Três travas, todas necessárias:
+
+      - UMA VEZ POR ABA, em `sessionStorage`, pela mesma razão que o
+        `chunkRecovery` se limita a uma recarga: se a causa não for cache, um
+        laço de recarga é pior que a tela branca.
+      - SÓ ONLINE. O app é offline-first. Offline, esse cache pode ser a única
+        cópia que existe, e limpá-lo trocaria uma tela branca temporária por um
+        app destruído.
+      - SÓ COM `#root` VAZIO. App montado não se mexe, aconteça o que acontecer.
+    -->
+    <script>
+      (function () {
+        var CHAVE = 'th_boot_recuperado';
+
+        function montou() {
+          var raiz = document.getElementById('root');
+          return !!(raiz && raiz.childElementCount > 0);
+        }
+
+        // Sem `sessionStorage` não há como garantir "uma vez só", e aí é mais
+        // seguro não fazer nada do que arriscar o laço.
+        function reservarTentativa() {
+          try {
+            if (sessionStorage.getItem(CHAVE) === '1') return false;
+            sessionStorage.setItem(CHAVE, '1');
+            return sessionStorage.getItem(CHAVE) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+
+        function recuperar() {
+          if (montou()) return;
+          if (navigator.onLine === false) return;
+          if (!reservarTentativa()) return;
+
+          var tarefas = [];
+          try {
+            if (navigator.serviceWorker) {
+              tarefas.push(
+                navigator.serviceWorker.getRegistrations().then(function (regs) {
+                  return Promise.all(regs.map(function (r) { return r.unregister(); }));
+                })
+              );
+            }
+          } catch (e) { /* navegador sem service worker: nada a desregistrar */ }
+          try {
+            if (window.caches) {
+              tarefas.push(
+                caches.keys().then(function (nomes) {
+                  return Promise.all(nomes.map(function (n) { return caches.delete(n); }));
+                })
+              );
+            }
+          } catch (e) { /* sem Cache Storage: nada a limpar */ }
+
+          var recarregar = function () { window.location.reload(); };
+          Promise.all(tarefas).then(recarregar, recarregar);
+        }
+
+        // O 404 do bundle dispara `error` no próprio <script>, e isso chega
+        // bem antes do relógio. Na fase de captura porque erro de recurso não
+        // borbulha.
+        window.addEventListener('error', function (evento) {
+          var alvo = evento.target;
+          if (alvo && alvo !== window && alvo.tagName === 'SCRIPT') recuperar();
+        }, true);
+
+        // Cinto e suspensório: cobre o caso em que o script chega mas morre
+        // antes de montar. 8s é folgado para 3G ruim, que é a rede de quem usa
+        // este app.
+        setTimeout(recuperar, 8000);
+      })();
+    </script>
+
     <!-- Sem `maximum-scale`/`user-scalable`: bloquear zoom falha o critério
          1.4.4 da WCAG, e o público inclui gente lendo bula numa farmácia. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -50,6 +145,8 @@
   </head>
   <body>
     <div id="root"></div>
+
+
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>
