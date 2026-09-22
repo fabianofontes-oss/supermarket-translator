@@ -449,7 +449,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                                     playSound(isInShoppingList ? 'click' : 'success');
                                     onToggleShoppingListItem(item);
                                 }}
-                                className={`flex items-center gap-2 font-semibold py-2 px-6 rounded-full text-sm transition-transform hover:scale-105 shadow-lg flex-shrink-0 ${
+                                className={`flex items-center gap-2 font-semibold py-2 px-6 rounded-full text-sm tap active:scale-[0.97] hover:scale-105 shadow-lg flex-shrink-0 ${
                                     isInShoppingList
                                     ? 'bg-gray-700 dark:bg-slate-600 text-white hover:bg-gray-800 dark:hover:bg-slate-500'
                                     : `${theme.color} text-white hover:opacity-90`
@@ -489,7 +489,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                             playSound(isInShoppingList ? 'click' : 'success');
                             onToggleShoppingListItem(item);
                         }}
-                        className={`flex items-center gap-2 font-semibold py-2 px-6 rounded-full text-sm transition-transform hover:scale-105 shadow-lg flex-shrink-0 ml-4 ${
+                        className={`flex items-center gap-2 font-semibold py-2 px-6 rounded-full text-sm tap active:scale-[0.97] hover:scale-105 shadow-lg flex-shrink-0 ml-4 ${
                             isInShoppingList
                             ? 'bg-gray-700 dark:bg-slate-600 text-white hover:bg-gray-800 dark:hover:bg-slate-500'
                             : `${theme.color} text-white hover:opacity-90`

@@ -286,8 +286,8 @@ export default function DirectionsModule({
               <div className="flex gap-2">
                 {steps.length > 0 && (
                   <>
-                    <button onClick={undo} className="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-xs font-bold">{t('dirUndo')}</button>
-                    <button onClick={clear} className="p-1 rounded-full bg-white/20 hover:bg-white/30" aria-label={t('dirClear')}><XIcon className="w-4 h-4" /></button>
+                    <button onClick={undo} className="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-xs font-bold tap active:scale-95">{t('dirUndo')}</button>
+                    <button onClick={clear} className="p-1 rounded-full bg-white/20 hover:bg-white/30 tap active:scale-95" aria-label={t('dirClear')}><XIcon className="w-4 h-4" /></button>
                   </>
                 )}
               </div>
@@ -304,7 +304,7 @@ export default function DirectionsModule({
                       <p className="font-bold leading-snug">{s.phrases[target]}</p>
                       {showNative && <p className="text-xs text-white leading-snug" dir="auto">{s.phrases[native]}</p>}
                     </div>
-                    <button onClick={() => speak(s.phrases[target])} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 flex-shrink-0" aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+                    <button onClick={() => speak(s.phrases[target])} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 flex-shrink-0 tap active:scale-90" aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
                       <Listen className="w-4 h-4" />
                     </button>
                   </li>
@@ -600,7 +600,7 @@ export default function DirectionsModule({
                 );
               })}
             </div>
-            <button onClick={() => speak(headingSentence(target, compass))} className="w-full text-left flex items-center gap-2">
+            <button onClick={() => speak(headingSentence(target, compass))} className="w-full text-left flex items-center gap-2 tap active:scale-[0.98]">
               <Listen className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
               <div className="min-w-0">
                 <p className="text-sm font-semibold leading-snug">{headingSentence(target, compass)}</p>
