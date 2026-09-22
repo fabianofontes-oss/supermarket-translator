@@ -363,7 +363,7 @@ Ao reiniciar o chat, peça para:
 
 ### Recorte do lançamento (temporário, 23/9/2026)
 
-*   **Decisão do dono, para as primeiras pessoas testarem:** "Eu falo" só aceita português do Brasil; "Estou em" só aceita países de inglês, espanhol e francês (Reino Unido, EUA, Espanha, Chile, Argentina, França); Supermercado e Farmácia ficam fechados no hub para todo mundo, e por link direto também.
+*   **Decisão do dono, para as primeiras pessoas testarem:** "Eu falo" só aceita português do Brasil; "Estou em" só aceita Estados Unidos, França e Espanha — por país, não por idioma: Reino Unido, Chile e Argentina ficam de fora; Supermercado e Farmácia ficam fechados no hub para todo mundo, e por link direto também.
 *   **Nada foi tirado.** O que está fora do recorte continua na tela, desativado: bandeira apagada no painel, ladrilho cinza com "Em breve" no hub. Os dados, os módulos e as traduções estão intactos.
 *   **Tudo mora em `lancamento.ts`**, em três funções. Para abrir de novo, basta afrouxá-las lá; nenhum outro arquivo guarda a lista.
 *   **Escolha salva de antes não se perde.** Quem tinha "Estou em" Itália cai em Espanha enquanto o recorte valer, mas o valor continua gravado e volta sozinho quando o recorte cair — a mesma regra que `useCountryPair` já usava para código desconhecido.

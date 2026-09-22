@@ -4,8 +4,8 @@ import type { ModuleKey } from './utils/rotas';
 /**
  * Recorte do lançamento. TEMPORÁRIO, por decisão do dono.
  *
- * Por enquanto o app abre só para quem fala **português do Brasil** e está num
- * país de língua **inglesa, espanhola ou francesa**. Supermercado e Farmácia
+ * Por enquanto o app abre só para quem fala **português do Brasil** e está nos
+ * **Estados Unidos, na França ou na Espanha**. Supermercado e Farmácia
  * ficam fechados no hub para todo mundo.
  *
  * O resto continua na tela, desativado — não some. Nada do que já foi escrito se
@@ -22,11 +22,8 @@ import type { ModuleKey } from './utils/rotas';
 /** "Eu falo": códigos de país liberados. */
 const ORIGENS_ABERTAS: readonly string[] = ['br'];
 
-/**
- * "Estou em": liberado pelo IDIOMA, não pelo país — inglês cobre Reino Unido e
- * Estados Unidos; espanhol cobre Espanha, Chile e Argentina.
- */
-const IDIOMAS_DE_DESTINO_ABERTOS: readonly string[] = ['en', 'es', 'fr'];
+/** "Estou em": códigos de país liberados — Estados Unidos, França e Espanha. */
+const DESTINOS_ABERTOS: readonly string[] = ['us', 'fr', 'es'];
 
 /** Fechados no hub, e por link direto também. */
 const MODULOS_FECHADOS: readonly ModuleKey[] = ['supermarket', 'pharmacy'];
@@ -34,6 +31,6 @@ const MODULOS_FECHADOS: readonly ModuleKey[] = ['supermarket', 'pharmacy'];
 export const origemAberta = (pais: Country): boolean => ORIGENS_ABERTAS.includes(pais.code);
 
 export const destinoAberto = (pais: Country): boolean =>
-  !pais.originOnly && IDIOMAS_DE_DESTINO_ABERTOS.includes(pais.lang.split('-')[0]);
+  !pais.originOnly && DESTINOS_ABERTOS.includes(pais.code);
 
 export const moduloFechado = (modulo: ModuleKey): boolean => MODULOS_FECHADOS.includes(modulo);

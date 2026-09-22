@@ -9,8 +9,8 @@ import { origemAberta, destinoAberto } from '../lancamento';
 import { useCountryPair, NATIVE_COUNTRY_KEY, TARGET_COUNTRY_KEY } from '../hooks/useCountryPair';
 
 /**
- * O recorte do lançamento: só português do Brasil em "Eu falo", só inglês,
- * espanhol e francês em "Estou em", Supermercado e Farmácia fechados.
+ * O recorte do lançamento: só português do Brasil em "Eu falo", só Estados
+ * Unidos, França e Espanha em "Estou em", Supermercado e Farmácia fechados.
  *
  * A regra que estes testes trancam é que **nada some**: o que está fora do
  * recorte continua na tela, desativado, para quem testa ver que existe.
@@ -68,13 +68,13 @@ describe('painel de idiomas', () => {
     expect(todos(eu)).toHaveLength(COUNTRIES.length);
   });
 
-  it('"Estou em": só países de inglês, espanhol e francês respondem', async () => {
+  it('"Estou em": só Estados Unidos, França e Espanha respondem', async () => {
     const { estou, ativos, todos } = await abrirPainel();
-    expect(ativos(estou).sort()).toEqual(
-      ['Argentina', 'Chile', 'Espanha', 'Estados Unidos', 'França', 'Reino Unido'].sort(),
-    );
-    // Brasil, Portugal e Itália seguem visíveis.
-    expect(todos(estou)).toEqual(expect.arrayContaining(['Brasil', 'Portugal', 'Itália']));
+    expect(ativos(estou).sort()).toEqual(['Espanha', 'Estados Unidos', 'França'].sort());
+    // Os outros seguem visíveis.
+    expect(todos(estou)).toEqual(expect.arrayContaining(
+      ['Brasil', 'Chile', 'Argentina', 'Reino Unido', 'Portugal', 'Itália'],
+    ));
   });
 });
 
