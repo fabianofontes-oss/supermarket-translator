@@ -3,14 +3,19 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
- * O modo escuro não pode apodrecer em silêncio.
+ * O modo escuro está DORMENTE, e este arquivo guarda os dois lados disso.
  *
- * Ele entrou de uma vez, em 589 classes. O jeito de ele se desfazer não é
- * alguém apagar isso — é o próximo cartão nascer com `bg-white` e sem par, e
- * ninguém ver, porque quem escreve normalmente está no tema claro. Aí o app
- * fica 95% escuro e com um cartão branco aceso no meio.
+ * Ele entrou de uma vez, em 589 classes, e foi desligado numa linha só:
+ * `darkMode: 'class'` no `tailwind.config.js` faz toda variante `dark:`
+ * depender de uma classe que nada neste projeto escreve. As 589 continuam no
+ * código, inertes.
  *
- * Então a regra é mecânica: superfície neutra sem par `dark:` é defeito.
+ * Por isso as duas regras convivem. A primeira é a de sempre: superfície
+ * neutra sem par `dark:` é defeito — porque o dia em que alguém trocar aquela
+ * linha de volta para `media`, o app precisa acordar inteiro, e não 95%
+ * escuro com um cartão branco aceso no meio. A última é nova e aponta para o
+ * outro lado: enquanto a decisão for app claro, nada pode reacender o tema
+ * escuro por acidente.
  */
 
 const raiz = join(__dirname, '..');
@@ -44,7 +49,7 @@ const EXIGEM_PAR = [
   'border-slate-200', 'border-slate-300', 'divide-gray-100',
 ];
 
-describe('modo escuro', () => {
+describe('modo escuro (dormente)', () => {
   it('toda superfície neutra tem par no escuro', () => {
     const orfas: string[] = [];
     for (const f of arquivos) {
@@ -104,17 +109,32 @@ describe('modo escuro', () => {
     expect(cravadas, `vire papel em index.css:\n${cravadas.join('\n')}`).toEqual([]);
   });
 
-  it('index.css declara a rampa dos desenhos nos dois temas', () => {
+  it('a rampa dos desenhos continua declarada, em tema único', () => {
     const css = ler('index.css');
     const papeis = ['--art-ground', '--art-tint', '--art-edge', '--art-fill',
                     '--art-line', '--art-ink', '--art-plate', '--art-paint',
                     '--art-label', '--art-skin'];
-    const escuro = css.slice(css.indexOf('@media (prefers-color-scheme: dark)'));
+    // Os papéis sobrevivem ao fim do tema escuro: eles não existem por causa
+    // do escuro, existem para a tinta do desenho ter um lugar só.
     for (const p of papeis) {
-      expect(css, `${p} não existe no tema claro`).toContain(`${p}:`);
-      expect(escuro, `${p} não inverte no escuro`).toContain(`${p}:`);
+      expect(css, `${p} sumiu da paleta`).toContain(`${p}:`);
     }
-    // Sem isto o navegador continua desenhando barra de rolagem e menus claros.
-    expect(css).toMatch(/color-scheme:\s*light dark/);
+  });
+
+  it('nada reacende o tema escuro por acidente', () => {
+    const css = ler('index.css');
+    expect(css, 'voltou um bloco @media de tema escuro ao index.css')
+      .not.toContain('@media (prefers-color-scheme: dark)');
+    // `light dark` anuncia ao navegador que o app aceita os dois, e aí a barra
+    // de rolagem e os menus de `select` escurecem sozinhos.
+    expect(css).toContain('color-scheme: light;');
+
+    const tw = ler('tailwind.config.js');
+    expect(tw, 'sem darkMode: class, as 589 variantes dark: reacendem')
+      .toContain("darkMode: 'class'");
+
+    const html = ler('index.html');
+    expect(html, 'voltou uma theme-color de tema escuro')
+      .not.toContain('prefers-color-scheme: dark');
   });
 });
