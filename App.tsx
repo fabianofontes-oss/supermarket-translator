@@ -93,21 +93,21 @@ const THEMES: Record<ModuleKey, Theme> = {
 
 // Módulos ativos do hub (classes escritas por extenso para o Tailwind gerar o CSS)
 // needsCatalog: depende dos 1.333 itens traduzidos; fica bloqueado para países só de origem (uk, ar).
-const ACTIVE_MODULES: { key: ModuleKey; labelKey: string; icon: React.FC<{ className?: string }>; iconClass: string; needsCatalog?: boolean }[] = [
-  { key: 'supermarket', labelKey: 'supermarketGuide', icon: ShoppingBagIconSolid, iconClass: 'bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-300', needsCatalog: true },
-  { key: 'pharmacy',    labelKey: 'modulePharmacy',   icon: PillIcon,             iconClass: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300', needsCatalog: true },
-  { key: 'location',    labelKey: 'moduleLocation',   icon: MapPinIcon,           iconClass: 'bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-300' },
-  { key: 'directions',  labelKey: 'moduleDirections', icon: SignpostIcon,         iconClass: 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300' },
-  { key: 'numbers',     labelKey: 'moduleNumbers',    icon: NumbersIcon,          iconClass: 'bg-violet-100 dark:bg-violet-950 text-violet-600 dark:text-violet-300' },
-  { key: 'body',        labelKey: 'moduleBody',       icon: BodyIcon,             iconClass: 'bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-300' },
-  { key: 'cafe',        labelKey: 'moduleCafe',       icon: CafeIcon,             iconClass: 'bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-300' },
-  { key: 'pronouns',    labelKey: 'modulePronouns',   icon: PronounsIcon,         iconClass: 'bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300' },
-  { key: 'sizes',       labelKey: 'moduleSizes',      icon: SizesIcon,            iconClass: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300' },
-  { key: 'makeup',      labelKey: 'moduleMakeup',     icon: MakeupIcon,           iconClass: 'bg-fuchsia-100 dark:bg-fuchsia-950 text-fuchsia-700 dark:text-fuchsia-300' },
+const ACTIVE_MODULES: { key: ModuleKey; labelKey: string; icon: React.FC<{ className?: string }>; iconClass: string; cardClass: string; needsCatalog?: boolean }[] = [
+  { key: 'supermarket', labelKey: 'supermarketGuide', icon: ShoppingBagIcon, iconClass: 'bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-300', cardClass: 'bg-red-50 border-red-200 text-red-700', needsCatalog: true },
+  { key: 'pharmacy',    labelKey: 'modulePharmacy',   icon: PillIcon,             iconClass: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300', cardClass: 'bg-emerald-50 border-emerald-200 text-emerald-700', needsCatalog: true },
+  { key: 'location',    labelKey: 'moduleLocation',   icon: MapPinIcon,           iconClass: 'bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-300', cardClass: 'bg-blue-50 border-blue-200 text-blue-600' },
+  { key: 'directions',  labelKey: 'moduleDirections', icon: SignpostIcon,         iconClass: 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300', cardClass: 'bg-amber-50 border-amber-200 text-amber-700' },
+  { key: 'numbers',     labelKey: 'moduleNumbers',    icon: NumbersIcon,          iconClass: 'bg-violet-100 dark:bg-violet-950 text-violet-600 dark:text-violet-300', cardClass: 'bg-violet-50 border-violet-200 text-violet-600' },
+  { key: 'body',        labelKey: 'moduleBody',       icon: BodyIcon,             iconClass: 'bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-300', cardClass: 'bg-rose-50 border-rose-200 text-rose-700' },
+  { key: 'cafe',        labelKey: 'moduleCafe',       icon: CafeIcon,             iconClass: 'bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-300', cardClass: 'bg-orange-50 border-orange-200 text-orange-800' },
+  { key: 'pronouns',    labelKey: 'modulePronouns',   icon: PronounsIcon,         iconClass: 'bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300', cardClass: 'bg-teal-50 border-teal-200 text-teal-700' },
+  { key: 'sizes',       labelKey: 'moduleSizes',      icon: SizesIcon,            iconClass: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300', cardClass: 'bg-indigo-50 border-indigo-200 text-indigo-600' },
+  { key: 'makeup',      labelKey: 'moduleMakeup',     icon: MakeupIcon,           iconClass: 'bg-fuchsia-100 dark:bg-fuchsia-950 text-fuchsia-700 dark:text-fuchsia-300', cardClass: 'bg-fuchsia-50 border-fuchsia-200 text-fuchsia-700' },
   // Sem `needsCatalog`: e generativo, entao abre tambem para ucraniana,
   // marroquina e lituana — que sao justamente quem faz este trabalho.
-  { key: 'eldercare',   labelKey: 'moduleElderCare',  icon: ElderCareIcon,        iconClass: 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300' },
-  { key: 'housecleaning', labelKey: 'moduleHouseCleaning', icon: HouseCleaningIcon, iconClass: 'bg-lime-100 dark:bg-lime-950 text-lime-800 dark:text-lime-300' },
+  { key: 'eldercare',   labelKey: 'moduleElderCare',  icon: ElderCareIcon,        iconClass: 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300', cardClass: 'bg-sky-50 border-sky-200 text-sky-700' },
+  { key: 'housecleaning', labelKey: 'moduleHouseCleaning', icon: HouseCleaningIcon, iconClass: 'bg-lime-100 dark:bg-lime-950 text-lime-800 dark:text-lime-300', cardClass: 'bg-lime-50 border-lime-200 text-lime-800' },
 ];
 
 // Módulos ainda não implementados (aparecem desativados)
@@ -472,16 +472,25 @@ export default function App() {
                     <button
                       key={mod.key}
                       disabled={blocked}
-                      style={stagger ? { animationDelay: `${i * 40}ms` } : undefined}
+                      style={{
+                        ...(stagger ? { animationDelay: `${i * 40}ms` } : null),
+                        // A sombra do ladrilho é da COR do módulo, não preta. Chega por
+                        // variável porque são doze cores, e em Tailwind isso seriam doze
+                        // sombras arbitrárias escritas à mão; o hex já existe no tema.
+                        ...(blocked ? null : { '--cor': THEMES[mod.key].hex }),
+                      } as React.CSSProperties}
                       onClick={() => { playSound('click'); setCurrentModule(mod.key); }}
                       className={`${blocked
                         ? 'bg-gray-50 dark:bg-slate-800 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 opacity-60'
-                        : 'bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 hover:shadow-md tap active:scale-95'} ${stagger ? 'animate-rise-in' : ''}`}
+                        : `${mod.cardClass} ladrilho p-5 rounded-2xl border flex flex-col items-center gap-3 tap active:scale-95`} ${stagger ? 'animate-rise-in' : ''}`}
                     >
-                      <div className={`w-14 h-14 rounded-full flex items-center justify-center ${mod.iconClass} ${blocked ? 'grayscale' : ''}`}>
-                        <mod.icon className="w-7 h-7" />
-                      </div>
-                      <span className={`text-sm ${blocked ? 'font-medium text-gray-500 dark:text-slate-400' : 'font-bold text-gray-700 dark:text-slate-200'}`}>{t(mod.labelKey)}</span>
+                      {/*
+                        O disco saiu. Ele existia para segurar a cor do módulo; agora
+                        o cartão inteiro é a cor, então o disco só servia para
+                        encolher o ícone. 48px contra os 28px de antes.
+                      */}
+                      <mod.icon className={`w-12 h-12 ${blocked ? 'text-gray-400 dark:text-slate-500' : ''}`} />
+                      <span className={`text-sm ${blocked ? 'font-medium text-gray-500 dark:text-slate-400' : 'font-bold'}`}>{t(mod.labelKey)}</span>
                       {blocked && <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 -mt-2">{t('comingSoon')}</span>}
                     </button>
                   );
@@ -493,9 +502,7 @@ export default function App() {
                     disabled
                     className="bg-gray-50 dark:bg-slate-800 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 opacity-60"
                   >
-                    <div className={`w-14 h-14 rounded-full flex items-center justify-center grayscale ${mod.iconClass}`}>
-                      <mod.icon className="w-7 h-7" />
-                    </div>
+                    <mod.icon className="w-12 h-12 text-gray-400 dark:text-slate-500" />
                     <span className="font-medium text-gray-500 dark:text-slate-400 text-sm">{t(mod.labelKey)}</span>
                   </button>
                 ))}

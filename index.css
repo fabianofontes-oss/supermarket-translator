@@ -146,6 +146,39 @@ body {
 }
 
 /*
+ * O LADRILHO DO HUB
+ *
+ * A sombra é da COR do módulo, não preta, e é só isso que muda tudo: com sombra
+ * cinza, os doze ladrilhos são o mesmo objeto branco com um adesivo colorido
+ * diferente, e a cor não participa da profundidade. Tingida, cada ladrilho
+ * parece feito do próprio material.
+ *
+ * Duas camadas, porque uma só não convence: um contato curto de 1px, que assenta
+ * o cartão na página, e uma difusa e larga com deslocamento negativo, que é o
+ * que dá altura. A larga é quase o dobro da opacidade da curta — sombra real
+ * tem a penumbra mais visível que o contato.
+ *
+ * `--cor` chega por `style` inline, vindo do `hex` do tema. São doze cores; em
+ * Tailwind seriam doze sombras arbitrárias escritas à mão.
+ *
+ * A primeira declaração é neutra e a segunda a substitui onde `color-mix`
+ * existe. Navegador que não a conhece descarta a segunda inteira e fica com a
+ * sombra cinza: perde o tingimento, não a profundidade.
+ *
+ * E a sombra NÃO entra em transição, de propósito. `.tap` logo acima documenta
+ * por que — sombra animada força repintura a cada quadro. Quem devolve o toque
+ * aqui é o `scale(0.97)`, que é composição pura.
+ */
+.ladrilho {
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.06),
+    0 6px 16px -6px rgb(15 23 42 / 0.10);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--cor) 16%, transparent),
+    0 6px 16px -6px color-mix(in srgb, var(--cor) 24%, transparent);
+}
+
+/*
  * Só opacidade, e isto é correção. Quem usa esta classe são véus
  * `absolute inset-0` puros: CategorySheet, ShareSheet, UpdateSheet,
  * VoiceMissingSheet, LanguagePanel e o modal de instalação. Um véu que entra
