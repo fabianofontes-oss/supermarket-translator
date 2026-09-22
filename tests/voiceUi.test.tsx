@@ -14,6 +14,17 @@ import { translations } from '../translations';
  * app cala e explica.
  */
 
+/**
+ * Estes testes são da regra de voz, e precisam de destinos que o recorte do
+ * lançamento desativa (Brasil, Itália). O recorte tem teste próprio, em
+ * `lancamento.test.tsx`; aqui ele fica aberto.
+ */
+vi.mock('../lancamento', () => ({
+  origemAberta: () => true,
+  destinoAberto: () => true,
+  moduloFechado: () => false,
+}));
+
 const t = (key: string) => (translations['pt-BR'] as Record<string, string>)[key] || key;
 const semVoz = (base: string) => `${base} — ${t('voiceMissingLabel')}`;
 

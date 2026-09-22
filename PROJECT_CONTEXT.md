@@ -361,6 +361,14 @@ Ao reiniciar o chat, peça para:
 *   **Uma tentativa que foi medida e desfeita.** A glosa ganhou `text-white/75` para virar glosa de verdade em vez de segunda frase. Medido: 3,2–3,4:1 sobre a cor dos módulos, **abaixo dos 4,5 exigidos**, e só voltaria a passar perto de 95% de opacidade — que é branco. Voltou ao branco cheio: a hierarquia já está feita pelo tamanho (30 contra 14) e pelo peso, e a opacidade era acessório. Acessório que reprova em contraste sai.
 *   ⚠️ **O que fica aberto, e é a maior alavanca que sobrou: o app não tem fonte própria.** Uma face de display resolveria mais do que qualquer outra mudança visual — e há um encaixe bom com a arquitetura: como a frase falada é sempre latina, bastaria um subconjunto **Latin-only** no papel de display, com a pilha do sistema seguindo no corpo e nos alfabetos não latinos. O custo é real e é do usuário: um woff2 auto-hospedado pesa uns 30–80KB num app offline-first feito para telefone barato e dado pré-pago, então é decisão de produto, não de código.
 
+### Recorte do lançamento (temporário, 23/9/2026)
+
+*   **Decisão do dono, para as primeiras pessoas testarem:** "Eu falo" só aceita português do Brasil; "Estou em" só aceita países de inglês, espanhol e francês (Reino Unido, EUA, Espanha, Chile, Argentina, França); Supermercado e Farmácia ficam fechados no hub para todo mundo, e por link direto também.
+*   **Nada foi tirado.** O que está fora do recorte continua na tela, desativado: bandeira apagada no painel, ladrilho cinza com "Em breve" no hub. Os dados, os módulos e as traduções estão intactos.
+*   **Tudo mora em `lancamento.ts`**, em três funções. Para abrir de novo, basta afrouxá-las lá; nenhum outro arquivo guarda a lista.
+*   **Escolha salva de antes não se perde.** Quem tinha "Estou em" Itália cai em Espanha enquanto o recorte valer, mas o valor continua gravado e volta sozinho quando o recorte cair — a mesma regra que `useCountryPair` já usava para código desconhecido.
+*   `tests/lancamento.test.tsx` tranca o recorte. `tests/voiceUi.test.tsx` o desliga por `vi.mock`, porque testa a regra de voz com destinos que o recorte fecha (Brasil, Itália).
+
 ### Próximos passos previstos
 *   Etapa 2: Supermercado e Farmácia em `uk`/`ar` (1.333 itens, chaves `ua` e `ma` em cada item). Revisar com falante nativo, especialmente remédios. Farmácia precisa de lista de marcas por país de origem.
 *   Trocar o texto fixo "PROIBIDO" nos dados da farmácia por um código neutro (ex.: `BANNED`).

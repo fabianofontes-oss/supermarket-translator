@@ -19,20 +19,31 @@ const isCode = (v: unknown): v is string => typeof v === 'string' && v.length > 
  * está salvo continua sendo resolvido contra a lista atual. Código que não
  * existe mais cai no padrão sem apagar nada em silêncio — o valor bruto segue
  * gravado até a próxima escolha.
+ *
+ * `aberto` aplica o recorte do lançamento (ver `lancamento.ts`) com a mesma
+ * regra: país salvo que hoje está desativado cai no padrão, mas continua
+ * gravado, e volta sozinho quando o recorte cair.
  */
-export const useCountryPair = (countries: Country[]) => {
+const tudoAberto = () => true;
+
+export const useCountryPair = (
+  countries: Country[],
+  aberto: { origem?: (c: Country) => boolean; destino?: (c: Country) => boolean } = {},
+) => {
+  const { origem = tudoAberto, destino = tudoAberto } = aberto;
+
   const resolve = useCallback(
-    (key: string, fallbackCode: string): Country => {
+    (key: string, fallbackCode: string, permitido: (c: Country) => boolean): Country => {
       const saved = readJSON<string | null>(key, null, (v): v is string | null => v === null || isCode(v));
-      return countries.find((c) => c.code === saved)
+      return countries.find((c) => c.code === saved && permitido(c))
         ?? countries.find((c) => c.code === fallbackCode)
         ?? countries[0];
     },
     [countries],
   );
 
-  const [nativeCountry, setNativeCountry] = useState<Country>(() => resolve(NATIVE_COUNTRY_KEY, 'br'));
-  const [targetCountry, setTargetCountry] = useState<Country>(() => resolve(TARGET_COUNTRY_KEY, 'es'));
+  const [nativeCountry, setNativeCountry] = useState<Country>(() => resolve(NATIVE_COUNTRY_KEY, 'br', origem));
+  const [targetCountry, setTargetCountry] = useState<Country>(() => resolve(TARGET_COUNTRY_KEY, 'es', destino));
 
   /**
    * Grava a partir da segunda vez, isto é, quando o valor mudou de verdade.

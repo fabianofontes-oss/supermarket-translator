@@ -19,6 +19,12 @@ interface LanguagePanelProps {
   theme: { color: string; textColor: string; hex: string };
   /** Bloqueia em "Eu falo" os países que ainda não têm dados do módulo atual (ex.: catálogo). */
   blockOriginOnly?: boolean;
+  /**
+   * Recorte do lançamento (`lancamento.ts`). País fora dele continua visível,
+   * mas desativado. Sem as props, tudo aberto.
+   */
+  origemAberta?: (country: Country) => boolean;
+  destinoAberto?: (country: Country) => boolean;
   /** Vozes do aparelho, para o diagnóstico. Vazio = motor ainda não respondeu. */
   voices?: readonly VoiceLike[];
   /** Com rede, a falta de voz local deixa de ser impedimento: o áudio vem de fora. */
@@ -36,6 +42,8 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
   t,
   theme,
   blockOriginOnly = false,
+  origemAberta = () => true,
+  destinoAberto = () => true,
   voices = [],
   online = true
 }) => {
@@ -133,7 +141,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
                         // dá 1,95:1 e o anel de seleção some. `--art-ink` é o
                         // papel que inverte — 7,5:1 no claro, 11,9:1 no escuro.
                         'var(--art-ink)',
-                        targetCountry.code === opt.code || (blockOriginOnly && !!opt.originOnly),
+                        targetCountry.code === opt.code || (blockOriginOnly && !!opt.originOnly) || !origemAberta(opt),
                         isSelected ? nativeSelectedRef : undefined,
                     );
                 })}
@@ -152,7 +160,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
                         targetCountry.code === opt.code,
                         () => onTargetChange(opt),
                         theme.hex,
-                        nativeCountry.code === opt.code
+                        nativeCountry.code === opt.code || !destinoAberto(opt)
                     )
                  )}
              </div>
@@ -190,7 +198,8 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
             {t('voiceDiagnosticsTitle')}
           </button>
           <ul id={diagnosticsId} hidden={!showDiagnostics} className="px-4 pb-3 space-y-2">
-            {options.filter((opt) => !opt.originOnly).map((opt) => {
+            {/* Só os destinos que dá para escolher: voz de país desativado é ruído. */}
+            {options.filter((opt) => !opt.originOnly && destinoAberto(opt)).map((opt) => {
               // Mesma função do botão de áudio: uma regra só, nunca duas.
               // Só conta como voz do aparelho a da REGIÃO exata — es-US não
               // serve para a Espanha, pt-PT não serve para o Brasil.

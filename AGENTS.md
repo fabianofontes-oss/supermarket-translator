@@ -430,6 +430,14 @@ corretamente. Funciona.
 O rótulo do bloqueio diz "Em breve", que não é bem verdade: o motivo é falta de dados
 para aquele idioma, não uma data futura.
 
+### Recorte do lançamento (temporário)
+
+Por cima de tudo isso vale hoje um recorte em [lancamento.ts](lancamento.ts): "Eu falo"
+só aceita o Brasil, "Estou em" só aceita inglês, espanhol e francês, e Supermercado e
+Farmácia estão fechados para todo mundo. **Não é defeito, e nada foi removido**: o que
+está fora aparece desativado. Para abrir de novo, basta afrouxar as três funções desse
+arquivo. O porquê está no PROJECT_CONTEXT.md.
+
 ## 7. Convenções que precisam ser respeitadas
 
 1. **Classe do Tailwind nunca se monta por concatenação.** `bg-${cor}` não gera CSS,

@@ -3,6 +3,7 @@ import { COUNTRIES, SUPERMARKET_CATEGORIES, PHARMACY_CATEGORIES } from './consta
 import type { Country, TranslationItem } from './types';
 import type { ModuleKey } from './utils/rotas';
 import { useModuleRoute } from './hooks/useModuleRoute';
+import { origemAberta, destinoAberto, moduloFechado } from './lancamento';
 // Cada módulo vira um pedaço próprio: abrir o hub não baixa o catálogo
 // inteiro nem os dados dos outros oito módulos.
 const CatalogModule = lazyWithRetry(() => import('./modules/CatalogModule'));
@@ -130,16 +131,23 @@ export default function App() {
   // Par de idiomas persistido; também mantém lang/dir do documento.
   // Vem ANTES da rota de propósito: é o país nativo que decide se um módulo de
   // catálogo pode abrir, e a rota precisa dessa resposta já no primeiro render.
-  const { nativeCountry, setNativeCountry, targetCountry, setTargetCountry } = useCountryPair(COUNTRIES);
+  const { nativeCountry, setNativeCountry, targetCountry, setTargetCountry } = useCountryPair(COUNTRIES, {
+    origem: origemAberta,
+    destino: destinoAberto,
+  });
 
   /**
    * Supermercado e Farmácia dependem dos 1.333 itens do catálogo, que só existem
    * nas línguas de destino. Para origem ucraniana, marroquina ou lituana eles
    * ficam desativados — e isto é o que impede um link direto de driblar a trava.
+   *
+   * Por cima disso vale o recorte do lançamento (`lancamento.ts`), que hoje
+   * fecha os dois para todo mundo. Uma função só decide o ladrilho e o link.
    */
   const estaBloqueado = useCallback(
     (modulo: ModuleKey) =>
-      !!ACTIVE_MODULES.find((m) => m.key === modulo)?.needsCatalog && !!nativeCountry.originOnly,
+      moduloFechado(modulo)
+      || (!!ACTIVE_MODULES.find((m) => m.key === modulo)?.needsCatalog && !!nativeCountry.originOnly),
     [nativeCountry.originOnly],
   );
 
@@ -481,7 +489,7 @@ export default function App() {
             <main className="flex-1 p-6 overflow-y-auto">
               <div className="grid grid-cols-2 gap-4 mb-20">
                 {ACTIVE_MODULES.map((mod, i) => {
-                  const blocked = !!mod.needsCatalog && !!nativeCountry.originOnly;
+                  const blocked = estaBloqueado(mod.key);
                   return (
                     <button
                       key={mod.key}
@@ -563,6 +571,8 @@ export default function App() {
         t={t}
         theme={theme}
         blockOriginOnly={currentModule === 'supermarket' || currentModule === 'pharmacy'}
+        origemAberta={origemAberta}
+        destinoAberto={destinoAberto}
         voices={voices}
         online={online}
       />
