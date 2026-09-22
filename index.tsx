@@ -5,6 +5,7 @@ import App from './App';
 import './index.css';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { runStorageMigration } from './utils/storageMigration';
+import { Analytics } from '@vercel/analytics/react';
 
 // Antes do React montar: os hooks leem o localStorage já na inicialização do
 // estado, então o formato precisa estar convertido antes do primeiro render.
@@ -51,11 +52,37 @@ const LastResort = () => (
   </div>
 );
 
+/**
+ * O app nasceu sem medição nenhuma, e por isso a pergunta "alguém está entrando?"
+ * nunca teve resposta — só a suposição de que não. Isto existe para trocar a
+ * suposição por um número.
+ *
+ * Está fora do `App` de propósito: não é funcionalidade, é instrumentação. Quem
+ * ler o `App` não deve tropeçar nela, e quem quiser arrancar a medição tira uma
+ * linha daqui.
+ *
+ * DUAS RESSALVAS que mudam como o número deve ser lido:
+ *
+ * 1. O script mora em `/_vercel/insights/script.js`, servido pela Vercel. No
+ *    APK (Capacitor) a origem é `capacitor://localhost` e esse caminho não
+ *    existe — daria 404 a cada abertura. Por isso a guarda de protocolo.
+ *
+ * 2. Este app é offline-first, e esse é o cenário REAL do público: PWA
+ *    instalado, usado dentro do supermercado, muitas vezes sem rede. O sinal só
+ *    sai quando há conexão. Então o número é um PISO de uso, nunca o total —
+ *    zero aqui significa "ninguém entrou COM REDE", e uso real sempre será
+ *    maior que o medido. Tratar como censo é a leitura errada.
+ */
+const medindoNaWeb =
+  typeof window !== 'undefined' &&
+  (window.location.protocol === 'https:' || window.location.protocol === 'http:');
+
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ErrorBoundary fallback={() => <LastResort />}>
       <App />
+      {medindoNaWeb && <Analytics />}
     </ErrorBoundary>
   </React.StrictMode>
 );

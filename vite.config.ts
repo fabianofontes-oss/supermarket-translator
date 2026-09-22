@@ -101,7 +101,12 @@ export default defineConfig({
         // O fallback de navegação nunca deve responder por um pedido dentro de
         // /assets/: falha de chunk tem que falhar como falha, não virar HTML.
         // Mesma regra do rewrite em vercel.json, na camada do service worker.
-        navigateFallbackDenylist: [/^\/assets\//],
+        // `/_vercel/` entra pela mesma razão, e por uma a mais: o Web Analytics
+        // busca `/_vercel/insights/script.js`. Se o fallback respondesse por ele,
+        // o navegador receberia o `index.html` no lugar do script e a medição
+        // morreria em silêncio — sem erro visível, só um painel eternamente zerado.
+        // O `vercel.json` já exclui o mesmo prefixo na camada de cima.
+        navigateFallbackDenylist: [/^\/assets\//, /^\/_vercel\//],
       },
     }),
   ],
