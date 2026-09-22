@@ -454,10 +454,25 @@ export default function App() {
                     espaço as duas se sobrepõem e uma delas para de responder. */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <ShareButton onClick={() => setIsShareOpen(true)} t={t} variant="onLight" />
-                  <button onClick={() => setIsLanguageModalOpen(true)} aria-label={t('languageSettings')} className="hit p-2 rounded-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-700 tap active:scale-90">
-                    <div className="flex items-center -space-x-2">
-                      <img src={nativeCountry.image} alt={nativeCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
-                      <img src={targetCountry.image} alt={targetCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
+                  {/*
+                    Sem pílula, e as bandeiras ocupam o botão inteiro.
+
+                    O botão nunca foi pequeno: `p-1.5` mais 24px de bandeira já dava
+                    os mesmos 36px do Compartilhar e do Início. Pequenas eram as
+                    bandeiras DENTRO dele — e é a bandeira que a pessoa precisa
+                    reconhecer, não a pílula em volta. A 36px elas crescem 50% sem
+                    que nada no cabeçalho mude de altura.
+
+                    O anel branco fica, e é funcional, não enfeite: são dois círculos
+                    sobrepostos, e Brasil (verde e amarelo) sobre Espanha (vermelho e
+                    amarelo) funde no encontro sem ele. Passa de `border` para `ring`
+                    porque `border` come 1px de dentro da bandeira; `ring` é sombra e
+                    cresce para fora.
+                  */}
+                  <button onClick={() => setIsLanguageModalOpen(true)} aria-label={t('languageSettings')} className="hit rounded-full tap active:scale-90">
+                    <div className="flex items-center -space-x-2.5">
+                      <img src={nativeCountry.image} alt={nativeCountry.name} className="w-9 h-9 rounded-full ring-2 ring-white object-cover" />
+                      <img src={targetCountry.image} alt={targetCountry.name} className="w-9 h-9 rounded-full ring-2 ring-white object-cover" />
                     </div>
                   </button>
                 </div>
