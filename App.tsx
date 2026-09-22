@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useId, Suspense } from 'react';
 import { COUNTRIES, SUPERMARKET_CATEGORIES, PHARMACY_CATEGORIES } from './constants';
 import type { Country, TranslationItem } from './types';
+import type { ModuleKey } from './utils/rotas';
+import { useModuleRoute } from './hooks/useModuleRoute';
 // Cada módulo vira um pedaço próprio: abrir o hub não baixa o catálogo
 // inteiro nem os dados dos outros oito módulos.
 const CatalogModule = lazyWithRetry(() => import('./modules/CatalogModule'));
@@ -59,9 +61,6 @@ import {
   HouseCleaningIcon,
 } from './components/Icons';
 
-type ModuleKey =
-  | 'supermarket' | 'pharmacy' | 'location' | 'directions'
-  | 'numbers' | 'body' | 'cafe' | 'pronouns' | 'sizes' | 'makeup' | 'eldercare' | 'housecleaning';
 type Tab = 'home' | 'search' | 'favorites' | 'list';
 
 export interface Theme { color: string; textColor: string; hex: string; borderColor: string }
@@ -128,9 +127,24 @@ const COMING_SOON: { labelKey: string; icon: React.FC<{ className?: string }>; i
 ];
 
 export default function App() {
-  const [currentModule, setCurrentModule] = useState<ModuleKey | null>(null);
   // Par de idiomas persistido; também mantém lang/dir do documento.
+  // Vem ANTES da rota de propósito: é o país nativo que decide se um módulo de
+  // catálogo pode abrir, e a rota precisa dessa resposta já no primeiro render.
   const { nativeCountry, setNativeCountry, targetCountry, setTargetCountry } = useCountryPair(COUNTRIES);
+
+  /**
+   * Supermercado e Farmácia dependem dos 1.333 itens do catálogo, que só existem
+   * nas línguas de destino. Para origem ucraniana, marroquina ou lituana eles
+   * ficam desativados — e isto é o que impede um link direto de driblar a trava.
+   */
+  const estaBloqueado = useCallback(
+    (modulo: ModuleKey) =>
+      !!ACTIVE_MODULES.find((m) => m.key === modulo)?.needsCatalog && !!nativeCountry.originOnly,
+    [nativeCountry.originOnly],
+  );
+
+  // O módulo aberto mora na URL: ver `utils/rotas.ts`.
+  const { currentModule, setCurrentModule } = useModuleRoute(estaBloqueado);
 
   // PWA install
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
