@@ -5,6 +5,7 @@ import {
   WHATSAPP_HEX, TELEGRAM_HEX, FACEBOOK_HEX,
 } from './BrandIcons';
 import { useDialog } from '../hooks/useDialog';
+import { usePresenca } from '../hooks/usePresenca';
 import { playSound } from '../utils/soundUtils';
 import { SHARE_URL, SHARE_QR_SRC } from '../constants';
 
@@ -155,18 +156,20 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
     }
   };
 
-  if (!isOpen) return null;
+  const { montado, saindo } = usePresenca(isOpen);
+
+  if (!montado) return null;
 
   return (
-    <div className="fixed inset-0 z-[105] flex items-end sm:items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={close} />
+    <div className={`fixed inset-0 z-[105] flex items-end sm:items-center justify-center p-4 ${saindo ? 'pointer-events-none' : ''}`}>
+      <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm ${saindo ? 'animate-fade-out' : 'animate-fade-in'}`} onClick={close} />
 
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-slide-up max-h-[85vh] overflow-y-auto"
+        className={`relative bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto ${saindo ? 'animate-slide-down' : 'animate-slide-up'}`}
       >
         <div className="flex items-start gap-3 mb-5">
           {/* O mesmo glifo do botão que abriu a folha: é o que confirma para a

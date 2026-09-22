@@ -3,6 +3,7 @@ import React, { useCallback, useId, useRef, useState } from 'react';
 import type { Country } from '../types';
 import { XIcon, CheckIcon } from './Icons';
 import { useDialog } from '../hooks/useDialog';
+import { usePresenca } from '../hooks/usePresenca';
 import { playSound } from '../utils/soundUtils';
 import { pickVoice, type VoiceLike } from '../utils/speech';
 
@@ -55,7 +56,9 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
 
   const [showDiagnostics, setShowDiagnostics] = useState(false);
 
-  if (!isOpen) return null;
+  const { montado, saindo } = usePresenca(isOpen);
+
+  if (!montado) return null;
 
   const renderFlagButton = (
     opt: Country,
@@ -93,7 +96,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
+    <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${saindo ? 'animate-fade-out pointer-events-none' : 'animate-fade-in'}`}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={handleClose}></div>
 
       <div
@@ -101,7 +104,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label={t('languageSettings')}
-        className="relative w-full max-w-[16rem] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[85vh] overflow-y-auto animate-expand-up no-scrollbar"
+        className={`relative w-full max-w-[16rem] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[85vh] overflow-y-auto no-scrollbar ${saindo ? 'animate-collapse-down' : 'animate-expand-up'}`}
       >
 
         {/* Close Button */}

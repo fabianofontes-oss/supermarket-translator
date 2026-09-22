@@ -18,6 +18,7 @@ import { translations } from './translations';
 import { useListManager } from './hooks/useListManager';
 import { useFavorites } from './hooks/useFavorites';
 import { useDialog } from './hooks/useDialog';
+import { usePresenca } from './hooks/usePresenca';
 import { useCountryPair } from './hooks/useCountryPair';
 import { LanguagePanel } from './components/LanguagePanel';
 import { VoiceMissingSheet } from './components/VoiceMissingSheet';
@@ -170,6 +171,7 @@ export default function App() {
   // Modal de instalação: mesmo padrão de diálogo do painel de categorias.
   const installTitleId = useId();
   const installPanelRef = useDialog(showInstallModal, () => handleDismissInstall());
+  const instalacao = usePresenca(showInstallModal);
 
   const t = useCallback((key: string) => {
     const lang = nativeCountry.lang || 'en-US';
@@ -565,14 +567,14 @@ export default function App() {
         theme={theme}
       />
 
-      {showInstallModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+      {instalacao.montado && (
+        <div className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm ${instalacao.saindo ? 'animate-fade-out pointer-events-none' : 'animate-fade-in'}`}>
           <div
             ref={installPanelRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby={installTitleId}
-            className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl transform tap animate-slide-up"
+            className={`bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl transform ${instalacao.saindo ? 'animate-slide-down' : 'animate-slide-up'}`}
           >
             <div className="flex justify-between items-start mb-4">
               <div className="p-3 bg-red-100 dark:bg-red-950 rounded-xl">

@@ -3,6 +3,7 @@ import type { Category } from '../types';
 import { XIcon, CheckIcon } from './Icons';
 import { metaFor } from './categoryMeta';
 import { useDialog } from '../hooks/useDialog';
+import { usePresenca } from '../hooks/usePresenca';
 import { playSound } from '../utils/soundUtils';
 
 interface CategorySheetProps {
@@ -38,16 +39,17 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
   // para quem abriu. Mesmo comportamento de antes, agora compartilhado com o
   // painel de idiomas e o modal de instalação.
   const panelRef = useDialog(isOpen, close, selectedRef);
+  const { montado, saindo } = usePresenca(isOpen);
 
-  if (!isOpen) return null;
+  if (!montado) return null;
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center" role="dialog" aria-modal="true" aria-labelledby="category-sheet-title">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={close} />
+    <div className={`fixed inset-0 z-[90] flex items-end justify-center ${saindo ? 'pointer-events-none' : ''}`} role="dialog" aria-modal="true" aria-labelledby="category-sheet-title">
+      <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm ${saindo ? 'animate-fade-out' : 'animate-fade-in'}`} onClick={close} />
 
       <div
         ref={panelRef}
-        className="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] max-h-[85vh] flex flex-col animate-slide-up"
+        className={`relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] max-h-[85vh] flex flex-col ${saindo ? 'animate-slide-down' : 'animate-slide-up'}`}
       >
         <div className={`${theme.color} rounded-t-[2.5rem] flex flex-col items-center pt-3 pb-3`}>
           <button onClick={close} aria-label={t('close')} className="hit w-12 h-1.5 rounded-full bg-white/40 mb-3 tap active:scale-90" />

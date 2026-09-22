@@ -1,7 +1,8 @@
-import React, { useId } from 'react';
+import React, { useId, useRef } from 'react';
 import type { Country } from '../types';
 import { SpeakerOffIcon } from './Icons';
 import { useDialog } from '../hooks/useDialog';
+import { usePresenca } from '../hooks/usePresenca';
 import { playSound } from '../utils/soundUtils';
 
 interface VoiceMissingSheetProps {
@@ -31,9 +32,16 @@ export const VoiceMissingSheet: React.FC<VoiceMissingSheetProps> = ({ country, o
   };
 
   const panelRef = useDialog(isOpen, handleClose);
+  const { montado, saindo } = usePresenca(isOpen);
   const titleId = useId();
 
-  if (!country) return null;
+  // Mesmo motivo do UpdateSheet: `country` e zerado pelo pai no instante do
+  // fechamento, e a folha ainda precisa dele para se desenhar enquanto sai.
+  const ultimoPais = useRef(country);
+  if (country) ultimoPais.current = country;
+  const pais = ultimoPais.current;
+
+  if (!montado || !pais) return null;
 
   const steps = [
     t('voiceMissingAndroid'),
@@ -42,13 +50,13 @@ export const VoiceMissingSheet: React.FC<VoiceMissingSheetProps> = ({ country, o
   ];
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div className={`fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm ${saindo ? 'animate-fade-out pointer-events-none' : 'animate-fade-in'}`}>
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-slide-up max-h-[85vh] overflow-y-auto"
+        className={`bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto ${saindo ? 'animate-slide-down' : 'animate-slide-up'}`}
       >
         <div className="flex items-start gap-3 mb-4">
           <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: `${theme.hex}1a` }}>
@@ -61,9 +69,9 @@ export const VoiceMissingSheet: React.FC<VoiceMissingSheetProps> = ({ country, o
             {/* Qual voz falta, em vez de um aviso genérico: é o que a pessoa
                 precisa procurar nas configurações do aparelho. */}
             <p className="flex items-center gap-2 mt-1 text-sm text-gray-600 dark:text-slate-300">
-              <img src={country.image} alt="" aria-hidden="true" className="w-5 h-5 rounded-full object-cover" />
-              <span dir="auto">{country.name}</span>
-              <span className="font-mono text-xs text-gray-500 dark:text-slate-400">{country.lang}</span>
+              <img src={pais.image} alt="" aria-hidden="true" className="w-5 h-5 rounded-full object-cover" />
+              <span dir="auto">{pais.name}</span>
+              <span className="font-mono text-xs text-gray-500 dark:text-slate-400">{pais.lang}</span>
             </p>
           </div>
         </div>

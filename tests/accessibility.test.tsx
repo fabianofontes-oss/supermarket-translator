@@ -343,7 +343,7 @@ describe('3 e 9 — marcação verificada na fonte', () => {
 
   it('o modal de instalação declara diálogo, nome e fechar nomeado', () => {
     const app = ler('App.tsx');
-    const modal = app.slice(app.indexOf('showInstallModal && ('));
+    const modal = app.slice(app.indexOf('instalacao.montado && ('));
     expect(modal).toContain('role="dialog"');
     expect(modal).toContain('aria-modal="true"');
     expect(modal).toContain('aria-labelledby={installTitleId}');
