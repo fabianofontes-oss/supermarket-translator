@@ -28,12 +28,26 @@ export const watchForUpdate = (aoEncontrar: (aplicar: () => void) => void): (() 
   let cancelado = false;
   let limpar = () => {};
 
-  const aplicarCom = (esperando: ServiceWorker) => () => {
-    // Recarrega assim que o novo assumir o controle. Sem isto a página segue
-    // com o código antigo e o cache novo — a combinação que dá tela branca.
-    navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload(), { once: true });
-    esperando.postMessage({ type: 'SKIP_WAITING' });
-  };
+  /*
+   * Recarregar, e só. Esta função já foi mais esperta, e a esperteza virou
+   * botão morto.
+   *
+   * Ela mandava `SKIP_WAITING` para o service worker em espera e recarregava
+   * ao receber `controllerchange`. Isso funcionava enquanto o `sw.js` tinha
+   * `skipWaiting: false`, porque nesse modo o Workbox GERA um ouvinte de
+   * mensagem. Quando `skipWaiting` passou a ser `true` no `vite.config.ts`, o
+   * Workbox parou de gerar esse ouvinte — o `sw.js` publicado não tem um único
+   * `addEventListener` — e as duas metades morreram juntas: a mensagem caía no
+   * vazio, e o `controllerchange` já tinha acontecido milissegundos depois do
+   * `installed`, muito antes de a pessoa ler o aviso e tocar no botão. Tocar em
+   * "Atualizar" não fazia absolutamente nada.
+   *
+   * Com `skipWaiting` + `clientsClaim`, quando esta folha está na tela o
+   * service worker novo JÁ ativou e JÁ assumiu esta página. Não há o que
+   * pedir: o que falta é só a página buscar de novo o que agora está no cache
+   * novo. Uma recarga faz exatamente isso.
+   */
+  const aplicar = () => window.location.reload();
 
   navigator.serviceWorker
     .register('/sw.js', { scope: '/' })
@@ -41,7 +55,7 @@ export const watchForUpdate = (aoEncontrar: (aplicar: () => void) => void): (() 
       if (cancelado) return;
 
       const oferecer = (sw: ServiceWorker | null) => {
-        if (sw && !cancelado) aoEncontrar(aplicarCom(sw));
+        if (sw && !cancelado) aoEncontrar(aplicar);
       };
 
       // Já havia uma versão esperando de uma abertura anterior.
