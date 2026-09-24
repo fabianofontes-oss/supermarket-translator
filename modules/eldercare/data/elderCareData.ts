@@ -7,7 +7,7 @@
 //     daquelas durações é repetido aqui: o que falta lá é justamente a inversão da
 //     pessoa, e é só isso que este módulo acrescenta.
 //   • farmácia (`pharmacy/data/`) → remédio, princípio ativo, marca, equivalência
-//   • limpeza da casa é MÓDULO IRMÃO, ainda por escrever. Nada de tarefa doméstica aqui.
+//   • limpeza da casa é o MÓDULO IRMÃO (`housecleaning/`). Nada de tarefa doméstica aqui.
 //
 // ---------------------------------------------------------------------------
 // A REGRA QUE ORGANIZA O ARQUIVO: cada eixo é dono de metade, e eles NUNCA se multiplicam.
@@ -32,17 +32,36 @@
 // concorda com o SUJEITO, então "я допомогла" denunciaria o gênero de quem CUIDA —
 // um terceiro eixo que não pode entrar. Por isso o lado "falar com ela" evita passado
 // e condicional de 1ª pessoa em `uk` (usa-se "Вам допомогти?", infinitivo). Pelo mesmo
-// motivo `medTaken` em `uk` é impessoal ("Ранкова таблетка вже випита?") e por isso
-// coincide nos dois tratamentos — junto com `pt`, são os dois únicos idiomas em que a
-// coincidência é aceitável, e há teste garantindo que es/fr/it/lt sempre diferem.
+// motivo `medMorning` e `medNight` em `uk` são impessoais ("Ранкова таблетка вже
+// випита?") e por isso coincidem nos dois tratamentos — é o único idioma em que a
+// coincidência é aceitável, e há teste garantindo que es/fr/it/lt/pt sempre diferem.
+//
+// O PORTUGUÊS TAMBÉM DIFERE, e isso foi uma volta atrás: com o sujeito oculto ("Está
+// com fome?") 15 das 18 falas saíam iguais nos dois lados do seletor "Senhora /
+// Você" — e a linha em português é o que ela LÊ. Ela trocava o seletor, via a lista
+// igual, e achava que o botão não fazia nada. Agora a glosa diz "a senhora" ou
+// "você", que é a tradução fiel de usted/tú. "A senhora" tem gênero, sim, mas é a
+// palavra do próprio seletor ("Você chama ela de… Senhora"): não é um terceiro eixo,
+// é o nome do primeiro.
+//
+// ---------------------------------------------------------------------------
+// NOTA COM DESTINO — nada da Espanha aparece como verdade fora da Espanha
+// ---------------------------------------------------------------------------
+// Quase toda nota fala de UM país: "taca-taca", "la tensión", "el empapador" são da
+// Espanha; "fauteuil roulant" é da França. Para quem está nos Estados Unidos, a nota
+// do andador ensinava que americano diz "taca-taca". Por isso a nota traz `noteIn`, o
+// código do PAÍS de destino em que ela vale, e só aparece lá (`visibleNote`). Nota sem
+// `noteIn` vale em qualquer lugar — e há teste listando quais são, para que ninguém
+// esqueça o campo numa nota nova.
 //
 // ---------------------------------------------------------------------------
 // SEGURANÇA — a regra que decide se o módulo pode existir
 // ---------------------------------------------------------------------------
 // NUNCA nome de medicamento, NUNCA dose, NUNCA quantidade de comprimido. Horário e
 // adesão sim ("a pastilha da manhã"); o resto é a Farmácia. Período do dia, nunca
-// relógio: hora é o módulo Números. O único algarismo permitido no arquivo é o 112,
-// e só dentro de `EMERGENCY`. Há teste varrendo todas as strings dos oito idiomas.
+// relógio: hora é o módulo Números. Os únicos algarismos do arquivo são os números de
+// emergência de cada país (`EMERGENCY_NUMBERS`), FORA das tabelas. Há teste varrendo
+// todas as strings das tabelas nos oito idiomas.
 //
 // ⚠️ CONTEÚDO NÃO REVISADO POR FALANTE NATIVO, e aqui o risco é maior que na
 // Maquiagem: lá errar é constrangimento, aqui é dano. Vale o alerta da seção 10 do
@@ -102,6 +121,20 @@ export const say = (s: Spoken, lang: LangCode, treat: Treat): string => {
 export const tellClause = (t: Told, lang: LangCode, g: Gender): string =>
   (g === 'm' ? t.m?.[lang] : undefined) ?? t.f[lang];
 
+/**
+ * Nota presa a um item. `noteIn` é o código do PAÍS de destino (`targetCountry.code`),
+ * não o do idioma: "taca-taca" é da Espanha, e não do Chile nem da Argentina, que
+ * também falam espanhol. Ausente = a nota vale em qualquer destino.
+ */
+export interface Noted {
+  note?: Text;
+  noteIn?: string;
+}
+
+/** A nota na língua de quem lê — ou `null`, se ela não vale no destino escolhido. */
+export const visibleNote = (item: Noted, targetCode: string, read: LangCode): string | null =>
+  item.note && (!item.noteIn || item.noteIn === targetCode) ? item.note[read] : null;
+
 // ---------------------------------------------------------------------------
 // FALAR COM ELA
 // ---------------------------------------------------------------------------
@@ -111,15 +144,35 @@ export type CareGroup = 'move' | 'hygiene' | 'dress' | 'meal' | 'meds' | 'rest' 
 /** Ordem em que os grupos aparecem na tela. */
 export const CARE_GROUPS: CareGroup[] = ['move', 'hygiene', 'dress', 'meal', 'meds', 'rest', 'comfort', 'outing'];
 
-export interface CareAction {
+export interface CareAction extends Noted {
   key: string;
   group: CareGroup;
-  /** Rótulo curto do botão, na língua de quem lê. */
+  /**
+   * O assunto, em uma ou duas palavras, na língua de quem lê. A TELA NÃO MOSTRA
+   * ISTO: o botão mostra a frase inteira (`buildCareLine`), porque "Fome" podia ser
+   * "estou com fome" e era "Está com fome?" — cada botão era uma surpresa. Fica no
+   * dado como nome curto e estável do item.
+   */
   labels: Text;
   says: Spoken;
-  /** Armadilha, na língua de quem lê. */
+  /** Armadilha, na língua de quem lê. Com `noteIn`, só naquele destino. */
   note?: Text;
 }
+
+/**
+ * A nota das duas perguntas do comprimido. Vale em qualquer destino (sem `noteIn`):
+ * não fala de país nenhum, fala da regra de segurança do módulo.
+ */
+const PILL_NOTE: Text = {
+  es: 'Pregunte por el momento, nunca por la cantidad. El nombre del medicamento y la dosis son cosa del médico y de la farmacia; esta app no entra ahí.',
+  pt: 'Pergunte pelo horário, nunca pela quantidade. Nome do remédio e dose são conversa de médico e de farmácia — o app não entra aí, e é de propósito.',
+  en: 'Ask about timing, never about amount. Drug names and doses belong to the doctor and the pharmacy; this app stays out of it.',
+  fr: "Demandez le moment, jamais la quantité. Le nom du médicament et la dose relèvent du médecin et de la pharmacie ; l'appli n'y touche pas.",
+  it: 'Chieda il momento, mai la quantità. Nome del farmaco e dose sono cosa del medico e della farmacia; qui non si entra.',
+  uk: 'Питайте про час, ніколи про кількість. Назва ліків і доза — справа лікаря й аптеки, і застосунок туди не втручається.',
+  lt: 'Klauskite apie laiką, niekada apie kiekį. Vaisto pavadinimas ir dozė — gydytojo ir vaistinės reikalas.',
+  ar: 'اسألي عن الوقت، لا عن الكمية أبداً. اسم الدواء والجرعة من شأن الطبيب والصيدلية، والتطبيق لا يدخل في ذلك.',
+};
 
 export const CARE_ACTIONS: CareAction[] = [
   {
@@ -147,12 +200,15 @@ export const CARE_ACTIONS: CareAction[] = [
       tu: { es: 'Apóyate en mi brazo.', pt: 'Apoia no meu braço.', fr: 'Appuie-toi sur mon bras.', it: 'Appoggiati al mio braccio.', uk: 'Тримайся за мою руку.', lt: 'Atsiremk į mano ranką.' },
       arM: 'اتكئ على ذراعي.',
     },
+    // Só na Itália: é sobre o italiano. Antes aparecia para quem estava na Espanha,
+    // em palavra de gramática, sobre uma língua que ela não usa.
+    noteIn: 'it',
     note: {
       es: 'En italiano el pronombre cambia de lado: "Si appoggi" con usted, "Appoggiati" con tú. No es una terminación: es otra palabra en otro sitio.',
-      pt: 'Em italiano o pronome troca de lado: "Si appoggi" no formal, "Appoggiati" no informal. Não é só a terminação que muda — é outra palavra em outro lugar da frase.',
+      pt: 'Em italiano a palavrinha muda de lugar: "Si appoggi" para a senhora, "Appoggiati" para você.',
       en: 'In Italian the pronoun moves: "Si appoggi" formally, "Appoggiati" informally. Not just an ending — a different word in a different place.',
       fr: "En italien le pronom change de place : « Si appoggi » au vouvoiement, « Appoggiati » au tutoiement.",
-      it: 'In spagnolo il pronome resta attaccato al verbo in entrambi i casi: "Apóyese", "Apóyate".',
+      it: 'Il pronome cambia posto: "Si appoggi" con il Lei, "Appoggiati" con il tu.',
       uk: 'В італійській займенник змінює місце: «Si appoggi» на «ви», «Appoggiati» на «ти».',
       lt: 'Italų kalboje įvardis keičia vietą: „Si appoggi“ mandagiai, „Appoggiati“ familiariai.',
       ar: 'في الإيطالية يتغير موضع الضمير: «Si appoggi» في المخاطبة الرسمية و«Appoggiati» في غير الرسمية.',
@@ -172,8 +228,8 @@ export const CARE_ACTIONS: CareAction[] = [
       kind: 'treat',
       // uk: infinitivo ("Вам допомогти?") e não "щоб я допомогла" — o passado
       // ucraniano de 1ª pessoa denunciaria o gênero de quem cuida.
-      usted: { es: '¿Quiere que le ayude con la ducha?', pt: 'Quer que eu ajude no banho?', en: 'Would you like help with the shower?', fr: 'Voulez-vous que je vous aide pour la douche ?', it: "Vuole che L'aiuti con la doccia?", uk: 'Вам допомогти з душем?', lt: 'Ar norite pagalbos duše?', ar: 'هل تريدين مساعدة في الاستحمام؟' },
-      tu: { es: '¿Quieres que te ayude con la ducha?', pt: 'Quer que eu ajude no banho?', fr: "Tu veux que je t'aide pour la douche ?", it: 'Vuoi che ti aiuti con la doccia?', uk: 'Тобі допомогти з душем?', lt: 'Ar nori pagalbos duše?' },
+      usted: { es: '¿Quiere que le ayude con la ducha?', pt: 'A senhora quer que eu ajude no banho?', en: 'Would you like help with the shower?', fr: 'Voulez-vous que je vous aide pour la douche ?', it: "Vuole che L'aiuti con la doccia?", uk: 'Вам допомогти з душем?', lt: 'Ar norite pagalbos duše?', ar: 'هل تريدين مساعدة في الاستحمام؟' },
+      tu: { es: '¿Quieres que te ayude con la ducha?', pt: 'Você quer que eu ajude no banho?', fr: "Tu veux que je t'aide pour la douche ?", it: 'Vuoi che ti aiuti con la doccia?', uk: 'Тобі допомогти з душем?', lt: 'Ar nori pagalbos duše?' },
       arM: 'هل تريد مساعدة في الاستحمام؟',
     },
   },
@@ -187,8 +243,8 @@ export const CARE_ACTIONS: CareAction[] = [
     labels: { es: 'La chaqueta', pt: 'O casaco', en: 'The jacket', fr: 'La veste', it: 'La giacca', uk: 'Кофта', lt: 'Striukė', ar: 'السترة' },
     says: {
       kind: 'treat',
-      usted: { es: '¿Quiere ponerse la chaqueta?', pt: 'Quer vestir o casaco?', en: 'Would you like to put on your jacket?', fr: 'Voulez-vous mettre votre veste ?', it: 'Vuole mettersi la giacca?', uk: 'Хочете вдягнути кофту?', lt: 'Ar norite apsivilkti striukę?', ar: 'هل تريدين ارتداء السترة؟' },
-      tu: { es: '¿Quieres ponerte la chaqueta?', pt: 'Quer vestir o casaco?', fr: 'Tu veux mettre ta veste ?', it: 'Vuoi metterti la giacca?', uk: 'Хочеш вдягнути кофту?', lt: 'Ar nori apsivilkti striukę?' },
+      usted: { es: '¿Quiere ponerse la chaqueta?', pt: 'A senhora quer vestir o casaco?', en: 'Would you like to put on your jacket?', fr: 'Voulez-vous mettre votre veste ?', it: 'Vuole mettersi la giacca?', uk: 'Хочете вдягнути кофту?', lt: 'Ar norite apsivilkti striukę?', ar: 'هل تريدين ارتداء السترة؟' },
+      tu: { es: '¿Quieres ponerte la chaqueta?', pt: 'Você quer vestir o casaco?', fr: 'Tu veux mettre ta veste ?', it: 'Vuoi metterti la giacca?', uk: 'Хочеш вдягнути кофту?', lt: 'Ar nori apsivilkti striukę?' },
       arM: 'هل تريد ارتداء السترة؟',
     },
   },
@@ -200,8 +256,8 @@ export const CARE_ACTIONS: CareAction[] = [
       // "¿Tiene hambre?" e não "¿Está hambriento?": substantivo não concorda com ela.
       // Em uk e lt o mesmo motivo obriga "хочете їсти" / "norite valgyti", porque
       // "голодний/голодна" e "alkanas/alkana" flexionam.
-      usted: { es: '¿Tiene hambre?', pt: 'Está com fome?', en: 'Are you hungry?', fr: 'Avez-vous faim ?', it: 'Ha fame?', uk: 'Ви хочете їсти?', lt: 'Ar norite valgyti?', ar: 'هل تشعرين بالجوع؟' },
-      tu: { es: '¿Tienes hambre?', pt: 'Está com fome?', fr: 'Tu as faim ?', it: 'Hai fame?', uk: 'Ти хочеш їсти?', lt: 'Ar nori valgyti?' },
+      usted: { es: '¿Tiene hambre?', pt: 'A senhora está com fome?', en: 'Are you hungry?', fr: 'Avez-vous faim ?', it: 'Ha fame?', uk: 'Ви хочете їсти?', lt: 'Ar norite valgyti?', ar: 'هل تشعرين بالجوع؟' },
+      tu: { es: '¿Tienes hambre?', pt: 'Você está com fome?', fr: 'Tu as faim ?', it: 'Hai fame?', uk: 'Ти хочеш їсти?', lt: 'Ar nori valgyti?' },
       arM: 'هل تشعر بالجوع؟',
     },
   },
@@ -210,46 +266,54 @@ export const CARE_ACTIONS: CareAction[] = [
     labels: { es: 'Agua', pt: 'Água', en: 'Water', fr: 'Eau', it: 'Acqua', uk: 'Вода', lt: 'Vanduo', ar: 'ماء' },
     says: {
       kind: 'treat',
-      usted: { es: 'Le traigo un vaso de agua.', pt: 'Vou trazer um copo de água.', en: "I'll bring you a glass of water.", fr: "Je vous apporte un verre d'eau.", it: "Le porto un bicchiere d'acqua.", uk: 'Я принесу вам склянку води.', lt: 'Atnešiu jums stiklinę vandens.', ar: 'سأحضر لكِ كوب ماء.' },
-      tu: { es: 'Te traigo un vaso de agua.', pt: 'Vou trazer um copo de água.', fr: "Je t'apporte un verre d'eau.", it: "Ti porto un bicchiere d'acqua.", uk: 'Я принесу тобі склянку води.', lt: 'Atnešiu tau stiklinę vandens.' },
+      usted: { es: 'Le traigo un vaso de agua.', pt: 'Vou trazer um copo de água para a senhora.', en: "I'll bring you a glass of water.", fr: "Je vous apporte un verre d'eau.", it: "Le porto un bicchiere d'acqua.", uk: 'Я принесу вам склянку води.', lt: 'Atnešiu jums stiklinę vandens.', ar: 'سأحضر لكِ كوب ماء.' },
+      tu: { es: 'Te traigo un vaso de agua.', pt: 'Vou trazer um copo de água para você.', fr: "Je t'apporte un verre d'eau.", it: "Ti porto un bicchiere d'acqua.", uk: 'Я принесу тобі склянку води.', lt: 'Atnešiu tau stiklinę vandens.' },
       arM: 'سأحضر لك كوب ماء.',
     },
   },
+  // O COMPRIMIDO. Eram dois botões com um detalhe fixo escondido: "O comprimido"
+  // perguntava sempre pelo da MANHÃ, e "Hora do comprimido" anunciava sempre o da
+  // NOITE — às oito da manhã inclusive. Agora cada período tem a sua pergunta, e o
+  // anúncio não traz período nenhum: quem está ali já sabe que horas são.
+  // Período do dia, nunca relógio: hora é o módulo Números.
   {
-    key: 'medTaken', group: 'meds',
-    labels: { es: 'La pastilla', pt: 'O comprimido', en: 'The pill', fr: 'Le cachet', it: 'La pastiglia', uk: 'Таблетка', lt: 'Tabletė', ar: 'الحبة' },
+    key: 'medMorning', group: 'meds',
+    labels: { es: 'Pastilla de la mañana', pt: 'Comprimido da manhã', en: 'Morning pill', fr: 'Cachet du matin', it: 'Pastiglia del mattino', uk: 'Ранкова таблетка', lt: 'Rytinė tabletė', ar: 'حبة الصباح' },
     says: {
       kind: 'treat',
       // uk impessoal nas duas formas: o passado ucraniano concorda com quem ouve
       // ("випив"/"випила") e aqui não existe seletor de gênero. Ver o cabeçalho.
-      usted: { es: '¿Ya se ha tomado la pastilla de la mañana?', pt: 'Já tomou o comprimido da manhã?', en: 'Have you taken your morning pill?', fr: 'Avez-vous pris votre cachet du matin ?', it: 'Ha già preso la pastiglia del mattino?', uk: 'Ранкова таблетка вже випита?', lt: 'Ar jau išgėrėte rytinę tabletę?', ar: 'هل أخذتِ حبة الصباح؟' },
-      tu: { es: '¿Ya te has tomado la pastilla de la mañana?', pt: 'Já tomou o comprimido da manhã?', fr: 'Tu as pris ton cachet du matin ?', it: 'Hai già preso la pastiglia del mattino?', uk: 'Ранкова таблетка вже випита?', lt: 'Ar jau išgėrei rytinę tabletę?' },
+      usted: { es: '¿Ya se ha tomado la pastilla de la mañana?', pt: 'A senhora já tomou o comprimido da manhã?', en: 'Have you taken your morning pill?', fr: 'Avez-vous pris votre cachet du matin ?', it: 'Ha già preso la pastiglia del mattino?', uk: 'Ранкова таблетка вже випита?', lt: 'Ar jau išgėrėte rytinę tabletę?', ar: 'هل أخذتِ حبة الصباح؟' },
+      tu: { es: '¿Ya te has tomado la pastilla de la mañana?', pt: 'Você já tomou o comprimido da manhã?', fr: 'Tu as pris ton cachet du matin ?', it: 'Hai già preso la pastiglia del mattino?', uk: 'Ранкова таблетка вже випита?', lt: 'Ar jau išgėrei rytinę tabletę?' },
       arM: 'هل أخذتَ حبة الصباح؟',
     },
-    note: {
-      es: 'Pregunte por el momento, nunca por la cantidad. El nombre del medicamento y la dosis son cosa del médico y de la farmacia; esta app no entra ahí.',
-      pt: 'Pergunte pelo horário, nunca pela quantidade. Nome do remédio e dose são conversa de médico e de farmácia — o app não entra aí, e é de propósito.',
-      en: 'Ask about timing, never about amount. Drug names and doses belong to the doctor and the pharmacy; this app stays out of it.',
-      fr: "Demandez le moment, jamais la quantité. Le nom du médicament et la dose relèvent du médecin et de la pharmacie ; l'appli n'y touche pas.",
-      it: 'Chieda il momento, mai la quantità. Nome del farmaco e dose sono cosa del medico e della farmacia; qui non si entra.',
-      uk: 'Питайте про час, ніколи про кількість. Назва ліків і доза — справа лікаря й аптеки, і застосунок туди не втручається.',
-      lt: 'Klauskite apie laiką, niekada apie kiekį. Vaisto pavadinimas ir dozė — gydytojo ir vaistinės reikalas.',
-      ar: 'اسألي عن الوقت، لا عن الكمية أبداً. اسم الدواء والجرعة من شأن الطبيب والصيدلية، والتطبيق لا يدخل في ذلك.',
+    note: PILL_NOTE,
+  },
+  {
+    key: 'medNight', group: 'meds',
+    labels: { es: 'Pastilla de la noche', pt: 'Comprimido da noite', en: 'Evening pill', fr: 'Cachet du soir', it: 'Pastiglia della sera', uk: 'Вечірня таблетка', lt: 'Vakarinė tabletė', ar: 'حبة المساء' },
+    says: {
+      kind: 'treat',
+      usted: { es: '¿Ya se ha tomado la pastilla de la noche?', pt: 'A senhora já tomou o comprimido da noite?', en: 'Have you taken your evening pill?', fr: 'Avez-vous pris votre cachet du soir ?', it: 'Ha già preso la pastiglia della sera?', uk: 'Вечірня таблетка вже випита?', lt: 'Ar jau išgėrėte vakarinę tabletę?', ar: 'هل أخذتِ حبة المساء؟' },
+      tu: { es: '¿Ya te has tomado la pastilla de la noche?', pt: 'Você já tomou o comprimido da noite?', fr: 'Tu as pris ton cachet du soir ?', it: 'Hai già preso la pastiglia della sera?', uk: 'Вечірня таблетка вже випита?', lt: 'Ar jau išgėrei vakarinę tabletę?' },
+      arM: 'هل أخذتَ حبة المساء؟',
     },
+    note: PILL_NOTE,
   },
   {
     key: 'medTime', group: 'meds',
     labels: { es: 'Hora de la pastilla', pt: 'Hora do comprimido', en: 'Pill time', fr: "L'heure du cachet", it: 'Ora della pastiglia', uk: 'Час таблетки', lt: 'Tabletės laikas', ar: 'وقت الحبة' },
-    // Período do dia, nunca relógio: hora é o módulo Números.
-    says: { kind: 'same', text: { es: 'Es la hora de la pastilla de la noche.', pt: 'Está na hora do comprimido da noite.', en: "It's time for the evening pill.", fr: "C'est l'heure du cachet du soir.", it: "È l'ora della pastiglia della sera.", uk: 'Час вечірньої таблетки.', lt: 'Metas vakarinei tabletei.', ar: 'حان وقت حبة المساء.' } },
+    // Sem período, de propósito (ver o comentário do grupo). uk e lt com infinitivo:
+    // "приймати" / "išgerti" não têm sujeito, logo não têm gênero.
+    says: { kind: 'same', text: { es: 'Es la hora de la pastilla.', pt: 'Está na hora do comprimido.', en: "It's time for your pill.", fr: "C'est l'heure du cachet.", it: "È l'ora della pastiglia.", uk: 'Час приймати таблетку.', lt: 'Metas išgerti tabletę.', ar: 'حان وقت الحبة.' } },
   },
   {
     key: 'sleepy', group: 'rest',
     labels: { es: 'Sueño', pt: 'Sono', en: 'Sleepy', fr: 'Sommeil', it: 'Sonno', uk: 'Сон', lt: 'Miegas', ar: 'النعاس' },
     says: {
       kind: 'treat',
-      usted: { es: '¿Tiene sueño?', pt: 'Está com sono?', en: 'Are you sleepy?', fr: 'Avez-vous sommeil ?', it: 'Ha sonno?', uk: 'Ви хочете спати?', lt: 'Ar norite miego?', ar: 'هل تشعرين بالنعاس؟' },
-      tu: { es: '¿Tienes sueño?', pt: 'Está com sono?', fr: 'Tu as sommeil ?', it: 'Hai sonno?', uk: 'Ти хочеш спати?', lt: 'Ar nori miego?' },
+      usted: { es: '¿Tiene sueño?', pt: 'A senhora está com sono?', en: 'Are you sleepy?', fr: 'Avez-vous sommeil ?', it: 'Ha sonno?', uk: 'Ви хочете спати?', lt: 'Ar norite miego?', ar: 'هل تشعرين بالنعاس؟' },
+      tu: { es: '¿Tienes sueño?', pt: 'Você está com sono?', fr: 'Tu as sommeil ?', it: 'Hai sonno?', uk: 'Ти хочеш спати?', lt: 'Ar nori miego?' },
       arM: 'هل تشعر بالنعاس؟',
     },
   },
@@ -258,8 +322,8 @@ export const CARE_ACTIONS: CareAction[] = [
     labels: { es: 'Echarse', pt: 'Deitar', en: 'Lie down', fr: "S'allonger", it: 'Sdraiarsi', uk: 'Лягти', lt: 'Atsigulti', ar: 'الاستلقاء' },
     says: {
       kind: 'treat',
-      usted: { es: '¿Quiere echarse un rato?', pt: 'Quer deitar um pouco?', en: 'Would you like to lie down for a while?', fr: 'Voulez-vous vous allonger un moment ?', it: 'Vuole sdraiarsi un momento?', uk: 'Хочете трохи полежати?', lt: 'Ar norite šiek tiek pagulėti?', ar: 'هل تريدين الاستلقاء قليلاً؟' },
-      tu: { es: '¿Quieres echarte un rato?', pt: 'Quer deitar um pouco?', fr: "Tu veux t'allonger un moment ?", it: 'Vuoi sdraiarti un momento?', uk: 'Хочеш трохи полежати?', lt: 'Ar nori šiek tiek pagulėti?' },
+      usted: { es: '¿Quiere echarse un rato?', pt: 'A senhora quer deitar um pouco?', en: 'Would you like to lie down for a while?', fr: 'Voulez-vous vous allonger un moment ?', it: 'Vuole sdraiarsi un momento?', uk: 'Хочете трохи полежати?', lt: 'Ar norite šiek tiek pagulėti?', ar: 'هل تريدين الاستلقاء قليلاً؟' },
+      tu: { es: '¿Quieres echarte un rato?', pt: 'Você quer deitar um pouco?', fr: "Tu veux t'allonger un moment ?", it: 'Vuoi sdraiarti un momento?', uk: 'Хочеш трохи полежати?', lt: 'Ar nori šiek tiek pagulėti?' },
       arM: 'هل تريد الاستلقاء قليلاً؟',
     },
   },
@@ -268,8 +332,8 @@ export const CARE_ACTIONS: CareAction[] = [
     labels: { es: 'Frío', pt: 'Frio', en: 'Cold', fr: 'Froid', it: 'Freddo', uk: 'Холод', lt: 'Šalta', ar: 'البرد' },
     says: {
       kind: 'treat',
-      usted: { es: '¿Tiene frío?', pt: 'Está com frio?', en: 'Are you cold?', fr: 'Avez-vous froid ?', it: 'Ha freddo?', uk: 'Вам холодно?', lt: 'Ar jums šalta?', ar: 'هل تشعرين بالبرد؟' },
-      tu: { es: '¿Tienes frío?', pt: 'Está com frio?', fr: 'Tu as froid ?', it: 'Hai freddo?', uk: 'Тобі холодно?', lt: 'Ar tau šalta?' },
+      usted: { es: '¿Tiene frío?', pt: 'A senhora está com frio?', en: 'Are you cold?', fr: 'Avez-vous froid ?', it: 'Ha freddo?', uk: 'Вам холодно?', lt: 'Ar jums šalta?', ar: 'هل تشعرين بالبرد؟' },
+      tu: { es: '¿Tienes frío?', pt: 'Você está com frio?', fr: 'Tu as froid ?', it: 'Hai freddo?', uk: 'Тобі холодно?', lt: 'Ar tau šalta?' },
       arM: 'هل تشعر بالبرد؟',
     },
   },
@@ -278,8 +342,8 @@ export const CARE_ACTIONS: CareAction[] = [
     labels: { es: 'Dolor', pt: 'Dor', en: 'Pain', fr: 'Douleur', it: 'Dolore', uk: 'Біль', lt: 'Skausmas', ar: 'الألم' },
     says: {
       kind: 'treat',
-      usted: { es: '¿Le duele algo?', pt: 'Está doendo alguma coisa?', en: 'Does anything hurt?', fr: 'Avez-vous mal quelque part ?', it: 'Le fa male qualcosa?', uk: 'Вас щось болить?', lt: 'Ar jums kas nors skauda?', ar: 'هل يؤلمكِ شيء؟' },
-      tu: { es: '¿Te duele algo?', pt: 'Está doendo alguma coisa?', fr: 'Tu as mal quelque part ?', it: 'Ti fa male qualcosa?', uk: 'Тебе щось болить?', lt: 'Ar tau kas nors skauda?' },
+      usted: { es: '¿Le duele algo?', pt: 'A senhora está com alguma dor?', en: 'Does anything hurt?', fr: 'Avez-vous mal quelque part ?', it: 'Le fa male qualcosa?', uk: 'Вас щось болить?', lt: 'Ar jums kas nors skauda?', ar: 'هل يؤلمكِ شيء؟' },
+      tu: { es: '¿Te duele algo?', pt: 'Você está com alguma dor?', fr: 'Tu as mal quelque part ?', it: 'Ti fa male qualcosa?', uk: 'Тебе щось болить?', lt: 'Ar tau kas nors skauda?' },
       arM: 'هل يؤلمك شيء؟',
     },
   },
@@ -298,8 +362,8 @@ export const CARE_ACTIONS: CareAction[] = [
     labels: { es: 'Pasear', pt: 'Passear', en: 'Go for a walk', fr: 'Se promener', it: 'Passeggiare', uk: 'Прогулянка', lt: 'Pasivaikščiojimas', ar: 'النزهة' },
     says: {
       kind: 'treat',
-      usted: { es: '¿Quiere salir a dar un paseo?', pt: 'Quer sair para dar uma volta?', en: 'Would you like to go for a walk?', fr: 'Voulez-vous sortir vous promener ?', it: 'Vuole uscire a fare due passi?', uk: 'Хочете вийти прогулятися?', lt: 'Ar norite išeiti pasivaikščioti?', ar: 'هل تريدين الخروج للتنزه؟' },
-      tu: { es: '¿Quieres salir a dar un paseo?', pt: 'Quer sair para dar uma volta?', fr: 'Tu veux sortir te promener ?', it: 'Vuoi uscire a fare due passi?', uk: 'Хочеш вийти прогулятися?', lt: 'Ar nori išeiti pasivaikščioti?' },
+      usted: { es: '¿Quiere salir a dar un paseo?', pt: 'A senhora quer sair para dar uma volta?', en: 'Would you like to go for a walk?', fr: 'Voulez-vous sortir vous promener ?', it: 'Vuole uscire a fare due passi?', uk: 'Хочете вийти прогулятися?', lt: 'Ar norite išeiti pasivaikščioti?', ar: 'هل تريدين الخروج للتنزه؟' },
+      tu: { es: '¿Quieres salir a dar un paseo?', pt: 'Você quer sair para dar uma volta?', fr: 'Tu veux sortir te promener ?', it: 'Vuoi uscire a fare due passi?', uk: 'Хочеш вийти прогулятися?', lt: 'Ar nori išeiti pasivaikščioti?' },
       arM: 'هل تريد الخروج للتنزه؟',
     },
   },
@@ -319,8 +383,20 @@ export const REPORT_GROUPS: ReportGroup[] = ['meal', 'rest', 'body', 'mood', 'in
 export interface ReportEvent {
   key: string;
   group: ReportGroup;
+  /**
+   * O assunto, em substantivo. A TELA NÃO MOSTRA ISTO: o botão mostra a própria
+   * oração (`reportLabel`), que segue o seletor de gênero — "Esteve tranquila" vira
+   * "Esteve tranquilo" junto com o cartão. O assunto fica no dado como nome estável.
+   */
   labels: Text;
   says: Told;
+  /**
+   * O relato que não aceita marcador de tempo. "Creo que habría que llamar al
+   * médico" é uma recomendação, e com o "Hoje" que o seletor traz marcado saía
+   * "Hoy creo que…" — ou pior, "Desde ayer creo que…", como se a opinião dela
+   * tivesse data. `buildReport` ignora o marcador, e a tela desliga os botões.
+   */
+  semTempo?: true;
 }
 
 export const REPORT_EVENTS: ReportEvent[] = [
@@ -374,10 +450,11 @@ export const REPORT_EVENTS: ReportEvent[] = [
   },
   {
     key: 'walked', group: 'body',
-    labels: { es: 'Paseo por casa', pt: 'Caminhada em casa', en: 'A short walk', fr: 'Petite marche', it: 'Due passi in casa', uk: 'Коротка прогулянка', lt: 'Trumpas pasivaikščiojimas', ar: 'مشي قصير' },
+    labels: { es: 'Un paseo', pt: 'Caminhada', en: 'A short walk', fr: 'Petite marche', it: 'Due passi', uk: 'Коротка прогулянка', lt: 'Trumpas pasivaikščiojimas', ar: 'مشي قصير' },
+    // Sem lugar: dizia sempre "pelo corredor", e o botão não tinha como trocar.
     says: {
-      f: { es: 'ha caminado un poco por el pasillo', pt: 'caminhou um pouco pelo corredor', en: 'she walked a little in the hallway', fr: 'elle a marché un peu dans le couloir', it: "ha camminato un po' in corridoio", uk: 'вона трохи пройшлася коридором', lt: 'ji šiek tiek pavaikščiojo koridoriuje', ar: 'مشت قليلاً في الممر' },
-      m: { en: 'he walked a little in the hallway', fr: 'il a marché un peu dans le couloir', uk: 'він трохи пройшовся коридором', lt: 'jis šiek tiek pavaikščiojo koridoriuje', ar: 'مشى قليلاً في الممر' },
+      f: { es: 'ha caminado un poco', pt: 'caminhou um pouco', en: 'she walked a little', fr: 'elle a marché un peu', it: "ha camminato un po'", uk: 'вона трохи пройшлася', lt: 'ji šiek tiek pavaikščiojo', ar: 'مشت قليلاً' },
+      m: { en: 'he walked a little', fr: 'il a marché un peu', uk: 'він трохи пройшовся', lt: 'jis šiek tiek pavaikščiojo', ar: 'مشى قليلاً' },
     },
   },
   {
@@ -402,25 +479,30 @@ export const REPORT_EVENTS: ReportEvent[] = [
     key: 'fell', group: 'incident',
     labels: { es: 'Caída', pt: 'Queda', en: 'A fall', fr: 'Chute', it: 'Caduta', uk: 'Падіння', lt: 'Griuvimas', ar: 'سقوط' },
     says: {
+      // SEM LUGAR, e isto é segurança: dizia sempre "caiu no banheiro". Se ela caiu no
+      // quarto, a cuidadora passava a informação errada à família e, dali, ao médico.
       // O `у`/`в` protético do ucraniano segue o som anterior: depois de "вона"
       // (vogal) vem "впала", depois de "він" (consoante) vem "упав". As duas formas
       // são escritas à mão justamente porque nenhuma regra acerta isso sozinha.
-      f: { es: 'se ha caído en el baño', pt: 'caiu no banheiro', en: 'she fell in the bathroom', fr: 'elle est tombée dans la salle de bain', it: 'è caduta in bagno', uk: 'вона впала у ванній', lt: 'ji nukrito vonioje', ar: 'سقطت في الحمام' },
-      m: { en: 'he fell in the bathroom', fr: 'il est tombé dans la salle de bain', it: 'è caduto in bagno', uk: 'він упав у ванній', lt: 'jis nukrito vonioje', ar: 'سقط في الحمام' },
+      // lt: "pargriuvo" (caiu no chão, de pé), e não "nukrito" (caiu de cima de algo).
+      f: { es: 'se ha caído', pt: 'caiu', en: 'she fell', fr: 'elle est tombée', it: 'è caduta', uk: 'вона впала', lt: 'ji pargriuvo', ar: 'سقطت' },
+      m: { en: 'he fell', fr: 'il est tombé', it: 'è caduto', uk: 'він упав', lt: 'jis pargriuvo', ar: 'سقط' },
     },
   },
   {
     key: 'leak', group: 'incident',
-    labels: { es: 'Escape', pt: 'Escape', en: 'Accident', fr: 'Fuite', it: 'Incidente', uk: 'Конфуз', lt: 'Nelaimė', ar: 'تسرب' },
+    labels: { es: 'Escape', pt: 'Xixi ou cocô na roupa', en: 'Accident', fr: 'Fuite', it: 'Incidente', uk: 'Конфуз', lt: 'Nelaimė', ar: 'تسرب' },
     // Sem `m` de propósito, e o motivo muda de língua para língua: em es/pt/it o
-    // verbo não concorda com ninguém (`ha tenido`, `houve`), e nas outras a
+    // verbo não concorda com ninguém (`ha tenido`, `teve`), e nas outras a
     // construção é impessoal de raiz. O resultado é o mesmo: uma forma só.
+    // pt: "houve um escape" ninguém diz no Brasil para xixi na roupa — "escape" é
+    // cano de escape ou fuga. O parêntese diz a coisa como ela diria.
     says: {
-      f: { es: 'ha tenido un escape', pt: 'houve um escape', en: 'there was an accident', fr: 'il y a eu une fuite', it: "c'è stato un incidente", uk: 'стався конфуз', lt: 'įvyko nelaimė', ar: 'حدث تسرب' },
+      f: { es: 'ha tenido un escape', pt: 'teve um escape (fez na roupa)', en: 'there was an accident', fr: 'il y a eu une fuite', it: "c'è stato un incidente", uk: 'стався конфуз', lt: 'įvyko nelaimė', ar: 'حدث تسرب' },
     },
   },
   {
-    key: 'callDoctor', group: 'incident',
+    key: 'callDoctor', group: 'incident', semTempo: true,
     labels: { es: 'Llamar al médico', pt: 'Chamar o médico', en: 'Call the doctor', fr: 'Appeler le médecin', it: 'Chiamare il medico', uk: 'Викликати лікаря', lt: 'Kviesti gydytoją', ar: 'استدعاء الطبيب' },
     says: {
       f: { es: 'creo que habría que llamar al médico', pt: 'acho que seria bom chamar o médico', en: 'I think we should call the doctor', fr: "je pense qu'il faudrait appeler le médecin", it: 'credo che bisognerebbe chiamare il medico', uk: 'думаю, треба викликати лікаря', lt: 'manau, reikėtų kviesti gydytoją', ar: 'أعتقد أنه ينبغي استدعاء الطبيب' },
@@ -458,7 +540,7 @@ export type ToolGroup = 'mobility' | 'bed' | 'health' | 'bath';
 
 export const TOOL_GROUPS: ToolGroup[] = ['mobility', 'bed', 'health', 'bath'];
 
-export interface CareTool {
+export interface CareTool extends Noted {
   key: string;
   group: ToolGroup;
   /** Nominativo / definido. É o rótulo, e o que o quadro de preço usa. */
@@ -469,20 +551,21 @@ export interface CareTool {
   gen?: { uk?: string; lt?: string };
   /** Idiomas em que o objeto é PLURAL. Marcado só onde for; o resto é singular. */
   num?: Partial<Record<LangCode, 'pl'>>;
-  /** Armadilha de nome, na língua de quem lê. */
+  /** Armadilha de nome, na língua de quem lê. Com `noteIn`, só naquele destino. */
   note?: Text;
 }
 
 export const CARE_TOOLS: CareTool[] = [
   {
     key: 'walker', group: 'mobility',
-    names: { es: 'el andador', pt: 'o andador', en: 'the walking frame', fr: 'le déambulateur', it: 'il deambulatore', uk: 'ходунки', lt: 'vaikštynė', ar: 'مشاية' },
-    askFor: { es: 'un andador', pt: 'um andador', en: 'a walking frame', fr: 'un déambulateur', it: 'un deambulatore', uk: 'ходунки', lt: 'vaikštynę', ar: 'مشاية' },
+    names: { es: 'el andador', pt: 'o andador', en: 'the walker', fr: 'le déambulateur', it: 'il deambulatore', uk: 'ходунки', lt: 'vaikštynė', ar: 'مشاية' },
+    askFor: { es: 'un andador', pt: 'um andador', en: 'a walker', fr: 'un déambulateur', it: 'un deambulatore', uk: 'ходунки', lt: 'vaikštynę', ar: 'مشاية' },
     gen: { uk: 'ходунків', lt: 'vaikštynės' },
     num: { uk: 'pl' },
+    noteIn: 'es',
     note: {
       es: 'En casa mucha gente dice "taca-taca". En la ortopedia y en el médico la palabra es "andador".',
-      pt: 'Em casa muita gente diz "taca-taca", mas quem trabalha na ortopedia e o médico usam "andador". Vale saber as duas.',
+      pt: 'Na Espanha, em casa muita gente diz "taca-taca", mas quem trabalha na ortopedia e o médico usam "andador". Vale saber as duas.',
       en: 'At home many people say "taca-taca" in Spain. At the orthopaedic shop and the doctor, the word is "andador".',
       fr: "En Espagne, beaucoup disent « taca-taca » à la maison ; chez l'orthopédiste, c'est « andador ».",
       it: 'In Spagna in casa molti dicono "taca-taca"; in ortopedia si dice "andador".',
@@ -496,6 +579,8 @@ export const CARE_TOOLS: CareTool[] = [
     names: { es: 'la silla de ruedas', pt: 'a cadeira de rodas', en: 'the wheelchair', fr: 'le fauteuil roulant', it: 'la sedia a rotelle', uk: 'візок', lt: 'vežimėlis', ar: 'كرسي متحرك' },
     askFor: { es: 'una silla de ruedas', pt: 'uma cadeira de rodas', en: 'a wheelchair', fr: 'un fauteuil roulant', it: 'una sedia a rotelle', uk: 'візок', lt: 'vežimėlį', ar: 'كرسي متحرك' },
     gen: { uk: 'візка', lt: 'vežimėlio' },
+    // Só na França: é sobre o francês.
+    noteIn: 'fr',
     note: {
       es: 'En francés es "fauteuil roulant", nunca "chaise roulante".',
       pt: 'Em francês é "fauteuil roulant", nunca "chaise roulante" — a tradução direta de "cadeira" não funciona aqui.',
@@ -509,9 +594,10 @@ export const CARE_TOOLS: CareTool[] = [
   },
   {
     key: 'cane', group: 'mobility',
-    names: { es: 'el bastón', pt: 'a bengala', en: 'the walking stick', fr: 'la canne', it: 'il bastone', uk: 'палиця', lt: 'lazda', ar: 'عصا' },
-    askFor: { es: 'un bastón', pt: 'uma bengala', en: 'a walking stick', fr: 'une canne', it: 'un bastone', uk: 'палицю', lt: 'lazdą', ar: 'عصا' },
+    names: { es: 'el bastón', pt: 'a bengala', en: 'the cane', fr: 'la canne', it: 'il bastone', uk: 'палиця', lt: 'lazda', ar: 'عصا' },
+    askFor: { es: 'un bastón', pt: 'uma bengala', en: 'a cane', fr: 'une canne', it: 'un bastone', uk: 'палицю', lt: 'lazdą', ar: 'عصا' },
     gen: { uk: 'палиці', lt: 'lazdos' },
+    noteIn: 'es',
     note: {
       es: 'En portugués "bengala" es el bastón; en español "bengala" es fuego artificial de mano. El apoyo para andar es "el bastón".',
       pt: 'Cuidado: "bengala" em espanhol é fogo de artifício de mão. O apoio de andar é "el bastón" — pedir "una bengala" na ortopedia dá confusão.',
@@ -528,9 +614,10 @@ export const CARE_TOOLS: CareTool[] = [
     names: { es: 'el pasamanos', pt: 'o corrimão', en: 'the handrail', fr: 'la rampe', it: 'il corrimano', uk: 'поручень', lt: 'turėklas', ar: 'درابزين' },
     askFor: { es: 'un pasamanos', pt: 'um corrimão', en: 'a handrail', fr: 'une rampe', it: 'un corrimano', uk: 'поручень', lt: 'turėklą', ar: 'درابزين' },
     gen: { uk: 'поручня', lt: 'turėklo' },
+    noteIn: 'es',
     note: {
       es: 'Termina en -s y aun así es singular: "el pasamanos", "cuánto cuesta", nunca "cuestan".',
-      pt: 'Termina em -s e mesmo assim é singular: "el pasamanos", "¿cuánto cuesta?", nunca "cuestan". A terminação engana.',
+      pt: 'Termina em -s, mas é um só: "el pasamanos". Pergunte "¿cuánto cuesta?", e não "cuestan".',
       en: 'It ends in -s but is singular: "el pasamanos", "cuánto cuesta", never "cuestan".',
       fr: "Se termine par -s mais reste singulier : « el pasamanos », « cuánto cuesta ».",
       it: 'Finisce in -s ma è singolare: "el pasamanos", "cuánto cuesta", mai "cuestan".',
@@ -541,12 +628,14 @@ export const CARE_TOOLS: CareTool[] = [
   },
   {
     key: 'bedPad', group: 'bed',
-    names: { es: 'el empapador', pt: 'o resguardo de cama', en: 'the bed pad', fr: "l'alèse", it: 'la traversa', uk: 'пелюшка', lt: 'paklotas', ar: 'واقي الفراش' },
-    askFor: { es: 'un empapador', pt: 'um resguardo de cama', en: 'a bed pad', fr: 'une alèse', it: 'una traversa', uk: 'пелюшку', lt: 'paklotą', ar: 'واقي فراش' },
+    // pt: "resguardo de cama" soa a Portugal, e a própria nota explicava com "forro".
+    names: { es: 'el empapador', pt: 'o forro de cama descartável', en: 'the bed pad', fr: "l'alèse", it: 'la traversa', uk: 'пелюшка', lt: 'paklotas', ar: 'واقي الفراش' },
+    askFor: { es: 'un empapador', pt: 'um forro de cama descartável', en: 'a bed pad', fr: 'une alèse', it: 'una traversa', uk: 'пелюшку', lt: 'paklotą', ar: 'واقي فراش' },
     gen: { uk: 'пелюшки', lt: 'pakloto' },
+    noteIn: 'es',
     note: {
       es: '"Resguardo" en español es el recibo de una compra. El protector de cama es "el empapador".',
-      pt: 'Cuidado: "resguardo" em espanhol é recibo, comprovante. O forro de cama é "el empapador" — pedir "un resguardo" na farmácia devolve um papel.',
+      pt: 'O forro de cama descartável é "el empapador". Não peça "un resguardo": em espanhol isso é recibo.',
       en: 'Spanish "resguardo" means a receipt. The bed protector is "el empapador".',
       fr: "En espagnol « resguardo » veut dire reçu. L'alèse se dit « el empapador ».",
       it: 'In spagnolo "resguardo" è la ricevuta. La traversa è "el empapador".',
@@ -566,9 +655,11 @@ export const CARE_TOOLS: CareTool[] = [
     names: { es: 'la cuña', pt: 'a comadre', en: 'the bedpan', fr: 'le bassin', it: 'la padella', uk: 'судно', lt: 'basonas', ar: 'قصرية' },
     askFor: { es: 'una cuña', pt: 'uma comadre', en: 'a bedpan', fr: 'un bassin', it: 'una padella', uk: 'судно', lt: 'basoną', ar: 'قصرية' },
     gen: { uk: 'судна', lt: 'basono' },
+    // Só na Espanha: é sobre a farmácia de lá, e cita "el empapador".
+    noteIn: 'es',
     note: {
       es: 'La cuña y el empapador se compran en la farmacia, en el mostrador y sin receta. No hace falta pedirlos al médico.',
-      pt: 'A comadre e o resguardo se compram na farmácia, no balcão e sem receita — não precisa de pedido médico, e a farmácia do bairro costuma ter.',
+      pt: 'Na Espanha, a comadre e o forro de cama descartável se compram na farmácia, no balcão e sem receita — não precisa de pedido médico, e a farmácia do bairro costuma ter.',
       en: 'The bedpan and the bed pad are bought at the pharmacy counter, without a prescription.',
       fr: "Le bassin et l'alèse s'achètent en pharmacie, au comptoir et sans ordonnance.",
       it: 'La padella e la traversa si comprano in farmacia, al banco e senza ricetta.',
@@ -583,9 +674,10 @@ export const CARE_TOOLS: CareTool[] = [
     askFor: { es: 'un absorbente', pt: 'uma fralda geriátrica', en: 'an incontinence pad', fr: 'une protection', it: 'un pannolone', uk: 'підгузок', lt: 'sauskelnes', ar: 'حفاض' },
     gen: { uk: 'підгузка', lt: 'sauskelnių' },
     num: { lt: 'pl' },
+    noteIn: 'es',
     note: {
       es: 'En la farmacia la palabra es "el absorbente", no "pañal", que hace pensar en bebé. Se pide por talla y por absorción — día, noche, súper —, nunca por marca.',
-      pt: 'Na farmácia a palavra é "el absorbente"; "pañal" faz pensar em bebê. E se pede por talla (tamanho) e por absorção — día, noche, súper —, nunca por marca: a farmacêutica vai perguntar as duas coisas.',
+      pt: 'Na farmácia da Espanha a palavra é "el absorbente"; "pañal" faz pensar em bebê. E se pede por talla (tamanho) e por absorção — día, noche, súper —, nunca por marca: a farmacêutica vai perguntar as duas coisas.',
       en: 'At the pharmacy the word is "el absorbente", not "pañal", which suggests a baby. You ask by size (talla) and by absorbency — día, noche, súper — never by brand.',
       fr: 'En pharmacie on dit « el absorbente », pas « pañal », qui évoque le bébé. On demande par taille (talla) et par absorption — día, noche, súper —, jamais par marque.',
       it: 'In farmacia la parola è "el absorbente", non "pañal", che fa pensare al neonato. Si chiede per taglia (talla) e per assorbenza — día, noche, súper —, mai per marca.',
@@ -599,6 +691,7 @@ export const CARE_TOOLS: CareTool[] = [
     names: { es: 'el tensiómetro', pt: 'o medidor de pressão', en: 'the blood pressure monitor', fr: 'le tensiomètre', it: 'il misuratore di pressione', uk: 'тонометр', lt: 'kraujospūdžio matuoklis', ar: 'جهاز قياس الضغط' },
     askFor: { es: 'un tensiómetro', pt: 'um medidor de pressão', en: 'a blood pressure monitor', fr: 'un tensiomètre', it: 'un misuratore di pressione', uk: 'тонометр', lt: 'kraujospūdžio matuoklį', ar: 'جهاز قياس ضغط' },
     gen: { uk: 'тонометра', lt: 'kraujospūdžio matuoklio' },
+    noteIn: 'es',
     note: {
       es: 'En España se toma "la tensión", no "la presión". El aparato es "el tensiómetro".',
       pt: 'Na Espanha se toma "la tensión", não "la presión" — e o aparelho é "el tensiómetro". "Medidor de presión" ninguém usa.',
@@ -690,8 +783,22 @@ export const TOOL_FRAMES: ToolFrame[] = [
 // próprio, de gênero próprio — justamente para que nenhuma frase precise saber se é
 // senhor ou senhora, já que aqui não existe seletor.
 
-/** Número único de emergência na União Europeia. */
+/**
+ * O número de emergência, pelo PAÍS de destino. 112 é o padrão: vale em toda a
+ * União Europeia. Nos Estados Unidos é 911 — e o lançamento abre "Estou em:
+ * Estados Unidos", onde o app ensinava 112. Quem decora o número pelo app disca o
+ * errado no dia do susto; alguns celulares desviam o 112 para o 911, mas não dá
+ * para contar com isso.
+ *
+ * Um país novo que não use o 112 entra AQUI, antes de abrir como destino.
+ */
 export const EMERGENCY_NUMBER = '112';
+
+export const EMERGENCY_NUMBERS: Readonly<Record<string, string>> = { us: '911' };
+
+/** O número a discar no país de destino (`targetCountry.code`). */
+export const emergencyNumberFor = (countryCode: string): string =>
+  EMERGENCY_NUMBERS[countryCode] ?? EMERGENCY_NUMBER;
 
 export const EMERGENCY: Text[] = [
   { es: 'Necesito una ambulancia.', pt: 'Preciso de uma ambulância.', en: 'I need an ambulance.', fr: "J'ai besoin d'une ambulance.", it: "Ho bisogno di un'ambulanza.", uk: 'Мені потрібна швидка допомога.', lt: 'Reikia greitosios pagalbos.', ar: 'أحتاج سيارة إسعاف.' },
@@ -716,9 +823,17 @@ export const buildCareLine = (lang: LangCode, action: CareAction, treat: Treat):
 /** "Hoy ha comido poco." — o marcador de tempo entra na frente, e o ponto no fim. */
 export const buildReport = (lang: LangCode, event: ReportEvent, when: WhenTag | null, g: Gender): string => {
   const clause = tellClause(event.says, lang, g);
-  const body = when ? `${when.phrases[lang]} ${clause}` : clause;
+  const body = when && !event.semTempo ? `${when.phrases[lang]} ${clause}` : clause;
   return `${cap(body)}.`;
 };
+
+/**
+ * O rótulo do botão do relato: a própria oração, sem o tempo e sem o ponto —
+ * "Comeu pouco", "Esteve tranquila". Calculado, e por isso segue o seletor de
+ * gênero junto com o cartão: o botão nunca diz uma coisa e o cartão outra.
+ */
+export const reportLabel = (lang: LangCode, event: ReportEvent, g: Gender): string =>
+  cap(tellClause(event.says, lang, g));
 
 /** "¿Tenéis un andador?", "Ieškau vaikštynės." — caso e número saem do quadro. */
 export const buildToolPhrase = (lang: LangCode, frame: ToolFrame, tool: CareTool): string => {
@@ -760,6 +875,7 @@ export const REPORT_GROUP_LABELS: Record<ReportGroup, Text> = {
 export const TOOL_GROUP_LABELS: Record<ToolGroup, Text> = {
   mobility: { es: 'Para andar', pt: 'Para andar', en: 'For walking', fr: 'Pour marcher', it: 'Per camminare', uk: 'Для ходьби', lt: 'Vaikščiojimui', ar: 'للمشي' },
   bed: { es: 'Para la cama', pt: 'Para a cama', en: 'For the bed', fr: 'Pour le lit', it: 'Per il letto', uk: 'Для ліжка', lt: 'Lovai', ar: 'للسرير' },
-  health: { es: 'Para el control', pt: 'Para o controle', en: 'For monitoring', fr: 'Pour le suivi', it: 'Per il controllo', uk: 'Для контролю', lt: 'Kontrolei', ar: 'للمتابعة' },
+  // pt: "Para o controle" fazia pensar em controle remoto.
+  health: { es: 'Para el control', pt: 'Para medir a saúde', en: 'For monitoring', fr: 'Pour le suivi', it: 'Per il controllo', uk: 'Для контролю', lt: 'Kontrolei', ar: 'للمتابعة' },
   bath: { es: 'Para el baño', pt: 'Para o banho', en: 'For the bathroom', fr: 'Pour la salle de bain', it: 'Per il bagno', uk: 'Для ванної', lt: 'Voniai', ar: 'للحمام' },
 };

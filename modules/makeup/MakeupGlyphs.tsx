@@ -149,11 +149,14 @@ export const CotoneteGlyph = svg(<>
   <ellipse cx="19" cy="19" rx="2.6" ry="2.1" transform="rotate(45 19 19)" />
 </>);
 
-/** Lenço demaquilante: pacote com a folha saindo. */
+/** Lenço demaquilante: pacote baixo e largo, com a folha saindo pelo alto.
+ *  O desenho anterior tinha um arco fechado em cima do pacote e lia como alça de
+ *  maleta. Aqui a folha ABRE para cima e tem a borda ondulada — é o que faz dela
+ *  pano, e não alça —, e o pacote é mais baixo, como o saquinho de verdade. */
 export const LencoGlyph = svg(<>
-  <rect x="3" y="7.5" width="18" height="12.5" rx="2.5" />
-  <path d="M8.5 11h7" />
-  <path d="M9.5 7.5V6c0-1.4 1.1-2.5 2.5-2.5S14.5 4.6 14.5 6v1.5" />
+  <rect x="3" y="11" width="18" height="9" rx="3" />
+  <path d="M9 11 7.5 5.5c1.5-1 3-1 4.5 0s3 1 4.5 0L15 11" />
+  <path d="M8 15.5h8" />
 </>);
 
 // --- levar e ver -----------------------------------------------------------
@@ -166,15 +169,16 @@ export const EspelhoGlyph = svg(<>
   <path d="M9.8 7c.5-1.1 1.5-1.8 2.7-1.9" />
 </>);
 
-/** Espelho de maquiagem: disco com lâmpadas em volta e pé. */
+/** Espelho de maquiagem: espelho redondo de mesa, preso pelos lados num arco,
+ *  com haste e pé. O desenho anterior punha lâmpadas em volta do disco e lia
+ *  como sol ou engrenagem. O arco é o que o separa do espelho de mão, que tem
+ *  cabo reto. */
 export const EspelhoMaqGlyph = svg(<>
-  <circle cx="12" cy="9.5" r="5" />
-  <circle cx="12" cy="2.8" r="0.9" />
-  <circle cx="17.2" cy="5.3" r="0.9" />
-  <circle cx="17.2" cy="13.7" r="0.9" />
-  <circle cx="6.8" cy="5.3" r="0.9" />
-  <circle cx="6.8" cy="13.7" r="0.9" />
-  <path d="M12 16.5V20M8.5 21h7" />
+  <circle cx="12" cy="9" r="5.5" />
+  <path d="M9.6 7.5c.5-1.2 1.5-2 2.8-2.1" />
+  <path d="M5 9a7 7 0 0 0 14 0" />
+  <path d="M5 9h1.5M17.5 9H19" />
+  <path d="M12 16v4M8 20.5h8" />
 </>);
 
 /** Nécessaire: bolsa com zíper. */

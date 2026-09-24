@@ -1,14 +1,18 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ModuleShell } from '../components/ModuleShell';
 import { PhraseCard } from '../components/PhraseCard';
 import type { Country } from '../types';
-import { SpeakerIcon, SpeakerOffIcon, QuestionMarkCircleIcon } from '../components/Icons';
+import { SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
+import { anotarGlosa, useFalando } from '../utils/audioState';
 import type { VoiceStatus } from '../utils/speech';
 import {
   LOC_OBJECTS,
   LOC_RELATIONS,
+  LOC_START,
+  locObjectByKey,
+  locRelationByKey,
   toLangCode,
   nounPhrase,
   buildSentence,
@@ -79,9 +83,11 @@ export default function LocationModule({
   handlePlayAudio,
   voiceStatus = 'unknown',
 }: LocationModuleProps) {
-  const [subject, setSubject] = useState<LocObject>(LOC_OBJECTS[0]);
-  const [reference, setReference] = useState<LocObject>(LOC_OBJECTS[1]);
-  const [relation, setRelation] = useState<LocRelation>(LOC_RELATIONS[0]);
+  // A primeira frase é "A chave está embaixo do sofá.", escolhida pela chave e
+  // não pela posição na lista (ver `LOC_START`).
+  const [subject, setSubject] = useState<LocObject>(() => locObjectByKey(LOC_START.subject));
+  const [reference, setReference] = useState<LocObject>(() => locObjectByKey(LOC_START.reference));
+  const [relation, setRelation] = useState<LocRelation>(() => locRelationByKey(LOC_START.relation));
 
   const target = toLangCode(targetCountry.lang);
   const native = toLangCode(nativeCountry.lang);
@@ -121,10 +127,22 @@ export default function LocationModule({
     handlePlayAudio(text, targetCountry.lang);
   };
 
+  // A pergunta é o segundo alto-falante do cartão, e se comporta como o
+  // primeiro: pulsa enquanto carrega ou sai, e anota a própria glosa para a
+  // folha "Sem som agora" poder mostrá-la inteira se o som falhar.
+  const perguntando = useFalando(question);
+  const speakQuestion = () => {
+    anotarGlosa(question, showNative ? questionNative : null);
+    speak(question);
+  };
+
 
   return (
     <ModuleShell
-      title={t('moduleLocation')}
+      // No hub o nome é "Onde está a chave?", que diz o que o módulo faz; no
+      // cabeçalho cabe o curto.
+      title={t('locTitle')}
+      dica={t('hintLocation')}
       theme={theme}
       t={t}
       nativeCountry={nativeCountry}
@@ -145,15 +163,21 @@ export default function LocationModule({
           >
             <div className="mt-3 pt-3 border-t border-white/20 flex items-center gap-3">
               <div className="flex-1 min-w-0">
-                <p className="font-semibold leading-snug">{question}</p>
+                <p className="font-semibold leading-snug" dir="auto">{question}</p>
                 {showNative && <p className="text-sm text-white leading-snug" dir="auto">{questionNative}</p>}
               </div>
+              {/* Alto-falante, e não "?": em qualquer celular o ponto de
+                  interrogação quer dizer "ajuda", e quem tocava esperando uma
+                  explicação ouvia espanhol. `Listen` também já troca sozinho
+                  para o alto-falante cortado quando falta a voz, como o de cima.
+                  Menor e translúcido, para não disputar com o botão da frase. */}
               <button
-                onClick={() => speak(question)}
+                onClick={speakQuestion}
                 className="hit p-2 rounded-full bg-white/20 tap active:scale-90 flex-shrink-0"
                 aria-label={audioLabel(t('locAsk'))} title={audioLabel(t('locAsk'))}
+                aria-busy={perguntando}
               >
-                <QuestionMarkCircleIcon className="w-6 h-6" />
+                <Listen className={`w-6 h-6 ${perguntando ? 'animate-pulse' : ''}`} />
               </button>
             </div>
           </PhraseCard>
@@ -206,34 +230,12 @@ export default function LocationModule({
       </div>
 
 
-      {/* Relações */}
-      <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('locRelation')}</h2>
-        <div className="grid grid-cols-3 gap-2">
-          {LOC_RELATIONS.map((rel) => {
-            const active = rel.key === relation.key;
-            return (
-              <button
-                key={rel.key}
-                onClick={() => pickRelation(rel)}
-                className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
-                  active ? `${theme.color} border-transparent text-white shadow-md` : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-700 dark:text-slate-200 hover:border-gray-300 dark:hover:border-slate-600'
-                }`}
-              >
-                <MiniPosition relKey={rel.key} active={active} hex={theme.hex} />
-                <span className="text-sm font-bold leading-tight text-center">{rel.labels[target]}</span>
-                {showNative && (
-                  <span className={`text-[11px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">
-                    {rel.labels[native]}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      {/* A ordem da tela é a ordem da frase: "A chave / está embaixo / do sofá".
+          Antes a posição vinha primeiro, com 12 botões, e as duas fileiras de
+          objetos ficavam fora da primeira tela, uma embaixo da outra, iguais —
+          parecia lista repetida, e quem não rolava achava que só existia a bola. */}
 
-      {/* Objeto */}
+      {/* A coisa */}
       <ObjectRow
         title={t('locObject')}
         selected={subject}
@@ -244,7 +246,38 @@ export default function LocationModule({
         theme={theme}
       />
 
-      {/* Referência */}
+      {/* O lugar */}
+      <section>
+        <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1" dir="auto">{t('locRelation')}</h2>
+        {/* Três colunas de ~110px a 375px: "a la izquierda" quebra em duas
+            linhas, mas nenhuma palavra passa de 93px a 14px negrito. */}
+        <div className="grid grid-cols-3 gap-2">
+          {LOC_RELATIONS.map((rel) => {
+            const active = rel.key === relation.key;
+            return (
+              <button
+                key={rel.key}
+                onClick={() => pickRelation(rel)}
+                aria-pressed={active}
+                className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${
+                  active ? `${theme.color} border-transparent text-white shadow-md` : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-700 dark:text-slate-200 hover:border-gray-300 dark:hover:border-slate-600'
+                }`}
+              >
+                <MiniPosition relKey={rel.key} active={active} hex={theme.hex} />
+                <span className="text-sm font-bold leading-tight text-center" dir="auto">{rel.labels[target]}</span>
+                {/* O português é o que ela LÊ: 14px, e nunca apagado. */}
+                {showNative && (
+                  <span className={`text-sm leading-tight text-center ${active ? 'text-white' : 'text-gray-600 dark:text-slate-300'}`} dir="auto">
+                    {rel.labels[native]}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* O ponto de referência */}
       <ObjectRow
         title={t('locReference')}
         selected={reference}
@@ -268,32 +301,66 @@ interface ObjectRowProps {
   theme: { color: string; hex: string };
 }
 
-const ObjectRow: React.FC<ObjectRowProps> = ({ title, selected, onPick, target, native, showNative, theme }) => (
-  <section>
-    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">
-      {title} <span className="text-gray-500 dark:text-slate-400">·</span> <span className="text-gray-500 dark:text-slate-400 normal-case tracking-normal">{selected.emoji} {nounPhrase(target, selected)}</span>
-    </h2>
-    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
-      {LOC_OBJECTS.map((obj) => {
-        const active = obj.key === selected.key;
-        return (
-          <button
-            key={obj.key}
-            onClick={() => onPick(obj)}
-            className={`flex-shrink-0 w-[84px] rounded-2xl border p-2 flex flex-col items-center gap-0.5 tap active:scale-95 ${
-              active ? `${theme.color} border-transparent text-white shadow-md` : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-700 dark:text-slate-200'
-            }`}
-          >
-            <span className="text-3xl leading-none mb-1">{obj.emoji}</span>
-            <span className="text-xs font-bold leading-tight text-center truncate w-full">{obj.names[target].n}</span>
-            {showNative && (
-              <span className={`text-[10px] leading-tight text-center truncate w-full ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">
-                {obj.names[native].n}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  </section>
-);
+/**
+ * Uma fileira de objetos que rola para o lado.
+ *
+ * O cartão tem 96px DE PROPÓSITO, e não é pelo desenho: a 390px de tela cabem
+ * três cartões inteiros e sobra um pedaço do quarto (16 + 3×104 = 328; a 375px
+ * aparecem 47px dele). Esse cartão cortado na borda é o sinal de "tem mais para
+ * o lado" que ela já conhece do WhatsApp e do Instagram. Com 84px, a conta dava
+ * quatro cartões inteiros terminando rente à borda, e os outros dez objetos
+ * pareciam não existir. Os 80px úteis também são o que deixa o nome em 14px
+ * negrito caber inteiro ("téléphone", a palavra mais longa dos destinos).
+ *
+ * Ao abrir, a fileira rola sozinha até o cartão escolhido se ele estiver fora da
+ * vista — o sofá, que é a referência da primeira frase, é o 5º da lista e
+ * nasceria escondido. Só no eixo horizontal: `scrollIntoView` rolaria também a
+ * página, e a pessoa abriria o módulo já no meio.
+ */
+const ObjectRow: React.FC<ObjectRowProps> = ({ title, selected, onPick, target, native, showNative, theme }) => {
+  const trilho = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = trilho.current;
+    const ativo = el?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!el || !ativo) return;
+    const caixa = el.getBoundingClientRect();
+    const cartao = ativo.getBoundingClientRect();
+    if (cartao.left >= caixa.left && cartao.right <= caixa.right) return;
+    // Deixa o cartão a 64px da borda esquerda: assim o anterior aparece pela
+    // metade e fica claro que a fileira anda para os dois lados.
+    el.scrollLeft += cartao.left - caixa.left - 64;
+    // Só na abertura: depois, quem move a fileira é o dedo dela.
+  }, []);
+
+  return (
+    <section>
+      <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1" dir="auto">
+        {title} <span className="text-gray-500 dark:text-slate-400">·</span> <span className="text-gray-500 dark:text-slate-400 normal-case tracking-normal" dir="auto">{selected.emoji} {nounPhrase(target, selected)}</span>
+      </h2>
+      <div ref={trilho} className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
+        {LOC_OBJECTS.map((obj) => {
+          const active = obj.key === selected.key;
+          return (
+            <button
+              key={obj.key}
+              onClick={() => onPick(obj)}
+              aria-pressed={active}
+              className={`flex-shrink-0 w-[96px] rounded-2xl border p-2 flex flex-col items-center gap-0.5 tap active:scale-95 ${
+                active ? `${theme.color} border-transparent text-white shadow-md` : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-700 dark:text-slate-200'
+              }`}
+            >
+              <span className="text-3xl leading-none mb-1" aria-hidden="true">{obj.emoji}</span>
+              <span className="text-sm font-bold leading-tight text-center truncate w-full" dir="auto">{obj.names[target].n}</span>
+              {showNative && (
+                <span className={`text-sm leading-tight text-center truncate w-full ${active ? 'text-white' : 'text-gray-600 dark:text-slate-300'}`} dir="auto">
+                  {obj.names[native].n}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+};

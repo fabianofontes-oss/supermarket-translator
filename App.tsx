@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useId, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useId, useRef, Suspense } from 'react';
 import { COUNTRIES, SUPERMARKET_CATEGORIES, PHARMACY_CATEGORIES } from './constants';
 import type { Country, TranslationItem } from './types';
 import type { ModuleKey } from './utils/rotas';
@@ -22,9 +22,12 @@ import { useListManager } from './hooks/useListManager';
 import { useFavorites } from './hooks/useFavorites';
 import { useDialog } from './hooks/useDialog';
 import { usePresenca } from './hooks/usePresenca';
-import { useCountryPair } from './hooks/useCountryPair';
+import { useCountryPair, TARGET_COUNTRY_KEY } from './hooks/useCountryPair';
+import { TraducaoContext } from './hooks/useT';
 import { LanguagePanel } from './components/LanguagePanel';
-import { VoiceMissingSheet } from './components/VoiceMissingSheet';
+import { VoiceMissingSheet, type AvisoSemSom } from './components/VoiceMissingSheet';
+import { ShowPhraseScreen, fraseJaNaTela } from './components/ShowPhraseScreen';
+import { CountrySheet } from './components/CountrySheet';
 import { UpdateSheet } from './components/UpdateSheet';
 import { ShareSheet } from './components/ShareSheet';
 import { ShareButton } from './components/ShareButton';
@@ -33,33 +36,37 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ErrorFallback } from './components/ErrorFallback';
 import { lazyWithRetry } from './utils/lazyWithRetry';
 import { playSound } from './utils/soundUtils';
-import { pickVoice, googleTtsUrl, type VoiceStatus } from './utils/speech';
+import { pickVoice, type VoiceStatus } from './utils/speech';
+import { criarTocador, type Tocador } from './utils/tocador';
+import { assinarAudio, glosaDe, lerAudio, marcarGestoAprendido } from './utils/audioState';
+import { writeJSON } from './utils/storage';
+import {
+  contarAbertura,
+  destinoSalvoAberto,
+  devePerguntarPais,
+  deveConvidarInstalar,
+  gravarDispensaInstalar,
+  jaPerguntouPais,
+  lerDispensaInstalar,
+  marcarPaisPerguntado,
+} from './utils/primeiraAbertura';
 import {
   ShoppingBagIcon,
   PillIcon,
-  UtensilsIcon,
-  TruckIcon,
-  BedIcon,
-  BankIcon,
-  DumbbellIcon,
-  HospitalIcon,
-  FuelIcon,
-  SchoolIcon,
-  WrenchIcon,
-  PawIcon,
-  ShieldCheckIcon,
-  EnvelopeIcon,
-  ShoppingBagIconSolid,
-  MapPinIcon,
+  KeyIcon,
   SignpostIcon,
-  NumbersIcon,
+  IconeRelogio,
   BodyIcon,
   CafeIcon,
   PronounsIcon,
-  SizesIcon,
+  ShirtIcon,
   MakeupIcon,
   ElderCareIcon,
   HouseCleaningIcon,
+  ChevronDownIcon,
+  SpeakerIcon,
+  SpeakerOffIcon,
+  XIcon,
 } from './components/Icons';
 
 type Tab = 'home' | 'search' | 'favorites' | 'list';
@@ -91,18 +98,23 @@ const THEMES: Record<ModuleKey, Theme> = {
   housecleaning: { color: 'bg-lime-800',  textColor: 'text-lime-800 dark:text-lime-300',    hex: '#3f6212', borderColor: 'border-lime-800' },
 };
 
-// Módulos ativos do hub (classes escritas por extenso para o Tailwind gerar o CSS)
+// Módulos do hub (classes escritas por extenso para o Tailwind gerar o CSS)
 // needsCatalog: depende dos 1.333 itens traduzidos; fica bloqueado para países só de origem (uk, ar).
+//
+// Não existe mais a fileira de treze telhas cinzas "a caminho" (Restaurante,
+// Hospital, Shopping…). Elas não abriam, não diziam por quê, e disputavam com as
+// vivas o mesmo problema: quem sentia dor procurava "Hospital", que estava
+// morto, e não "Onde dói". Metade do início eram botões que não funcionavam.
 const ACTIVE_MODULES: { key: ModuleKey; labelKey: string; icon: React.FC<{ className?: string }>; iconClass: string; cardClass: string; needsCatalog?: boolean }[] = [
   { key: 'supermarket', labelKey: 'supermarketGuide', icon: ShoppingBagIcon, iconClass: 'bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-300', cardClass: 'bg-red-50 border-red-200 text-red-700', needsCatalog: true },
   { key: 'pharmacy',    labelKey: 'modulePharmacy',   icon: PillIcon,             iconClass: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300', cardClass: 'bg-emerald-50 border-emerald-200 text-emerald-700', needsCatalog: true },
-  { key: 'location',    labelKey: 'moduleLocation',   icon: MapPinIcon,           iconClass: 'bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-300', cardClass: 'bg-blue-50 border-blue-200 text-blue-600' },
+  { key: 'location',    labelKey: 'moduleLocation',   icon: KeyIcon,              iconClass: 'bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-300', cardClass: 'bg-blue-50 border-blue-200 text-blue-600' },
   { key: 'directions',  labelKey: 'moduleDirections', icon: SignpostIcon,         iconClass: 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300', cardClass: 'bg-amber-50 border-amber-200 text-amber-700' },
-  { key: 'numbers',     labelKey: 'moduleNumbers',    icon: NumbersIcon,          iconClass: 'bg-violet-100 dark:bg-violet-950 text-violet-600 dark:text-violet-300', cardClass: 'bg-violet-50 border-violet-200 text-violet-600' },
+  { key: 'numbers',     labelKey: 'moduleNumbers',    icon: IconeRelogio,         iconClass: 'bg-violet-100 dark:bg-violet-950 text-violet-600 dark:text-violet-300', cardClass: 'bg-violet-50 border-violet-200 text-violet-600' },
   { key: 'body',        labelKey: 'moduleBody',       icon: BodyIcon,             iconClass: 'bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-300', cardClass: 'bg-rose-50 border-rose-200 text-rose-700' },
   { key: 'cafe',        labelKey: 'moduleCafe',       icon: CafeIcon,             iconClass: 'bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-300', cardClass: 'bg-orange-50 border-orange-200 text-orange-800' },
   { key: 'pronouns',    labelKey: 'modulePronouns',   icon: PronounsIcon,         iconClass: 'bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300', cardClass: 'bg-teal-50 border-teal-200 text-teal-700' },
-  { key: 'sizes',       labelKey: 'moduleSizes',      icon: SizesIcon,            iconClass: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300', cardClass: 'bg-indigo-50 border-indigo-200 text-indigo-600' },
+  { key: 'sizes',       labelKey: 'moduleSizes',      icon: ShirtIcon,            iconClass: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300', cardClass: 'bg-indigo-50 border-indigo-200 text-indigo-600' },
   { key: 'makeup',      labelKey: 'moduleMakeup',     icon: MakeupIcon,           iconClass: 'bg-fuchsia-100 dark:bg-fuchsia-950 text-fuchsia-700 dark:text-fuchsia-300', cardClass: 'bg-fuchsia-50 border-fuchsia-200 text-fuchsia-700' },
   // Sem `needsCatalog`: e generativo, entao abre tambem para ucraniana,
   // marroquina e lituana — que sao justamente quem faz este trabalho.
@@ -110,22 +122,29 @@ const ACTIVE_MODULES: { key: ModuleKey; labelKey: string; icon: React.FC<{ class
   { key: 'housecleaning', labelKey: 'moduleHouseCleaning', icon: HouseCleaningIcon, iconClass: 'bg-lime-100 dark:bg-lime-950 text-lime-800 dark:text-lime-300', cardClass: 'bg-lime-50 border-lime-200 text-lime-800' },
 ];
 
-// Módulos ainda não implementados (aparecem desativados)
-const COMING_SOON: { labelKey: string; icon: React.FC<{ className?: string }>; iconClass: string }[] = [
-  { labelKey: 'moduleRestaurant', icon: UtensilsIcon,    iconClass: 'bg-orange-100 dark:bg-orange-950 text-orange-500 dark:text-orange-400' },
-  { labelKey: 'moduleTransport',  icon: TruckIcon,       iconClass: 'bg-blue-100 dark:bg-blue-950 text-blue-500 dark:text-blue-400' },
-  { labelKey: 'moduleHotel',      icon: BedIcon,         iconClass: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-500 dark:text-indigo-400' },
-  { labelKey: 'moduleBank',       icon: BankIcon,        iconClass: 'bg-green-100 dark:bg-green-950 text-green-500 dark:text-green-400' },
-  { labelKey: 'moduleGym',        icon: DumbbellIcon,    iconClass: 'bg-purple-100 dark:bg-purple-950 text-purple-500 dark:text-purple-400' },
-  { labelKey: 'moduleHospital',   icon: HospitalIcon,    iconClass: 'bg-red-100 dark:bg-red-950 text-red-500 dark:text-red-400' },
-  { labelKey: 'moduleShopping',   icon: ShoppingBagIcon, iconClass: 'bg-pink-100 dark:bg-pink-950 text-pink-500 dark:text-pink-400' },
-  { labelKey: 'moduleFuel',       icon: FuelIcon,        iconClass: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-500 dark:text-yellow-400' },
-  { labelKey: 'moduleSchool',     icon: SchoolIcon,      iconClass: 'bg-cyan-100 dark:bg-cyan-950 text-cyan-500 dark:text-cyan-400' },
-  { labelKey: 'moduleMechanic',   icon: WrenchIcon,      iconClass: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' },
-  { labelKey: 'modulePet',        icon: PawIcon,         iconClass: 'bg-orange-100 dark:bg-orange-950 text-orange-500 dark:text-orange-400' },
-  { labelKey: 'modulePolice',     icon: ShieldCheckIcon, iconClass: 'bg-blue-100 dark:bg-blue-950 text-blue-500 dark:text-blue-400' },
-  { labelKey: 'modulePost',       icon: EnvelopeIcon,    iconClass: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-500 dark:text-yellow-400' },
-];
+/**
+ * Para onde leva a telha de um módulo fechado, quando há um vizinho que resolve.
+ *
+ * A Farmácia fechada é justamente a telha que quem sente dor procura. "Em breve"
+ * ali era um beco sem saída; o Onde dói está aberto e diz o que ela precisa
+ * dizer no balcão. O Supermercado não tem vizinho equivalente e continua "Em
+ * breve", sem ação.
+ */
+const DESVIO_SE_FECHADO: Partial<Record<ModuleKey, { para: ModuleKey; labelKey: string }>> = {
+  pharmacy: { para: 'body', labelKey: 'useBodyInstead' },
+};
+
+/** Lido uma vez: nada disso muda com o app aberto. */
+const lerAmbiente = () => {
+  if (typeof window === 'undefined') return { ios: false, standalone: false };
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as unknown as { MSStream?: unknown }).MSStream;
+  let standalone = false;
+  try {
+    standalone = !!window.matchMedia?.('(display-mode: standalone)')?.matches
+      || !!(navigator as unknown as { standalone?: boolean }).standalone;
+  } catch { /* sem matchMedia */ }
+  return { ios, standalone };
+};
 
 export default function App() {
   // Par de idiomas persistido; também mantém lang/dir do documento.
@@ -154,10 +173,17 @@ export default function App() {
   // O módulo aberto mora na URL: ver `utils/rotas.ts`.
   const { currentModule, setCurrentModule } = useModuleRoute(estaBloqueado);
 
-  // PWA install
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showInstallModal, setShowInstallModal] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  /*
+   * Os fechados vão para o FIM da grade. Eles eram a primeira fileira, que é por
+   * onde o olho começa: a primeira coisa que a pessoa via era "Em breve". O
+   * `sort` é estável, então a ordem entre os abertos não muda.
+   */
+  const hubModules = useMemo(
+    () => [...ACTIVE_MODULES].sort((a, b) => Number(estaBloqueado(a.key)) - Number(estaBloqueado(b.key))),
+    [estaBloqueado],
+  );
+
+  const [ambiente] = useState(lerAmbiente);
 
   /**
    * Versão nova esperando. Sem este aviso a atualização não chega no app
@@ -189,11 +215,6 @@ export default function App() {
   const lists = currentModule === 'pharmacy' ? pharmacyLists : supermarketLists;
   // …favoritos são uma lista só para o app inteiro, montada uma única vez.
   const { favorites, toggleFavorite } = useFavorites();
-
-  // Modal de instalação: mesmo padrão de diálogo do painel de categorias.
-  const installTitleId = useId();
-  const installPanelRef = useDialog(showInstallModal, () => handleDismissInstall());
-  const instalacao = usePresenca(showInstallModal);
 
   const t = useCallback((key: string) => {
     const lang = nativeCountry.lang || 'en-US';
@@ -234,62 +255,50 @@ export default function App() {
     setExpandedItemKey(null);
   }, [currentModule]);
 
-  // Lógica de instalação do PWA
-  useEffect(() => {
-    const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
-    const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-    setIsIOS(isIosDevice);
+  // ----- Primeira abertura: em que país você está? -----
+  //
+  // Só os destinos abertos, em ordem alfabética (Espanha, Estados Unidos,
+  // França). Com um destino só, não há pergunta: ver `devePerguntarPais`.
+  const destinosAbertos = useMemo(
+    () => COUNTRIES.filter((c) => !c.originOnly && destinoAberto(c)).sort((a, b) => a.name.localeCompare(b.name, 'pt')),
+    [],
+  );
+  const [perguntandoPais, setPerguntandoPais] = useState(() => devePerguntarPais({
+    destinosAbertos: destinosAbertos.length,
+    destinoSalvoAberto: destinoSalvoAberto(COUNTRIES, destinoAberto),
+    jaPerguntou: jaPerguntouPais(),
+  }));
 
-    let dismissed = false;
-    try { dismissed = !!localStorage.getItem('installDismissed'); } catch { /* ignore */ }
-
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      if (!isStandaloneMode && !dismissed) setShowInstallModal(true);
-    };
-
-    let iosTimer: number | undefined;
-    if (isIosDevice && !isStandaloneMode && !dismissed) {
-      iosTimer = window.setTimeout(() => setShowInstallModal(true), 3000);
-    }
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      if (iosTimer) window.clearTimeout(iosTimer);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null);
-      setShowInstallModal(false);
-      playSound('success');
-    }
+  const escolherPais = (pais: Country) => {
+    setTargetCountry(pais);
+    // Gravado já, mesmo sendo o padrão: foi escolha dela, e não pode voltar a
+    // ser tratado como "nada salvo".
+    writeJSON(TARGET_COUNTRY_KEY, pais.code);
+    marcarPaisPerguntado();
+    setPerguntandoPais(false);
   };
-
-  const handleDismissInstall = () => {
-    setShowInstallModal(false);
-    try { localStorage.setItem('installDismissed', 'true'); } catch { /* ignore */ }
+  const fecharPerguntaPais = () => {
+    // Fechar sem escolher mantém o padrão, e não pergunta de novo.
+    marcarPaisPerguntado();
+    setPerguntandoPais(false);
   };
 
   // ----- Áudio -----
   //
   // A regra é a região, não só o idioma: texto do Brasil nunca sai na voz de
   // Portugal, espanhol da Espanha nunca sai na voz mexicana. Região errada foi
-  // o que dois revisores nativos reprovaram.
-  //
-  // O aparelho do público real costuma ter uma ou duas vozes só, nenhuma da
-  // região certa. Por isso o áudio online volta a existir: é ele que entrega o
-  // sotaque correto num celular que não tem voz nenhuma instalada.
+  // o que dois revisores nativos reprovaram. O caminho inteiro — voz do
+  // aparelho, MP3 da rede, um de cada vez, repetir devagar — mora em
+  // `utils/tocador.ts`.
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  /** País cuja voz falta. Preenchido só quando alguém tenta ouvir. */
-  const [voiceMissingFor, setVoiceMissingFor] = useState<Country | null>(null);
   const [online, setOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
+  const onlineRef = useRef(online);
+  onlineRef.current = online;
+
+  /** Frase cujo som não saiu, e por quê. Preenchido só quando alguém tenta ouvir. */
+  const [avisoVoz, setAvisoVoz] = useState<(AvisoSemSom & { texto: string; lang: string }) | null>(null);
+  /** A tela "Mostrar" aberta a partir do aviso "Sem som agora". */
+  const [fraseMostrada, setFraseMostrada] = useState<{ texto: string; glosa: string | null; lang: string } | null>(null);
 
   useEffect(() => {
     const entrou = () => setOnline(true);
@@ -330,65 +339,26 @@ export default function App() {
    */
   const voiceStatus: VoiceStatus = targetVoice.status === 'missing' && !online ? 'missing' : 'ok';
 
+  // Um tocador só, para o app inteiro: é o que garante um áudio de cada vez.
+  const tocadorRef = useRef<Tocador | null>(null);
+  if (!tocadorRef.current) {
+    tocadorRef.current = criarTocador({
+      online: () => onlineRef.current,
+      aoFicarSemSom: (texto, lang, motivo) => {
+        const country = COUNTRIES.find((c) => c.lang === lang);
+        if (country) setAvisoVoz({ country, motivo, texto, lang });
+      },
+    });
+  }
+
   const handlePlayAudio = useCallback((text: string, lang: string) => {
-    const synth = window.speechSynthesis;
-    // Reconsulta o motor: a lista pode ter chegado depois do último render.
-    const lookup = synth ? pickVoice(synth.getVoices(), lang) : ({ status: 'missing' } as const);
+    // Tocou num alto-falante: aprendeu o gesto, e a linha que o ensina some.
+    marcarGestoAprendido();
+    tocadorRef.current!.tocar(text, lang);
+  }, []);
 
-    const falarNoSistema = (voice: SpeechSynthesisVoice | null): boolean => {
-      if (!synth) return false;
-      synth.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang;
-      utterance.rate = 0.95;
-      if (voice) utterance.voice = voice;
-      synth.speak(utterance);
-      return true;
-    };
-
-    const avisar = () => setVoiceMissingFor(COUNTRIES.find((c) => c.lang === lang) ?? null);
-
-    /** Último recurso. Nunca fala com voz de região diferente. */
-    const degradar = () => {
-      // Lista vazia: o motor não sabe dizer o que tem, então não há prova de
-      // voz errada. Definir só o `lang` é o que o Android respeita — e é o que
-      // a versão que funcionava fazia.
-      if (lookup.status === 'unknown' && falarNoSistema(null)) return;
-      avisar();
-    };
-
-    // 1. Voz da região exata instalada: fala já. Offline, instantâneo, correto.
-    if (lookup.status === 'ok') { falarNoSistema(lookup.voice); return; }
-
-    // 2. Sem a voz certa no aparelho: busca o áudio com o sotaque certo.
-    const url = online && typeof Audio !== 'undefined' ? googleTtsUrl(text, lang) : null;
-    if (!url) { degradar(); return; }
-
-    // `play()` sai daqui de dentro do gesto do toque, que é o que o navegador
-    // de celular exige. Só o tratamento da falha é assíncrono.
-    const audio = new Audio(url);
-    let resolvido = false;
-    let limite: number | undefined;
-
-    const desistir = () => {
-      if (resolvido) return;
-      resolvido = true;
-      window.clearTimeout(limite);
-      try { audio.pause(); } catch { /* já parado */ }
-      degradar();
-    };
-
-    audio.addEventListener('playing', () => {
-      resolvido = true;
-      window.clearTimeout(limite);
-    }, { once: true });
-    audio.addEventListener('error', desistir, { once: true });
-
-    // Rede pendurada não pode virar silêncio sem explicação.
-    limite = window.setTimeout(desistir, 3500);
-
-    void audio.play().catch(desistir);
-  }, [online]);
+  // Trocar de módulo cala o som do anterior.
+  useEffect(() => { tocadorRef.current?.parar(); }, [currentModule]);
 
   const handlePlayPhrase = useCallback((type: 'ask' | 'want', item: TranslationItem) => {
     const name = item.translated_term;
@@ -402,6 +372,86 @@ export default function App() {
     const template = templates[targetCountry.lang.split('-')[0]] || templates.en;
     handlePlayAudio(type === 'ask' ? template.ask(name) : template.want(name), targetCountry.lang);
   }, [targetCountry.lang, handlePlayAudio]);
+
+  // ----- Convite para guardar o app no celular -----
+  //
+  // Não abre mais no instante em que o navegador deixa, por cima de uma tela que
+  // a pessoa ainda nem viu. Espera ela ouvir a primeira frase — ou a segunda
+  // abertura do app —, e aparece no hub, entre uma tarefa e outra, nunca no meio
+  // de um módulo nem antes da pergunta do país. Ver `utils/primeiraAbertura.ts`.
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [dispensadoEm, setDispensadoEm] = useState<number | null>(() => lerDispensaInstalar(Date.now()));
+  const [aberturas, setAberturas] = useState(0);
+  const [ouviuFrase, setOuviuFrase] = useState(false);
+
+  // Conta a abertura uma vez por carga. A ref segura o duplo efeito do
+  // StrictMode, que em desenvolvimento contaria duas.
+  const contouAbertura = useRef(false);
+  useEffect(() => {
+    if (contouAbertura.current) return;
+    contouAbertura.current = true;
+    setAberturas(contarAbertura());
+  }, []);
+
+  // "Ouviu uma frase" é o som ter saído de fato, não só o toque.
+  useEffect(() => assinarAudio(() => {
+    if (lerAudio().status === 'falando') setOuviuFrase(true);
+  }), []);
+
+  useEffect(() => {
+    const guardar = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); };
+    const instalado = () => { setDeferredPrompt(null); setShowInstallModal(false); };
+    window.addEventListener('beforeinstallprompt', guardar);
+    window.addEventListener('appinstalled', instalado);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', guardar);
+      window.removeEventListener('appinstalled', instalado);
+    };
+  }, []);
+
+  const instalavel = !ambiente.standalone && (!!deferredPrompt || ambiente.ios);
+  const telaLivre = currentModule === null
+    && !perguntandoPais && !isLanguageModalOpen && !isShareOpen
+    && !avisoVoz && !fraseMostrada && !applyUpdate;
+
+  useEffect(() => {
+    if (showInstallModal) return;
+    if (!deveConvidarInstalar({ instalavel, dispensadoEm, agora: Date.now(), ouviuFrase, aberturas, telaLivre })) return;
+    // Um respiro depois de chegar ao hub, para não parecer que o toque abriu isto.
+    const timer = window.setTimeout(() => setShowInstallModal(true), 800);
+    return () => window.clearTimeout(timer);
+  }, [instalavel, dispensadoEm, ouviuFrase, aberturas, telaLivre, showInstallModal]);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    // O evento só serve uma vez: depois do `prompt()` o botão ficaria morto.
+    setDeferredPrompt(null);
+    setShowInstallModal(false);
+    if (outcome === 'accepted') playSound('success');
+    else registrarDispensa();
+  };
+
+  const registrarDispensa = () => {
+    const agora = Date.now();
+    gravarDispensaInstalar(agora);
+    setDispensadoEm(agora);
+  };
+
+  const handleDismissInstall = () => {
+    setShowInstallModal(false);
+    registrarDispensa();
+  };
+
+  // Modal de instalação: mesmo padrão de diálogo do painel de categorias. O foco
+  // entra no TÍTULO, e não no X: foco posto por código no X, sem toque antes,
+  // acendia o anel de teclado e desenhava um quadrado preto em volta dele.
+  const installTitleId = useId();
+  const installTitleRef = useRef<HTMLHeadingElement>(null);
+  const installPanelRef = useDialog(showInstallModal, () => handleDismissInstall(), installTitleRef);
+  const instalacao = usePresenca(showInstallModal);
 
   // ----- Render -----
   const theme = currentModule ? THEMES[currentModule] : THEMES.supermarket;
@@ -465,35 +515,47 @@ export default function App() {
       default: {
         return (
           <div className="min-h-screen bg-gray-50 dark:bg-slate-800 flex flex-col">
-            <header className="bg-white dark:bg-slate-800 shadow-sm pt-12 pb-6 px-6 sticky top-0 z-10">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-800 dark:text-slate-100">{t('hubTitle')}</h1>
-                  <p className="text-gray-500 dark:text-slate-400 text-sm">{t('hubSubtitle')}</p>
-                </div>
-                {/* Cluster da direita. `gap-2` não é escolha estética: a área
-                    de toque de `.hit` é 44px centrada no botão, e com menos
-                    espaço as duas se sobrepõem e uma delas para de responder. */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <ShareButton onClick={() => setIsShareOpen(true)} t={t} variant="onLight" />
-                  <button onClick={() => setIsLanguageModalOpen(true)} aria-label={t('languageSettings')} className="hit p-2 rounded-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-700 tap active:scale-90">
-                    <div className="flex items-center -space-x-2">
-                      <img src={nativeCountry.image} alt={nativeCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
-                      <img src={targetCountry.image} alt={targetCountry.name} className="w-6 h-6 rounded-full border border-white object-cover" />
-                    </div>
-                  </button>
-                </div>
+            {/* Não é mais `sticky`: com o país escrito por extenso o cabeçalho
+                cresceu, e grudado no topo ele comeria um terço da tela. */}
+            <header className="bg-white dark:bg-slate-800 shadow-sm pt-12 pb-5 px-6">
+              <div className="flex justify-between items-start gap-3">
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-slate-100 min-w-0" dir="auto">{t('hubTitle')}</h1>
+                <ShareButton onClick={() => setIsShareOpen(true)} t={t} variant="onLight" />
               </div>
+              <p className="text-gray-600 dark:text-slate-300 text-base leading-snug mt-1" dir="auto">{t('hubSubtitle')}</p>
+              {/*
+                Onde ela está, escrito. Antes eram duas bandeirinhas de 24px
+                encavaladas num botão cinza sem texto, e muita gente não sabia que
+                aquilo se tocava — nem que ali se escolhia o país. Numa linha
+                própria, embaixo do título, cabe "Estou em: Estados Unidos" inteiro
+                a 375px; o `truncate` fica só de guarda.
+
+                Os dois-pontos são gramática, não enfeite: "Estou em França" e
+                "Estou em Estados Unidos" estão errados em português (seria "na",
+                "nos"). Como rótulo e valor, "Estou em: França" fica certo com
+                qualquer país, sem guardar o artigo de cada um.
+              */}
+              <button
+                onClick={() => { playSound('click'); setIsLanguageModalOpen(true); }}
+                className="mt-3 inline-flex items-center gap-2 max-w-full min-h-[44px] pl-1.5 pr-3 py-1.5 rounded-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 tap active:scale-95"
+              >
+                <img src={targetCountry.image} alt="" aria-hidden="true" className="w-7 h-7 rounded-full object-cover flex-shrink-0 ring-1 ring-black/5" />
+                <span className="min-w-0 truncate text-base text-gray-800 dark:text-slate-100" dir="auto">
+                  {t('iAmIn')}: <strong className="font-bold">{targetCountry.name}</strong>
+                </span>
+                <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-600 dark:text-slate-300" />
+              </button>
             </header>
 
             <main className="flex-1 p-6 overflow-y-auto">
               <div className="grid grid-cols-2 gap-4 mb-20">
-                {ACTIVE_MODULES.map((mod, i) => {
+                {hubModules.map((mod, i) => {
                   const blocked = estaBloqueado(mod.key);
+                  const desvio = blocked ? DESVIO_SE_FECHADO[mod.key] : undefined;
                   return (
                     <button
                       key={mod.key}
-                      disabled={blocked}
+                      disabled={blocked && !desvio}
                       style={{
                         ...(stagger ? { animationDelay: `${i * 40}ms` } : null),
                         // A sombra do ladrilho é da COR do módulo, não preta. Chega por
@@ -501,9 +563,12 @@ export default function App() {
                         // sombras arbitrárias escritas à mão; o hex já existe no tema.
                         ...(blocked ? null : { '--cor': THEMES[mod.key].hex }),
                       } as React.CSSProperties}
-                      onClick={() => { playSound('click'); setCurrentModule(mod.key); }}
+                      onClick={() => { playSound('click'); setCurrentModule(desvio ? desvio.para : mod.key); }}
                       className={`${blocked
-                        ? 'bg-gray-50 dark:bg-slate-800 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 opacity-60'
+                        // Sem `opacity` no fechado: "Em breve" é texto que ela LÊ, e
+                        // texto lido não fica apagado (piso de leitura do app). O
+                        // cinza do fundo e do ícone já diz que não abre.
+                        ? `bg-gray-50 dark:bg-slate-800 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 ${desvio ? 'tap active:scale-95' : 'cursor-not-allowed'}`
                         : `${mod.cardClass} ladrilho p-5 rounded-2xl border flex flex-col items-center gap-3 tap active:scale-95`} ${stagger ? 'animate-rise-in' : ''}`}
                     >
                       {/*
@@ -512,22 +577,15 @@ export default function App() {
                         encolher o ícone. 48px contra os 28px de antes.
                       */}
                       <mod.icon className={`w-12 h-12 ${blocked ? 'text-gray-400 dark:text-slate-500' : ''}`} />
-                      <span className={`text-sm ${blocked ? 'font-medium text-gray-500 dark:text-slate-400' : 'font-bold'}`}>{t(mod.labelKey)}</span>
-                      {blocked && <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 -mt-2">{t('comingSoon')}</span>}
+                      <span className={`text-base text-center leading-tight ${blocked ? 'font-medium text-gray-600 dark:text-slate-300' : 'font-bold'}`} dir="auto">{t(mod.labelKey)}</span>
+                      {blocked && (desvio ? (
+                        <span className="text-sm font-semibold text-center leading-tight text-rose-700 dark:text-rose-300 -mt-1" dir="auto">{t(desvio.labelKey)}</span>
+                      ) : (
+                        <span className="text-sm text-center text-gray-600 dark:text-slate-300 -mt-1" dir="auto">{t('comingSoon')}</span>
+                      ))}
                     </button>
                   );
                 })}
-
-                {COMING_SOON.map((mod) => (
-                  <button
-                    key={mod.labelKey}
-                    disabled
-                    className="bg-gray-50 dark:bg-slate-800 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 opacity-60"
-                  >
-                    <mod.icon className="w-12 h-12 text-gray-400 dark:text-slate-500" />
-                    <span className="font-medium text-gray-500 dark:text-slate-400 text-sm">{t(mod.labelKey)}</span>
-                  </button>
-                ))}
               </div>
             </main>
           </div>
@@ -537,7 +595,7 @@ export default function App() {
   };
 
   return (
-    <>
+    <TraducaoContext.Provider value={t}>
       {/*
         Menor ponto de isolamento útil: só o módulo carregado sob demanda. Se o
         chunk não vier, o hub, o seletor de idiomas e a navegação continuam de
@@ -560,6 +618,14 @@ export default function App() {
         </Suspense>
       </ErrorBoundary>
 
+      <CountrySheet
+        isOpen={perguntandoPais}
+        countries={destinosAbertos}
+        onChoose={escolherPais}
+        onClose={fecharPerguntaPais}
+        t={t}
+      />
+
       <LanguagePanel
         isOpen={isLanguageModalOpen}
         onClose={() => setIsLanguageModalOpen(false)}
@@ -577,9 +643,29 @@ export default function App() {
         online={online}
       />
 
+      <ShowPhraseScreen
+        aberto={!!fraseMostrada}
+        frase={fraseMostrada?.texto ?? ''}
+        glosa={fraseMostrada?.glosa ?? null}
+        onFechar={() => setFraseMostrada(null)}
+        onOuvir={() => { if (fraseMostrada) handlePlayAudio(fraseMostrada.texto, fraseMostrada.lang); }}
+        Listen={voiceStatus === 'missing' ? SpeakerOffIcon : SpeakerIcon}
+        listenLabel={voiceStatus === 'missing' ? `${t('locListen')} — ${t('voiceMissingLabel')}` : t('locListen')}
+        t={t}
+        theme={theme}
+      />
+
       <VoiceMissingSheet
-        country={voiceMissingFor}
-        onClose={() => setVoiceMissingFor(null)}
+        aviso={avisoVoz}
+        onClose={() => setAvisoVoz(null)}
+        onShowPhrase={() => {
+          // Se o som falhou DENTRO da tela Mostrar, a frase já está em tela
+          // cheia embaixo da folha: basta fechar a folha.
+          if (avisoVoz && !fraseJaNaTela(avisoVoz.texto)) {
+            setFraseMostrada({ texto: avisoVoz.texto, glosa: glosaDe(avisoVoz.texto), lang: avisoVoz.lang });
+          }
+          setAvisoVoz(null);
+        }}
         t={t}
         theme={theme}
       />
@@ -608,18 +694,26 @@ export default function App() {
             className={`bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl transform ${instalacao.saindo ? 'animate-slide-down' : 'animate-slide-up'}`}
           >
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-red-100 dark:bg-red-950 rounded-xl">
-                <ShoppingBagIconSolid className="w-8 h-8 text-red-600 dark:text-red-300" />
-              </div>
-              <button onClick={handleDismissInstall} aria-label={t('close')} className="hit text-gray-500 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300 p-1 tap active:scale-90">
-                <span aria-hidden="true" className="text-2xl">&times;</span>
+              {/* O ícone do próprio app, que é o que vai ficar na tela do celular.
+                  Antes era o saquinho vermelho do Supermercado — um módulo fechado. */}
+              <img src="/icons/pwa-192x192.png" alt="" aria-hidden="true" className="w-14 h-14 rounded-2xl shadow-sm" />
+              <button onClick={handleDismissInstall} aria-label={t('close')} className="hit p-2 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600 tap active:scale-90">
+                <XIcon className="w-5 h-5" />
               </button>
             </div>
-            <h3 id={installTitleId} className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('installApp')}</h3>
-            <p className="text-gray-600 dark:text-slate-300 mb-6">{t('installAppDesc')}</p>
+            <h3
+              id={installTitleId}
+              ref={installTitleRef}
+              tabIndex={-1}
+              className="text-xl font-bold text-gray-900 dark:text-white mb-2 focus-visible:outline-none focus-visible:shadow-none"
+              dir="auto"
+            >
+              {t('installApp')}
+            </h3>
+            <p className="text-base text-gray-600 dark:text-slate-300 mb-6" dir="auto">{t('installAppDesc')}</p>
 
-            {isIOS ? (
-              <div className="bg-gray-50 dark:bg-slate-800 rounded-xl p-4 mb-4 text-sm text-gray-700 dark:text-slate-200 space-y-2">
+            {ambiente.ios ? (
+              <div className="bg-gray-50 dark:bg-slate-800 rounded-xl p-4 mb-4 text-base text-gray-700 dark:text-slate-200 space-y-2">
                 <p className="flex items-center gap-2">
                   1. {t('iosStep1')}
                   <span className="text-blue-500 dark:text-blue-400">
@@ -630,10 +724,10 @@ export default function App() {
               </div>
             ) : (
               <div className="flex gap-3">
-                <button onClick={handleDismissInstall} className="flex-1 py-3 px-4 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 font-medium hover:bg-gray-50 dark:hover:bg-slate-800 tap active:scale-95">
+                <button onClick={handleDismissInstall} className="flex-1 min-h-[48px] py-3 px-4 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 font-medium hover:bg-gray-50 dark:hover:bg-slate-800 tap active:scale-95">
                   {t('notNow')}
                 </button>
-                <button onClick={handleInstallClick} className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 tap active:scale-95">
+                <button onClick={handleInstallClick} className="flex-1 min-h-[48px] py-3 px-4 rounded-xl bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 tap active:scale-95">
                   {t('install')}
                 </button>
               </div>
@@ -641,6 +735,6 @@ export default function App() {
           </div>
         </div>
       )}
-    </>
+    </TraducaoContext.Provider>
   );
 }

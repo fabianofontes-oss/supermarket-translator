@@ -47,8 +47,8 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
 
       {/* O app não tem telemetria: a mensagem precisa ficar acessível aqui. */}
       <details className="mt-7 text-left">
-        <summary className="text-xs text-gray-500 dark:text-slate-400 cursor-pointer">{error.name || 'Error'}</summary>
-        <pre className="mt-2 text-[11px] text-gray-600 dark:text-slate-300 whitespace-pre-wrap break-words overflow-x-auto">
+        <summary className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer">{error.name || 'Error'}</summary>
+        <pre className="mt-2 text-sm text-gray-600 dark:text-slate-300 whitespace-pre-wrap break-words overflow-x-auto">
           {error.message}
         </pre>
       </details>

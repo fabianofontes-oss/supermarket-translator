@@ -1,9 +1,9 @@
 
 // Módulo "Onde está?" — dados e gramática para frases de posição espacial.
 // A frase principal é sempre no idioma de DESTINO (o que o imigrante está aprendendo).
-// O idioma nativo aparece só como apoio, em letra pequena.
+// O idioma nativo aparece como apoio, embaixo, e nunca abaixo de 14px: é o que ela lê.
 //
-// Idiomas: pt, es, en, fr, it (destinos) + uk (ucraniano) e ar (árabe padrão) como origem.
+// Idiomas: pt, es, en, fr, it (destinos) + uk (ucraniano), ar (árabe padrão) e lt (lituano) como origem.
 // Ucraniano não tem artigo mas declina o substantivo: cada objeto traz genitivo, instrumental e locativo.
 // Árabe usa o artigo "ال" colado ao substantivo e não tem verbo "estar" no presente.
 
@@ -41,21 +41,26 @@ export interface LocRelation {
 // ---------------------------------------------------------------------------
 // OBJETOS (todos no singular para manter a concordância simples)
 // ---------------------------------------------------------------------------
+// A ORDEM é de uso, e é decisão: as coisas que se perdem em casa vêm primeiro
+// (chave, celular, bolsa, xícara), depois os móveis que servem de referência,
+// e a bola e a caixa por último. As fileiras rolam para o lado e só os três ou
+// quatro primeiros cartões aparecem sem arrastar — com bola e caixa na frente,
+// a tela parecia exercício de escola, e as coisas da casa ficavam escondidas.
 export const LOC_OBJECTS: LocObject[] = [
-  { key: 'ball',  emoji: '⚽', names: { pt: { n: 'bola', g: 'f' },     es: { n: 'pelota', g: 'f' },   en: { n: 'ball' },  fr: { n: 'ballon', g: 'm' },    it: { n: 'palla', g: 'f' },    uk: { n: "м'яч",    cases: { gen: "м'яча",    instr: "м'ячем",    loc: "м'ячі" } },    lt: { n: 'kamuolys', cases: { gen: 'kamuolio', instr: 'kamuoliu', loc: 'kamuolyje', acc: 'kamuolį' } }, ar: { n: 'كرة' } } },
-  { key: 'box',   emoji: '📦', names: { pt: { n: 'caixa', g: 'f' },    es: { n: 'caja', g: 'f' },     en: { n: 'box' },   fr: { n: 'boîte', g: 'f' },     it: { n: 'scatola', g: 'f' },  uk: { n: 'коробка', cases: { gen: 'коробки',  instr: 'коробкою',  loc: 'коробці' } },  lt: { n: 'dėžė', cases: { gen: 'dėžės', instr: 'dėže', loc: 'dėžėje', acc: 'dėžę' } }, ar: { n: 'صندوق' } } },
   { key: 'key',   emoji: '🔑', names: { pt: { n: 'chave', g: 'f' },    es: { n: 'llave', g: 'f' },    en: { n: 'key' },   fr: { n: 'clé', g: 'f' },       it: { n: 'chiave', g: 'f' },   uk: { n: 'ключ',    cases: { gen: 'ключа',    instr: 'ключем',    loc: 'ключі' } },    lt: { n: 'raktas', cases: { gen: 'rakto', instr: 'raktu', loc: 'rakte', acc: 'raktą' } }, ar: { n: 'مفتاح' } } },
   { key: 'phone', emoji: '📱', names: { pt: { n: 'celular', g: 'm' },  es: { n: 'teléfono', g: 'm' }, en: { n: 'phone' }, fr: { n: 'téléphone', g: 'm' }, it: { n: 'telefono', g: 'm' }, uk: { n: 'телефон', cases: { gen: 'телефону', instr: 'телефоном', loc: 'телефоні' } }, lt: { n: 'telefonas', cases: { gen: 'telefono', instr: 'telefonu', loc: 'telefone', acc: 'telefoną' } }, ar: { n: 'هاتف' } } },
-  { key: 'book',  emoji: '📖', names: { pt: { n: 'livro', g: 'm' },    es: { n: 'libro', g: 'm' },    en: { n: 'book' },  fr: { n: 'livre', g: 'm' },     it: { n: 'libro', g: 'm' },    uk: { n: 'книга',   cases: { gen: 'книги',    instr: 'книгою',    loc: 'книзі' } },    lt: { n: 'knyga', cases: { gen: 'knygos', instr: 'knyga', loc: 'knygoje', acc: 'knygą' } }, ar: { n: 'كتاب' } } },
   { key: 'bag',   emoji: '👜', names: { pt: { n: 'bolsa', g: 'f' },    es: { n: 'bolso', g: 'm' },    en: { n: 'bag' },   fr: { n: 'sac', g: 'm' },       it: { n: 'borsa', g: 'f' },    uk: { n: 'сумка',   cases: { gen: 'сумки',    instr: 'сумкою',    loc: 'сумці' } },    lt: { n: 'krepšys', cases: { gen: 'krepšio', instr: 'krepšiu', loc: 'krepšyje', acc: 'krepšį' } }, ar: { n: 'حقيبة' } } },
   { key: 'cup',   emoji: '☕', names: { pt: { n: 'xícara', g: 'f' },   es: { n: 'taza', g: 'f' },     en: { n: 'cup' },   fr: { n: 'tasse', g: 'f' },     it: { n: 'tazza', g: 'f' },    uk: { n: 'чашка',   cases: { gen: 'чашки',    instr: 'чашкою',    loc: 'чашці' } },    lt: { n: 'puodelis', cases: { gen: 'puodelio', instr: 'puodeliu', loc: 'puodelyje', acc: 'puodelį' } }, ar: { n: 'كوب' } } },
-  { key: 'chair', emoji: '🪑', names: { pt: { n: 'cadeira', g: 'f' },  es: { n: 'silla', g: 'f' },    en: { n: 'chair' }, fr: { n: 'chaise', g: 'f' },    it: { n: 'sedia', g: 'f' },    uk: { n: 'стілець', cases: { gen: 'стільця',  instr: 'стільцем',  loc: 'стільці' } },  lt: { n: 'kėdė', cases: { gen: 'kėdės', instr: 'kėde', loc: 'kėdėje', acc: 'kėdę' } }, ar: { n: 'كرسي' } } },
   { key: 'sofa',  emoji: '🛋️', names: { pt: { n: 'sofá', g: 'm' },     es: { n: 'sofá', g: 'm' },     en: { n: 'sofa' },  fr: { n: 'canapé', g: 'm' },    it: { n: 'divano', g: 'm' },   uk: { n: 'диван',   cases: { gen: 'дивана',   instr: 'диваном',   loc: 'дивані' } },   lt: { n: 'sofa', cases: { gen: 'sofos', instr: 'sofa', loc: 'sofoje', acc: 'sofą' } }, ar: { n: 'أريكة' } } },
   { key: 'bed',   emoji: '🛏️', names: { pt: { n: 'cama', g: 'f' },     es: { n: 'cama', g: 'f' },     en: { n: 'bed' },   fr: { n: 'lit', g: 'm' },       it: { n: 'letto', g: 'm' },    uk: { n: 'ліжко',   cases: { gen: 'ліжка',    instr: 'ліжком',    loc: 'ліжку' } },    lt: { n: 'lova', cases: { gen: 'lovos', instr: 'lova', loc: 'lovoje', acc: 'lovą' } }, ar: { n: 'سرير' } } },
+  { key: 'chair', emoji: '🪑', names: { pt: { n: 'cadeira', g: 'f' },  es: { n: 'silla', g: 'f' },    en: { n: 'chair' }, fr: { n: 'chaise', g: 'f' },    it: { n: 'sedia', g: 'f' },    uk: { n: 'стілець', cases: { gen: 'стільця',  instr: 'стільцем',  loc: 'стільці' } },  lt: { n: 'kėdė', cases: { gen: 'kėdės', instr: 'kėde', loc: 'kėdėje', acc: 'kėdę' } }, ar: { n: 'كرسي' } } },
   { key: 'door',  emoji: '🚪', names: { pt: { n: 'porta', g: 'f' },    es: { n: 'puerta', g: 'f' },   en: { n: 'door' },  fr: { n: 'porte', g: 'f' },     it: { n: 'porta', g: 'f' },    uk: { n: 'двері',   cases: { gen: 'дверей',   instr: 'дверима',   loc: 'дверях' } },   lt: { n: 'durys', cases: { gen: 'durų', instr: 'durimis', loc: 'duryse', acc: 'duris' } }, ar: { n: 'باب' } } },
+  { key: 'book',  emoji: '📖', names: { pt: { n: 'livro', g: 'm' },    es: { n: 'libro', g: 'm' },    en: { n: 'book' },  fr: { n: 'livre', g: 'm' },     it: { n: 'libro', g: 'm' },    uk: { n: 'книга',   cases: { gen: 'книги',    instr: 'книгою',    loc: 'книзі' } },    lt: { n: 'knyga', cases: { gen: 'knygos', instr: 'knyga', loc: 'knygoje', acc: 'knygą' } }, ar: { n: 'كتاب' } } },
+  { key: 'box',   emoji: '📦', names: { pt: { n: 'caixa', g: 'f' },    es: { n: 'caja', g: 'f' },     en: { n: 'box' },   fr: { n: 'boîte', g: 'f' },     it: { n: 'scatola', g: 'f' },  uk: { n: 'коробка', cases: { gen: 'коробки',  instr: 'коробкою',  loc: 'коробці' } },  lt: { n: 'dėžė', cases: { gen: 'dėžės', instr: 'dėže', loc: 'dėžėje', acc: 'dėžę' } }, ar: { n: 'صندوق' } } },
   { key: 'car',   emoji: '🚗', names: { pt: { n: 'carro', g: 'm' },    es: { n: 'coche', g: 'm' },    en: { n: 'car' },   fr: { n: 'voiture', g: 'f' },   it: { n: 'macchina', g: 'f' }, uk: { n: 'машина',  cases: { gen: 'машини',   instr: 'машиною',   loc: 'машині' } },   lt: { n: 'automobilis', cases: { gen: 'automobilio', instr: 'automobiliu', loc: 'automobilyje', acc: 'automobilį' } }, ar: { n: 'سيارة' } } },
   { key: 'cat',   emoji: '🐱', names: { pt: { n: 'gato', g: 'm' },     es: { n: 'gato', g: 'm' },     en: { n: 'cat' },   fr: { n: 'chat', g: 'm' },      it: { n: 'gatto', g: 'm' },    uk: { n: 'кіт',     cases: { gen: 'кота',     instr: 'котом',     loc: 'коті' } },     lt: { n: 'katė', cases: { gen: 'katės', instr: 'kate', loc: 'katėje', acc: 'katę' } }, ar: { n: 'قط' } } },
   { key: 'dog',   emoji: '🐶', names: { pt: { n: 'cachorro', g: 'm' }, es: { n: 'perro', g: 'm' },    en: { n: 'dog' },   fr: { n: 'chien', g: 'm' },     it: { n: 'cane', g: 'm' },     uk: { n: 'собака',  cases: { gen: 'собаки',   instr: 'собакою',   loc: 'собаці' } },   lt: { n: 'šuo', cases: { gen: 'šuns', instr: 'šunimi', loc: 'šunyje', acc: 'šunį' } }, ar: { n: 'كلب' } } },
+  { key: 'ball',  emoji: '⚽', names: { pt: { n: 'bola', g: 'f' },     es: { n: 'pelota', g: 'f' },   en: { n: 'ball' },  fr: { n: 'ballon', g: 'm' },    it: { n: 'palla', g: 'f' },    uk: { n: "м'яч",    cases: { gen: "м'яча",    instr: "м'ячем",    loc: "м'ячі" } },    lt: { n: 'kamuolys', cases: { gen: 'kamuolio', instr: 'kamuoliu', loc: 'kamuolyje', acc: 'kamuolį' } }, ar: { n: 'كرة' } } },
 ];
 
 // ---------------------------------------------------------------------------
@@ -123,6 +128,35 @@ export const LOC_RELATIONS: LocRelation[] = [
     labels:  { pt: 'longe',    es: 'lejos',    en: 'far',      fr: 'loin',    it: 'lontano',    uk: 'далеко',           lt: 'toli', ar: 'بعيد' },
   },
 ];
+
+// ---------------------------------------------------------------------------
+// A PRIMEIRA FRASE
+// ---------------------------------------------------------------------------
+/**
+ * Onde a tela abre: "A chave está embaixo do sofá." / "¿Dónde está la llave?".
+ *
+ * É uma frase que ela diria HOJE, limpando uma casa ou cuidando de alguém. A
+ * anterior era "a bola está à direita da caixa", o exercício de escola, e quem
+ * abria concluía que o módulo não era para ela antes de tocar em nada.
+ *
+ * Pela CHAVE e não pela posição na lista, para que reordenar as tabelas nunca
+ * mude a primeira frase por acidente.
+ */
+export const LOC_START = { subject: 'key', relation: 'under', reference: 'sofa' } as const;
+
+/** O objeto pela chave. Chave inexistente é erro de programação: estoura. */
+export const locObjectByKey = (key: string): LocObject => {
+  const obj = LOC_OBJECTS.find((o) => o.key === key);
+  if (!obj) throw new Error(`LOC_OBJECTS não tem "${key}"`);
+  return obj;
+};
+
+/** A relação pela chave. Chave inexistente é erro de programação: estoura. */
+export const locRelationByKey = (key: string): LocRelation => {
+  const rel = LOC_RELATIONS.find((r) => r.key === key);
+  if (!rel) throw new Error(`LOC_RELATIONS não tem "${key}"`);
+  return rel;
+};
 
 // ---------------------------------------------------------------------------
 // GRAMÁTICA: artigos, contrações, declinação e montagem da frase

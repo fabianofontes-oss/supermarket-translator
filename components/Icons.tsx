@@ -273,22 +273,44 @@ export const PlusSquareIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) =
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
 );
-export const MapPinIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+/**
+ * "Onde está a chave?": uma chave, e não o alfinete de mapa de antes. O alfinete
+ * prometia "onde fica a rua" — GPS, metrô, farmácia —, e o módulo ensina em cima,
+ * embaixo e atrás com as coisas da casa. A chave é um dos objetos da cena.
+ */
+export const KeyIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className} aria-hidden="true">
+    <circle cx="7" cy="12" r="4" />
+    <circle cx="7" cy="12" r="1.2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M11 12h10M17.5 12v3M20.5 12v2.5" />
+  </svg>
+);
+
+/**
+ * Relógio. Mora aqui, e não em `NumbersModule`, porque serve a dois lugares: a
+ * aba Hora e o ladrilho do hub, onde substitui o `#` — que só diz "número" para
+ * quem sabe inglês e não chamava quem procura hora ou preço.
+ */
+export const IconeRelogio: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className} aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3.5 2" />
+  </svg>
+);
+
+/**
+ * "Roupa e sapato": uma camiseta. A régua de antes fazia pensar em quilo e litro,
+ * e o módulo é tamanho de roupa e de sapato.
+ */
+export const ShirtIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 4a3 3 0 0 0 6 0l5 2.5-1.8 4-2.2-1V20H8V9.5l-2.2 1L4 6.5Z" />
   </svg>
 );
 
 export const SignpostIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v3m0 0H6.5L4 8.5 6.5 11H12m0-5h5.5L20 8.5 17.5 11H12m0 0v3m0 0h5.5L20 16.5 17.5 19H12m0-5H6.5L4 16.5 6.5 19H12m0 0v2" />
-  </svg>
-);
-
-export const NumbersIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 3.5 7 20.5M17 3.5l-2 17M3.5 8.5h17M2.5 15.5h17" />
   </svg>
 );
 
@@ -311,13 +333,6 @@ export const PronounsIcon: React.FC<{ className?: string }> = ({ className }) =>
     <circle cx="7.5" cy="7" r="2.6" />
     <circle cx="16.5" cy="7" r="2.6" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 19a4.5 4.5 0 0 1 9 0M12 19a4.5 4.5 0 0 1 9 0" />
-  </svg>
-);
-
-export const SizesIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
-    <rect x="2" y="8" width="20" height="8" rx="2" />
-    <path strokeLinecap="round" d="M6.5 8v3M10 8v4.5M13.5 8v3M17 8v4.5" />
   </svg>
 );
 

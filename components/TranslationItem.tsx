@@ -244,7 +244,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
             {contextLabel && (
               <span
                 id={contextId}
-                className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400 truncate"
+                className="text-sm font-semibold text-gray-600 dark:text-slate-300 truncate"
                 dir="auto"
               >
                 {contextLabel}
@@ -296,7 +296,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     {availability && (
                       <span
                         id={badgeId}
-                        className={`mt-0.5 self-start text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded ${
+                        className={`mt-0.5 self-start text-sm font-bold leading-snug px-1.5 py-0.5 rounded ${
                           availability.travel
                             ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200'
@@ -395,7 +395,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     </div>
 
                     {availability && (
-                      <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-snug -mt-1" dir="auto">
+                      <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug -mt-1" dir="auto">
                         {t('pharmacyCountryInfoNote')}
                       </p>
                     )}
@@ -407,7 +407,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                       lugar do nome.
                     */}
                     <div>
-                        <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-0.5" dir="auto">
+                        <p className="text-sm text-gray-600 dark:text-slate-300 font-bold mb-0.5" dir="auto">
                           {t('pharmacyGenericName')}
                         </p>
                         {localNameUnknown ? (
@@ -419,7 +419,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
 
                     {!localNameUnknown && brands.length > 0 && (
                         <div>
-                            <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-2" dir="auto">
+                            <p className="text-sm text-gray-600 dark:text-slate-300 font-bold mb-2" dir="auto">
                               {t('pharmacyBrands')}
                             </p>
                             <div className="flex flex-wrap gap-2">
@@ -435,7 +435,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     {/* Sugestão que já vinha no próprio catálogo. */}
                     {availability?.alternative && (
                         <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
-                            <p className="text-[10px] text-blue-500 dark:text-blue-400 uppercase font-bold mb-1" dir="auto">{t('pharmacyAskInstead')}</p>
+                            <p className="text-sm text-blue-700 dark:text-blue-300 font-bold mb-1" dir="auto">{t('pharmacyAskInstead')}</p>
                             <p className="text-blue-800 dark:text-blue-300 font-bold text-sm" dir="auto">{availability.alternative}</p>
                         </div>
                     )}
@@ -476,7 +476,7 @@ export const TranslationItem: React.FC<TranslationItemProps> = ({
                     <div className="flex items-center gap-4 flex-1">
                     {item.phonetic && (
                         <div className="text-left">
-                        <p className="text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider mb-1">{t('pronunciation')}</p>
+                        <p className="text-gray-600 dark:text-slate-300 text-sm font-semibold mb-1">{t('pronunciation')}</p>
                         <p className="text-gray-800 dark:text-slate-100 font-mono text-lg">{item.phonetic}</p>
                         </div>
                     )}

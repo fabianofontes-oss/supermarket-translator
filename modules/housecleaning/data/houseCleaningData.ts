@@ -20,9 +20,17 @@
 //
 // O que existe é uma ASSIMETRIA de registro, e ela é real: **quem limpa trata a patroa
 // de `usted`; a patroa costuma tratar quem limpa de `tú`.** Por isso o modo *A tarefa*
-// e o modo *Combinar* estão em `usted`, e o modo *O que ela pede* está em `tú` — porque
-// é assim que se ouve. Há uma nota na tela explicando que `puedes` e `puede` são a
-// mesma ordem, para ninguém achar que ouviu errado.
+// e o modo *Combinar* estão em `usted`, e o modo *A patroa diz* está em `tú` — porque
+// é assim que se ouve. A tela diz isso numa linha só ("Ela vai te chamar de tú…"), e
+// SÓ com destino Espanha: nos EUA e na França não existe tú/usted na frase.
+//
+// ---------------------------------------------------------------------------
+// AS NOTAS FALAM DA ESPANHA, e por isso só aparecem na Espanha
+// ---------------------------------------------------------------------------
+// Toda `note` deste arquivo explica uma palavra espanhola (fregona, trastero, coger,
+// persiana). O app abre também para EUA e França, e lá a nota explicava uma palavra
+// que não estava na tela — a pessoa achava que era ela quem não tinha entendido. O
+// módulo só mostra nota com `targetCountry.code === 'es'`. O texto não muda.
 //
 // ---------------------------------------------------------------------------
 // A REGRA DE CONTEÚDO: quem fala aqui é sempre a própria pessoa, em 1ª pessoa.
@@ -63,9 +71,11 @@ export type TaskGroup = 'rooms' | 'beds' | 'kitchen' | 'bath' | 'laundry';
 export const TASK_GROUPS: TaskGroup[] = ['rooms', 'beds', 'kitchen', 'bath', 'laundry'];
 
 export const TASK_GROUP_LABELS: Record<TaskGroup, Text> = {
-  // "Pela casa" e não "Os cômodos": o seletor de lugar logo acima já se chama
-  // "Em que cômodo", e os dois títulos quase iguais a dois dedos de distância
-  // faziam a pessoa procurar a tarefa na lista de cômodos.
+  // "Pela casa" e não "Os cômodos": o seletor de lugar se chama "Em que cômodo",
+  // e os dois títulos quase iguais a dois dedos de distância faziam a pessoa
+  // procurar a tarefa na lista de cômodos. Hoje o seletor mora logo ABAIXO do
+  // grupo da tarefa escolhida, numa caixa tingida — e as que aceitam cômodo são
+  // todas daqui.
   rooms: { es: 'Por la casa', pt: 'Pela casa', en: 'Around the house', fr: 'Dans la maison', it: 'Per casa', uk: 'По оселі', lt: 'Po namus', ar: 'في أنحاء البيت' },
   beds: { es: 'Las camas', pt: 'As camas', en: 'The beds', fr: 'Les lits', it: 'I letti', uk: 'Ліжка', lt: 'Lovos', ar: 'الأسرّة' },
   kitchen: { es: 'La cocina', pt: 'A cozinha', en: 'The kitchen', fr: 'La cuisine', it: 'La cucina', uk: 'Кухня', lt: 'Virtuvė', ar: 'المطبخ' },
@@ -105,20 +115,38 @@ export interface Task {
 }
 
 export const TASKS: Task[] = [
+  /**
+   * PRIMEIRA de propósito, e é ela que abre a tela ("Voy a limpiar la cocina."):
+   * é a frase que quem limpa casa mais diz, e antes ela não se montava. Quem tocava
+   * em "A cozinha" esperando isso recebia "fregar el suelo de la cocina", descia
+   * procurando "Limpar" e só achava "Arrumar", que em espanhol é `ordenar`.
+   *
+   * `obj` porque o cômodo é o que se limpa: "limpiar la cocina", "limpar a sala".
+   * Em uk o rótulo é "Чистити" e não "Прибирати", que já é o de "Arrumar"; em uk,
+   * lt e ar o cômodo cai no locativo, como em todas as tarefas (ver `Place`).
+   */
+  {
+    key: 'clean', group: 'rooms', placeMode: 'obj',
+    labels: { es: 'Limpiar', pt: 'Limpar', en: 'Clean', fr: 'Nettoyer', it: 'Pulire', uk: 'Чистити', lt: 'Valyti', ar: 'التنظيف' },
+    inf: { es: 'limpiar', pt: 'limpar', en: 'clean', fr: 'nettoyer', it: 'pulire', uk: 'чистити', lt: 'valyti', ar: 'التنظيف' },
+    done: { es: 'ya he limpiado', pt: 'já limpei', en: "I've already cleaned", fr: "j'ai déjà nettoyé", it: 'ho già pulito', uk: 'уже почищено', lt: 'jau išvalyta', ar: 'تم التنظيف' },
+  },
   {
     key: 'mopFloor', group: 'rooms', placeMode: 'of',
     labels: { es: 'Fregar el suelo', pt: 'Passar pano no chão', en: 'Mop the floor', fr: 'Laver le sol', it: 'Lavare il pavimento', uk: 'Мити підлогу', lt: 'Plauti grindis', ar: 'مسح الأرضية' },
     inf: { es: 'fregar el suelo', pt: 'passar pano no chão', en: 'mop the floor', fr: 'laver le sol', it: 'lavare il pavimento', uk: 'мити підлогу', lt: 'plauti grindis', ar: 'مسح الأرضية' },
     done: { es: 'ya he fregado el suelo', pt: 'já passei pano no chão', en: "I've already mopped the floor", fr: "j'ai déjà lavé le sol", it: 'ho già lavato il pavimento', uk: 'підлогу вже помито', lt: 'grindys jau išplautos', ar: 'تم مسح الأرضية' },
+    // A nota parte da palavra que ESTÁ na frase ("fregar el suelo"). Antes começava
+    // por "fregona", e a pessoa procurava "fregona" na frase sem achar.
     note: {
-      es: 'La "fregona" es el palo con la cabeza de tiras y el cubo con escurridor. No es la "mopa", que va en seco.',
-      pt: 'A "fregona" é o esfregão de cabo com o balde de espremer — não tem palavra única em português. Não confundir com "mopa", que é seca e só tira pó.',
-      en: 'A "fregona" is the Spanish mop with a spin bucket. It is not a "mopa", which is used dry.',
-      fr: "La « fregona » est le balai-serpillière espagnol avec son seau essoreur. Ce n'est pas la « mopa », qui s'utilise à sec.",
-      it: 'La "fregona" è il mocio spagnolo con il secchio strizzatore. Non è la "mopa", che si usa a secco.',
-      uk: '«Fregona» — це іспанська швабра з відром-віджималкою. Це не «mopa», якою витирають насухо.',
-      lt: '„Fregona“ — ispaniška šluostė su gręžimo kibiru. Tai ne „mopa“, kuri naudojama sausai.',
-      ar: '«fregona» هي الممسحة الإسبانية بدلوها العاصر، وليست «mopa» التي تُستعمل جافة.',
+      es: '"Fregar el suelo" es pasar la "fregona": el palo con la cabeza de tiras y el cubo con escurridor. No es la "mopa", que va en seco.',
+      pt: '"Fregar el suelo" é passar pano com a "fregona", o esfregão de cabo com balde de espremer. Não confunda com a "mopa", que é seca e só tira pó.',
+      en: '"Fregar el suelo" means mopping with the "fregona", the mop with a wringer bucket. It is not the "mopa", which is dry and only picks up dust.',
+      fr: "« Fregar el suelo », c'est laver le sol avec la « fregona », le balai-serpillière avec son seau essoreur. Ce n'est pas la « mopa », qui s'utilise à sec, pour la poussière.",
+      it: '"Fregar el suelo" è lavare il pavimento con la "fregona", il mocio con il secchio strizzatore. Non è la "mopa", che si usa a secco e toglie solo la polvere.',
+      uk: '«Fregar el suelo» — це мити підлогу шваброю «fregona» з відром-віджималкою. Це не «mopa»: нею лише витирають пил насухо.',
+      lt: '„Fregar el suelo“ – plauti grindis šluoste „fregona“ su gręžimo kibiru. Tai ne „mopa“: ja tik sausai valomos dulkės.',
+      ar: '«fregar el suelo» يعني مسح الأرضية بـ«fregona»، الممسحة ذات الدلو العاصر. وهي غير «mopa» التي تُستعمل جافة لإزالة الغبار فقط.',
     },
   },
   {
@@ -416,7 +444,7 @@ export const TASK_FRAMES: TaskFrame[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// O QUE ELA PEDE
+// A PATROA DIZ (a aba se chamava "O que ela pede", e ninguém sabia quem era "ela")
 // ---------------------------------------------------------------------------
 // Frases RECEPTIVAS: é o que se OUVE, não o que se diz. Estão em `tú` porque é assim
 // que a patroa costuma falar com quem limpa — a assimetria descrita no cabeçalho.
@@ -501,11 +529,27 @@ export const HEARD: HeardPhrase[] = [
 
 export type SayGroup = 'deal' | 'warn';
 
-export const SAY_GROUPS: SayGroup[] = ['deal', 'warn'];
+/**
+ * Os AVISOS primeiro. "Hoje vou chegar um pouco mais tarde", "quebrou um copo" e
+ * "não consegui entrar" são o aperto do dia a dia; combinar horas e pagamento é
+ * coisa de uma vez só. Com os avisos por último, o bloco começava no pé da tela e
+ * ninguém procurava "vou me atrasar" dentro de "Combinar".
+ */
+export const SAY_GROUPS: SayGroup[] = ['warn', 'deal'];
 
 export const SAY_GROUP_LABELS: Record<SayGroup, Text> = {
-  deal: { es: 'Las condiciones', pt: 'As condições', en: 'The terms', fr: 'Les conditions', it: 'Le condizioni', uk: 'Умови', lt: 'Sąlygos', ar: 'الشروط' },
+  // "Combinar o trabalho" e não "As condições": condição soa a contrato, e o bloco
+  // é horas, dias, chaves e onde fica o esfregão.
+  deal: { es: 'Organizar el trabajo', pt: 'Combinar o trabalho', en: 'Arranging the work', fr: 'Organiser le travail', it: 'Organizzare il lavoro', uk: 'Домовитися про роботу', lt: 'Susitarti dėl darbo', ar: 'الاتفاق على العمل' },
   warn: { es: 'Avisar de algo', pt: 'Avisar de alguma coisa', en: 'Letting her know', fr: 'Prévenir', it: 'Avvisare', uk: 'Повідомити', lt: 'Pranešti', ar: 'الإبلاغ' },
+};
+
+/**
+ * O rótulo que abre a nota de uma tarefa, na língua de quem lê. Sem ele o
+ * parágrafo parecia instrução da tela, e não um aviso sobre a palavra.
+ */
+export const TIP_LABEL: Text = {
+  es: 'Consejo:', pt: 'Dica:', en: 'Tip:', fr: 'Astuce :', it: 'Consiglio:', uk: 'Порада:', lt: 'Patarimas:', ar: 'نصيحة:',
 };
 
 export interface SayPhrase {
@@ -536,6 +580,13 @@ export const SAY_PHRASES: SayPhrase[] = [
 /** Primeira letra em maiúscula. Em árabe e nas escritas sem caixa é operação nula. */
 const cap = (s: string): string => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
+/**
+ * Em árabe a preposição لِ colada ao artigo الـ perde o alif: لِ + التنظيف vira
+ * للتنظيف, nunca "لالتنظيف". O quadro "não deu tempo" é o único que cola لِ, e as
+ * tarefas cujo masdar já traz o artigo (`clean`, `tidyUp`, `vacuum`) saíam erradas.
+ */
+const juntarArabe = (s: string): string => s.replace(/(^|\s)لال/g, '$1لل');
+
 /** "Voy a fregar el suelo de la cocina." / "Voy a ordenar el salón." — o cômodo só
  *  entra onde a tarefa aceita, e na forma que aquela tarefa rege. */
 export const buildTaskPhrase = (
@@ -546,5 +597,6 @@ export const buildTaskPhrase = (
 ): string => {
   const body = frame.use === 'done' ? task.done[lang] : task.inf[lang];
   const full = place && task.placeMode ? `${body} ${placeForm(place, lang, task.placeMode)}` : body;
-  return cap(frame.templates[lang].replace('{t}', full));
+  const frase = frame.templates[lang].replace('{t}', full);
+  return cap(lang === 'ar' ? juntarArabe(frase) : frase);
 };

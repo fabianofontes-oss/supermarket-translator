@@ -1,7 +1,15 @@
 
-// Módulo "Medidas" — conversão de numeração de calçado e roupa.
+// Módulo "Roupa e sapato" (cabeçalho "Tamanhos"; antes, "Medidas") — conversão
+// de numeração de calçado e roupa.
 // Aviso importante: numeração varia bastante de marca para marca.
 // Estes valores servem de ponto de partida, não de garantia.
+//
+// MEIO NÚMERO SE ESCREVE COM PONTO nas colunas UK e US ('8.5'), porque é assim
+// que se escreve lá. A vírgula é o jeito brasileiro e europeu, e "size 8,5" na
+// frase em inglês era erro de escrita — e a voz inglesa lia "eight, five". A
+// coluna de centímetros (`extra`) continua com vírgula: ela é lida por quem fala
+// a língua de origem. Na frase, o meio número vai por extenso em cada língua
+// ("eight and a half", "oito e meio") — ver `spellSize`.
 
 import type { LangCode } from '../../location/data/locationData';
 import { numberToWords } from '../../numbers/data/numbersData';
@@ -9,6 +17,9 @@ import { numberToWords } from '../../numbers/data/numbersData';
 export type Text = Record<LangCode, string>;
 
 export type SizeSystem = 'BR' | 'EU' | 'UK' | 'US';
+
+/** Espanhol e francês têm palavra própria para numeração de calçado. */
+export type SizeKind = 'shoe' | 'clothes';
 
 /**
  * Chaves de tradução, não texto pronto. Antes eram strings em português
@@ -32,37 +43,43 @@ export interface SizeRow { BR: string; EU: string; UK: string; US: string; extra
 export interface SizeTable {
   key: string;
   emoji: string;
-  /** Espanhol e francês têm palavra própria para numeração de calçado. */
-  kind: 'shoe' | 'clothes';
+  kind: SizeKind;
   labels: Text;
   /** Rótulo da coluna extra, se houver. */
   extraLabel?: Text;
+  /**
+   * Linha que já vem escolhida ao abrir a categoria — perto do meio da tabela.
+   * Cada categoria guarda a SUA escolha: antes era uma posição só para as seis,
+   * e tocar em "roupa feminina" (7 linhas) vindo do sapato (posição 8) caía na
+   * última linha, BR 48 / XXXL.
+   */
+  defaultRow: number;
   rows: SizeRow[];
 }
 
 export const SIZE_TABLES: SizeTable[] = [
   {
-    key: 'shoes', emoji: '👟', kind: 'shoe',
+    key: 'shoes', emoji: '👟', kind: 'shoe', defaultRow: 7, // BR 40
     labels: { es: 'calzado', pt: 'calçado', en: 'shoes', fr: 'chaussures', it: 'scarpe', uk: 'взуття', lt: 'avalynė', ar: 'الأحذية' },
     extraLabel: { es: 'cm', pt: 'cm', en: 'cm', fr: 'cm', it: 'cm', uk: 'см', lt: 'cm', ar: 'سم' },
     rows: [
       { BR: '33', EU: '34', UK: '2',    US: '3',    extra: '21,5' },
-      { BR: '34', EU: '35', UK: '2,5',  US: '3,5',  extra: '22' },
-      { BR: '35', EU: '36', UK: '3,5',  US: '4,5',  extra: '22,5' },
+      { BR: '34', EU: '35', UK: '2.5',  US: '3.5',  extra: '22' },
+      { BR: '35', EU: '36', UK: '3.5',  US: '4.5',  extra: '22,5' },
       { BR: '36', EU: '37', UK: '4',    US: '5',    extra: '23,5' },
       { BR: '37', EU: '38', UK: '5',    US: '6',    extra: '24' },
       { BR: '38', EU: '39', UK: '6',    US: '7',    extra: '25' },
-      { BR: '39', EU: '40', UK: '6,5',  US: '7,5',  extra: '25,5' },
-      { BR: '40', EU: '41', UK: '7,5',  US: '8,5',  extra: '26,5' },
+      { BR: '39', EU: '40', UK: '6.5',  US: '7.5',  extra: '25,5' },
+      { BR: '40', EU: '41', UK: '7.5',  US: '8.5',  extra: '26,5' },
       { BR: '41', EU: '42', UK: '8',    US: '9',    extra: '27' },
       { BR: '42', EU: '43', UK: '9',    US: '10',   extra: '28' },
-      { BR: '43', EU: '44', UK: '9,5',  US: '10,5', extra: '28,5' },
-      { BR: '44', EU: '45', UK: '10,5', US: '11,5', extra: '29,5' },
+      { BR: '43', EU: '44', UK: '9.5',  US: '10.5', extra: '28,5' },
+      { BR: '44', EU: '45', UK: '10.5', US: '11.5', extra: '29,5' },
       { BR: '45', EU: '46', UK: '11',   US: '12',   extra: '30' },
     ],
   },
   {
-    key: 'women', emoji: '👗', kind: 'clothes',
+    key: 'women', emoji: '👗', kind: 'clothes', defaultRow: 2, // BR 40 / M
     labels: { es: 'ropa de mujer', pt: 'roupa feminina', en: "women's clothing", fr: 'vêtements femme', it: 'abbigliamento donna', uk: 'жіночий одяг', lt: 'moteriški drabužiai', ar: 'ملابس نسائية' },
     extraLabel: { es: 'letra', pt: 'letra', en: 'letter', fr: 'lettre', it: 'lettera', uk: 'літера', lt: 'raidė', ar: 'حرف' },
     rows: [
@@ -76,7 +93,7 @@ export const SIZE_TABLES: SizeTable[] = [
     ],
   },
   {
-    key: 'men', emoji: '👕', kind: 'clothes',
+    key: 'men', emoji: '👕', kind: 'clothes', defaultRow: 2, // M
     labels: { es: 'ropa de hombre', pt: 'roupa masculina', en: "men's clothing", fr: 'vêtements homme', it: 'abbigliamento uomo', uk: 'чоловічий одяг', lt: 'vyriški drabužiai', ar: 'ملابس رجالية' },
     extraLabel: { es: 'pecho cm', pt: 'peito cm', en: 'chest cm', fr: 'poitrine cm', it: 'petto cm', uk: 'груди см', lt: 'krūtinė cm', ar: 'الصدر سم' },
     rows: [
@@ -89,7 +106,7 @@ export const SIZE_TABLES: SizeTable[] = [
     ],
   },
   {
-    key: 'trousers', emoji: '👖', kind: 'clothes',
+    key: 'trousers', emoji: '👖', kind: 'clothes', defaultRow: 2, // BR 40
     labels: { es: 'pantalones', pt: 'calça', en: 'trousers', fr: 'pantalon', it: 'pantaloni', uk: 'штани', ar: 'البنطلون', lt: 'kelnės' },
     extraLabel: { es: 'cintura cm', pt: 'cintura cm', en: 'waist cm', fr: 'taille cm', it: 'vita cm', uk: 'талія см', ar: 'الخصر سم', lt: 'juosmuo cm' },
     rows: [
@@ -103,7 +120,7 @@ export const SIZE_TABLES: SizeTable[] = [
     ],
   },
   {
-    key: 'bra', emoji: '👙', kind: 'clothes',
+    key: 'bra', emoji: '👙', kind: 'clothes', defaultRow: 2, // BR 42
     labels: { es: 'sujetador', pt: 'sutiã', en: 'bra', fr: 'soutien-gorge', it: 'reggiseno', uk: 'бюстгальтер', ar: 'حمالة الصدر', lt: 'liemenėlė' },
     extraLabel: { es: 'bajo pecho cm', pt: 'abaixo do busto cm', en: 'underbust cm', fr: 'sous-poitrine cm', it: 'sottoseno cm', uk: 'під грудьми см', ar: 'تحت الصدر سم', lt: 'po krūtine cm' },
     rows: [
@@ -116,7 +133,7 @@ export const SIZE_TABLES: SizeTable[] = [
     ],
   },
   {
-    key: 'kids', emoji: '🧒', kind: 'clothes',
+    key: 'kids', emoji: '🧒', kind: 'clothes', defaultRow: 3, // BR 6
     labels: { es: 'ropa de niño', pt: 'roupa infantil', en: "kids' clothing", fr: 'vêtements enfant', it: 'abbigliamento bambino', uk: 'дитячий одяг', ar: 'ملابس الأطفال', lt: 'vaikų drabužiai' },
     extraLabel: { es: 'altura cm', pt: 'altura cm', en: 'height cm', fr: 'taille cm', it: 'altezza cm', uk: 'зріст см', ar: 'الطول سم', lt: 'ūgis cm' },
     rows: [
@@ -133,17 +150,50 @@ export const SIZE_TABLES: SizeTable[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// PERGUNTA DO SELETOR
+// ---------------------------------------------------------------------------
+/**
+ * A chave de tradução da pergunta que fica em cima dos números: "Qual número
+ * você calça no Brasil?". Sapato se CALÇA, roupa se VESTE, e na roupa infantil
+ * quem veste é a criança — "o seu tamanho" ali estaria errado.
+ */
+export const askKeyFor = (tb: Pick<SizeTable, 'key' | 'kind'>): 'szAskShoe' | 'szAskClothes' | 'szAskKids' => {
+  if (tb.kind === 'shoe') return 'szAskShoe';
+  return tb.key === 'kids' ? 'szAskKids' : 'szAskClothes';
+};
+
+// ---------------------------------------------------------------------------
 // FRASES DA LOJA
 // ---------------------------------------------------------------------------
-export const SIZE_QUESTIONS: Text[] = [
+/**
+ * Uma frase que muda com o tipo: na sapataria se pede "un número más" e
+ * "la pointure au-dessus"; na loja de roupa, "una talla más" e "la taille
+ * au-dessus". A pergunta do topo (`buildSizeQuestion`) já separava as duas
+ * palavras, e a lista da loja ensinava "talla" até para sapato.
+ * Onde a língua usa a mesma palavra para os dois (inglês "size", ucraniano
+ * "розмір", lituano "dydis", árabe "مقاس"), as duas versões são iguais.
+ */
+interface PorTipo { shoe: Text; clothes: Text }
+
+const SHOP_PHRASES: Array<Text | PorTipo> = [
   { es: '¿Puedo probármelo?', pt: 'Posso experimentar?', en: 'Can I try it on?', fr: "Puis-je l'essayer ?", it: 'Posso provarlo?', uk: 'Можна поміряти?', lt: 'Ar galiu pasimatuoti?', ar: 'هل يمكنني تجربته؟' },
   { es: '¿Dónde está el probador?', pt: 'Onde fica o provador?', en: 'Where is the fitting room?', fr: 'Où sont les cabines ?', it: "Dov'è il camerino?", uk: 'Де примірочна?', lt: 'Kur yra matavimosi kabina?', ar: 'أين غرفة القياس؟' },
   { es: 'Me queda grande.', pt: 'Ficou grande em mim.', en: "It's too big.", fr: "C'est trop grand.", it: 'Mi sta grande.', uk: 'Завелике.', lt: 'Man per didelis.', ar: 'إنه كبير عليّ.' },
   { es: 'Me queda pequeño.', pt: 'Ficou pequeno em mim.', en: "It's too small.", fr: "C'est trop petit.", it: 'Mi sta piccolo.', uk: 'Замале.', lt: 'Man per mažas.', ar: 'إنه صغير عليّ.' },
-  { es: '¿Tienen una talla más?', pt: 'Tem um número maior?', en: 'Do you have a bigger size?', fr: 'Avez-vous la taille au-dessus ?', it: 'Avete una taglia in più?', uk: 'Є більший розмір?', lt: 'Ar turite didesnį dydį?', ar: 'هل لديكم مقاس أكبر؟' },
-  { es: '¿Tienen una talla menos?', pt: 'Tem um número menor?', en: 'Do you have a smaller size?', fr: 'Avez-vous la taille en dessous ?', it: 'Avete una taglia in meno?', uk: 'Є менший розмір?', lt: 'Ar turite mažesnį dydį?', ar: 'هل لديكم مقاس أصغر؟' },
+  {
+    shoe:    { es: '¿Tienen un número más?', pt: 'Tem um número maior?', en: 'Do you have a bigger size?', fr: "Vous l'avez en pointure au-dessus ?", it: 'Avete un numero in più?', uk: 'Є більший розмір?', lt: 'Ar turite didesnį dydį?', ar: 'هل لديكم مقاس أكبر؟' },
+    clothes: { es: '¿Tienen una talla más?', pt: 'Tem um tamanho maior?', en: 'Do you have a bigger size?', fr: 'Avez-vous la taille au-dessus ?', it: 'Avete una taglia in più?', uk: 'Є більший розмір?', lt: 'Ar turite didesnį dydį?', ar: 'هل لديكم مقاس أكبر؟' },
+  },
+  {
+    shoe:    { es: '¿Tienen un número menos?', pt: 'Tem um número menor?', en: 'Do you have a smaller size?', fr: "Vous l'avez en pointure en dessous ?", it: 'Avete un numero in meno?', uk: 'Є менший розмір?', lt: 'Ar turite mažesnį dydį?', ar: 'هل لديكم مقاس أصغر؟' },
+    clothes: { es: '¿Tienen una talla menos?', pt: 'Tem um tamanho menor?', en: 'Do you have a smaller size?', fr: 'Avez-vous la taille en dessous ?', it: 'Avete una taglia in meno?', uk: 'Є менший розмір?', lt: 'Ar turite mažesnį dydį?', ar: 'هل لديكم مقاس أصغر؟' },
+  },
   { es: '¿Se puede cambiar si no me vale?', pt: 'Dá para trocar se não servir?', en: "Can I exchange it if it doesn't fit?", fr: 'Puis-je l\'échanger si ça ne va pas ?', it: 'Posso cambiarlo se non mi va?', uk: 'Чи можна обміняти, якщо не підійде?', lt: 'Ar galima pakeisti, jei netiks?', ar: 'هل يمكن استبداله إذا لم يناسبني؟' },
 ];
+
+/** As frases da loja já resolvidas para o tipo escolhido (sapato ou roupa). */
+export const sizeQuestions = (kind: SizeKind): Text[] =>
+  SHOP_PHRASES.map((p) => ('shoe' in p ? p[kind] : p));
 
 export const SIZE_WARNING: Text = {
   es: 'Las tallas cambian mucho de una marca a otra. Pruébate siempre la prenda.',
@@ -158,17 +208,41 @@ export const SIZE_WARNING: Text = {
 // ---------------------------------------------------------------------------
 // MONTAGEM DA FRASE
 // ---------------------------------------------------------------------------
-/** Números vão por extenso; letras (M, XL) vão como estão. */
-const spellSize = (lang: LangCode, size: string): string => {
-  const n = Number(size.replace(',', '.'));
-  if (!Number.isInteger(n)) return size;
+/**
+ * O "e meio" de cada língua, colado depois do número inteiro por extenso.
+ * O lituano não entra: lá o tamanho vai em algarismo (ver `buildSizeQuestion`).
+ */
+const AND_A_HALF: Record<Exclude<LangCode, 'lt'>, (whole: string) => string> = {
+  pt: (w) => `${w} e meio`,
+  es: (w) => `${w} y medio`,
+  en: (w) => `${w} and a half`,
+  fr: (w) => `${w} et demi`,
+  it: (w) => `${w} e mezzo`,
+  uk: (w) => `${w} з половиною`,
+  ar: (w) => `${w} ونصف`,
+};
+
+/** Meio número, escrito com ponto ('8.5') ou vírgula ('8,5'). */
+const HALF = /^(\d+)[.,]5$/;
+
+/**
+ * Números vão por extenso; letras (M, XL, 2T) e faixas (2-3) vão como estão.
+ * Meio número vai por extenso também: "eight and a half", nunca "8,5" — a voz
+ * inglesa lia a vírgula como pausa ("eight, five").
+ */
+const spellSize = (lang: Exclude<LangCode, 'lt'>, size: string): string => {
+  const half = size.match(HALF);
+  if (half) return AND_A_HALF[lang](numberToWords(lang, Number(half[1])));
+  const n = Number(size);
+  if (size.trim() === '' || !Number.isInteger(n)) return size;
   return numberToWords(lang, n);
 };
 
 /** "¿Lo tiene en el número cuarenta y dos?" para calçado, "en la talla" para roupa. */
-export const buildSizeQuestion = (lang: LangCode, size: string, kind: 'shoe' | 'clothes'): string => {
-  // Em lituano o número do tamanho vai em algarismo: declinar o ordinal seria frágil.
-  const s = lang === 'lt' ? size : spellSize(lang, size);
+export const buildSizeQuestion = (lang: LangCode, size: string, kind: SizeKind): string => {
+  // Em lituano o número do tamanho vai em algarismo: declinar o ordinal seria
+  // frágil. E em algarismo lituano o decimal é com vírgula (8,5).
+  const s = lang === 'lt' ? size.replace('.', ',') : spellSize(lang, size);
   const shoe = kind === 'shoe';
   switch (lang) {
     case 'es': return shoe ? `¿Lo tiene en el número ${s}?` : `¿Lo tiene en la talla ${s}?`;

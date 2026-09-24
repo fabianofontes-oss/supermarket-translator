@@ -1,12 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { createElement } from 'react';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import HouseCleaningModule from '../modules/HouseCleaningModule';
 import {
   TASKS, TASK_GROUPS, TASK_GROUP_LABELS, PLACES, TASK_FRAMES,
-  HEARD, SAY_PHRASES, SAY_GROUPS, SAY_GROUP_LABELS,
+  HEARD, SAY_PHRASES, SAY_GROUPS, SAY_GROUP_LABELS, TIP_LABEL,
   buildTaskPhrase,
   placeForm,
 } from '../modules/housecleaning/data/houseCleaningData';
 import * as dados from '../modules/housecleaning/data/houseCleaningData';
 import { SUPPORTED_LANGS, type LangCode } from '../modules/location/data/locationData';
+import { translations } from '../translations';
+import { COUNTRIES } from '../constants';
 
 /**
  * Módulo Limpeza da casa.
@@ -20,6 +27,10 @@ import { SUPPORTED_LANGS, type LangCode } from '../modules/location/data/locatio
  *     quem fala ("vou chegar atrasada", "je suis désolée", "я не змогла").
  *  2. A Parte 5 tranca a fronteira com o catálogo: este módulo não pode virar uma
  *     segunda lista dos 96 produtos de `supermarket/data/cleaningData.ts`.
+ *  3. A Parte 7 tranca a tela, pela auditoria de usabilidade de 23/09/2026: abre
+ *     em "Voy a limpiar la cocina.", nota de costume espanhol só com destino
+ *     Espanha, o aviso de "é para reconhecer" na banda fixa, a tarefa sob "Qual
+ *     serviço?" com cômodo e dica logo abaixo dela, e os avisos antes do combinado.
  */
 
 /** Bloco árabe. Nenhuma outra língua pode conter isto (AGENTS.md 8.5). */
@@ -55,7 +66,7 @@ const TAREFAS = [...todasAsTarefas()];
 const FRASES = [...todasAsFrases()];
 const TUDO = [...TAREFAS, ...FRASES];
 
-/** Só o que a própria pessoa diz. O modo "o que ela pede" é fala de outra pessoa. */
+/** Só o que a própria pessoa diz. O modo "A patroa diz" é fala de outra pessoa. */
 const EU_FALO = [
   ...TAREFAS,
   ...SUPPORTED_LANGS.flatMap((lang) => SAY_PHRASES.map((s) => ({ tag: `${lang}/${s.key}`, lang, frase: s.text[lang] }))),
@@ -71,13 +82,14 @@ const invariante = (nome: string, casos: Caso[], quebrou: (c: Caso) => boolean) 
 
 describe('PARTE 1 — varredura de invariantes', () => {
   it('cobre o que a interface consegue produzir', () => {
-    expect(TASKS).toHaveLength(16);
+    // 17 e não 16: entrou "Limpar", a frase que quem limpa casa mais diz.
+    expect(TASKS).toHaveLength(17);
     expect(PLACES).toHaveLength(7);
     expect(TASK_FRAMES).toHaveLength(4);
     expect(HEARD).toHaveLength(12);
     expect(SAY_PHRASES).toHaveLength(12);
-    // 8 idiomas × 16 tarefas × 4 quadros × (1 sem cômodo + 7 cômodos)
-    expect(TAREFAS).toHaveLength(8 * 16 * 4 * 8);
+    // 8 idiomas × 17 tarefas × 4 quadros × (1 sem cômodo + 7 cômodos)
+    expect(TAREFAS).toHaveLength(8 * 17 * 4 * 8);
   });
 
   invariante('sem buraco de dado', TUDO, (c) => !c.frase || /undefined|null|\[object/.test(c.frase));
@@ -91,6 +103,57 @@ describe('PARTE 1 — varredura de invariantes', () => {
   });
   invariante('nenhum idioma cai no ramo árabe', TUDO, (c) => c.lang !== 'ar' && ARABE.test(c.frase));
   invariante('o árabe sai em árabe', TUDO.filter((c) => c.lang === 'ar'), (c) => !ARABE.test(c.frase));
+  // لِ + الـ perde o alif: "للتنظيف", nunca "لالتنظيف". O quadro "não deu tempo"
+  // cola لِ, e três tarefas têm masdar com artigo (clean, tidyUp, vacuum).
+  invariante('em árabe, لِ colado ao artigo perde o alif', TAREFAS.filter((c) => c.lang === 'ar'), (c) => /(^|\s)لال/.test(c.frase));
+});
+
+describe('PARTE 1b — a frase mais dita existe, e abre a tela', () => {
+  const going = TASK_FRAMES.find((f) => f.key === 'going')!;
+  const done = TASK_FRAMES.find((f) => f.key === 'done')!;
+  const need = TASK_FRAMES.find((f) => f.key === 'need')!;
+  const noTime = TASK_FRAMES.find((f) => f.key === 'noTime')!;
+  const clean = TASKS.find((t) => t.key === 'clean')!;
+  const kitchen = PLACES.find((p) => p.key === 'kitchen')!;
+  const bath = PLACES.find((p) => p.key === 'bath')!;
+
+  it('"Limpar" é a primeira tarefa, e a cozinha o primeiro cômodo', () => {
+    // A tela abre com TASKS[0] e PLACES[0]: a ordem destas tabelas É a primeira
+    // frase que a pessoa vê.
+    expect(TASKS[0].key).toBe('clean');
+    expect(PLACES[0].key).toBe('kitchen');
+    expect(TASK_FRAMES[0].key).toBe('going');
+    expect(buildTaskPhrase('es', TASK_FRAMES[0], TASKS[0], PLACES[0])).toBe('Voy a limpiar la cocina.');
+    expect(buildTaskPhrase('pt', TASK_FRAMES[0], TASKS[0], PLACES[0])).toBe('Vou limpar a cozinha.');
+  });
+
+  it('o cômodo é o objeto do verbo, nos quatro quadros', () => {
+    expect(buildTaskPhrase('es', done, clean, bath)).toBe('Ya he limpiado el baño.');
+    expect(buildTaskPhrase('pt', done, clean, bath)).toBe('Já limpei o banheiro.');
+    expect(buildTaskPhrase('es', need, clean, kitchen)).toBe('¿Hace falta limpiar la cocina hoy?');
+    expect(buildTaskPhrase('es', noTime, clean, kitchen)).toBe('Hoy no me ha dado tiempo de limpiar la cocina.');
+    expect(buildTaskPhrase('en', going, clean, kitchen)).toBe("I'm going to clean the kitchen.");
+    expect(buildTaskPhrase('en', done, clean, bath)).toBe("I've already cleaned the bathroom.");
+    expect(buildTaskPhrase('fr', going, clean, kitchen)).toBe('Je vais nettoyer la cuisine.');
+    expect(buildTaskPhrase('fr', done, clean, bath)).toBe("J'ai déjà nettoyé la salle de bain.");
+    expect(buildTaskPhrase('it', going, clean, kitchen)).toBe('Sto per pulire la cucina.');
+    // Sem cômodo, a frase continua inteira.
+    expect(buildTaskPhrase('es', going, clean, null)).toBe('Voy a limpiar.');
+  });
+
+  it('o árabe junta لِ e الـ do jeito certo', () => {
+    expect(buildTaskPhrase('ar', noTime, clean, kitchen)).toBe('لم يتسع الوقت اليوم للتنظيف في المطبخ.');
+    expect(buildTaskPhrase('ar', going, clean, kitchen)).toBe('سأقوم بالتنظيف في المطبخ.');
+    const tidy = TASKS.find((t) => t.key === 'tidyUp')!;
+    expect(buildTaskPhrase('ar', noTime, tidy, null)).toBe('لم يتسع الوقت اليوم للترتيب.');
+  });
+
+  it('"Limpar" não repete o rótulo de "Arrumar" em ucraniano', () => {
+    const tidy = TASKS.find((t) => t.key === 'tidyUp')!;
+    const rotulos = TASKS.map((t) => t.labels.uk);
+    expect(new Set(rotulos).size).toBe(rotulos.length);
+    expect(clean.labels.uk).not.toBe(tidy.labels.uk);
+  });
 });
 
 describe('PARTE 2 — o cômodo entra só onde cabe', () => {
@@ -230,7 +293,7 @@ describe('PARTE 3 — quem fala não se descreve', () => {
   });
 });
 
-describe('PARTE 4 — o que ela pede é fala de outra pessoa', () => {
+describe('PARTE 4 — o que a patroa diz é fala de outra pessoa', () => {
   it('as frases ouvidas estão em tú, e as ditas em usted', () => {
     /**
      * A assimetria de registro é o achado do módulo: quem limpa trata a patroa de
@@ -351,5 +414,187 @@ describe('PARTE 6 — integridade das tabelas', () => {
         }
       }
     }
+  });
+
+  it('o rótulo da dica existe nos oito idiomas', () => {
+    for (const lang of SUPPORTED_LANGS) expect(TIP_LABEL[lang], lang).toBeTruthy();
+  });
+
+  it('a nota do "fregar el suelo" parte da palavra que está na frase', () => {
+    // Antes começava por "fregona", e a pessoa procurava "fregona" na frase
+    // ("Voy a fregar el suelo") sem achar.
+    const mop = TASKS.find((t) => t.key === 'mopFloor')!;
+    for (const lang of SUPPORTED_LANGS) expect(mop.note![lang], lang).toMatch(/fregar el suelo/i);
+    expect(mop.note!.pt).toMatch(/^"Fregar el suelo"/);
+  });
+
+  it('os avisos vêm antes do combinado', () => {
+    // "Vou chegar mais tarde" é aperto de todo dia; horas e pagamento se combinam
+    // uma vez. Com os avisos por último, o bloco começava no pé da tela.
+    expect(SAY_GROUPS).toEqual(['warn', 'deal']);
+    expect(SAY_GROUP_LABELS.deal.pt).toBe('Combinar o trabalho');
+  });
+});
+
+// ---------------------------------------------------------------------- tela
+
+const t = (k: string) => (translations['pt-BR'] as Record<string, string>)[k] || k;
+const BR = COUNTRIES.find((c) => c.code === 'br')!;
+const ES = COUNTRIES.find((c) => c.code === 'es')!;
+const US = COUNTRIES.find((c) => c.code === 'us')!;
+const FR = COUNTRIES.find((c) => c.code === 'fr')!;
+const tema = { color: 'bg-lime-800', textColor: 'text-lime-800', hex: '#3f6212', borderColor: 'border-lime-800' };
+
+const montar = (targetCountry = ES) => {
+  const handlePlayAudio = vi.fn();
+  const r = render(createElement(HouseCleaningModule, {
+    nativeCountry: BR,
+    targetCountry,
+    t,
+    theme: tema,
+    onGoHome: () => {},
+    onOpenLanguageModal: () => {},
+    onOpenShare: () => {},
+    handlePlayAudio,
+  }));
+  return { ...r, handlePlayAudio };
+};
+
+/** O botão que contém este texto. */
+const botaoCom = (texto: string) =>
+  screen.getAllByText(texto).map((e) => e.closest('button')).find(Boolean) as HTMLButtonElement;
+
+const aba = (chave: string) => screen.getByRole('tab', { name: t(chave) });
+
+/** `a` vem antes de `b` na ordem do documento. */
+const antes = (a: Element, b: Element) =>
+  Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+const ler = (f: string) => readFileSync(join(__dirname, '..', f), 'utf8');
+
+const nota = (key: string) => TASKS.find((x) => x.key === key)!.note!.pt;
+
+beforeEach(() => {
+  localStorage.clear();
+  window.matchMedia = ((): MediaQueryList => ({
+    matches: false, media: '', onchange: null,
+    addEventListener() {}, removeEventListener() {},
+    addListener() {}, removeListener() {}, dispatchEvent: () => false,
+  } as unknown as MediaQueryList)) as unknown as typeof window.matchMedia;
+});
+
+afterEach(() => cleanup());
+
+describe('PARTE 7 — a tela', () => {
+  it('abre dizendo "Voy a limpiar la cocina.", com os três botões que a formam acesos', () => {
+    montar();
+    expect(screen.getByText('Voy a limpiar la cocina.')).toBeTruthy();
+    expect(screen.getByText('Vou limpar a cozinha.')).toBeTruthy();
+    expect(botaoCom('Vou…').getAttribute('aria-pressed')).toBe('true');
+    expect(botaoCom('Limpar').getAttribute('aria-pressed')).toBe('true');
+    expect(botaoCom('A cozinha').getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('diz para que serve, e pergunta pelo serviço antes do cômodo', () => {
+    montar();
+    expect(screen.getByText(t('hintHouseCleaning'))).toBeTruthy();
+    const servico = screen.getByRole('heading', { name: t('hcWhatTask') });
+    const comodo = screen.getByRole('heading', { name: t('hcWhere') });
+    expect(antes(servico, comodo)).toBe(true);
+    // E o cômodo mora logo abaixo das tarefas de "Pela casa", antes do grupo seguinte.
+    expect(antes(botaoCom('Limpar'), comodo)).toBe(true);
+    expect(antes(comodo, screen.getByText(TASK_GROUP_LABELS.beds.pt))).toBe(true);
+  });
+
+  it('um toque na cozinha escolhida desfaz a escolha', () => {
+    montar();
+    fireEvent.click(botaoCom('A cozinha'));
+    expect(screen.getByText('Voy a limpiar.')).toBeTruthy();
+  });
+
+  it('o cômodo some para a tarefa que não o aceita, e a escolha volta com ela', () => {
+    montar();
+    fireEvent.click(botaoCom('Levar o lixo'));
+    expect(screen.queryByRole('heading', { name: t('hcWhere') })).toBeNull();
+    expect(screen.getByText('Voy a sacar la basura.')).toBeTruthy();
+    fireEvent.click(botaoCom('Limpar'));
+    expect(screen.getByText('Voy a limpiar la cocina.')).toBeTruthy();
+  });
+
+  it('na Espanha, a dica aparece com rótulo, logo abaixo do grupo da tarefa tocada', () => {
+    montar(ES);
+    fireEvent.click(botaoCom('Lavar a louça'));
+    const dica = screen.getByText(nota('dishes'));
+    expect(dica.closest('p')!.textContent).toMatch(/^Dica: /);
+    expect(antes(botaoCom('Lavar a louça'), dica)).toBe(true);
+    expect(antes(dica, screen.getByText(TASK_GROUP_LABELS.bath.pt))).toBe(true);
+    // Nenhuma dica solta no topo, antes das escolhas.
+    expect(antes(screen.getByRole('heading', { name: t('hcHowToSay') }), dica)).toBe(true);
+  });
+
+  it('fora da Espanha, nenhuma nota explica palavra espanhola que não está na tela', () => {
+    for (const pais of [US, FR]) {
+      montar(pais);
+      fireEvent.click(botaoCom('Passar pano no chão'));
+      expect(screen.queryByText(nota('mopFloor')), pais.code).toBeNull();
+      expect(screen.queryByText(/fregona/i), pais.code).toBeNull();
+
+      fireEvent.click(aba('hcModeHeard'));
+      expect(screen.getByText(t('hcHeardNote'))).toBeTruthy();
+      expect(screen.queryByText(t('hcHeardNoteSpain')), pais.code).toBeNull();
+      for (const h of HEARD) if (h.note) expect(screen.queryByText(h.note.pt), `${pais.code}/${h.key}`).toBeNull();
+      cleanup();
+    }
+  });
+
+  it('"A patroa diz": o aviso fica na banda fixa, e o tú/usted só na Espanha', () => {
+    montar(ES);
+    fireEvent.click(aba('hcModeHeard'));
+    const aviso = screen.getByText(t('hcHeardNote'));
+    // Fora do painel que rola: na rolagem ele sumia ao descer.
+    expect(aviso.closest('[role="tabpanel"]')).toBeNull();
+    expect(screen.getByText(t('hcHeardNoteSpain'))).toBeTruthy();
+    // As notas de costume continuam na Espanha.
+    for (const h of HEARD) if (h.note) expect(screen.getByText(h.note.pt), h.key).toBeTruthy();
+    // A dica do módulo ("a frase é para a patroa") contradiria o aviso aqui.
+    expect(screen.queryByText(t('hintHouseCleaning'))).toBeNull();
+  });
+
+  it('a linha de gesto só aparece na aba que monta frase', () => {
+    // Ela diz "toque aqui embaixo e a frase lá em cima muda". Em "A patroa diz" e
+    // em "Combinar" a banda não tem frase: tocar e ver nada mudar parece travado.
+    montar();
+    expect(screen.getByText(t('gestureHint'))).toBeTruthy();
+    fireEvent.click(aba('hcModeHeard'));
+    expect(screen.queryByText(t('gestureHint'))).toBeNull();
+    fireEvent.click(aba('hcModeSay'));
+    expect(screen.queryByText(t('gestureHint'))).toBeNull();
+    fireEvent.click(aba('hcModeTask'));
+    expect(screen.getByText(t('gestureHint'))).toBeTruthy();
+  });
+
+  it('"Combinar" começa pelos avisos', () => {
+    montar();
+    fireEvent.click(aba('hcModeSay'));
+    const avisar = screen.getByText(SAY_GROUP_LABELS.warn.pt);
+    const combinar = screen.getByText(SAY_GROUP_LABELS.deal.pt);
+    expect(antes(avisar, combinar)).toBe(true);
+  });
+
+  it('nenhuma letra abaixo de 14px, e o português nunca apagado', () => {
+    const fonte = ler('modules/HouseCleaningModule.tsx');
+    expect(fonte).not.toMatch(/text-\[(9|10|11|12|13)px\]/);
+    expect(fonte).not.toMatch(/\btext-xs\b/);
+    expect(fonte).not.toMatch(/opacity-70/);
+    expect(fonte).not.toMatch(/text-gray-(300|400|500)\b/);
+  });
+
+  it('toda chave que a tela usa existe nos oito idiomas', () => {
+    const fonte = ler('modules/HouseCleaningModule.tsx');
+    const usadas = [...new Set([...fonte.matchAll(/\bt\('([A-Za-z0-9_]+)'\)/g)].map((m) => m[1]))];
+    expect(usadas).toEqual(expect.arrayContaining(['hintHouseCleaning', 'hcWhatTask', 'hcHeardNoteSpain']));
+    const blocos = ['en-US', 'pt-BR', 'es-ES', 'fr-FR', 'it-IT', 'uk-UA', 'ar-MA', 'lt-LT'];
+    const faltando = blocos.flatMap((b) => usadas.filter((k) => !(translations[b] as Record<string, string>)[k]).map((k) => `${b}/${k}`));
+    expect(faltando).toEqual([]);
   });
 });
