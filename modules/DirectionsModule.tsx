@@ -2,9 +2,8 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { ModuleShell } from '../components/ModuleShell';
 import type { Country } from '../types';
-import { SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
+import { SpeakerIcon, SpeakerOffIcon, XIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
-import { anotarGlosa, useFalando } from '../utils/audioState';
 import type { VoiceStatus } from '../utils/speech';
 import { toLangCode, type LangCode } from './location/data/locationData';
 import {
@@ -13,13 +12,11 @@ import {
   ROTATORIA,
   DIAGONAIS,
   COMPASS,
-  DIR_GO_TO,
   DIR_QUESTIONS,
   DIR_PLACES,
   DIR_DISTANCES,
   GRID,
   START,
-  MAX_STEPS,
   applyStep,
   headingSentence,
   type DirStep,
@@ -40,16 +37,11 @@ interface DirectionsModuleProps {
   voiceStatus?: VoiceStatus;
 }
 
-type Glyph = React.FC<React.SVGProps<SVGSVGElement>>;
+const MAX_STEPS = 10;
 
-/**
- * Pílula de texto do cartão do percurso (Desfazer, Começar de novo).
- *
- * Contorno sobre véu ESCURO, e não `bg-white/20`: o véu claro baixava o branco
- * sobre o âmbar para 3,5:1, reprovado para texto de 14px. Escurecer só sobe. É o
- * mesmo recado que o rodapé do `PhraseCard` já deu.
- */
-const PILULA = 'hit flex-shrink-0 px-3 py-1.5 rounded-full border border-white/70 bg-black/10 text-sm font-bold text-white tap active:scale-95';
+/** Quantas colunas para quantos passos. Escrito por extenso: o Tailwind varre o
+ *  fonte e não gera classe que só existe depois de concatenada. */
+const COLUNAS: Record<number, string> = { 1: 'grid-cols-1', 2: 'grid-cols-2', 3: 'grid-cols-3' };
 
 // Geometria do mapa (SVG 300x300)
 const SP = 72;      // distância entre cruzamentos
@@ -199,39 +191,14 @@ export default function DirectionsModule({
     return applyStep(route.walker, step) !== null;
   };
 
-  /**
-   * Fala a frase e anota a glosa antes. Quando o som falha, a folha "Sem som
-   * agora" oferece mostrar a frase na tela, e a glosa só quem pediu o som
-   * conhece — o `PhraseCard` faz o mesmo nos outros módulos.
-   */
-  const falar = (text: string, glosa: string | null) => {
-    anotarGlosa(text, showNative ? glosa : null);
-    handlePlayAudio(text, targetCountry.lang);
-  };
-
-  /*
-   * Todo movimento devolve a bússola ao boneco. A escolha manual passava na
-   * frente do rumo dele para sempre: depois de um toque em "Sur", o boneco
-   * andava para o norte e o cartão continuava dizendo "você está indo para o
-   * sul". A escolha manual vale só até o próximo passo.
-   */
   const addStep = (step: DirStep) => {
     if (!canApply(step)) return;
     playSound('click');
     setSteps((prev) => [...prev, step]);
-    setCompassPick(null);
-    falar(step.phrases[target], step.phrases[native]);
+    handlePlayAudio(step.phrases[target], targetCountry.lang);
   };
-  const undo = () => { playSound('toggle'); setSteps((p) => p.slice(0, -1)); setCompassPick(null); };
-  const clear = () => { playSound('toggle'); setSteps([]); setCompassPick(null); };
-
-  // A lista do cartão fixo tem teto e rolagem própria. Sem isto, do quarto
-  // passo em diante o que acabou de entrar ficava escondido embaixo.
-  const listaRef = useRef<HTMLOListElement>(null);
-  useEffect(() => {
-    const lista = listaRef.current;
-    if (lista) lista.scrollTop = lista.scrollHeight;
-  }, [steps.length]);
+  const undo = () => { playSound('toggle'); setSteps((p) => p.slice(0, -1)); };
+  const clear = () => { playSound('toggle'); setSteps([]); };
 
   // Sem voz do idioma de destino, `handlePlayAudio` recusa falar e abre o
   // aviso — falar com a voz padrão ensinaria outra pronúncia. Aqui só o botão
@@ -240,9 +207,9 @@ export default function DirectionsModule({
   const Listen = voiceMissing ? SpeakerOffIcon : SpeakerIcon;
   const audioLabel = (base: string) => (voiceMissing ? `${base} — ${t('voiceMissingLabel')}` : base);
 
-  const speak = (text: string, glosa: string | null = null) => {
+  const speak = (text: string) => {
     playSound('click');
-    falar(text, glosa);
+    handlePlayAudio(text, targetCountry.lang);
   };
 
   /** Os passos que dão para usar daqui. Os outros não ficam apagados: somem. */
@@ -272,15 +239,14 @@ export default function DirectionsModule({
         className="rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-700 dark:text-slate-200 hover:border-gray-300 dark:hover:border-slate-600"
         style={deLugar ? { borderColor: 'var(--tema-texto)', backgroundColor: `${theme.hex}0d` } : undefined}
       >
-        <span className="text-2xl leading-none" aria-hidden="true">{s.icon}</span>
-        <span className={`text-sm font-bold leading-tight text-center ${deLugar ? theme.textColor : ''}`} dir="auto">{s.labels[target]}</span>
-        {showNative && <span className="text-sm leading-tight text-center text-gray-600 dark:text-slate-300" dir="auto">{s.labels[native]}</span>}
+        <span className="text-2xl leading-none">{s.icon}</span>
+        <span className={`text-[11px] font-bold leading-tight text-center ${deLugar ? theme.textColor : ''}`}>{s.labels[target]}</span>
+        {showNative && <span className="text-[10px] leading-tight text-center text-gray-500 dark:text-slate-400" dir="auto">{s.labels[native]}</span>}
       </button>
     );
   };
 
   const fullRoute = steps.map((s) => s.phrases[target]).join(' ');
-  const fullRouteNative = steps.map((s) => s.phrases[native]).join(' ');
   // O rumo agora tem 8 valores e a bússola só tem 4 pontos: na diagonal mostra o
   // cardeal mais próximo. É aproximação consciente — quem quiser o rumo exato
   // escolhe na própria bússola.
@@ -300,8 +266,7 @@ export default function DirectionsModule({
 
   return (
     <ModuleShell
-      title={t('dirTitle')}
-      dica={t('hintDirections')}
+      title={t('moduleDirections')}
       theme={theme}
       t={t}
       nativeCountry={nativeCountry}
@@ -310,89 +275,60 @@ export default function DirectionsModule({
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
       pinned={(
-        steps.length === 0 ? (
-          /* Percurso vazio: o cartão vira só a linha que diz PARA QUE servem os
-             passos — é o que a pessoa vai ouvir, não o que vai falar. Sem o
-             título e sem os botões, que não têm o que fazer aqui, a banda
-             devolve ao mapa uns 50px na primeira tela. */
-          <p className={`rounded-2xl px-4 py-3 text-base leading-snug text-white shadow-md ${theme.color}`} dir="auto">
-            {t('dirEmpty')}
-          </p>
-        ) : (
-          /* O percurso é a frase deste módulo, e vai crescendo passo a passo. A
-             lista tem teto e rolagem própria, e rola sozinha até o passo novo:
-             dez passos encheriam meia tela, e aí o mapa — que é onde a pessoa
-             olha para escolher o próximo — sairia da vista. */
+        <>
+          {/* O percurso é a frase deste módulo, e vai crescendo passo a passo.
+              A lista tem teto e rolagem própria: dez passos encheriam meia tela, e
+              aí o mapa — que é onde a pessoa olha para escolher o próximo — sairia
+              da vista. Desfazer, Limpar e Tocar tudo ficam sempre visíveis. */}
           <div className={`rounded-3xl p-4 text-white shadow-md ${theme.color}`}>
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h2 className="flex-1 min-w-0 pt-1.5 text-sm font-bold uppercase tracking-wide text-white" dir="auto">{t('dirRoute')}</h2>
-              <button onClick={undo} className={PILULA}><span dir="auto">{t('dirUndo')}</span></button>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-white">{t('dirRoute')}</h2>
+              <div className="flex gap-2">
+                {steps.length > 0 && (
+                  <>
+                    <button onClick={undo} className="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-xs font-bold tap active:scale-95">{t('dirUndo')}</button>
+                    <button onClick={clear} className="p-1 rounded-full bg-white/20 hover:bg-white/30 tap active:scale-95" aria-label={t('dirClear')}><XIcon className="w-4 h-4" /></button>
+                  </>
+                )}
+              </div>
             </div>
 
-            <ol ref={listaRef} className="space-y-2 max-h-32 overflow-y-auto pr-1">
-              {steps.map((s, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className="w-6 h-6 rounded-full bg-black/15 text-sm font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold leading-snug" dir="auto">{s.phrases[target]}</p>
-                    {showNative && <p className="text-sm text-white leading-snug" dir="auto">{s.phrases[native]}</p>}
-                  </div>
-                  <button onClick={() => speak(s.phrases[target], s.phrases[native])} className="hit p-1.5 rounded-full bg-white/20 hover:bg-white/30 flex-shrink-0 tap active:scale-90" aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
-                    <IconeOuvir texto={s.phrases[target]} Listen={Listen} className="w-5 h-5" />
-                  </button>
-                </li>
-              ))}
-            </ol>
+            {steps.length === 0 ? (
+              <p className="text-white text-sm py-3">{t('dirEmpty')}</p>
+            ) : (
+              <ol className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                {steps.map((s, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="w-6 h-6 rounded-full bg-white/25 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold leading-snug">{s.phrases[target]}</p>
+                      {showNative && <p className="text-xs text-white leading-snug" dir="auto">{s.phrases[native]}</p>}
+                    </div>
+                    <button onClick={() => speak(s.phrases[target])} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 flex-shrink-0 tap active:scale-90" aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}>
+                      <Listen className="w-4 h-4" />
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
 
-            {/* "Começar de novo" era um X, e X quer dizer "fechar" para quase todo
-                mundo. Virou texto, no mesmo feitio de Desfazer. */}
-            <div className="mt-3 flex items-center gap-2">
-              {steps.length > 1 && (
-                <button
-                  onClick={() => speak(fullRoute, fullRouteNative)}
-                  className="flex-1 min-w-0 px-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 font-bold flex items-center justify-center gap-2 tap active:scale-[0.98]"
-                  style={{ color: 'var(--tema-texto)' }}
-                  aria-label={audioLabel(t('dirPlayAll'))}
-                >
-                  <IconeOuvir texto={fullRoute} Listen={Listen} className="w-5 h-5 flex-shrink-0" />
-                  <span dir="auto">{t('dirPlayAll')}</span>
-                </button>
-              )}
-              <button onClick={clear} className={`${PILULA} ml-auto`}><span dir="auto">{t('dirClear')}</span></button>
-            </div>
+            {steps.length > 1 && (
+              <button
+                onClick={() => speak(fullRoute)}
+                className="mt-3 w-full py-2.5 rounded-xl bg-white dark:bg-slate-800 font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                style={{ color: 'var(--tema-texto)' }}
+              >
+                <Listen className="w-5 h-5" /> {t('dirPlayAll')}
+              </button>
+            )}
           </div>
-        )
+        </>
       )}
     >
 
-      {/*
-        MAPA E PASSOS — um bloco só, e é por isso que eles moram juntos.
-
-        O módulo inteiro depende de a pessoa tocar num passo e VER o boneco
-        virar: é isso que ensina "derecha" e "izquierda". Com o mapa a 320px, a
-        banda fixa e o mapa empurravam os botões para o pé da tela; quem rolava
-        para alcançá-los perdia o mapa de vista, tocava, ouvia, e não via nada.
-
-        Duas medidas:
-        1. O mapa encolheu para 240px, e para menos ainda em tela baixa (32% da
-           altura). Assim o mapa e duas fileiras de passos cabem juntos.
-        2. Em tela alta (a partir de 800px), o mapa GRUDA no topo da rolagem
-           enquanto os passos passam por baixo dele — e solta sozinho quando os
-           passos acabam, porque o `sticky` só vale dentro deste bloco. Em tela
-           baixa não gruda: com a banda cheia, sobraria uma fresta para tocar.
-           E aqui não há os problemas que tiraram o `sticky` da banda da frase
-           (ModuleShell): o mapa é o primeiro filho do bloco, então o
-           `space-y-4` não lhe põe margem, e ninguém mira `scrollIntoView` nele.
-      */}
-      <div>
-      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-3 [@media(min-height:800px)]:sticky [@media(min-height:800px)]:top-0 [@media(min-height:800px)]:z-10">
-        <svg
-          viewBox="0 0 300 300"
-          className="w-full max-w-[240px] mx-auto block select-none"
-          // `dvh` num `min()` e não numa classe: onde o navegador não conhece a
-          // unidade, a declaração inteira cai e sobra o `max-w-[240px]`.
-          style={{ aspectRatio: '1 / 1', maxWidth: 'min(240px, 32dvh)' }}
-        >
+      {/* MAPA */}
+      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-3">
+        <svg viewBox="0 0 300 300" className="w-full max-w-[320px] mx-auto block select-none" style={{ aspectRatio: '1 / 1' }}>
           <defs>
             {/* Setas brancas dentro do traço do percurso: dizem o SENTIDO.
                 Sem elas a rota é uma linha lisa e não dá para saber onde
@@ -413,22 +349,15 @@ export default function DirectionsModule({
               Em tom mais claro de propósito: é cenário. O bairro onde dá para
               andar vem desenhado por cima, mais forte, e essa diferença de
               tom é o que conta, sem legenda, até onde o percurso pode ir.
-
-              A 40% de opacidade, e não só "um tom mais claro": a diferença
-              antiga era sutil demais para quem não sabia que ela existia, e a
-              rua de enfeite parecia rua de verdade — o mapa dizia "pode ir"
-              onde os botões diziam "não pode".
             */}
             <pattern id={cidadeId} patternUnits="userSpaceOnUse" x={OFF} y={OFF} width={SP} height={SP}>
-              <g opacity={0.4}>
-                <rect x={9} y={9} width={SP - 18} height={SP - 18} rx={7} fill="var(--art-ground)" stroke="var(--art-tint)" />
-                {[0, SP].map((d) => (
-                  <g key={d}>
-                    <line x1={d} y1={-SP} x2={d} y2={SP * 2} stroke="var(--art-edge)" strokeWidth={11} />
-                    <line x1={-SP} y1={d} x2={SP * 2} y2={d} stroke="var(--art-edge)" strokeWidth={11} />
-                  </g>
-                ))}
-              </g>
+              <rect x={9} y={9} width={SP - 18} height={SP - 18} rx={7} fill="var(--art-ground)" stroke="var(--art-tint)" />
+              {[0, SP].map((d) => (
+                <g key={d}>
+                  <line x1={d} y1={-SP} x2={d} y2={SP * 2} stroke="var(--art-edge)" strokeWidth={11} />
+                  <line x1={-SP} y1={d} x2={SP * 2} y2={d} stroke="var(--art-edge)" strokeWidth={11} />
+                </g>
+              ))}
             </pattern>
           </defs>
 
@@ -583,6 +512,8 @@ export default function DirectionsModule({
             </Upright>
           </g>
         </svg>
+
+        <p className="text-xs text-gray-500 dark:text-slate-400 text-center leading-snug mt-1 px-2" dir="auto">{t('dirMapTurns')}</p>
       </div>
 
       {/*
@@ -601,121 +532,38 @@ export default function DirectionsModule({
            procurar o botão da bifurcação na grade de cima e não achar. Botão
            que aparece fora do lugar onde se olha é botão que não apareceu.
 
-        Eles entram no fim, não no começo, para os de sempre não trocarem de
-        posição a cada passo; e vêm tingidos com a cor do módulo, que é o que
-        os faz saltar sem precisar de seção à parte.
+        Eles entram no fim, não no começo, para os oito de sempre não trocarem
+        de posição a cada passo; e vêm tingidos com a cor do módulo, que é o
+        que os faz saltar sem precisar de seção à parte.
 
         O preço de sumir é a grade mexer, e botão que some sem explicação
         confunde tanto quanto botão apagado — por isso a regra vem escrita
         logo acima, e ela troca de texto quando a pessoa chega na rotatória ou
         na bifurcação, que é onde a explicação vale.
-
-        Três colunas e não quatro: com quatro, o espanhol saía em 11px e o
-        português em 10px, justo nos botões mais tocados. A 14px, quatro não
-        cabem. E a seção vai sem cartão em volta, como os chips dos outros
-        módulos: são 32px a menos entre o mapa e a primeira fileira.
-      */}
-      <section className="mt-4">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-1 px-1" dir="auto">{t('dirSteps')}</h2>
-        {passosNaTela.length > 0 ? (
-          <>
-            {/* Com o percurso vazio, a banda lá em cima já diz "Toque num passo
-                aqui embaixo", e somada à linha de gesto e à dica eram quatro
-                recados iguais empurrando os botões para baixo. A regra de por
-                que um passo some só faz falta depois do primeiro passo — ou na
-                rotatória e na bifurcação, onde ela troca de texto. */}
-            {(emLugar || steps.length > 0) && (
-              <p className="text-sm text-gray-600 dark:text-slate-300 mb-3 leading-snug px-1" dir="auto">
-                {emLugar && (
-                  <strong className={`font-bold ${theme.textColor}`}>
-                    {t(naRotatoria ? 'dirAtRoundabout' : 'dirAtFork')}{' — '}
-                  </strong>
-                )}
-                {t(emLugar ? (naRotatoria ? 'dirAtRoundaboutHint' : 'dirAtForkHint') : 'dirStepsHint')}
-              </p>
-            )}
-            <div className="grid grid-cols-3 gap-2">
-              {passosNaTela.map(botaoPasso)}
-            </div>
-          </>
-        ) : (
-          /* Só dois motivos deixam a grade vazia, e nenhum é erro. Chegar é
-             vitória, e a frase diz isso; o teto de dez passos é dito como teto.
-             As duas apontam para onde o botão está de verdade: lá em cima, no
-             cartão fixo (antes diziam "no percurso abaixo", e o X de limpar
-             parecia "fechar"). */
-          <p
-            role="status"
-            className="rounded-2xl px-4 py-3 text-base leading-snug text-gray-800 dark:text-slate-100"
-            style={{ backgroundColor: `${theme.hex}14` }}
-            dir="auto"
-          >
-            {t(route.arrived ? 'dirArrived' : 'dirMaxSteps')}
-          </p>
-        )}
-        {/* A legenda do mapa desceu para cá: embaixo do mapa ela empurrava os
-            passos para longe dele. Aqui ela fica perto de onde o olho está
-            quando o mapa gira — logo depois do toque. */}
-        <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug mt-3 px-1" dir="auto">{t('dirMapTurns')}</p>
-      </section>
-      </div>
-
-      {/*
-        PERGUNTAS — o que ELA fala, logo depois dos passos.
-
-        A bússola ficava aqui no meio e empurrava tudo isto para baixo; desceu
-        para o fim. No topo, as fichas de "Como chego a…", uma frase inteira por
-        lugar: é a primeira coisa que alguém perdido pergunta.
-      */}
-      <section>
-        <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1" dir="auto">{t('dirQuestions')}</h2>
-        <h3 className="text-base font-bold text-gray-800 dark:text-slate-100 mb-2 px-1" dir="auto">{t('dirGoTo')}</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {DIR_GO_TO.map((g) => (
-            <button
-              key={g.key}
-              onClick={() => speak(g.phrase[target], g.phrase[native])}
-              className="rounded-2xl border p-3 text-left flex flex-col gap-1 tap active:scale-95 bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-800 dark:text-slate-100"
-            >
-              <span className="flex items-center justify-between gap-2">
-                <span className="text-2xl leading-none" aria-hidden="true">{g.emoji}</span>
-                <IconeOuvir texto={g.phrase[target]} Listen={Listen} className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
-              </span>
-              <span className="text-base font-bold leading-snug" dir="auto">{g.phrase[target]}</span>
-              {showNative && <span className="text-sm text-gray-600 dark:text-slate-300 leading-snug" dir="auto">{g.phrase[native]}</span>}
-            </button>
-          ))}
-        </div>
-
-        <ul className="mt-3 bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 px-4 py-1 divide-y divide-gray-100 dark:divide-slate-700">
-          {DIR_QUESTIONS.map((q, i) => (
-            <li key={i}>
-              <button onClick={() => speak(q[target], q[native])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
-                  {showNative && <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug" dir="auto">{q[native]}</p>}
-                </div>
-                <IconeOuvir texto={q[target]} Listen={Listen} className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* VOCABULÁRIO */}
-      <VocabGroup title={t('dirVocabulary')} items={DIR_PLACES} target={target} native={native} showNative={showNative} onSpeak={speak} />
-      <VocabGroup title={t('dirDistances')} items={DIR_DISTANCES} target={target} native={native} showNative={showNative} onSpeak={speak} />
-
-      {/*
-        BÚSSOLA — por último.
-
-        Na rua ninguém ensina caminho a pé por norte e sul, e as palavras são
-        quase iguais ao português. Ela fica porque o mapa tem rosa dos ventos e
-        alguém pode querer saber o nome, mas não pode ficar entre os passos e as
-        perguntas, empurrando o que é útil para baixo.
       */}
       <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-3" dir="auto">{t('dirCompass')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-1">{t('dirSteps')}</h2>
+        <p className="text-xs text-gray-500 dark:text-slate-400 mb-3 leading-snug" dir="auto">
+          {emLugar && (
+            <strong className={`font-bold ${theme.textColor}`}>
+              {t(naRotatoria ? 'dirAtRoundabout' : 'dirAtFork')}{' — '}
+            </strong>
+          )}
+          {t(emLugar ? (naRotatoria ? 'dirAtRoundaboutHint' : 'dirAtForkHint') : 'dirStepsHint')}
+        </p>
+        {passosNaTela.length > 0 ? (
+          <div className="grid grid-cols-4 gap-2">
+            {passosNaTela.map(botaoPasso)}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug" dir="auto">{t('dirNoSteps')}</p>
+        )}
+      </section>
+
+
+      {/* BÚSSOLA */}
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-3">{t('dirCompass')}</h2>
         <div className="flex items-center gap-4">
           <svg viewBox="0 0 120 120" className="w-32 h-32 flex-shrink-0">
             <circle cx={60} cy={60} r={54} fill="var(--art-ground)" stroke="var(--art-edge)" strokeWidth={2} />
@@ -743,26 +591,47 @@ export default function DirectionsModule({
                 return (
                   <button
                     key={c.key}
-                    aria-pressed={active}
-                    onClick={() => { setCompassPick(i); speak(c.names[target], c.names[native]); }}
+                    onClick={() => { setCompassPick(i); speak(c.names[target]); }}
                     className={`rounded-xl border px-2 py-1.5 text-left tap active:scale-95 ${active ? `${theme.color} border-transparent text-white` : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-700 dark:text-slate-200'}`}
                   >
-                    <div className="text-sm font-bold leading-tight" dir="auto">{c.names[target]}</div>
-                    {showNative && <div className={`text-sm leading-tight ${active ? 'text-white' : 'text-gray-600 dark:text-slate-300'}`} dir="auto">{c.names[native]}</div>}
+                    <div className="text-sm font-bold leading-tight">{c.names[target]}</div>
+                    {showNative && <div className={`text-[10px] leading-tight ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{c.names[native]}</div>}
                   </button>
                 );
               })}
             </div>
-            <button onClick={() => speak(headingSentence(target, compass), headingSentence(native, compass))} className="w-full text-left flex items-center gap-2 tap active:scale-[0.98]">
-              <IconeOuvir texto={headingSentence(target, compass)} Listen={Listen} className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
+            <button onClick={() => speak(headingSentence(target, compass))} className="w-full text-left flex items-center gap-2 tap active:scale-[0.98]">
+              <Listen className={`w-4 h-4 flex-shrink-0 ${theme.textColor}`} />
               <div className="min-w-0">
-                <p className="text-sm font-semibold leading-snug" dir="auto">{headingSentence(target, compass)}</p>
-                {showNative && <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug" dir="auto">{headingSentence(native, compass)}</p>}
+                <p className="text-sm font-semibold leading-snug">{headingSentence(target, compass)}</p>
+                {showNative && <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{headingSentence(native, compass)}</p>}
               </div>
             </button>
           </div>
         </div>
       </section>
+
+      {/* PERGUNTAS */}
+      <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">{t('dirQuestions')}</h2>
+        <ul className="divide-y divide-gray-100 dark:divide-slate-700">
+          {DIR_QUESTIONS.map((q, i) => (
+            <li key={i}>
+              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold leading-snug">{q[target]}</p>
+                  {showNative && <p className="text-xs text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{q[native]}</p>}
+                </div>
+                <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* VOCABULÁRIO */}
+      <VocabGroup title={t('dirVocabulary')} items={DIR_PLACES} target={target} native={native} showNative={showNative} onSpeak={speak} />
+      <VocabGroup title={t('dirDistances')} items={DIR_DISTANCES} target={target} native={native} showNative={showNative} onSpeak={speak} />
     </ModuleShell>
   );
 }
@@ -786,42 +655,29 @@ const Upright: React.FC<{ x: number; y: number; deg: number; children: React.Rea
   </g>
 );
 
-/**
- * O ícone de ouvir que pulsa enquanto ESTA frase carrega ou sai.
- *
- * Direções não usa o `PhraseCard` (tem lista, não frase), então não ganhava o
- * pulso de graça como os outros nove. Sem ele, o som da rede demorava, o botão
- * ficava igual, e a pessoa tocava de novo. O estado vem de `utils/audioState`,
- * sem prop nova no módulo.
- */
-const IconeOuvir: React.FC<{ texto: string; Listen: Glyph; className: string }> = ({ texto, Listen, className }) => {
-  const falando = useFalando(texto);
-  return <Listen className={falando ? `${className} animate-pulse` : className} aria-hidden="true" />;
-};
-
 interface VocabGroupProps {
   title: string;
   items: Vocab[];
   target: LangCode;
   native: LangCode;
   showNative: boolean;
-  onSpeak: (text: string, glosa: string | null) => void;
+  onSpeak: (text: string) => void;
 }
 
 const VocabGroup: React.FC<VocabGroupProps> = ({ title, items, target, native, showNative, onSpeak }) => (
   <section>
-    <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1" dir="auto">{title}</h2>
+    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{title}</h2>
     <div className="grid grid-cols-2 gap-2">
       {items.map((v, i) => (
         <button
           key={i}
-          onClick={() => onSpeak(v.names[target], v.names[native])}
-          className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-2.5 flex items-center gap-2 text-left tap active:scale-95"
+          onClick={() => onSpeak(v.names[target])}
+          className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-2.5 flex items-center gap-2 text-left active:scale-95 transition-transform"
         >
-          <span className="text-2xl leading-none flex-shrink-0" aria-hidden="true">{v.emoji}</span>
+          <span className="text-2xl leading-none flex-shrink-0">{v.emoji}</span>
           <div className="min-w-0">
-            <p className="text-sm font-bold leading-tight" dir="auto">{v.names[target]}</p>
-            {showNative && <p className="text-sm text-gray-600 dark:text-slate-300 leading-tight" dir="auto">{v.names[native]}</p>}
+            <p className="text-sm font-bold leading-tight">{v.names[target]}</p>
+            {showNative && <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-tight" dir="auto">{v.names[native]}</p>}
           </div>
         </button>
       ))}

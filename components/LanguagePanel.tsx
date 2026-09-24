@@ -68,17 +68,6 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
 
   if (!montado) return null;
 
-  /*
-   * Cada bandeira com o NOME embaixo, e colorida sempre que dá para escolher.
-   *
-   * Antes as livres não escolhidas ficavam em cinza e só ganhavam cor ao passar
-   * o mouse — o que não existe no celular. A França em cinza virava três listras
-   * cinzas, igual à Itália bloqueada, e para escolher a França era preciso
-   * adivinhar pelo tom de cinza. O nome existia só no `title`, que o celular não
-   * mostra. Agora o cinza é só de quem está bloqueado — e só na BANDEIRA: o nome
-   * embaixo dela é texto que ela lê para entender o que existe, e texto lido não
-   * fica apagado (mesma regra das telhas fechadas do hub).
-   */
   const renderFlagButton = (
     opt: Country,
     isSelected: boolean,
@@ -91,45 +80,26 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
       key={opt.code}
       ref={ref}
       disabled={isBlocked}
-      // O anel é só visual: sem isto, um leitor de tela ouve doze botões iguais
-      // e não sabe qual país está escolhido.
+      // O anel e a saturação são só visuais: sem isto, um leitor de tela ouve
+      // doze botões iguais e não sabe qual país está escolhido.
       aria-pressed={isSelected}
       onClick={() => { playSound('click'); onClick(); }}
-      className={`w-full flex flex-col items-center gap-1 p-1 rounded-xl tap ${isBlocked ? 'cursor-not-allowed' : 'active:scale-95'}`}
+      className={`hit relative group flex items-center justify-center p-1 rounded-full tap ${
+        isBlocked
+          ? 'opacity-25 grayscale cursor-not-allowed'
+          : isSelected
+          ? 'bg-white dark:bg-slate-800 shadow-xl scale-110 z-10 ring-2 ring-offset-1'
+          : 'hover:bg-white/40 hover:scale-105 opacity-80 hover:opacity-100 grayscale hover:grayscale-0'
+      }`}
+      style={isSelected ? ({ '--tw-ring-color': ringColor } as React.CSSProperties) : undefined}
       title={opt.name}
     >
-      <span
-        className={`rounded-full p-0.5 ${
-          isBlocked
-            ? 'opacity-25 grayscale'
-            : isSelected
-            ? 'bg-white dark:bg-slate-800 shadow-lg ring-2 ring-offset-1'
-            : ''
-        }`}
-        style={isSelected ? ({ '--tw-ring-color': ringColor } as React.CSSProperties) : undefined}
-      >
-        {/* O nome acessível vem do `alt`; o texto de baixo repete o mesmo nome
-            para quem vê e fica fora da árvore, senão o leitor diria duas vezes. */}
-        <img
-          src={opt.image}
-          alt={opt.name}
-          loading="lazy"
-          className="w-10 h-10 rounded-full object-cover drop-shadow-md"
-        />
-      </span>
-      <span
-        aria-hidden="true"
-        dir="auto"
-        className={`text-sm leading-tight text-center break-words ${
-          isBlocked
-            ? 'text-gray-600 dark:text-slate-300'
-            : isSelected
-            ? 'font-bold text-gray-900 dark:text-white'
-            : 'text-gray-700 dark:text-slate-200'
-        }`}
-      >
-        {opt.name}
-      </span>
+      <img
+        src={opt.image}
+        alt={opt.name}
+        loading="lazy"
+        className="w-10 h-10 rounded-full object-cover drop-shadow-md"
+      />
     </button>
   );
 
@@ -142,26 +112,25 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label={t('languageSettings')}
-        className={`relative w-full max-w-xs bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[85vh] overflow-y-auto no-scrollbar ${saindo ? 'animate-collapse-down' : 'animate-expand-up'}`}
+        className={`relative w-full max-w-[16rem] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex flex-col ring-4 ring-white/20 max-h-[85vh] overflow-y-auto no-scrollbar ${saindo ? 'animate-collapse-down' : 'animate-expand-up'}`}
       >
 
-        {/* Fechar. Fundo escuro de verdade e ícone de 20px: o X branco de 14px
-            sobre `bg-black/10` quase não aparecia. */}
+        {/* Close Button */}
         <button
             onClick={handleClose}
             aria-label={t('close')}
-            className="hit absolute top-1.5 right-1.5 p-1.5 bg-black/40 rounded-full text-white z-50 hover:bg-black/60 tap active:scale-90"
+            className="hit absolute top-1.5 right-1.5 p-1 bg-black/10 rounded-full text-white z-50 hover:bg-black/30 backdrop-blur-md tap active:scale-90"
         >
-            <XIcon className="w-5 h-5" strokeWidth={2} />
+            <XIcon className="w-3.5 h-3.5" />
         </button>
 
         {/* Top Section: Native Language (Blue Theme) */}
         <div className="bg-slate-100 dark:bg-slate-800 flex flex-col shrink-0">
-             <div id={nativeGroupId} className="bg-slate-700 dark:bg-slate-600 text-white py-2.5 pl-4 pr-12 font-bold text-base shadow-md z-10 relative flex items-center gap-2">
-                <span dir="auto">{t('myLanguage')}...</span>
+             <div id={nativeGroupId} className="bg-slate-700 dark:bg-slate-600 text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2">
+                {t('myLanguage')}...
              </div>
              {/* Optimized padding and gap for small screens */}
-             <div role="group" aria-labelledby={nativeGroupId} className="p-3 grid grid-cols-3 gap-x-2 gap-y-3 items-start">
+             <div role="group" aria-labelledby={nativeGroupId} className="p-3 grid grid-cols-3 gap-3 justify-items-center">
                 {options.map((opt) => {
                     const isSelected = nativeCountry.code === opt.code;
                     return renderFlagButton(
@@ -181,10 +150,10 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
 
         {/* Bottom Section: Target Location (Red Theme) */}
         <div className="flex flex-col relative shrink-0 flex-1" style={{ backgroundColor: `${theme.hex}14` }}>
-             <div id={targetGroupId} className={`${theme.color} text-white py-2.5 px-4 font-bold text-base shadow-md z-10 relative flex items-center gap-2`}>
-                <span dir="auto">{t('iAmIn')}...</span>
+             <div id={targetGroupId} className={`${theme.color} text-white p-2 px-4 font-bold text-sm shadow-md z-10 relative flex items-center gap-2`}>
+                {t('iAmIn')}...
              </div>
-             <div role="group" aria-labelledby={targetGroupId} className="p-3 grid grid-cols-3 gap-x-2 gap-y-3 pb-2 items-start">
+             <div role="group" aria-labelledby={targetGroupId} className="p-3 grid grid-cols-3 gap-3 pb-2 justify-items-center">
                  {options.filter((opt) => !opt.originOnly).map((opt) =>
                     renderFlagButton(
                         opt,
@@ -224,9 +193,9 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
             onClick={() => setShowDiagnostics((v) => !v)}
             aria-expanded={showDiagnostics}
             aria-controls={diagnosticsId}
-            className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-semibold text-gray-600 dark:text-slate-300 hover:text-gray-800 dark:hover:text-slate-100 tap active:scale-[0.98]"
+            className="w-full px-4 py-2.5 text-left text-[11px] uppercase tracking-wider text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
           >
-            <span dir="auto">{t('voiceDiagnosticsTitle')}</span>
+            {t('voiceDiagnosticsTitle')}
           </button>
           <ul id={diagnosticsId} hidden={!showDiagnostics} className="px-4 pb-3 space-y-2">
             {/* Só os destinos que dá para escolher: voz de país desativado é ruído. */}
@@ -246,7 +215,7 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
               const aindaLendo = lookup.status === 'unknown';
 
               return (
-                <li key={opt.code} className="text-sm leading-snug space-y-0.5">
+                <li key={opt.code} className="text-[11px] leading-tight space-y-0.5">
                   <span className="flex items-baseline gap-1.5 text-gray-700 dark:text-slate-200">
                     <span className="font-medium" dir="auto">{opt.name}</span>
                     <span className="font-mono text-gray-500 dark:text-slate-400">{opt.lang}</span>
@@ -278,9 +247,9 @@ export const LanguagePanel: React.FC<LanguagePanelProps> = ({
             falam e outras não. Descobrir isso no momento do erro é tarde.
           */}
           <div hidden={!showDiagnostics} className="px-4 pb-4 pt-1 border-t border-gray-100 dark:border-slate-700 space-y-2">
-            <p className="text-sm leading-snug text-gray-600 dark:text-slate-300" dir="auto">{t('voiceOfflineNote')}</p>
-            <p className="text-sm font-semibold text-gray-700 dark:text-slate-200" dir="auto">{t('voiceHowToInstall')}</p>
-            <ul className="space-y-1.5 text-sm leading-snug text-gray-600 dark:text-slate-300">
+            <p className="text-[11px] leading-snug text-gray-600 dark:text-slate-300" dir="auto">{t('voiceOfflineNote')}</p>
+            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400" dir="auto">{t('voiceHowToInstall')}</p>
+            <ul className="space-y-1.5 text-[11px] leading-snug text-gray-500 dark:text-slate-400">
               {[t('voiceMissingAndroid'), t('voiceMissingIOS'), t('voiceMissingWindows')].map((passo) => (
                 <li key={passo} dir="auto">{passo}</li>
               ))}

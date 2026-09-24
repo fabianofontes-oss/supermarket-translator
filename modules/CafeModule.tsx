@@ -14,11 +14,8 @@ import {
   CAFE_QUESTIONS,
   LAYER_COLOR,
   buildOrder,
-  modsFor,
-  vesselFor,
   type Drink,
   type Modifier,
-  type Vessel,
 } from './cafe/data/cafeData';
 
 interface CafeModuleProps {
@@ -34,22 +31,9 @@ interface CafeModuleProps {
   voiceStatus?: VoiceStatus;
 }
 
-/**
- * Título de seção: 16px, sem a caixa-alta miúda de antes (12px, cinza,
- * espaçada), que parecia rodapé. O mesmo do Onde dói.
- */
-const TITULO = 'text-base font-bold text-gray-700 dark:text-slate-200 mb-2 px-1';
-
-/**
- * Português da linha de apoio: nunca apagado, nunca abaixo de 14px. É por ele
- * que ela ESCOLHE — ainda não sabe o que é "cortado", sabe o que é "pingado" —,
- * e antes era a menor letra da tela, 10px.
- */
-const apoio = (active: boolean) => (active ? 'text-white' : 'text-gray-600 dark:text-slate-300');
-
 /** Copo (vaso) ou xícara (taza) com as camadas da bebida. */
-const VesselDrawing: React.FC<{ drink: Drink; vessel: Vessel }> = ({ drink, vessel }) => {
-  const isCup = vessel === 'cup';
+const Vessel: React.FC<{ drink: Drink }> = ({ drink }) => {
+  const isCup = drink.vessel === 'cup';
   // Área interna do recipiente, em coordenadas do viewBox 120x140.
   const box = isCup ? { x: 22, y: 46, w: 68, h: 58 } : { x: 34, y: 24, w: 46, h: 84 };
 
@@ -62,7 +46,7 @@ const VesselDrawing: React.FC<{ drink: Drink; vessel: Vessel }> = ({ drink, vess
   });
 
   return (
-    <svg viewBox="0 0 120 140" className="w-28 h-32 sm:w-36 sm:h-40" aria-hidden="true">
+    <svg viewBox="0 0 120 140" className="w-36 h-40">
       <defs>
         <clipPath id="vesselClip">
           {isCup
@@ -104,26 +88,14 @@ export default function CafeModule({
   const target = toLangCode(targetCountry.lang);
   const native = toLangCode(nativeCountry.lang);
   const showNative = native !== target;
-  /**
-   * O módulo ensina o costume da Espanha (o cortado no copo, a tapa de graça, o
-   * "de máquina"). Fora dela a frase sai na língua do destino, mas as notas
-   * continuam falando da Espanha — então a tela diz isso logo no topo, em vez de
-   * deixar ela aprender como verdade de Miami o que é costume de Madri.
-   */
-  const naEspanha = targetCountry.code === 'es';
 
   const [drink, setDrink] = useState<Drink>(DRINKS[1]); // cortado
   const [modKeys, setModKeys] = useState<string[]>([]);
+  const [openPortion, setOpenPortion] = useState<string | null>(null);
 
-  // O que se mostra depende da bebida; o que foi marcado, não. Trocar do cortado
-  // para o solo esconde "con leche fría" sem apagar a escolha — ao voltar, ela
-  // está lá. Quem tira da frase o que não vale é `buildOrder`.
-  const available = useMemo(() => modsFor(drink), [drink]);
   const mods = useMemo(() => MODIFIERS.filter((m) => modKeys.includes(m.key)), [modKeys]);
   const order = useMemo(() => buildOrder(target, drink, mods), [target, drink, mods]);
   const orderNative = useMemo(() => buildOrder(native, drink, mods), [native, drink, mods]);
-  // O desenho e a etiqueta seguem "en taza"/"en vaso", não só o padrão da bebida.
-  const vessel = vesselFor(drink, modKeys);
 
   // Sem voz do idioma de destino, `handlePlayAudio` recusa falar e abre o
   // aviso — falar com a voz padrão ensinaria outra pronúncia. Aqui só o botão
@@ -157,7 +129,6 @@ export default function CafeModule({
       onGoHome={onGoHome}
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
-      dica={t('hintCafe')}
       pinned={(
         <>
           {/* Pedido */}
@@ -173,114 +144,110 @@ export default function CafeModule({
       )}
     >
 
-      {/* Fora da Espanha: o aviso que enquadra as notas (auditoria [cafe-1], opção B). */}
-      {!naEspanha && (
-        <p
-          role="note"
-          className="rounded-2xl border-l-4 bg-white dark:bg-slate-800 px-4 py-3 text-base font-semibold leading-snug text-gray-800 dark:text-slate-100 shadow-sm"
-          style={{ borderLeftColor: 'var(--tema-texto)' }}
-          dir="auto"
-        >
-          {t('cafeSpainOnly')}
-        </p>
-      )}
-
       {/* Copo + explicação */}
       <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 flex items-center gap-4">
-        <div className="flex-shrink-0"><VesselDrawing drink={drink} vessel={vessel} /></div>
+        <div className="flex-shrink-0"><Vessel drink={drink} /></div>
         <div className="min-w-0">
           <p className="text-lg font-extrabold leading-tight" dir="auto">{drink.names[target]}</p>
-          {showNative && <p className="text-sm font-semibold text-gray-700 dark:text-slate-200 leading-snug mt-0.5" dir="auto">{drink.names[native]}</p>}
+          {showNative && <p className="text-xs text-gray-500 dark:text-slate-400 mb-1" dir="auto">{drink.names[native]}</p>}
           <p className="text-sm text-gray-600 dark:text-slate-300 leading-snug mt-1" dir="auto">{drink.descs[showNative ? native : target]}</p>
-          <span className="inline-block mt-2 text-sm font-bold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: `${theme.hex}18`, color: 'var(--tema-texto)' }} dir="auto">
-            {vessel === 'cup' ? t('cafeInCup') : t('cafeInGlass')}
+          <span className="inline-block mt-2 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: `${theme.hex}18`, color: 'var(--tema-texto)' }}>
+            {drink.vessel === 'cup' ? t('cafeInCup') : t('cafeInGlass')}
           </span>
         </div>
       </div>
 
-      {/* Bebidas — escolha única. Duas colunas e não três: com o nome a 16px e o
-          português a 14px, "descafeinado de máquina" não cabia em três. */}
+
+      {/* Bebidas */}
       <section>
-        <h2 className={TITULO} dir="auto">{t('cafeDrinks')}</h2>
-        <div className="grid grid-cols-2 gap-2">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('cafeDrinks')}</h2>
+        <div className="grid grid-cols-3 gap-2">
           {DRINKS.map((d) => {
             const active = d.key === drink.key;
             return (
               <button
                 key={d.key}
                 onClick={() => { playSound('click'); setDrink(d); }}
-                aria-pressed={active}
-                className={`rounded-2xl border px-2 py-3 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
+                className={`rounded-2xl border p-2 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
               >
-                <span className="block text-base font-bold leading-tight" dir="auto">{d.names[target]}</span>
-                {showNative && <span className={`block text-sm leading-snug mt-1 ${apoio(active)}`} dir="auto">{d.names[native]}</span>}
+                <span className="block text-xs font-bold leading-tight" dir="auto">{d.names[target]}</span>
+                {showNative && <span className={`block text-[10px] leading-tight mt-0.5 ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{d.names[native]}</span>}
               </button>
             );
           })}
         </div>
       </section>
 
-      {/* Modificadores — somam. O ✓ no marcado é o que os distingue dos cafés, que
-          são escolha única e tinham a mesmíssima cara; o título diz o resto. */}
+      {/* Modificadores */}
       <section>
-        <h2 className={TITULO} dir="auto">{t('cafeHowYouWant')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('cafeHowYouWant')}</h2>
         <div className="flex flex-wrap gap-2">
-          {available.map((m) => {
+          {MODIFIERS.map((m) => {
             const active = modKeys.includes(m.key);
             return (
               <button
                 key={m.key}
                 onClick={() => toggleMod(m)}
-                aria-pressed={active}
-                className={`rounded-xl px-3 py-2 text-base font-bold tap active:scale-95 border ${active ? `${theme.color} text-white border-transparent shadow` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
+                className={`rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${active ? `${theme.color} text-white border-transparent shadow` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
               >
-                <span className="block" dir="auto">{active && <span aria-hidden="true">✓ </span>}{m.labels[target]}</span>
-                {showNative && <span className={`block text-sm font-medium ${apoio(active)}`} dir="auto">{m.labels[native]}</span>}
+                <span dir="auto">{m.labels[target]}</span>
+                {showNative && <span className={`block text-[10px] font-medium ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{m.labels[native]}</span>}
               </button>
             );
           })}
         </div>
       </section>
 
-      {/* Frases do bar — antes das palavras do cardápio, porque é daqui que sai o
-          pedido: a caña abre a lista, e a lista de palavras, agora com a
-          explicação sempre aberta, ficou alta demais para vir antes. */}
+      {/* Porções */}
+      <section>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('cafePortions')}</h2>
+        <div className="space-y-2">
+          {PORTIONS.map((p) => {
+            const open = openPortion === p.key;
+            return (
+              <div key={p.key} className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
+                <div className="flex items-center gap-1 pr-2">
+                  <button
+                    onClick={() => { playSound('page-turn'); setOpenPortion(open ? null : p.key); }}
+                    className="flex-1 min-w-0 px-3 py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]"
+                  >
+                    <span className="text-xl leading-none flex-shrink-0">{p.emoji}</span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block font-bold leading-tight" dir="auto">{p.names[target]}</span>
+                      {showNative && <span className="block text-[11px] text-gray-500 dark:text-slate-400 leading-tight" dir="auto">{p.names[native]}</span>}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => speak(p.names[target])}
+                    className={`p-1.5 rounded-full flex-shrink-0 tap active:scale-90 ${theme.textColor}`}
+                    aria-label={audioLabel(t('locListen'))} title={audioLabel(t('locListen'))}
+                  >
+                    <Listen className="w-5 h-5" />
+                  </button>
+                </div>
+                {open && (
+                  <p className="px-3 pb-3 -mt-1 text-sm text-gray-600 dark:text-slate-300 leading-snug" dir="auto">
+                    {p.descs[showNative ? native : target]}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Frases */}
       <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
-        <h2 className="text-base font-bold text-gray-700 dark:text-slate-200 mb-1" dir="auto">{t('cafePhrases')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">{t('cafePhrases')}</h2>
         <ul className="divide-y divide-gray-100 dark:divide-slate-700">
           {CAFE_QUESTIONS.map((q, i) => (
             <li key={i}>
-              <button onClick={() => speak(q[target])} className="w-full py-3 flex items-center gap-3 text-left tap active:scale-[0.98]">
-                <span className="flex-1 min-w-0">
-                  <span className="block text-base font-semibold leading-snug" dir="auto">{q[target]}</span>
-                  {showNative && <span className="block text-sm text-gray-600 dark:text-slate-300 leading-snug" dir="auto">{q[native]}</span>}
-                </span>
-                <Listen aria-hidden="true" className="w-6 h-6 flex-shrink-0" style={{ color: 'var(--tema-texto)' }} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Palavras do cardápio. A explicação fica SEMPRE à vista: antes ela abria
-          no toque e nada avisava, e era justamente a parte que ensina o costume.
-          A linha inteira é o botão de ouvir, como nas frases do bar. */}
-      <section>
-        <h2 className={TITULO} dir="auto">{t('cafePortions')}</h2>
-        <ul className="space-y-2">
-          {PORTIONS.map((p) => (
-            <li key={p.key}>
-              <button
-                onClick={() => speak(p.names[target])}
-                className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 px-3 py-3 flex items-start gap-3 text-left tap active:scale-[0.98]"
-              >
-                <span className="text-2xl leading-none flex-shrink-0 pt-0.5" aria-hidden="true">{p.emoji}</span>
-                <span className="flex-1 min-w-0">
-                  <span className="block text-base font-bold leading-tight" dir="auto">{p.names[target]}</span>
-                  {showNative && <span className="block text-sm font-semibold text-gray-700 dark:text-slate-200 leading-snug mt-0.5" dir="auto">{p.names[native]}</span>}
-                  <span className="block text-sm text-gray-600 dark:text-slate-300 leading-snug mt-1" dir="auto">{p.descs[showNative ? native : target]}</span>
-                </span>
-                <Listen aria-hidden="true" className="w-6 h-6 flex-shrink-0" style={{ color: 'var(--tema-texto)' }} />
+              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
+                  {showNative && <p className="text-xs text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{q[native]}</p>}
+                </div>
+                <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
               </button>
             </li>
           ))}

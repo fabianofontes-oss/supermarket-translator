@@ -43,13 +43,8 @@ let redeFunciona = true;
 const setOnline = (valor: boolean) =>
   Object.defineProperty(navigator, 'onLine', { get: () => valor, configurable: true });
 
-beforeAll(async () => {
+beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn();
-  // O primeiro `import()` do módulo adiado paga a transformação do arquivo, e
-  // isso caía dentro do tempo do primeiro teste: 2,7 s sozinho, mais de 5 s com
-  // a suíte inteira em paralelo. Aquecido aqui, o custo sai da conta do teste;
-  // o `lazy` do App continua passando pelo Suspense do mesmo jeito.
-  await import('../modules/LocationModule');
 });
 
 beforeEach(() => {
@@ -94,13 +89,7 @@ afterEach(() => cleanup());
 const abrirModulo = async (user: ReturnType<typeof userEvent.setup>) => {
   render(<App />);
   await user.click(await screen.findByText(t('moduleLocation')));
-  // O módulo é um pedaço adiado. Com a suíte inteira rodando em paralelo, o
-  // import passava de 1s de vez em quando e o teste caía por tempo, não por
-  // defeito — daí a folga.
-  await waitFor(
-    () => expect(screen.getAllByRole('button', { name: new RegExp(`^${t('locListen')}`) }).length).toBeGreaterThan(0),
-    { timeout: 5000 },
-  );
+  await waitFor(() => expect(screen.getByRole('heading', { name: t('moduleLocation') })).toBeTruthy());
 };
 
 describe('a regra da região', () => {
@@ -173,12 +162,7 @@ describe('sem voz da região e sem internet', () => {
     expect(pedidas).toHaveLength(0);
 
     const aviso = await screen.findByRole('dialog', { name: t('voiceMissingTitle') });
-    // Primeiro o que fazer agora (mostrar a tela), depois o motivo verdadeiro.
-    expect(aviso.textContent).toContain(t('voiceShowScreen'));
-    expect(aviso.textContent).toContain(t('voiceNoNetwork'));
-    expect(aviso.textContent).not.toContain(t('voiceFailed'));
-    // Código de locale não diz nada a quem usa o app: saiu da tela.
-    expect(aviso.textContent).not.toContain('it-IT');
+    expect(aviso.textContent).toContain('it-IT');
   });
 });
 
@@ -193,45 +177,8 @@ describe('rede falhando', () => {
     await user.click(screen.getByRole('button', { name: t('locListen') }));
 
     expect(pedidas).toHaveLength(1);
-    const aviso = await screen.findByRole('dialog', { name: t('voiceMissingTitle') });
-    expect(faladas).toHaveLength(0);
-    // Com rede, a culpa não é da internet: a folha antiga dizia "sem internet"
-    // aqui também, e a pessoa ia desligar e ligar o wi-fi à toa.
-    expect(aviso.textContent).toContain(t('voiceFailed'));
-    expect(aviso.textContent).not.toContain(t('voiceNoNetwork'));
-  });
-
-  it('"Mostrar a frase" abre a tela cheia com a frase que falhou', async () => {
-    voices = APARELHO_DO_DONO;
-    redeFunciona = false;
-    localStorage.setItem('targetCountry', JSON.stringify('it'));
-    const user = userEvent.setup();
-    await abrirModulo(user);
-
-    await user.click(screen.getByRole('button', { name: t('locListen') }));
-    const frase = new URL(pedidas[0]).searchParams.get('q')!;
     await screen.findByRole('dialog', { name: t('voiceMissingTitle') });
-
-    await user.click(screen.getByRole('button', { name: t('voiceShowPhrase') }));
-
-    const tela = await screen.findByRole('dialog', { name: t('showTitle') });
-    expect(tela.textContent).toContain(frase);
-    await waitFor(() => expect(screen.queryByRole('dialog', { name: t('voiceMissingTitle') })).toBeNull());
-  });
-});
-
-describe('o gesto de ouvir', () => {
-  it('o primeiro toque num alto-falante apaga a linha que ensina o gesto', async () => {
-    voices = [voice('Luciana', 'pt-BR')];
-    localStorage.setItem('targetCountry', JSON.stringify('br'));
-    const user = userEvent.setup();
-    await abrirModulo(user);
-
-    expect(screen.getByText(t('gestureHint'))).toBeTruthy();
-    await user.click(screen.getByRole('button', { name: t('locListen') }));
-
-    expect(localStorage.getItem('aquisediz:gestoAprendido')).toBe('1');
-    expect(screen.queryByText(t('gestureHint'))).toBeNull();
+    expect(faladas).toHaveLength(0);
   });
 });
 

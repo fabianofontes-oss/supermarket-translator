@@ -55,11 +55,10 @@ describe('PARTE 1 — varredura de invariantes de buildPhrase', () => {
   const frases = [...todasAsFrases()];
 
   it('cobre as combinações que a interface consegue produzir', () => {
-    // 8 idiomas × 11 pronomes × 7 verbos × complementos × 3 modos × 3 tempos.
-    // (O 11º é "nosotras": duas mulheres falando de si não dizem "nosotros".)
-    expect(frases.length).toBe(21384);
+    // 8 idiomas × 8 pronomes × 7 verbos × complementos × 3 modos × 3 tempos.
+    expect(frases.length).toBe(15552);
     expect(SUPPORTED_LANGS).toHaveLength(8);
-    expect(PRONOUNS).toHaveLength(11);
+    expect(PRONOUNS).toHaveLength(8);
     expect(VERBS).toHaveLength(7);
   });
 
@@ -240,8 +239,7 @@ describe('MATRIZ MÍNIMA — regras que não podem regredir', () => {
   });
 
   it('do-support do inglês', () => {
-    expect(buildPhrase('en', P('el'), q, null, 'question', 'present')).toBe('Does he want?');
-    expect(buildPhrase('en', P('ella'), q, null, 'question', 'present')).toBe('Does she want?');
+    expect(buildPhrase('en', P('el'), q, null, 'question', 'present')).toBe('Does he / she want?');
     expect(buildPhrase('en', yo, q, null, 'negative', 'present')).toBe("I don't want.");
     expect(buildPhrase('en', yo, q, null, 'question', 'past')).toBe('Did I want?');
   });

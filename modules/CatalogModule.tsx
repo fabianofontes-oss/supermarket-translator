@@ -321,7 +321,7 @@ export default function CatalogModule({
                 onToggleSearch();
               }
             }}
-            aria-label={t('erase')}
+            aria-label={t('dirClear')}
             className="hit p-2 rounded-full text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300 tap active:scale-90"
           >
             <XIcon className="w-5 h-5" />
@@ -356,7 +356,7 @@ export default function CatalogModule({
         <CurrentIcon className="w-5 h-5" />
       </span>
       <span className="flex-1 min-w-0 text-left">
-        <span className="block text-sm font-semibold text-gray-600 dark:text-slate-300 leading-none" dir="auto">
+        <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 leading-none" dir="auto">
           {t('categoryLabel')}
         </span>
         <span className={`block text-base font-bold truncate leading-tight ${theme.textColor}`} dir="auto">
@@ -491,7 +491,7 @@ export default function CatalogModule({
 
         {/* Nunca esconder em silêncio que existem mais. */}
         {search.mode === 'results' && search.total > searchResults.length && (
-          <p className="text-center text-sm text-gray-600 dark:text-slate-300 -mb-1" dir="auto">
+          <p className="text-center text-xs text-gray-500 dark:text-slate-400 -mb-1" dir="auto">
             {t('searchShowingOf')
               .replace('{shown}', String(searchResults.length))
               .replace('{total}', String(search.total))}
@@ -505,7 +505,7 @@ export default function CatalogModule({
               if (subCategoryItems.length === 0) return null;
               return (
                 <div key={sub} id={`section-${sub}`} className="scroll-mt-40 bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-slate-700">
-                  <h3 className="text-sm font-bold text-gray-600 dark:text-slate-300 mb-4 border-b border-gray-100 dark:border-slate-700 pb-2 ml-1">
+                  <h3 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-4 border-b border-gray-100 dark:border-slate-700 pb-2 ml-1">
                     {t(sub)}
                   </h3>
                   <div className="space-y-3">

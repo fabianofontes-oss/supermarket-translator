@@ -1,19 +1,7 @@
 
 // Módulo "Onde dói" — parte do corpo, sintoma e há quanto tempo.
-// A frase é montada: 14 partes (12 com marcador no boneco) × 4 sintomas localizados
-// × 5 durações, mais 8 sintomas gerais. Os textos de uk, ar e lt só aparecem na
-// linha de apoio: esses três países nunca são destino.
-//
-// REGRA DE CONTEÚDO — a mesma da Limpeza da casa, que agora vale para o app todo:
-// quem fala é a própria pessoa, e o app não sabe o gênero dela. Nenhuma frase pode
-// concordar com quem fala: nada de "Estoy mareado", "Sou alérgico", "Sono allergico".
-// Usa-se ter + substantivo ("Tengo mareos", "Tenho alergia"). A única exceção é
-// "Estoy embarazada", porque ali o gênero é a própria informação.
-// `tests/body.test.ts` varre as frases dos oito idiomas atrás disso.
-//
-// E o rótulo do botão tem que estar DENTRO da frase que ele monta, em toda língua
-// que pode ser destino: a pessoa lê "me falta el aire" e é isso que ela tem que
-// ouvir, não "me cuesta respirar". Também tem teste.
+// A frase é montada: 14 partes × 4 sintomas localizados × 6 durações, mais 8 sintomas gerais.
+// Foco: espanhol da Espanha. uk e ar existem como idiomas de apoio.
 
 import type { LangCode } from '../../location/data/locationData';
 
@@ -30,42 +18,17 @@ export interface BodyPart {
   names: Record<LangCode, Forms>;
 }
 
-/**
- * Raio da área de toque de cada marcador, em unidades do desenho (o boneco sai
- * a uns 210px de largura, então 13 ≈ 27px de diâmetro na tela). Os marcadores do
- * rosto ficam a pelo menos 2 × este raio uns dos outros, para que duas áreas
- * nunca se cruzem: antes cabeça, olho, ouvido e dente ficavam a 20–22 unidades, e
- * o toque num ia para o outro.
- */
-export const MARKER_HIT_R = 13;
-
-/**
- * O rosto do boneco. Sem ele, quatro bolinhas soltas numa bola cinza não diziam
- * qual era o olho e qual era o dente. Os marcadores do olho, do ouvido e do dente
- * ficam EM CIMA do primeiro olho, da primeira orelha e da boca; o outro olho e a
- * outra orelha ficam à vista, e é isso que diz o que cada bolinha é.
- * `tests/body.test.ts` confere que marcador e desenho continuam no mesmo lugar.
- */
-export const FACE = {
-  eyes: [[86, 38], [114, 38]] as const,
-  ears: [[131, 44], [69, 44]] as const,
-  mouth: { x1: 86, x2: 114, y: 60 },
-};
-
 // ---------------------------------------------------------------------------
 // PARTES DO CORPO
 // ---------------------------------------------------------------------------
-// As costas NÃO têm marcador: o boneco está de frente, e a bolinha que ficava no
-// meio da barriga dizia "espalda". Quem tinha dor de estômago tocava nela e ia
-// ao balcão com a frase errada. Elas vivem só na lista, como a pele.
 export const BODY_PARTS: BodyPart[] = [
-  { key: 'head',   x: 100, y: 16,  names: { es: ['la cabeza', 'en la cabeza'], pt: ['a cabeça', 'na cabeça'], en: ['my head', 'in my head'], fr: ['la tête', 'à la tête'], it: ['la testa', 'alla testa'], uk: ['голова', 'у голові'], lt: ['galvą', 'galvoje'], ar: ['الرأس', 'في الرأس'] } },
-  { key: 'eye',    x: 86,  y: 38,  names: { es: ['el ojo', 'en el ojo'], pt: ['o olho', 'no olho'], en: ['my eye', 'in my eye'], fr: ["l'œil", "à l'œil"], it: ["l'occhio", "all'occhio"], uk: ['око', 'в оці'], lt: ['akį', 'akyje'], ar: ['العين', 'في العين'] } },
-  { key: 'ear',    x: 131, y: 44,  names: { es: ['el oído', 'en el oído'], pt: ['o ouvido', 'no ouvido'], en: ['my ear', 'in my ear'], fr: ["l'oreille", "à l'oreille"], it: ["l'orecchio", "all'orecchio"], uk: ['вухо', 'у вусі'], lt: ['ausį', 'ausyje'], ar: ['الأذن', 'في الأذن'] } },
-  { key: 'tooth',  x: 100, y: 60,  names: { es: ['el diente', 'en el diente'], pt: ['o dente', 'no dente'], en: ['my tooth', 'in my tooth'], fr: ['la dent', 'à la dent'], it: ['il dente', 'al dente'], uk: ['зуб', 'у зубі'], lt: ['dantį', 'dantyje'], ar: ['السن', 'في السن'] } },
-  { key: 'throat', x: 100, y: 87,  names: { es: ['la garganta', 'en la garganta'], pt: ['a garganta', 'na garganta'], en: ['my throat', 'in my throat'], fr: ['la gorge', 'à la gorge'], it: ['la gola', 'alla gola'], uk: ['горло', 'у горлі'], lt: ['gerklę', 'gerklėje'], ar: ['الحلق', 'في الحلق'] } },
-  { key: 'chest',  x: 100, y: 114, names: { es: ['el pecho', 'en el pecho'], pt: ['o peito', 'no peito'], en: ['my chest', 'in my chest'], fr: ['la poitrine', 'à la poitrine'], it: ['il petto', 'al petto'], uk: ['груди', 'у грудях'], lt: ['krūtinę', 'krūtinėje'], ar: ['الصدر', 'في الصدر'] } },
-  { key: 'back',                   names: { es: ['la espalda', 'en la espalda'], pt: ['a coluna', 'na coluna'], en: ['my back', 'in my back'], fr: ['le dos', 'au dos'], it: ['la schiena', 'alla schiena'], uk: ['спина', 'у спині'], lt: ['nugarą', 'nugaroje'], ar: ['الظهر', 'في الظهر'] } },
+  { key: 'head',   x: 100, y: 26,  names: { es: ['la cabeza', 'en la cabeza'], pt: ['a cabeça', 'na cabeça'], en: ['my head', 'in my head'], fr: ['la tête', 'à la tête'], it: ['la testa', 'alla testa'], uk: ['голова', 'у голові'], lt: ['galvą', 'galvoje'], ar: ['الرأس', 'في الرأس'] } },
+  { key: 'eye',    x: 86,  y: 42,  names: { es: ['el ojo', 'en el ojo'], pt: ['o olho', 'no olho'], en: ['my eye', 'in my eye'], fr: ["l'œil", "à l'œil"], it: ["l'occhio", "all'occhio"], uk: ['око', 'в оці'], lt: ['akį', 'akyje'], ar: ['العين', 'في العين'] } },
+  { key: 'ear',    x: 127, y: 46,  names: { es: ['el oído', 'en el oído'], pt: ['o ouvido', 'no ouvido'], en: ['my ear', 'in my ear'], fr: ["l'oreille", "à l'oreille"], it: ["l'orecchio", "all'orecchio"], uk: ['вухо', 'у вусі'], lt: ['ausį', 'ausyje'], ar: ['الأذن', 'في الأذن'] } },
+  { key: 'tooth',  x: 112, y: 60,  names: { es: ['el diente', 'en el diente'], pt: ['o dente', 'no dente'], en: ['my tooth', 'in my tooth'], fr: ['la dent', 'à la dent'], it: ['il dente', 'al dente'], uk: ['зуб', 'у зубі'], lt: ['dantį', 'dantyje'], ar: ['السن', 'في السن'] } },
+  { key: 'throat', x: 100, y: 78,  names: { es: ['la garganta', 'en la garganta'], pt: ['a garganta', 'na garganta'], en: ['my throat', 'in my throat'], fr: ['la gorge', 'à la gorge'], it: ['la gola', 'alla gola'], uk: ['горло', 'у горлі'], lt: ['gerklę', 'gerklėje'], ar: ['الحلق', 'في الحلق'] } },
+  { key: 'chest',  x: 100, y: 110, names: { es: ['el pecho', 'en el pecho'], pt: ['o peito', 'no peito'], en: ['my chest', 'in my chest'], fr: ['la poitrine', 'à la poitrine'], it: ['il petto', 'al petto'], uk: ['груди', 'у грудях'], lt: ['krūtinę', 'krūtinėje'], ar: ['الصدر', 'في الصدر'] } },
+  { key: 'back',   x: 100, y: 140, names: { es: ['la espalda', 'en la espalda'], pt: ['a coluna', 'na coluna'], en: ['my back', 'in my back'], fr: ['le dos', 'au dos'], it: ['la schiena', 'alla schiena'], uk: ['спина', 'у спині'], lt: ['nugarą', 'nugaroje'], ar: ['الظهر', 'في الظهر'] } },
   { key: 'belly',  x: 100, y: 170, names: { es: ['la barriga', 'en la barriga'], pt: ['a barriga', 'na barriga'], en: ['my belly', 'in my belly'], fr: ['le ventre', 'au ventre'], it: ['la pancia', 'alla pancia'], uk: ['живіт', 'у животі'], lt: ['pilvą', 'pilve'], ar: ['البطن', 'في البطن'] } },
   { key: 'arm',    x: 146, y: 140, names: { es: ['el brazo', 'en el brazo'], pt: ['o braço', 'no braço'], en: ['my arm', 'in my arm'], fr: ['le bras', 'au bras'], it: ['il braccio', 'al braccio'], uk: ['рука', 'у руці'], lt: ['ranką', 'rankoje'], ar: ['الذراع', 'في الذراع'] } },
   { key: 'hand',   x: 146, y: 205, names: { es: ['la mano', 'en la mano'], pt: ['a mão', 'na mão'], en: ['my hand', 'in my hand'], fr: ['la main', 'à la main'], it: ['la mano', 'alla mano'], uk: ['кисть', 'у кисті'], lt: ['plaštaką', 'plaštakoje'], ar: ['اليد', 'في اليد'] } },
@@ -101,7 +64,7 @@ export const LOCAL_SYMPTOMS: Symptom[] = [
   },
   {
     key: 'itch', emoji: '🖐️', local: true,
-    labels:    { es: 'me pica', pt: 'coça', en: 'itches', fr: 'ça me démange', it: 'mi prude', uk: 'свербить', lt: 'niežti', ar: 'حكة' },
+    labels:    { es: 'me pica', pt: 'coça', en: 'itches', fr: 'ça démange', it: 'mi prude', uk: 'свербить', lt: 'niežti', ar: 'حكة' },
     templates: { es: 'Me pica {a}', pt: 'Coça {a}', en: '{a} itches', fr: 'Ça me démange {l}', it: 'Mi prude {a}', uk: 'Свербить {a}', lt: 'Man niežti {a}', ar: 'أشعر بحكة {l}' },
   },
   {
@@ -120,25 +83,22 @@ export const GENERAL_SYMPTOMS: Symptom[] = [
   {
     key: 'cough', emoji: '😷', local: false,
     labels:    { es: 'tos', pt: 'tosse', en: 'cough', fr: 'toux', it: 'tosse', uk: 'кашель', lt: 'kosulys', ar: 'سعال' },
-    templates: { es: 'Tengo tos', pt: 'Estou com tosse', en: 'I have a cough', fr: "J'ai de la toux", it: 'Ho la tosse', uk: 'У мене кашель', lt: 'Aš kosėju', ar: 'لدي سعال' },
+    templates: { es: 'Tengo tos', pt: 'Estou com tosse', en: 'I have a cough', fr: 'Je tousse', it: 'Ho la tosse', uk: 'У мене кашель', lt: 'Aš kosėju', ar: 'لدي سعال' },
   },
   {
     key: 'nausea', emoji: '🤢', local: false,
-    labels:    { es: 'náuseas', pt: 'enjoo', en: 'nauseous', fr: 'nausées', it: 'nausea', uk: 'нудота', lt: 'pykina', ar: 'غثيان' },
-    templates: { es: 'Tengo náuseas', pt: 'Estou com enjoo', en: 'I feel nauseous', fr: "J'ai des nausées", it: 'Ho la nausea', uk: 'Мене нудить', lt: 'Mane pykina', ar: 'أشعر بالغثيان' },
+    labels:    { es: 'náuseas', pt: 'enjoo', en: 'nausea', fr: 'nausées', it: 'nausea', uk: 'нудота', lt: 'pykina', ar: 'غثيان' },
+    templates: { es: 'Tengo náuseas', pt: 'Estou enjoado', en: 'I feel nauseous', fr: "J'ai des nausées", it: 'Ho la nausea', uk: 'Мене нудить', lt: 'Mane pykina', ar: 'أشعر بالغثيان' },
   },
   {
-    // Estado, e não o ato no passado: "He vomitado" com duração virava "He
-    // vomitado desde hace dos días", que nenhum espanhol diz. "Tengo vómitos" é
-    // como "Tengo fiebre", e aceita qualquer "desde quando".
     key: 'vomit', emoji: '🤮', local: false,
-    labels:    { es: 'vómitos', pt: 'vômito', en: 'vomiting', fr: 'vomissements', it: 'vomito', uk: 'блювота', lt: 'vemiu', ar: 'تقيؤ' },
-    templates: { es: 'Tengo vómitos', pt: 'Estou com vômito', en: 'I have been vomiting', fr: "J'ai des vomissements", it: 'Ho il vomito', uk: 'У мене блювота', lt: 'Aš vemiu', ar: 'أتقيأ' },
+    labels:    { es: 'he vomitado', pt: 'vomitei', en: 'vomited', fr: "j'ai vomi", it: 'ho vomitato', uk: 'блювота', lt: 'vėmiau', ar: 'تقيؤ' },
+    templates: { es: 'He vomitado', pt: 'Eu vomitei', en: 'I have vomited', fr: "J'ai vomi", it: 'Ho vomitato', uk: 'Мене вирвало', lt: 'Aš vėmiau', ar: 'لقد تقيأت' },
   },
   {
     key: 'dizzy', emoji: '😵‍💫', local: false,
     labels:    { es: 'mareo', pt: 'tontura', en: 'dizzy', fr: 'vertiges', it: 'vertigini', uk: 'запаморочення', lt: 'svaigsta galva', ar: 'دوار' },
-    templates: { es: 'Tengo mareos', pt: 'Estou com tontura', en: 'I feel dizzy', fr: "J'ai des vertiges", it: 'Ho le vertigini', uk: 'У мене паморочиться голова', lt: 'Man svaigsta galva', ar: 'أشعر بالدوار' },
+    templates: { es: 'Estoy mareado', pt: 'Estou tonto', en: 'I feel dizzy', fr: "J'ai des vertiges", it: 'Ho le vertigini', uk: 'У мене паморочиться голова', lt: 'Man svaigsta galva', ar: 'أشعر بالدوار' },
   },
   {
     key: 'diarrhea', emoji: '🚽', local: false,
@@ -153,7 +113,7 @@ export const GENERAL_SYMPTOMS: Symptom[] = [
   {
     key: 'breathe', emoji: '🫁', local: false,
     labels:    { es: 'me falta el aire', pt: 'falta de ar', en: 'short of breath', fr: 'du mal à respirer', it: 'fiato corto', uk: 'важко дихати', lt: 'sunku kvėpuoti', ar: 'ضيق تنفس' },
-    templates: { es: 'Me falta el aire', pt: 'Estou com falta de ar', en: "I'm short of breath", fr: "J'ai du mal à respirer", it: 'Ho il fiato corto', uk: 'Мені важко дихати', lt: 'Man sunku kvėpuoti', ar: 'أجد صعوبة في التنفس' },
+    templates: { es: 'Me cuesta respirar', pt: 'Estou com falta de ar', en: "I can't breathe well", fr: "J'ai du mal à respirer", it: 'Faccio fatica a respirare', uk: 'Мені важко дихати', lt: 'Man sunku kvėpuoti', ar: 'أجد صعوبة في التنفس' },
   },
 ];
 
@@ -163,10 +123,8 @@ export const GENERAL_SYMPTOMS: Symptom[] = [
 export interface Duration { key: string; labels: Text; phrases: Text }
 
 export const DURATIONS: Duration[] = [
-  // "Desde hoy" não se diz ("Tengo fiebre desde hoy" soa quebrado, e "Dói a
-  // cabeça desde hoje" também). O começo do dia é "esta mañana".
-  { key: 'morning',   labels: { es: 'esta mañana', pt: 'hoje cedo', en: 'this morning', fr: 'ce matin', it: 'stamattina', uk: 'зранку', lt: 'šį rytą', ar: 'هذا الصباح' },
-                      phrases: { es: 'desde esta mañana', pt: 'desde hoje cedo', en: 'since this morning', fr: 'depuis ce matin', it: 'da stamattina', uk: 'від самого ранку', lt: 'nuo šio ryto', ar: 'منذ هذا الصباح' } },
+  { key: 'today',     labels: { es: 'hoy', pt: 'hoje', en: 'today', fr: "aujourd'hui", it: 'oggi', uk: 'сьогодні', lt: 'šiandien', ar: 'اليوم' },
+                      phrases: { es: 'desde hoy', pt: 'desde hoje', en: 'since today', fr: "depuis aujourd'hui", it: 'da oggi', uk: 'з сьогодні', lt: 'nuo šiandien', ar: 'منذ اليوم' } },
   { key: 'yesterday', labels: { es: 'ayer', pt: 'ontem', en: 'yesterday', fr: 'hier', it: 'ieri', uk: 'учора', lt: 'vakar', ar: 'الأمس' },
                       phrases: { es: 'desde ayer', pt: 'desde ontem', en: 'since yesterday', fr: 'depuis hier', it: 'da ieri', uk: 'з учора', lt: 'nuo vakar', ar: 'منذ الأمس' } },
   { key: 'twoDays',   labels: { es: '2 días', pt: '2 dias', en: '2 days', fr: '2 jours', it: '2 giorni', uk: '2 дні', lt: '2 dienos', ar: 'يومان' },
@@ -178,44 +136,23 @@ export const DURATIONS: Duration[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// URGÊNCIA
+// FRASES DA FARMÁCIA E DO MÉDICO
 // ---------------------------------------------------------------------------
-/**
- * As três frases que se agarram, e não se procuram. Moravam no fim da lista da
- * farmácia, duas telas abaixo, sob um título que não lembrava hospital: numa hora
- * de aperto ninguém rola até lá. Agora ficam numa faixa vermelha no topo do
- * módulo — o mesmo padrão da Emergência do Cuidar de idosos.
- */
-export const BODY_URGENT: Text[] = [
+export const BODY_QUESTIONS: Text[] = [
+  { es: '¿Tiene algo para esto?', pt: 'Tem alguma coisa para isso?', en: 'Do you have something for this?', fr: 'Avez-vous quelque chose pour ça ?', it: 'Ha qualcosa per questo?', uk: 'У вас є щось від цього?', lt: 'Ar turite ko nors nuo to?', ar: 'هل لديك شيء لهذا؟' },
+  { es: '¿Necesito receta?', pt: 'Preciso de receita?', en: 'Do I need a prescription?', fr: "Ai-je besoin d'une ordonnance ?", it: 'Serve la ricetta?', uk: 'Чи потрібен рецепт?', lt: 'Ar reikia recepto?', ar: 'هل أحتاج وصفة طبية؟' },
+  { es: '¿Cuántas veces al día?', pt: 'Quantas vezes por dia?', en: 'How many times a day?', fr: 'Combien de fois par jour ?', it: 'Quante volte al giorno?', uk: 'Скільки разів на день?', lt: 'Kiek kartų per dieną?', ar: 'كم مرة في اليوم؟' },
+  { es: 'Soy alérgico a la penicilina.', pt: 'Sou alérgico a penicilina.', en: 'I am allergic to penicillin.', fr: 'Je suis allergique à la pénicilline.', it: 'Sono allergico alla penicillina.', uk: 'У мене алергія на пеніцилін.', lt: 'Esu alergiškas penicilinui.', ar: 'لدي حساسية من البنسلين.' },
+  { es: 'Estoy embarazada.', pt: 'Estou grávida.', en: 'I am pregnant.', fr: 'Je suis enceinte.', it: 'Sono incinta.', uk: 'Я вагітна.', lt: 'Aš nėščia.', ar: 'أنا حامل.' },
   { es: 'Necesito un médico.', pt: 'Preciso de um médico.', en: 'I need a doctor.', fr: "J'ai besoin d'un médecin.", it: 'Ho bisogno di un medico.', uk: 'Мені потрібен лікар.', lt: 'Man reikia gydytojo.', ar: 'أحتاج طبيبًا.' },
   { es: '¿Dónde está el hospital más cercano?', pt: 'Onde fica o hospital mais próximo?', en: 'Where is the nearest hospital?', fr: "Où est l'hôpital le plus proche ?", it: "Dov'è l'ospedale più vicino?", uk: 'Де найближча лікарня?', lt: 'Kur yra artimiausia ligoninė?', ar: 'أين أقرب مستشفى؟' },
   { es: 'Es urgente.', pt: 'É urgente.', en: "It's urgent.", fr: "C'est urgent.", it: 'È urgente.', uk: 'Це терміново.', lt: 'Tai skubu.', ar: 'الأمر عاجل.' },
 ];
 
 // ---------------------------------------------------------------------------
-// FRASES DA FARMÁCIA E DO MÉDICO
-// ---------------------------------------------------------------------------
-// A alergia é "tenho alergia", e não "sou alérgico": o adjetivo concordaria com
-// quem fala (regra do cabeçalho). A gravidez é a exceção, e é a única.
-export const BODY_QUESTIONS: Text[] = [
-  { es: '¿Tiene algo para esto?', pt: 'Tem alguma coisa para isso?', en: 'Do you have something for this?', fr: 'Avez-vous quelque chose pour ça ?', it: 'Ha qualcosa per questo?', uk: 'У вас є щось від цього?', lt: 'Ar turite ko nors nuo to?', ar: 'هل لديك شيء لهذا؟' },
-  { es: '¿Necesito receta?', pt: 'Preciso de receita?', en: 'Do I need a prescription?', fr: "Ai-je besoin d'une ordonnance ?", it: 'Serve la ricetta?', uk: 'Чи потрібен рецепт?', lt: 'Ar reikia recepto?', ar: 'هل أحتاج وصفة طبية؟' },
-  { es: '¿Cuántas veces al día?', pt: 'Quantas vezes por dia?', en: 'How many times a day?', fr: 'Combien de fois par jour ?', it: 'Quante volte al giorno?', uk: 'Скільки разів на день?', lt: 'Kiek kartų per dieną?', ar: 'كم مرة في اليوم؟' },
-  { es: 'Tengo alergia a la penicilina.', pt: 'Tenho alergia à penicilina.', en: 'I am allergic to penicillin.', fr: "J'ai une allergie à la pénicilline.", it: "Ho un'allergia alla penicillina.", uk: 'У мене алергія на пеніцилін.', lt: 'Turiu alergiją penicilinui.', ar: 'لدي حساسية من البنسلين.' },
-  { es: 'Estoy embarazada.', pt: 'Estou grávida.', en: 'I am pregnant.', fr: 'Je suis enceinte.', it: 'Sono incinta.', uk: 'Я вагітна.', lt: 'Aš nėščia.', ar: 'أنا حامل.' },
-];
-
-// ---------------------------------------------------------------------------
 // MONTAGEM DA FRASE
 // ---------------------------------------------------------------------------
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-/**
- * O nome da parte, com artigo e maiúscula, para a linha embaixo do boneco:
- * "A cabeça", "My head". Como as bolinhas não têm nome, sem essa linha a pessoa
- * só descobria o que tinha tocado lendo a frase lá em cima.
- */
-export const partName = (part: BodyPart, lang: LangCode): string => cap(part.names[lang][0]);
 
 /** "Me duele la cabeza desde hace dos días." */
 export const buildComplaint = (

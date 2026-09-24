@@ -1,9 +1,9 @@
 
-import React, { useId, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ModuleShell } from '../components/ModuleShell';
 import { PhraseCard } from '../components/PhraseCard';
 import type { Country } from '../types';
-import { ChevronDownIcon, SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
+import { SpeakerIcon, SpeakerOffIcon } from '../components/Icons';
 import { playSound } from '../utils/soundUtils';
 import type { VoiceStatus } from '../utils/speech';
 import { toLangCode } from './location/data/locationData';
@@ -13,11 +13,7 @@ import {
   GENERAL_SYMPTOMS,
   DURATIONS,
   BODY_QUESTIONS,
-  BODY_URGENT,
-  FACE,
-  MARKER_HIT_R,
   buildComplaint,
-  partName,
   type BodyPart,
   type Symptom,
   type Duration,
@@ -36,17 +32,6 @@ interface BodyModuleProps {
   voiceStatus?: VoiceStatus;
 }
 
-/**
- * Títulos das seções: frase normal, 16px, e não mais versalete de 12px em cinza
- * claro. Os títulos deste módulo viraram perguntas para ela ("Como dói nesse
- * lugar?", "Não achou no boneco? Escolha aqui") — em maiúsculas e espaçadas elas
- * perdiam o desenho das palavras, que é o que quem lê pouco usa para ler.
- */
-const TITULO = 'text-base font-bold text-gray-700 dark:text-slate-200 mb-2 px-1';
-
-/** Português da linha de apoio: nunca apagado, nunca abaixo de 14px. */
-const apoio = (active: boolean) => (active ? 'text-white' : 'text-gray-600 dark:text-slate-300');
-
 export default function BodyModule({
   nativeCountry,
   targetCountry,
@@ -61,14 +46,10 @@ export default function BodyModule({
   const target = toLangCode(targetCountry.lang);
   const native = toLangCode(nativeCountry.lang);
   const showNative = native !== target;
-  /** A língua em que ela lê — a da linha de apoio, ou a do destino se forem a mesma. */
-  const read = showNative ? native : target;
-  const urgenteId = useId();
 
   const [symptom, setSymptom] = useState<Symptom>(LOCAL_SYMPTOMS[0]);
   const [part, setPart] = useState<BodyPart>(BODY_PARTS[0]);
   const [duration, setDuration] = useState<Duration | null>(null);
-  const [urgente, setUrgente] = useState(false);
 
   const sentence = useMemo(() => buildComplaint(target, symptom, part, duration), [target, symptom, part, duration]);
   const sentenceNative = useMemo(() => buildComplaint(native, symptom, part, duration), [native, symptom, part, duration]);
@@ -102,32 +83,12 @@ export default function BodyModule({
     setDuration((cur) => (cur?.key === d.key ? null : d));
   };
 
-  // Com um sintoma geral (febre, tosse) a parte do corpo sai da frase, e por isso
-  // nenhuma parte fica marcada. Antes os botões também ficavam a 45% de
-  // opacidade — e o português ia junto, ilegível. Nenhum marcado já diz isso.
   const partsDimmed = !symptom.local;
 
-  const chip = (active: boolean) =>
-    `rounded-xl px-3 py-2 tap active:scale-95 border ${
+  const chip = (active: boolean, dim = false) =>
+    `rounded-xl px-3 py-2 text-sm font-bold tap active:scale-95 border ${
       active ? `${theme.color} text-white border-transparent shadow` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
-    }`;
-
-  /** Idioma de destino em cima (é o que ela aprende), português embaixo; os dois ≥ 14px. */
-  const symptomButton = (s: Symptom) => {
-    const active = s.key === symptom.key;
-    return (
-      <button
-        key={s.key}
-        onClick={() => pickSymptom(s)}
-        aria-pressed={active}
-        className={`min-w-0 rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}
-      >
-        <span className="text-2xl leading-none" aria-hidden="true">{s.emoji}</span>
-        <span className="w-full text-base font-bold leading-tight text-center break-words" dir="auto">{s.labels[target]}</span>
-        {showNative && <span className={`w-full text-sm leading-tight text-center break-words ${apoio(active)}`} dir="auto">{s.labels[native]}</span>}
-      </button>
-    );
-  };
+    } ${dim ? 'opacity-45' : ''}`;
 
   return (
     <ModuleShell
@@ -139,7 +100,6 @@ export default function BodyModule({
       onGoHome={onGoHome}
       onOpenLanguageModal={onOpenLanguageModal}
       onOpenShare={onOpenShare}
-      dica={t('hintBody')}
       pinned={(
         <>
           {/* Frase */}
@@ -155,55 +115,10 @@ export default function BodyModule({
       )}
     >
 
-      {/* Urgência. Não é uma seção que se procura: é uma coisa que se agarra, e
-          por isso fica no topo, fechada numa linha só, antes do boneco. Vermelha,
-          e não na cor do módulo, porque aqui a cor precisa dizer outra coisa. Mesmo
-          padrão da Emergência do Cuidar de idosos. */}
-      <section className="rounded-3xl border-2 border-red-600 bg-red-50 dark:bg-red-950 overflow-hidden">
-        <button
-          onClick={() => { playSound('page-turn'); setUrgente((v) => !v); }}
-          aria-expanded={urgente}
-          // Só aponta quando a lista existe: IDREF pendurada é defeito (mesma
-          // regra da Emergência do Cuidar de idosos e do `ModeTabs`).
-          aria-controls={urgente ? urgenteId : undefined}
-          className="w-full px-4 py-3 flex items-center justify-between gap-3 text-left tap active:scale-[0.98]"
-        >
-          <span className="text-base font-extrabold text-red-700 dark:text-red-300 uppercase tracking-wide" dir="auto">{t('bodyUrgent')}</span>
-          <ChevronDownIcon
-            aria-hidden="true"
-            strokeWidth={2}
-            className={`w-6 h-6 flex-shrink-0 text-red-700 dark:text-red-300 transition-transform ${urgente ? 'rotate-180' : ''}`}
-          />
-        </button>
-        {urgente && (
-          <ul id={urgenteId} className="px-4 pb-4 space-y-2">
-            {BODY_URGENT.map((q, i) => (
-              <li key={i}>
-                <button
-                  onClick={() => speak(q[target])}
-                  className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-red-200 dark:border-red-800 p-3 flex items-center gap-3 text-left tap active:scale-[0.98]"
-                >
-                  <span className="flex-1 min-w-0">
-                    <span className="block text-base font-bold leading-snug" dir="auto">{q[target]}</span>
-                    {showNative && <span className="block text-sm text-gray-600 dark:text-slate-300 leading-snug" dir="auto">{q[native]}</span>}
-                  </span>
-                  <Listen aria-hidden="true" className="w-6 h-6 flex-shrink-0 text-red-600 dark:text-red-300" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
       {/* Boneco */}
       <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-3">
-        {/* Sem esta linha, as bolinhas pareciam juntas do desenho e a frase de
-            exemplo parecia escolha já feita pelo app. */}
-        <p className="text-center text-base font-bold text-gray-800 dark:text-slate-100 mb-2" dir="auto">{t('bodyTapHint')}</p>
         <svg viewBox="0 0 200 400" className="w-full max-w-[210px] mx-auto block select-none" style={{ aspectRatio: '1 / 2' }}>
           <g fill="var(--art-edge)" stroke="var(--art-fill)" strokeWidth="2">
-            {/* Orelhas antes da cabeça: a cabeça cobre a metade de dentro. */}
-            {FACE.ears.map(([cx, cy]) => <ellipse key={cx} cx={cx} cy={cy} rx="6" ry="9" />)}
             <circle cx="100" cy="42" r="30" />
             <rect x="92" y="68" width="16" height="18" />
             <rect x="66" y="82" width="68" height="112" rx="22" />
@@ -217,107 +132,99 @@ export default function BodyModule({
             <ellipse cx="115" cy="350" rx="16" ry="9" />
           </g>
 
-          {/* Rosto: dá ao olho e ao dente onde se apoiar. Boca reta, nem sorrindo
-              nem chorando — o boneco é um mapa, não um personagem. */}
-          <g fill="var(--art-line)">
-            {FACE.eyes.map(([cx, cy]) => <circle key={cx} cx={cx} cy={cy} r="3.5" />)}
-          </g>
-          <line
-            x1={FACE.mouth.x1} y1={FACE.mouth.y} x2={FACE.mouth.x2} y2={FACE.mouth.y}
-            stroke="var(--art-line)" strokeWidth="3" strokeLinecap="round"
-          />
-
-          {/* Marcadores tocáveis. O contorno na cor do módulo (pelo token, que
-              funciona no escuro) diz "isto se toca"; o cinza de antes dizia
-              "isto é enfeite". */}
+          {/* Marcadores tocáveis */}
           {BODY_PARTS.filter((p) => p.x !== undefined).map((p) => {
             const active = p.key === part.key && !partsDimmed;
             return (
               <g key={p.key} onClick={() => pickPart(p)} style={{ cursor: 'pointer' }}>
-                <circle cx={p.x} cy={p.y} r={MARKER_HIT_R} fill="transparent" />
+                <circle cx={p.x} cy={p.y} r="13" fill="transparent" />
                 <circle
                   cx={p.x}
                   cy={p.y}
-                  r={active ? 11 : 8}
-                  fill={active ? theme.hex : 'var(--art-plate)'}
-                  stroke={active ? 'var(--art-plate)' : 'var(--tema-texto)'}
-                  strokeWidth={active ? 3 : 2.5}
+                  r={active ? 11 : 6}
+                  fill={active ? theme.hex : 'white'}
+                  stroke={active ? 'white' : 'var(--art-line)'}
+                  strokeWidth={active ? 3 : 2}
                   style={{ transition: 'r var(--scene-duration) var(--ease-out), fill var(--scene-duration) var(--ease-out), stroke-width var(--scene-duration) var(--ease-out)' }}
                 />
               </g>
             );
           })}
         </svg>
-        {/* O nome do que ela tocou, na língua dela. A altura fica reservada mesmo
-            vazia: sem isso, escolher "febre" lá embaixo encolhia o cartão e a
-            grade pulava debaixo do dedo. */}
-        <p className="mt-2 min-h-[1.5rem] text-center text-base font-bold text-gray-800 dark:text-slate-100" dir="auto" aria-live="polite">
-          {symptom.local ? partName(part, read) : ''}
-        </p>
       </div>
+
 
       {/* Sintoma localizado */}
       <section>
-        <h2 className={TITULO} dir="auto">{t('bodyWhereHurts')}</h2>
-        <div className="grid grid-cols-2 gap-2">
-          {LOCAL_SYMPTOMS.map(symptomButton)}
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('bodyWhereHurts')}</h2>
+        <div className="grid grid-cols-4 gap-2">
+          {LOCAL_SYMPTOMS.map((s) => {
+            const active = s.key === symptom.key;
+            return (
+              <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}>
+                <span className="text-xl leading-none">{s.emoji}</span>
+                <span className="text-[11px] font-bold leading-tight text-center" dir="auto">{s.labels[target]}</span>
+                {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{s.labels[native]}</span>}
+              </button>
+            );
+          })}
         </div>
       </section>
 
-      {/* Sintomas gerais — logo depois, e não mais uma tela abaixo: quem abre o
-          módulo com febre precisa ver que é aqui. */}
+      {/* Partes do corpo */}
       <section>
-        <h2 className={TITULO} dir="auto">{t('bodyHowFeel')}</h2>
-        <div className="grid grid-cols-3 gap-2">
-          {GENERAL_SYMPTOMS.map(symptomButton)}
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('bodyPart')}</h2>
+        <div className="flex flex-wrap gap-2">
+          {BODY_PARTS.map((p) => (
+            <button key={p.key} onClick={() => pickPart(p)} className={chip(p.key === part.key && !partsDimmed, partsDimmed)}>
+              <span dir="auto">{p.names[target][0]}</span>
+              {showNative && <span className="block text-[10px] font-medium opacity-70" dir="auto">{p.names[native][0]}</span>}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Sintomas gerais */}
+      <section>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('bodyHowFeel')}</h2>
+        <div className="grid grid-cols-4 gap-2">
+          {GENERAL_SYMPTOMS.map((s) => {
+            const active = s.key === symptom.key;
+            return (
+              <button key={s.key} onClick={() => pickSymptom(s)} className={`rounded-2xl border p-2 flex flex-col items-center gap-1 tap active:scale-95 ${active ? `${theme.color} text-white border-transparent shadow-md` : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-100 dark:border-slate-700'}`}>
+                <span className="text-xl leading-none">{s.emoji}</span>
+                <span className="text-[11px] font-bold leading-tight text-center" dir="auto">{s.labels[target]}</span>
+                {showNative && <span className={`text-[10px] leading-tight text-center ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} dir="auto">{s.labels[native]}</span>}
+              </button>
+            );
+          })}
         </div>
       </section>
 
       {/* Duração */}
       <section>
-        <h2 className={TITULO} dir="auto">{t('bodyDuration')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2 px-1">{t('bodyDuration')}</h2>
         <div className="flex flex-wrap gap-2">
-          {DURATIONS.map((d) => {
-            const active = duration?.key === d.key;
-            return (
-              <button key={d.key} onClick={() => pickDuration(d)} aria-pressed={active} className={chip(active)}>
-                <span className="block text-base font-bold" dir="auto">{d.labels[target]}</span>
-                {showNative && <span className={`block text-sm ${apoio(active)}`} dir="auto">{d.labels[native]}</span>}
-              </button>
-            );
-          })}
+          {DURATIONS.map((d) => (
+            <button key={d.key} onClick={() => pickDuration(d)} className={chip(duration?.key === d.key)}>
+              <span dir="auto">{d.labels[target]}</span>
+            </button>
+          ))}
         </div>
       </section>
 
-      {/* Partes do corpo — a lista é o caminho de quem não achou no boneco (as
-          costas e a pele só existem aqui), por isso vem depois do resto. */}
-      <section>
-        <h2 className={TITULO} dir="auto">{t('bodyPart')}</h2>
-        <div className="flex flex-wrap gap-2">
-          {BODY_PARTS.map((p) => {
-            const active = p.key === part.key && !partsDimmed;
-            return (
-              <button key={p.key} onClick={() => pickPart(p)} aria-pressed={active} className={chip(active)}>
-                <span className="block text-base font-bold" dir="auto">{p.names[target][0]}</span>
-                {showNative && <span className={`block text-sm ${apoio(active)}`} dir="auto">{p.names[native][0]}</span>}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Frases da farmácia e do médico */}
+      {/* Frases da farmácia */}
       <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
-        <h2 className={TITULO} dir="auto">{t('bodyPhrases')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">{t('bodyPhrases')}</h2>
         <ul className="divide-y divide-gray-100 dark:divide-slate-700">
           {BODY_QUESTIONS.map((q, i) => (
             <li key={i}>
-              <button onClick={() => speak(q[target])} className="w-full py-3 flex items-center gap-3 text-left tap active:scale-[0.98]">
-                <span className="flex-1 min-w-0">
-                  <span className="block text-base font-semibold leading-snug" dir="auto">{q[target]}</span>
-                  {showNative && <span className="block text-sm text-gray-600 dark:text-slate-300 leading-snug" dir="auto">{q[native]}</span>}
-                </span>
-                <Listen aria-hidden="true" className="w-6 h-6 flex-shrink-0" style={{ color: 'var(--tema-texto)' }} />
+              <button onClick={() => speak(q[target])} className="w-full py-2.5 flex items-center gap-3 text-left tap active:scale-[0.98]">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold leading-snug" dir="auto">{q[target]}</p>
+                  {showNative && <p className="text-xs text-gray-500 dark:text-slate-400 leading-snug" dir="auto">{q[native]}</p>}
+                </div>
+                <Listen className={`w-5 h-5 flex-shrink-0 ${theme.textColor}`} />
               </button>
             </li>
           ))}

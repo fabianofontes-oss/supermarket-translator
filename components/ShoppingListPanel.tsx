@@ -88,7 +88,7 @@ export const ShoppingListPanel: React.FC<ShoppingListPanelProps> = ({
                 <h3 className={`font-bold text-sm ${theme.textColor} uppercase tracking-wider mb-3 pb-2 border-b border-gray-100 dark:border-slate-700`}>{t(category)}</h3>
                 {Object.entries(subCategories).map(([subCategory, items]) => (
                 <div key={subCategory} className="mb-4">
-                    <h4 className="text-sm font-bold text-gray-600 dark:text-slate-300 mb-3 ml-1">{t(subCategory)}</h4>
+                    <h4 className="text-xs font-bold text-gray-500 dark:text-slate-400 mb-3 ml-1 uppercase">{t(subCategory)}</h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {items.map((item) => {
                            return (

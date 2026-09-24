@@ -1,15 +1,8 @@
 
 // Módulo "Direções" — instruções de rua, bússola, perguntas e vocabulário.
-// O espanhol é o da Espanha (manzana, gira, sigue recto, coge la primera...).
-// Inglês e francês também são destino de verdade (EUA e França estão abertos),
-// então precisam soar naturais lá, e não só "não quebrar".
-// Ucraniano (uk), árabe (ar) e lituano (lt) são idiomas de origem: aparecem só na
-// linha de apoio, nunca na frase falada.
-//
-// A REGRA DE GÊNERO (vale para o app inteiro): o app não sabe o gênero de quem
-// usa. Nenhuma frase pode concordar com ele — nem na boca dela ("Estoy perdido")
-// nem na de quem responde a ela ("Vous êtes arrivé", "Sei arrivato"). Por isso
-// "Me he perdido", "Vous y êtes", "Ci sei". tests/directions.test.ts varre isto.
+// Foco: Espanha (manzana, gira, sigue recto, coge la primera...).
+// Os demais idiomas de destino existem para o app não quebrar ao trocar o destino.
+// Ucraniano (uk) e árabe (ar) são idiomas de origem: aparecem como apoio, em letra pequena.
 
 import type { LangCode } from '../../location/data/locationData';
 
@@ -72,19 +65,14 @@ export const DIR_STEPS: DirStep[] = [
     phrases: { es: 'Sigue hasta el final de la calle.', pt: 'Siga até o final da rua.', en: 'Go to the end of the street.', fr: "Allez jusqu'au bout de la rue.", it: 'Vai fino alla fine della strada.', uk: 'Йдіть до кінця вулиці.', lt: 'Eikite iki gatvės galo.', ar: 'استمر حتى نهاية الشارع.' },
   },
   {
-    // "Dê a volta", no Brasil, é CONTORNAR (dar a volta no quarteirão), não
-    // voltar para trás. A glosa em pt ensinava o contrário do que o boneco faz.
     key: 'back', icon: '🔄', turn: 4, forward: 0,
-    labels:  { es: 'da la vuelta', pt: 'meia-volta', en: 'turn around', fr: 'demi-tour', it: 'torna indietro', uk: 'розверніться', lt: 'apsisukite', ar: 'ارجع' },
-    phrases: { es: 'Da la vuelta.', pt: 'Dê meia-volta.', en: 'Turn around.', fr: 'Faites demi-tour.', it: 'Torna indietro.', uk: 'Розверніться.', lt: 'Apsisukite.', ar: 'ارجع إلى الخلف.' },
+    labels:  { es: 'da la vuelta', pt: 'dê a volta', en: 'turn around', fr: 'demi-tour', it: 'torna indietro', uk: 'розверніться', lt: 'apsisukite', ar: 'ارجع' },
+    phrases: { es: 'Da la vuelta.', pt: 'Dê a volta.', en: 'Turn around.', fr: 'Faites demi-tour.', it: 'Torna indietro.', uk: 'Розверніться.', lt: 'Apsisukite.', ar: 'ارجع إلى الخلف.' },
   },
   {
-    // Francês e italiano diziam "arrivé" / "arrivato": concordavam com quem
-    // OUVE, e o app não sabe se é ela ou ele. "Vous y êtes" e "Ci sei" não
-    // concordam com ninguém e são o que se diz na rua.
     key: 'arrive', icon: '📍', turn: 0, forward: 0, arrive: true,
-    labels:  { es: 'has llegado', pt: 'chegou', en: 'arrived', fr: 'vous y êtes', it: 'ci sei', uk: 'прибули', lt: 'atvykote', ar: 'وصلت' },
-    phrases: { es: 'Ya has llegado. Está justo ahí.', pt: 'Você chegou. É bem ali.', en: "You have arrived. It's right there.", fr: "Vous y êtes. C'est juste là.", it: 'Ci sei. È proprio lì.', uk: 'Ви прибули. Це прямо тут.', lt: 'Jūs atvykote. Tai čia pat.', ar: 'لقد وصلت. إنه هنا تمامًا.' },
+    labels:  { es: 'has llegado', pt: 'chegou', en: 'arrived', fr: 'arrivé', it: 'arrivato', uk: 'прибули', lt: 'atvykote', ar: 'وصلت' },
+    phrases: { es: 'Ya has llegado. Está justo ahí.', pt: 'Você chegou. É bem ali.', en: "You have arrived. It's right there.", fr: "Vous êtes arrivé. C'est juste là.", it: 'Sei arrivato. È proprio lì.', uk: 'Ви прибули. Це прямо тут.', lt: 'Jūs atvykote. Tai čia pat.', ar: 'لقد وصلت. إنه هنا تمامًا.' },
   },
 ];
 
@@ -151,48 +139,17 @@ export const headingSentence = (lang: LangCode, c: Compass): string => {
 };
 
 // ---------------------------------------------------------------------------
-// COMO CHEGO A…
-//
-// Era uma frase só, "¿Cómo llego a la estación?", e quem precisava da farmácia
-// teria de juntar sozinha "Cómo llego a" + "el metro" — e ainda acertar "AL
-// metro". O app inteiro monta frases, e justo aqui a frase era pronta e servia a
-// um lugar. Agora é uma frase inteira por lugar, com a contração já feita em
-// cada língua (al, au, alla, ao, à).
-//
-// O emoji é o mesmo do mapa (💊, 🏥, 🚇, 🚏, 🚉, 🏦): quem viu o lugar desenhado
-// acha a ficha dele pelo desenho, sem ler.
-//
-// Equivalência, não tradução: o "centro de salud" espanhol é o "posto de saúde"
-// de quem lê em português, e "the clinic" para quem pergunta nos EUA.
-// ---------------------------------------------------------------------------
-export interface GoTo { key: string; emoji: string; phrase: Text }
-
-export const DIR_GO_TO: GoTo[] = [
-  { key: 'pharmacy', emoji: '💊', phrase: { es: '¿Cómo llego a la farmacia?', pt: 'Como chego à farmácia?', en: 'How do I get to the pharmacy?', fr: 'Comment aller à la pharmacie ?', it: 'Come arrivo alla farmacia?', uk: 'Як дійти до аптеки?', lt: 'Kaip nueiti į vaistinę?', ar: 'كيف أصل إلى الصيدلية؟' } },
-  { key: 'health', emoji: '🏥', phrase: { es: '¿Cómo llego al centro de salud?', pt: 'Como chego ao posto de saúde?', en: 'How do I get to the clinic?', fr: 'Comment aller au centre de santé ?', it: 'Come arrivo al centro medico?', uk: 'Як дійти до поліклініки?', lt: 'Kaip nueiti į polikliniką?', ar: 'كيف أصل إلى المركز الصحي؟' } },
-  { key: 'metro', emoji: '🚇', phrase: { es: '¿Cómo llego al metro?', pt: 'Como chego ao metrô?', en: 'How do I get to the subway?', fr: 'Comment aller au métro ?', it: 'Come arrivo alla metropolitana?', uk: 'Як дійти до метро?', lt: 'Kaip nueiti į metro?', ar: 'كيف أصل إلى المترو؟' } },
-  { key: 'bus', emoji: '🚏', phrase: { es: '¿Cómo llego a la parada de autobús?', pt: 'Como chego ao ponto de ônibus?', en: 'How do I get to the bus stop?', fr: "Comment aller à l'arrêt de bus ?", it: "Come arrivo alla fermata dell'autobus?", uk: 'Як дійти до автобусної зупинки?', lt: 'Kaip nueiti į autobusų stotelę?', ar: 'كيف أصل إلى موقف الحافلة؟' } },
-  { key: 'station', emoji: '🚉', phrase: { es: '¿Cómo llego a la estación?', pt: 'Como chego à estação?', en: 'How do I get to the station?', fr: 'Comment aller à la gare ?', it: 'Come arrivo alla stazione?', uk: 'Як дійти до вокзалу?', lt: 'Kaip nueiti į stotį?', ar: 'كيف أصل إلى المحطة؟' } },
-  { key: 'bank', emoji: '🏦', phrase: { es: '¿Cómo llego al banco?', pt: 'Como chego ao banco?', en: 'How do I get to the bank?', fr: 'Comment aller à la banque ?', it: 'Come arrivo alla banca?', uk: 'Як дійти до банку?', lt: 'Kaip nueiti į banką?', ar: 'كيف أصل إلى البنك؟' } },
-  { key: 'supermarket', emoji: '🛒', phrase: { es: '¿Cómo llego al supermercado?', pt: 'Como chego ao supermercado?', en: 'How do I get to the supermarket?', fr: 'Comment aller au supermarché ?', it: 'Come arrivo al supermercato?', uk: 'Як дійти до супермаркету?', lt: 'Kaip nueiti į prekybos centrą?', ar: 'كيف أصل إلى السوبرماركت؟' } },
-];
-
-// ---------------------------------------------------------------------------
 // PERGUNTAS ÚTEIS
-// A da estação saiu daqui: virou uma das fichas de DIR_GO_TO.
 // ---------------------------------------------------------------------------
 export const DIR_QUESTIONS: Text[] = [
+  { es: '¿Cómo llego a la estación?', pt: 'Como chego à estação?', en: 'How do I get to the station?', fr: 'Comment aller à la gare ?', it: 'Come arrivo alla stazione?', uk: 'Як дійти до вокзалу?', lt: 'Kaip nueiti į stotį?', ar: 'كيف أصل إلى المحطة؟' },
   { es: '¿Está lejos?', pt: 'É longe?', en: 'Is it far?', fr: "C'est loin ?", it: 'È lontano?', uk: 'Це далеко?', lt: 'Ar toli?', ar: 'هل هو بعيد؟' },
   { es: '¿Se puede ir andando?', pt: 'Dá para ir a pé?', en: 'Can I walk there?', fr: 'On peut y aller à pied ?', it: 'Si può andare a piedi?', uk: 'Можна дійти пішки?', lt: 'Ar galima nueiti pėsčiomis?', ar: 'هل يمكن الذهاب مشيًا؟' },
   { es: '¿Cuánto se tarda?', pt: 'Quanto tempo leva?', en: 'How long does it take?', fr: 'Ça prend combien de temps ?', it: 'Quanto ci vuole?', uk: 'Скільки часу це займе?', lt: 'Kiek užtrunka?', ar: 'كم يستغرق الوقت؟' },
   { es: '¿Dónde está la parada de autobús?', pt: 'Onde fica o ponto de ônibus?', en: 'Where is the bus stop?', fr: "Où est l'arrêt de bus ?", it: "Dov'è la fermata dell'autobus?", uk: 'Де автобусна зупинка?', lt: 'Kur yra autobusų stotelė?', ar: 'أين موقف الحافلة؟' },
   { es: '¿Me lo puede señalar en el mapa?', pt: 'Pode me mostrar no mapa?', en: 'Can you show me on the map?', fr: 'Pouvez-vous me montrer sur la carte ?', it: 'Me lo può indicare sulla mappa?', uk: 'Можете показати на карті?', lt: 'Ar galite parodyti žemėlapyje?', ar: 'هل يمكنك أن تريني على الخريطة؟' },
   { es: '¿Puede repetir, por favor?', pt: 'Pode repetir, por favor?', en: 'Can you repeat, please?', fr: "Pouvez-vous répéter, s'il vous plaît ?", it: 'Può ripetere, per favore?', uk: 'Повторіть, будь ласка.', lt: 'Pakartokite, prašau.', ar: 'هل يمكنك التكرار من فضلك؟' },
-  // A frase que mais ajuda a ENTENDER a resposta, e não existia.
-  { es: '¿Puede hablar más despacio?', pt: 'Pode falar mais devagar?', en: 'Can you speak more slowly?', fr: 'Pouvez-vous parler plus lentement ?', it: 'Può parlare più lentamente?', uk: 'Говоріть повільніше, будь ласка.', lt: 'Ar galite kalbėti lėčiau?', ar: 'هل يمكنك التحدث ببطء؟' },
-  // Era "Estoy perdido" / "Estou perdido": masculino, na boca de um público que
-  // é sobretudo mulher. Estas não concordam com quem fala.
-  { es: 'Me he perdido.', pt: 'Me perdi.', en: "I'm lost.", fr: 'Je ne trouve pas mon chemin.', it: 'Non trovo la strada.', uk: 'Я не можу знайти дорогу.', lt: 'Aš pasiklydau.', ar: 'لقد ضللت الطريق.' },
+  { es: 'Estoy perdido.', pt: 'Estou perdido.', en: 'I am lost.', fr: 'Je suis perdu.', it: 'Mi sono perso.', uk: 'Я заблукав.', lt: 'Aš pasiklydau.', ar: 'لقد ضللت الطريق.' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -204,9 +161,7 @@ export const DIR_PLACES: Vocab[] = [
   { emoji: '🏢', names: { es: 'la esquina', pt: 'a esquina', en: 'the corner', fr: 'le coin', it: "l'angolo", uk: 'ріг', lt: 'kampas', ar: 'الزاوية' } },
   { emoji: '🏘️', names: { es: 'la manzana', pt: 'o quarteirão', en: 'the block', fr: 'le pâté de maisons', it: "l'isolato", uk: 'квартал', lt: 'kvartalas', ar: 'المربع السكني' } },
   { emoji: '🚦', names: { es: 'el semáforo', pt: 'o semáforo', en: 'the traffic light', fr: 'le feu', it: 'il semaforo', uk: 'світлофор', lt: 'šviesoforas', ar: 'إشارة المرور' } },
-  // ⭕ e não 🔄: o 🔄 é o passo "da la vuelta", e com o mesmo desenho nos dois
-  // ela via o ícone sem saber qual das duas coisas era.
-  { emoji: '⭕', names: { es: 'la rotonda', pt: 'a rotatória', en: 'the roundabout', fr: 'le rond-point', it: 'la rotonda', uk: "кільцева розв'язка", lt: 'žiedinė sankryža', ar: 'الدوار' } },
+  { emoji: '🔄', names: { es: 'la rotonda', pt: 'a rotatória', en: 'the roundabout', fr: 'le rond-point', it: 'la rotonda', uk: "кільцева розв'язка", lt: 'žiedinė sankryža', ar: 'الدوار' } },
   { emoji: '➕', names: { es: 'el cruce', pt: 'o cruzamento', en: 'the intersection', fr: 'le carrefour', it: "l'incrocio", uk: 'перехрестя', lt: 'sankryža', ar: 'التقاطع' } },
   { emoji: '🚸', names: { es: 'el paso de peatones', pt: 'a faixa de pedestres', en: 'the crosswalk', fr: 'le passage piéton', it: 'le strisce pedonali', uk: 'пішохідний перехід', lt: 'pėsčiųjų perėja', ar: 'ممر المشاة' } },
   { emoji: '⛲', names: { es: 'la plaza', pt: 'a praça', en: 'the square', fr: 'la place', it: 'la piazza', uk: 'площа', lt: 'aikštė', ar: 'الساحة' } },
@@ -231,15 +186,12 @@ export const DIR_DISTANCES: Vocab[] = [
 
 // ---------------------------------------------------------------------------
 // SIMULAÇÃO DO PERCURSO NO MAPA
-// Grade de GRID x GRID cruzamentos. Começa no MEIO do bairro, olhando para o norte.
+// Grade de GRID x GRID cruzamentos. Começa embaixo, no meio, olhando para o norte.
 // ---------------------------------------------------------------------------
 // 7x7 cruzamentos = 6x6 quarteirões. Era 5x5, e com o mapa mostrando a cidade
 // continuando para todo lado, a borda do bairro virou uma parede invisível: os
 // botões apagavam sem nada explicar por quê. Bairro maior, esbarrão mais raro.
 export const GRID = 7;
-
-/** Teto do percurso. Dez passos já enchem o cartão fixo, que tem rolagem própria. */
-export const MAX_STEPS = 10;
 
 /** Oito direções, de 45 em 45, do norte girando pela direita. */
 export const HEADINGS = [
@@ -275,16 +227,8 @@ const temDiagonal = (x: number, y: number, nx: number, ny: number) =>
     (e.b.x === x && e.b.y === y && e.a.x === nx && e.a.y === ny));
 
 export interface Walker { x: number; y: number; heading: number }
-/**
- * No meio do bairro, olhando para o norte.
- *
- * Começava na borda de baixo, e aí metade do mapa era cidade de enfeite: rua
- * desenhada à frente depois de uma meia-volta, e o botão "sigue recto" sumido. O
- * mapa dizia "pode ir" e os botões diziam "não pode". No meio, todos os passos de
- * andar valem no primeiro toque, e a rotatória (um quarteirão à direita) e a
- * bifurcação (que termina aqui) já aparecem no primeiro quadro.
- */
-export const START: Walker = { x: (GRID - 1) / 2, y: (GRID - 1) / 2, heading: 0 };
+// Embaixo, no meio da largura, olhando para o norte.
+export const START: Walker = { x: (GRID - 1) / 2, y: GRID - 1, heading: 0 };
 
 const inBounds = (x: number, y: number) => x >= 0 && x < GRID && y >= 0 && y < GRID;
 

@@ -3,16 +3,6 @@
 // Aqui a tradução literal não serve: "café com leite" no Brasil e "café con leche"
 // na Espanha não são a mesma bebida. Por isso cada item tem o nome local,
 // uma explicação na língua de quem lê, e a proporção desenhada no copo.
-//
-// As explicações (`descs`) falam da Espanha, e continuam falando mesmo com outro
-// destino: a tela põe no topo, fora da Espanha, a linha `cafeSpainOnly` ("Este
-// módulo mostra como se pede num bar da Espanha"), e é ela que enquadra as notas.
-// Decisão do dono (auditoria de 23/09/2026, [cafe-1] opção B).
-//
-// Regra de conteúdo, a mesma da Limpeza da casa e agora do app inteiro: quem fala
-// é a própria pessoa, e o app não sabe o gênero dela. Nenhuma frase pode
-// concordar com quem fala — por isso "No como carne ni pescado" e não
-// "Soy vegetariano". `tests/cafe.test.ts` varre as frases atrás disso.
 
 import type { LangCode } from '../../location/data/locationData';
 
@@ -33,14 +23,10 @@ export const LAYER_COLOR: Record<LayerKind, string> = {
   foam: '#fffaf2',
 };
 
-export type Vessel = 'cup' | 'glass';
-
 export interface Drink {
   key: string;
-  /** taza = xícara, vaso = copo de vidro. Na Espanha isso muda o pedido.
-   *  É o recipiente PADRÃO: "en taza"/"en vaso" escolhidos na tela mandam no
-   *  desenho e na etiqueta, senão o desenho contradiz a frase. */
-  vessel: Vessel;
+  /** taza = xícara, vaso = copo de vidro. Na Espanha isso muda o pedido. */
+  vessel: 'cup' | 'glass';
   /** Camadas de baixo para cima, somando 100. */
   layers: { kind: LayerKind; pct: number }[];
   names: Text;
@@ -137,51 +123,9 @@ export const MODIFIERS: Modifier[] = [
                    texts:  { es: ' para llevar', pt: ' para viagem', en: ' to take away', fr: ' à emporter', it: ' da portare via', uk: ' з собою', lt: ' išsinešti', ar: ' للأخذ' } },
 ];
 
-/**
- * Os modificadores que fazem sentido PARA ESTA BEBIDA. Lista de permissão, como
- * o `optionsFor` da Maquiagem.
- *
- * Sem isto o app montava pedido que o garçom não entende: "Un café solo con la
- * leche fría" (o solo não leva leite), "Un carajillo con la leche fría", "Un café
- * con hielo muy caliente". Duas regras, e só duas:
- *
- * - "con leche fría" só onde a bebida TEM leite — a camada `milk` do desenho é a
- *   fonte, então bebida nova já nasce certa. O leite condensado do bombón não
- *   conta: ninguém pede o bombón com leite frio.
- * - "templado" e "muy caliente" nunca onde há gelo.
- *
- * "para llevar" fica em tudo, de propósito: é pedido que se faz, mesmo no cortado.
- *
- * A tela NÃO apaga o que foi marcado ao trocar de bebida — quem pediu leite frio
- * no cortado, passou pelo solo e voltou, reencontra a escolha. Quem filtra é
- * `buildOrder`, e a tela só esconde o botão.
- */
-export const modsFor = (drink: Drink): Modifier[] => {
-  const hasMilk = drink.layers.some((l) => l.kind === 'milk');
-  const hasIce = drink.layers.some((l) => l.kind === 'ice');
-  return MODIFIERS.filter((m) => {
-    if (m.key === 'coldMilk') return hasMilk;
-    if (m.key === 'warm' || m.key === 'hot') return !hasIce;
-    return true;
-  });
-};
-
-/**
- * O recipiente que vai à mesa. "en taza" ou "en vaso" escolhidos mandam; sem
- * eles, vale o padrão da bebida. O desenho e a etiqueta usam isto — antes usavam
- * só `drink.vessel`, e "Un cortado en taza" aparecia desenhado num copo com a
- * etiqueta "no copo". Quem aprende sozinha confere pelo desenho; se ele discorda
- * da frase, ela deixa de confiar nos dois.
- */
-export const vesselFor = (drink: Drink, modKeys: readonly string[]): Vessel =>
-  modKeys.includes('cup') ? 'cup' : modKeys.includes('glass') ? 'glass' : drink.vessel;
-
 // ---------------------------------------------------------------------------
-// PALAVRAS DO CARDÁPIO
+// PORÇÕES E FORMATOS
 // ---------------------------------------------------------------------------
-// Na tela, cada linha mostra a explicação SEMPRE — antes ela abria só no toque,
-// nada avisava, e era justamente a parte que ensina o costume ("em algumas
-// cidades é de graça", "só no almoço").
 export interface Portion { key: string; emoji: string; names: Text; descs: Text }
 
 export const PORTIONS: Portion[] = [
@@ -220,10 +164,7 @@ export const PORTIONS: Portion[] = [
 // ---------------------------------------------------------------------------
 // FRASES DO BAR
 // ---------------------------------------------------------------------------
-// A caña abre a lista porque é o pedido mais comum num bar espanhol — e antes
-// estava escondida no fim das porções, falando "la caña", que não é como se pede.
 export const CAFE_QUESTIONS: Text[] = [
-  { es: 'Una caña, por favor.', pt: 'Um chope pequeno, por favor.', en: 'A small draft beer, please.', fr: "Un demi, s'il vous plaît.", it: 'Una birra piccola alla spina, per favore.', uk: 'Мале розливне пиво, будь ласка.', lt: 'Mažą bokalą alaus, prašau.', ar: 'بيرة صغيرة من البرميل، من فضلك.' },
   { es: '¿Qué tapas tenéis?', pt: 'Que tapas vocês têm?', en: 'What tapas do you have?', fr: 'Quelles tapas avez-vous ?', it: 'Che tapas avete?', uk: 'Які у вас тапас?', lt: 'Kokių tapų turite?', ar: 'ما التاباس المتوفرة؟' },
   { es: '¿Tienen menú del día?', pt: 'Tem menu do dia?', en: 'Do you have a set lunch?', fr: 'Avez-vous un menu du jour ?', it: 'Avete il menù del giorno?', uk: 'У вас є комплексний обід?', lt: 'Ar turite dienos meniu?', ar: 'هل لديكم قائمة اليوم؟' },
   { es: '¿La tapa está incluida?', pt: 'A tapa está incluída?', en: 'Is the tapa included?', fr: 'La tapa est-elle comprise ?', it: 'La tapa è inclusa?', uk: 'Тапа входить у ціну?', lt: 'Ar tapa įskaičiuota?', ar: 'هل التاباس مشمولة؟' },
@@ -231,9 +172,7 @@ export const CAFE_QUESTIONS: Text[] = [
   { es: '¿Me pones la cuenta?', pt: 'Pode trazer a conta?', en: 'Can I have the bill?', fr: 'L\'addition, s\'il vous plaît ?', it: 'Mi porta il conto?', uk: 'Можна рахунок?', lt: 'Ar galiu gauti sąskaitą?', ar: 'الحساب من فضلك؟' },
   { es: '¿Se puede pagar con tarjeta?', pt: 'Dá para pagar com cartão?', en: 'Can I pay by card?', fr: 'Puis-je payer par carte ?', it: 'Posso pagare con la carta?', uk: 'Можна оплатити карткою?', lt: 'Ar galima mokėti kortele?', ar: 'هل يمكن الدفع بالبطاقة؟' },
   { es: '¿Tiene gluten?', pt: 'Tem glúten?', en: 'Does it contain gluten?', fr: 'Est-ce que ça contient du gluten ?', it: 'Contiene glutine?', uk: 'Чи містить глютен?', lt: 'Ar jame yra glitimo?', ar: 'هل يحتوي على الغلوتين؟' },
-  // Era "Soy vegetariano.": ensinava a mulher a falar no masculino. Dizer o que
-  // não come dá a mesma informação sem concordar com ninguém.
-  { es: 'No como carne ni pescado.', pt: 'Não como carne nem peixe.', en: "I don't eat meat or fish.", fr: 'Je ne mange ni viande ni poisson.', it: 'Non mangio né carne né pesce.', uk: "Я не їм ні м'яса, ні риби.", lt: 'Aš nevalgau nei mėsos, nei žuvies.', ar: 'لا آكل اللحم ولا السمك.' },
+  { es: 'Soy vegetariano.', pt: 'Sou vegetariano.', en: 'I am vegetarian.', fr: 'Je suis végétarien.', it: 'Sono vegetariano.', uk: 'Я вегетаріанець.', lt: 'Aš vegetaras.', ar: 'أنا نباتي.' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -241,16 +180,9 @@ export const CAFE_QUESTIONS: Text[] = [
 // ---------------------------------------------------------------------------
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/**
- * "Un cortado en vaso, por favor."
- *
- * `mods` pode trazer escolha que sobrou de outra bebida (a tela não apaga o
- * estado); é aqui, por `modsFor`, que o que não vale para esta bebida fica de
- * fora da frase.
- */
+/** "Un cortado en vaso, por favor." */
 export const buildOrder = (lang: LangCode, drink: Drink, mods: Modifier[]): string => {
-  const allowed = new Set(modsFor(drink).map((m) => m.key));
-  const body = drink.orders[lang] + mods.filter((m) => allowed.has(m.key)).map((m) => m.texts[lang]).join('');
+  const body = drink.orders[lang] + mods.map((m) => m.texts[lang]).join('');
   switch (lang) {
     case 'es': return `${cap(body)}, por favor.`;
     case 'pt': return `${cap(body)}, por favor.`;

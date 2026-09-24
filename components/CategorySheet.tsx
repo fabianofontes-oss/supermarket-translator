@@ -86,7 +86,7 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
                   <Icon className="w-6 h-6" />
                 </span>
                 <span
-                  className={`text-sm font-bold leading-tight break-words ${meta.wide ? 'text-left' : 'text-center'} ${active ? theme.textColor : 'text-gray-700 dark:text-slate-200'}`}
+                  className={`text-[13px] font-bold leading-tight break-words ${meta.wide ? 'text-left' : 'text-center'} ${active ? theme.textColor : 'text-gray-700 dark:text-slate-200'}`}
                   dir="auto"
                 >
                   {t(c.name)}

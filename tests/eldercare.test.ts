@@ -1,20 +1,12 @@
-import { createElement } from 'react';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import ElderCareModule from '../modules/ElderCareModule';
+import { describe, it, expect } from 'vitest';
 import {
-  CARE_ACTIONS, REPORT_EVENTS, WHEN_TAGS, CARE_TOOLS, TOOL_FRAMES, EMERGENCY,
-  EMERGENCY_NUMBER, EMERGENCY_NUMBERS, emergencyNumberFor,
+  CARE_ACTIONS, REPORT_EVENTS, WHEN_TAGS, CARE_TOOLS, TOOL_FRAMES, EMERGENCY, EMERGENCY_NUMBER,
   CARE_GROUPS, REPORT_GROUPS, TOOL_GROUPS,
   CARE_GROUP_LABELS, REPORT_GROUP_LABELS, TOOL_GROUP_LABELS,
-  buildCareLine, buildReport, buildToolPhrase, reportLabel, say, visibleNote,
+  buildCareLine, buildReport, buildToolPhrase, say,
   type Gender, type Treat,
 } from '../modules/eldercare/data/elderCareData';
 import { SUPPORTED_LANGS, type LangCode } from '../modules/location/data/locationData';
-import { translations } from '../translations';
-import { COUNTRIES } from '../constants';
 
 /**
  * Módulo Cuidar de idosos.
@@ -26,11 +18,6 @@ import { COUNTRIES } from '../constants';
  *     um adjetivo concordado no lado "falar com ela" não passa daqui.
  *  2. A Parte 6 varre nome de medicamento e dose. É o único teste deste arquivo cuja
  *     falha não é bug: é motivo para não publicar.
- *
- * As Partes 8 a 10 vêm da auditoria de usabilidade de 23/09/2026: uma cuidadora
- * brasileira recém-chegada, de óculos, com a senhora apoiada no braço. O botão
- * mostra a frase que vai dizer; nada da Espanha aparece como verdade fora dela; o
- * número de emergência é o do país; e nenhuma frase esconde um detalhe fixo.
  */
 
 /** Bloco árabe. Nenhuma outra língua pode conter isto (AGENTS.md 8.5). */
@@ -108,16 +95,14 @@ const TODAS_AS_STRINGS: { onde: string; texto: string }[] = (() => {
 
 describe('PARTE 1 — varredura de invariantes', () => {
   it('cobre o que a interface consegue produzir', () => {
-    // 18 falas: o comprimido virou dois períodos (manhã e noite) mais o anúncio
-    // sem período — ver a Parte 8.
-    expect(CARE_ACTIONS).toHaveLength(18);
+    expect(CARE_ACTIONS).toHaveLength(17);
     expect(REPORT_EVENTS).toHaveLength(12);
     expect(WHEN_TAGS).toHaveLength(5);
     expect(CARE_TOOLS).toHaveLength(14);
     expect(TOOL_FRAMES).toHaveLength(4);
     expect(EMERGENCY).toHaveLength(6);
-    // 8 idiomas × (18 falas × 2 tratamentos) e por aí.
-    expect(FALAS).toHaveLength(8 * 18 * 2);
+    // 8 idiomas × (17 falas × 2 tratamentos) e por aí.
+    expect(FALAS).toHaveLength(8 * 17 * 2);
     expect(RELATOS).toHaveLength(8 * 12 * 2 * 6);
     expect(OBJETOS).toHaveLength(8 * 14 * 4);
   });
@@ -133,19 +118,16 @@ describe('PARTE 1 — varredura de invariantes', () => {
 
 describe('PARTE 2 — o eixo do tratamento', () => {
   /**
-   * es, fr, it, lt e pt marcam o tratamento SEMPRE, e sem tocar no gênero de ninguém.
-   * Só `uk` pode coincidir, e é decisão registrada no cabeçalho dos dados: o
-   * ucraniano evita o passado justamente para não denunciar gênero.
-   *
-   * O `pt` entrou na lista em 24/09/2026. Com o sujeito oculto ("Está com fome?"),
-   * 15 das 18 falas saíam iguais nos dois lados do seletor "Senhora / Você", e o
-   * português é o que ela LÊ: trocar o seletor parecia não fazer nada.
+   * es, fr, it e lt marcam o tratamento SEMPRE, e sem tocar no gênero de ninguém.
+   * `pt` e `uk` podem coincidir, e é decisão registrada no cabeçalho dos dados:
+   * o português com sujeito oculto ("Quer que eu ajude no banho?") serve aos dois,
+   * e o ucraniano evita o passado justamente para não denunciar gênero.
    */
-  it('es, fr, it, lt e pt sempre distinguem usted de tú', () => {
+  it('es, fr, it e lt sempre distinguem usted de tú', () => {
     const falhas: string[] = [];
     for (const a of CARE_ACTIONS) {
       if (a.says.kind !== 'treat') continue;
-      for (const lang of ['es', 'fr', 'it', 'lt', 'pt'] as const) {
+      for (const lang of ['es', 'fr', 'it', 'lt'] as const) {
         if (a.says.usted[lang] === a.says.tu[lang]) falhas.push(`${a.key}/${lang}: "${a.says.usted[lang]}"`);
       }
     }
@@ -252,15 +234,14 @@ describe('PARTE 4 — o eixo do gênero, no relato', () => {
 
   it('onde a língua obriga, as duas formas existem e diferem', () => {
     // `fell` em francês e italiano usa "être/essere": ali o particípio concorda.
-    // (Sem o lugar desde 23/09/2026: dizia sempre "no banheiro". Ver a Parte 8.)
     const fell = REPORT_EVENTS.find((e) => e.key === 'fell')!;
-    expect(buildReport('fr', fell, null, 'f')).toBe('Elle est tombée.');
-    expect(buildReport('fr', fell, null, 'm')).toBe('Il est tombé.');
-    expect(buildReport('it', fell, null, 'f')).toBe('È caduta.');
-    expect(buildReport('it', fell, null, 'm')).toBe('È caduto.');
+    expect(buildReport('fr', fell, null, 'f')).toBe('Elle est tombée dans la salle de bain.');
+    expect(buildReport('fr', fell, null, 'm')).toBe('Il est tombé dans la salle de bain.');
+    expect(buildReport('it', fell, null, 'f')).toBe('È caduta in bagno.');
+    expect(buildReport('it', fell, null, 'm')).toBe('È caduto in bagno.');
     // O у/в protético do ucraniano segue o som anterior, e por isso é escrito à mão.
-    expect(buildReport('uk', fell, null, 'f')).toBe('Вона впала.');
-    expect(buildReport('uk', fell, null, 'm')).toBe('Він упав.');
+    expect(buildReport('uk', fell, null, 'f')).toBe('Вона впала у ванній.');
+    expect(buildReport('uk', fell, null, 'm')).toBe('Він упав у ванній.');
   });
 
   it('fr, uk e ar têm forma masculina em todo evento com sujeito', () => {
@@ -284,25 +265,21 @@ describe('PARTE 4 — o eixo do gênero, no relato', () => {
     }
   });
 
-  it('o rótulo da tela é a própria oração, e segue o seletor', () => {
+  it('o rótulo do relato é assunto, não frase', () => {
     /**
-     * Antes o rótulo era um substantivo fixo ("Tranquilidade"), porque um rótulo
-     * em forma de frase ESCRITO NO DADO contradizia o cartão assim que o seletor
-     * ia para "De um senhor". Agora o rótulo é CALCULADO da mesma oração que o
-     * cartão usa, com o mesmo gênero — e a contradição fica impossível: o botão
-     * diz exatamente o que o cartão vai dizer, sem o marcador de tempo e sem ponto.
+     * Com rótulo em forma de frase ("Esteve tranquila") o botão passava a
+     * contradizer o próprio resultado assim que o seletor ia para "De um senhor"
+     * — o botão dizia uma coisa e o cartão produzia "Ha estado tranquilo.".
+     * Substantivo não tem gênero de sujeito, então serve aos dois.
      */
+    const CONCORDA = /\b(tranquil|desorientad|cansad|sentad|acostad|cai?d|dormid|quiet)[ao]s?\b/i;
     const falhas: string[] = [];
-    for (const lang of SUPPORTED_LANGS)
-      for (const e of REPORT_EVENTS)
-        for (const g of GENDERS) {
-          const rotulo = reportLabel(lang, e, g);
-          if (`${rotulo}.` !== buildReport(lang, e, null, g)) falhas.push(`${lang}/${e.key}/${g}: "${rotulo}"`);
-        }
+    for (const e of REPORT_EVENTS) {
+      for (const lang of ['es', 'pt', 'it'] as const) {
+        if (CONCORDA.test(e.labels[lang])) falhas.push(`${e.key}/${lang}: "${e.labels[lang]}"`);
+      }
+    }
     expect(falhas).toEqual([]);
-    const calm = REPORT_EVENTS.find((e) => e.key === 'calm')!;
-    expect(reportLabel('pt', calm, 'f')).toBe('Esteve tranquila');
-    expect(reportLabel('pt', calm, 'm')).toBe('Esteve tranquilo');
   });
 
   it('o relato não tem tratamento', () => {
@@ -387,20 +364,8 @@ describe('PARTE 6 — segurança: nunca medicamento, nunca dose', () => {
     // módulo Números. E dose, por definição, precisa de número.
     const falhas = TODAS_AS_STRINGS.filter((s) => /\d/.test(s.texto)).map((s) => `${s.onde}: "${s.texto}"`);
     expect(falhas).toEqual([]);
-    // Os números de emergência vivem fora das tabelas, sozinhos, e são os únicos
-    // algarismos do módulo: 112 no padrão, 911 nos Estados Unidos.
+    // O 112 vive fora das tabelas, sozinho, e é o único algarismo do módulo.
     expect(EMERGENCY_NUMBER).toBe('112');
-    for (const n of Object.values(EMERGENCY_NUMBERS)) expect(n).toMatch(/^\d{3}$/);
-  });
-
-  it('o número de emergência é o do país: 112 no padrão, 911 nos Estados Unidos', () => {
-    // No lançamento "Estou em" abre Estados Unidos, e ali o app ensinava 112.
-    expect(emergencyNumberFor('es')).toBe('112');
-    expect(emergencyNumberFor('fr')).toBe('112');
-    expect(emergencyNumberFor('it')).toBe('112');
-    expect(emergencyNumberFor('us')).toBe('911');
-    // País sem entrada cai no padrão europeu, nunca em vazio.
-    expect(emergencyNumberFor('xx')).toBe('112');
   });
 
   /**
@@ -500,337 +465,5 @@ describe('PARTE 7 — integridade das tabelas', () => {
     for (const w of WHEN_TAGS) {
       for (const lang of SUPPORTED_LANGS) expect(w.phrases[lang]).toBe(w.phrases[lang].trim());
     }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Auditoria de usabilidade, 23/09/2026
-// ---------------------------------------------------------------------------
-
-const acao = (key: string) => CARE_ACTIONS.find((a) => a.key === key)!;
-const relato = (key: string) => REPORT_EVENTS.find((e) => e.key === key)!;
-const objeto = (key: string) => CARE_TOOLS.find((x) => x.key === key)!;
-
-describe('PARTE 8 — nenhum detalhe fixo escondido, nenhuma nota fora do lugar', () => {
-  it('a queda não diz onde foi', () => {
-    // Dizia sempre "caiu no banheiro". Se ela caiu no quarto, a família — e dali o
-    // médico — recebia a informação errada.
-    const LUGAR = /baño|banheiro|bathroom|salle de bain|bagno|ванн|vonioje|الحمام/i;
-    const fell = relato('fell');
-    for (const lang of SUPPORTED_LANGS)
-      for (const g of GENDERS) expect(buildReport(lang, fell, null, g), `${lang}/${g}`).not.toMatch(LUGAR);
-    expect(buildReport('es', fell, null, 'f')).toBe('Se ha caído.');
-    expect(buildReport('pt', fell, WHEN_TAGS[0], 'f')).toBe('Hoje caiu.');
-  });
-
-  it('a recomendação de chamar o médico não ganha data', () => {
-    const medico = relato('callDoctor');
-    expect(medico.semTempo).toBe(true);
-    for (const lang of SUPPORTED_LANGS)
-      for (const when of WHEN_TAGS)
-        expect(buildReport(lang, medico, when, 'f'), `${lang}/${when.key}`).toBe(buildReport(lang, medico, null, 'f'));
-    expect(buildReport('es', medico, WHEN_TAGS[0], 'f')).toBe('Creo que habría que llamar al médico.');
-    // Só ele: todo outro relato continua aceitando o marcador.
-    expect(REPORT_EVENTS.filter((e) => e.semTempo).map((e) => e.key)).toEqual(['callDoctor']);
-  });
-
-  it('a caminhada não diz por onde', () => {
-    const LUGAR = /pasillo|corredor|hallway|couloir|corridoio|коридор|koridori|الممر/i;
-    const walked = relato('walked');
-    for (const lang of SUPPORTED_LANGS)
-      for (const g of GENDERS) expect(buildReport(lang, walked, null, g), `${lang}/${g}`).not.toMatch(LUGAR);
-    expect(buildReport('pt', walked, null, 'f')).toBe('Caminhou um pouco.');
-  });
-
-  it('o comprimido: uma pergunta por período, e o anúncio sem período', () => {
-    // "Hora do comprimido" anunciava sempre o da NOITE, às oito da manhã inclusive.
-    const PERIODO = /mañana|noche|manhã|noite|morning|evening|matin|soir|mattino|sera|ранков|вечірн|ryt|vakar|الصباح|المساء/i;
-    const anuncio = acao('medTime');
-    for (const lang of SUPPORTED_LANGS) expect(buildCareLine(lang, anuncio, 'usted'), lang).not.toMatch(PERIODO);
-    expect(buildCareLine('es', anuncio, 'usted')).toBe('Es la hora de la pastilla.');
-
-    const manha = acao('medMorning');
-    const noite = acao('medNight');
-    expect(manha.group).toBe('meds');
-    expect(noite.group).toBe('meds');
-    expect(buildCareLine('es', manha, 'usted')).toBe('¿Ya se ha tomado la pastilla de la mañana?');
-    expect(buildCareLine('es', noite, 'usted')).toBe('¿Ya se ha tomado la pastilla de la noche?');
-    expect(buildCareLine('es', noite, 'tu')).toBe('¿Ya te has tomado la pastilla de la noche?');
-    expect(buildCareLine('pt', noite, 'usted')).toBe('A senhora já tomou o comprimido da noite?');
-    expect(buildCareLine('pt', noite, 'tu')).toBe('Você já tomou o comprimido da noite?');
-    // O ucraniano continua impessoal: o passado denunciaria o gênero de quem ouve.
-    expect(buildCareLine('uk', noite, 'usted')).toBe(buildCareLine('uk', noite, 'tu'));
-  });
-
-  it('toda nota que fala de um país diz qual é', () => {
-    /**
-     * A do andador ensinava a quem está nos Estados Unidos que lá se diz
-     * "taca-taca". Nota sem `noteIn` aparece em qualquer destino, então precisa
-     * ser declarada aqui — as duas únicas são a regra de segurança do comprimido.
-     */
-    const universais = [...CARE_ACTIONS, ...CARE_TOOLS].filter((x) => x.note && !x.noteIn).map((x) => x.key);
-    expect(universais).toEqual(['medMorning', 'medNight']);
-
-    const naEspanha = ['walker', 'cane', 'handrail', 'bedPad', 'bedpan', 'pad', 'bpMonitor'];
-    for (const key of naEspanha) expect(objeto(key).noteIn, key).toBe('es');
-    expect(objeto('wheelchair').noteIn).toBe('fr');
-    expect(acao('leanOnMe').noteIn).toBe('it');
-  });
-
-  it('a nota só aparece no destino dela', () => {
-    const walker = objeto('walker');
-    expect(visibleNote(walker, 'us', 'pt')).toBeNull();
-    expect(visibleNote(walker, 'fr', 'pt')).toBeNull();
-    // Dentro da Espanha, a nota em português diz que é na Espanha.
-    expect(visibleNote(walker, 'es', 'pt')).toMatch(/^Na Espanha, em casa muita gente diz "taca-taca"/);
-    expect(visibleNote(objeto('wheelchair'), 'fr', 'pt')).toContain('fauteuil roulant');
-    expect(visibleNote(objeto('wheelchair'), 'es', 'pt')).toBeNull();
-    // A do comprimido vale em qualquer lugar.
-    expect(visibleNote(acao('medMorning'), 'us', 'pt')).toContain('nunca pela quantidade');
-    // Item sem nota, nenhuma nota.
-    expect(visibleNote(acao('sit'), 'es', 'pt')).toBeNull();
-  });
-
-  it('palavras que a brasileira usa', () => {
-    const leak = relato('leak');
-    expect(leak.labels.pt).toBe('Xixi ou cocô na roupa');
-    expect(reportLabel('pt', leak, 'f')).toBe('Teve um escape (fez na roupa)');
-    expect(TOOL_GROUP_LABELS.health.pt).toBe('Para medir a saúde');
-    expect(objeto('bedPad').names.pt).toBe('o forro de cama descartável');
-    expect(objeto('bedPad').askFor.pt).toBe('um forro de cama descartável');
-    // "Resguardo" só sobrevive na nota que ensina a NÃO pedir "un resguardo".
-    const nomes = CARE_TOOLS.flatMap((x) => [x.names.pt, x.askFor.pt]);
-    expect(nomes.filter((n) => /resguardo/i.test(n))).toEqual([]);
-    expect(CARE_TOOLS.filter((x) => /resguardo/i.test(x.note?.pt ?? '')).map((x) => x.key)).toEqual(['bedPad']);
-  });
-});
-
-// ------------------------------------------------------------------- tela
-
-const t = (k: string) => (translations['pt-BR'] as Record<string, string>)[k] || k;
-const pais = (code: string) => COUNTRIES.find((c) => c.code === code)!;
-const BR = pais('br');
-const ES = pais('es');
-const US = pais('us');
-const FR = pais('fr');
-const tema = { color: 'bg-sky-700', textColor: 'text-sky-700', hex: '#0369a1', borderColor: 'border-sky-700' };
-
-const montar = (targetCountry = ES) => {
-  const handlePlayAudio = vi.fn();
-  const r = render(createElement(ElderCareModule, {
-    nativeCountry: BR,
-    targetCountry,
-    t,
-    theme: tema,
-    onGoHome: () => {},
-    onOpenLanguageModal: () => {},
-    onOpenShare: () => {},
-    handlePlayAudio,
-  }));
-  return { ...r, handlePlayAudio };
-};
-
-const botao = (nome: string) => screen.getByRole('button', { name: nome });
-const aba = (chave: string) => fireEvent.click(screen.getByRole('tab', { name: t(chave) }));
-const depois = (a: Node, b: Node) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
-
-describe('PARTE 9 — a tela', () => {
-  beforeEach(() => {
-    localStorage.clear();
-    window.matchMedia = ((): MediaQueryList => ({
-      matches: false, media: '', onchange: null,
-      addEventListener() {}, removeEventListener() {},
-      addListener() {}, removeListener() {}, dispatchEvent: () => false,
-    } as unknown as MediaQueryList)) as unknown as typeof window.matchMedia;
-  });
-
-  afterEach(() => cleanup());
-
-  it('diz para que serve', () => {
-    montar();
-    expect(screen.getByText(t('hintElderCare'))).toBeTruthy();
-  });
-
-  it('o botão mostra a frase inteira, em português, no tratamento escolhido', () => {
-    montar();
-    // Todas as falas, uma por botão, com a frase que o celular vai dizer.
-    // Uma consulta só: `getByRole` com nome recalcula o nome de todos os botões
-    // da tela a cada chamada, e dezoito seguidas passavam de 5 s com a suíte
-    // inteira rodando em paralelo. O botão da fala só tem o texto dela.
-    const textos = screen.getAllByRole('button').map((b) => b.textContent);
-    for (const a of CARE_ACTIONS) expect(textos, a.key).toContain(buildCareLine('pt', a, 'usted'));
-    // Nada de palavra solta: "Fome" podia ser "estou com fome".
-    expect(screen.queryByText('Fome')).toBeNull();
-    expect(screen.queryByText('O banho')).toBeNull();
-
-    fireEvent.click(botao('A senhora está com fome?'));
-    expect(botao('A senhora está com fome?').getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByText('¿Tiene hambre?')).toBeTruthy();
-    // O botão e a linha de apoio do cartão dizem a mesma coisa.
-    expect(screen.getAllByText('A senhora está com fome?')).toHaveLength(2);
-
-    // "Você" muda a frase falada E o botão: o português diz "você" agora.
-    fireEvent.click(botao(t('ecInformal')));
-    expect(screen.getByText('¿Tienes hambre?')).toBeTruthy();
-    expect(botao('Você está com fome?').getAttribute('aria-pressed')).toBe('true');
-    expect(screen.queryByRole('button', { name: 'A senhora está com fome?' })).toBeNull();
-    expect(botao('Senta aqui, por favor.')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Sente-se, por favor.' })).toBeNull();
-  });
-
-  it('na Espanha: "Senhora / Você", e a dica do usted', () => {
-    montar(ES);
-    expect(screen.getByText(t('ecTreatment'))).toBeTruthy();
-    expect(botao(t('ecFormal')).getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByText(t('ecUstedTip'))).toBeTruthy();
-  });
-
-  it('nos Estados Unidos o seletor de tratamento some, porque o inglês não muda', () => {
-    montar(US);
-    expect(screen.queryByText(t('ecTreatment'))).toBeNull();
-    expect(screen.queryByText(t('ecUstedTip'))).toBeNull();
-    expect(screen.getByText('Please sit down.')).toBeTruthy();
-  });
-
-  it('na França o seletor fica, mas sem a dica da Espanha', () => {
-    montar(FR);
-    expect(screen.getByText(t('ecTreatment'))).toBeTruthy();
-    expect(screen.queryByText(t('ecUstedTip'))).toBeNull();
-  });
-
-  it('emergência na Espanha: a faixa diz que abre, e o ligar mora dentro', () => {
-    const { handlePlayAudio } = montar(ES);
-    const faixa = screen.getByRole('button', { name: /Emergência · frases/ });
-    expect(faixa.textContent).toContain('112');
-    expect(faixa.getAttribute('aria-expanded')).toBe('false');
-    // Fechada, nada liga: o toque acidental não disca.
-    expect(screen.queryByRole('link')).toBeNull();
-
-    fireEvent.click(faixa);
-    expect(faixa.getAttribute('aria-expanded')).toBe('true');
-    const ligar = screen.getByRole('link', { name: `${t('ecCall')} 112` });
-    expect(ligar.getAttribute('href')).toBe('tel:112');
-    // No topo da parte aberta, antes da primeira frase — e a lista não mudou de ordem.
-    const primeira = screen.getByText(EMERGENCY[0].es);
-    expect(depois(ligar, primeira)).toBe(true);
-    expect(screen.getByText(t('ecEmergencyHint'))).toBeTruthy();
-
-    fireEvent.click(primeira.closest('button')!);
-    expect(handlePlayAudio).toHaveBeenCalledWith('Necesito una ambulancia.', 'es-ES');
-  });
-
-  it('emergência nos Estados Unidos: 911', () => {
-    montar(US);
-    const faixa = screen.getByRole('button', { name: /Emergência · frases/ });
-    expect(faixa.textContent).toContain('911');
-    expect(faixa.textContent).not.toContain('112');
-    fireEvent.click(faixa);
-    const ligar = screen.getByRole('link', { name: `${t('ecCall')} 911` });
-    expect(ligar.getAttribute('href')).toBe('tel:911');
-    expect(screen.getByText('I need an ambulance.')).toBeTruthy();
-  });
-
-  it('a nota entra embaixo do grupo tocado, e não empurra a lista', () => {
-    montar(ES);
-    const nota = acao('medMorning').note!.pt;
-    expect(screen.queryByText(nota)).toBeNull();
-
-    const b = botao('A senhora já tomou o comprimido da manhã?');
-    fireEvent.click(b);
-    const p = screen.getByText(nota);
-    expect(p.closest('section')).toBe(b.closest('section'));
-    expect(depois(b, p)).toBe(true);
-    // Nada foi desenhado antes do primeiro grupo: o primeiro botão não saiu do lugar.
-    expect(depois(p, botao('Sente-se, por favor.'))).toBe(false);
-  });
-
-  it('a nota sobre o italiano não aparece na Espanha', () => {
-    montar(ES);
-    fireEvent.click(botao('Apoie-se no meu braço.'));
-    expect(screen.queryByText(acao('leanOnMe').note!.pt)).toBeNull();
-  });
-
-  it('pedir coisas: "taca-taca" só na Espanha, e embaixo do grupo', () => {
-    montar(ES);
-    aba('ecModeTools');
-    const nota = objeto('walker').note!.pt;
-    const p = screen.getByText(nota);
-    expect(p.closest('section')).toBe(botao('o andador').closest('section'));
-    cleanup();
-
-    montar(US);
-    aba('ecModeTools');
-    expect(screen.queryByText(nota)).toBeNull();
-  });
-
-  it('pedir coisas: "fauteuil roulant" só na França', () => {
-    const nota = objeto('wheelchair').note!.pt;
-    montar(FR);
-    aba('ecModeTools');
-    fireEvent.click(botao('a cadeira de rodas'));
-    expect(screen.getByText(nota)).toBeTruthy();
-    cleanup();
-
-    montar(ES);
-    aba('ecModeTools');
-    fireEvent.click(botao('a cadeira de rodas'));
-    expect(screen.queryByText(nota)).toBeNull();
-  });
-
-  it('o relato do médico não leva tempo, e a fila de "Quando" se desliga sem perder a escolha', () => {
-    montar(ES);
-    aba('ecModeReport');
-    const hoje = botao(WHEN_TAGS[0].phrases.pt);
-    expect(hoje.getAttribute('aria-pressed')).toBe('true');
-
-    fireEvent.click(botao('Acho que seria bom chamar o médico'));
-    // Era "Hoy creo que habría que llamar al médico.": opinião com data.
-    expect(screen.getByText('Creo que habría que llamar al médico.')).toBeTruthy();
-    expect((hoje as HTMLButtonElement).disabled).toBe(true);
-    expect(hoje.getAttribute('aria-pressed')).toBe('false');
-
-    // De volta a outro relato, o "Hoje" que estava escolhido continua lá.
-    fireEvent.click(botao('Comeu pouco'));
-    expect(screen.getByText('Hoy ha comido poco.')).toBeTruthy();
-    expect((hoje as HTMLButtonElement).disabled).toBe(false);
-  });
-
-  it('contar à família: o botão é a oração, e segue "De um senhor"', () => {
-    montar(ES);
-    aba('ecModeReport');
-    expect(botao('Comeu pouco').getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByText('Hoy ha comido poco.')).toBeTruthy();
-    expect(botao('Esteve tranquila')).toBeTruthy();
-    expect(botao('Teve um escape (fez na roupa)')).toBeTruthy();
-
-    fireEvent.click(botao(t('ecWhoM')));
-    expect(botao('Esteve tranquilo')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Esteve tranquila' })).toBeNull();
-  });
-});
-
-describe('PARTE 10 — o código da tela', () => {
-  const ler = (f: string) => readFileSync(join(__dirname, '..', f), 'utf8');
-  const fonte = ler('modules/ElderCareModule.tsx');
-
-  it('nada de letra miúda nem português apagado', () => {
-    expect(fonte).not.toMatch(/text-\[(9|10|11|12|13)px\]/);
-    expect(fonte).not.toMatch(/\btext-xs\b/);
-    expect(fonte).not.toMatch(/opacity-(45|50|60|70)/);
-  });
-
-  it('passa a dica à moldura e lê o número pelo país', () => {
-    expect(fonte).toContain("dica={t('hintElderCare')}");
-    expect(fonte).toContain('emergencyNumberFor(targetCountry.code)');
-    expect(fonte).not.toMatch(/\{EMERGENCY_NUMBER\}/);
-  });
-
-  it('as chaves usadas existem nos oito blocos', () => {
-    const usadas = [...fonte.matchAll(/\bt\('([A-Za-z0-9_]+)'\)/g)].map((m) => m[1]);
-    expect(usadas.length).toBeGreaterThan(10);
-    const faltando: string[] = [];
-    for (const [locale, bloco] of Object.entries(translations))
-      for (const k of usadas) if (!(bloco as Record<string, string>)[k]) faltando.push(`${locale}/${k}`);
-    expect(faltando).toEqual([]);
   });
 });

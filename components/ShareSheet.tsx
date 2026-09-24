@@ -33,10 +33,10 @@ interface ShareSheetProps {
  * (VoiceMissingSheet 110, UpdateSheet 120). O que pode cobrir esta folha são só
  * avisos involuntários, nunca um painel que a pessoa mesma abriu.
  *
- * Duas folhas abertas ao mesmo tempo: o `useDialog` mantém uma pilha, e só a de
- * cima responde ao Esc e ao Tab. Antes os dois traps disputavam o foco e um Esc
- * fechava as duas; deixou de ser tolerável quando a tela "Mostrar" passou a
- * poder abrir a folha "Sem som agora" por cima de si.
+ * Ressalva herdada: o `useDialog` registra o listener de teclado em `document`.
+ * Duas folhas abertas ao mesmo tempo significam dois traps de Tab disputando e
+ * um Esc fechando as duas. Já acontecia entre VoiceMissing e Update; esta folha
+ * amplia a superfície sem criar o problema. Não vale código para blindar.
  */
 export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, theme }) => {
   const [copia, setCopia] = useState<'idle' | 'done' | 'failed'>('idle');
@@ -200,7 +200,7 @@ export const ShareSheet: React.FC<ShareSheetProps> = ({ isOpen, onClose, t, them
                 do endereço tem a URL em texto logo abaixo. */}
             <img src={SHARE_QR_SRC} alt="" aria-hidden="true" className="w-48 h-48 block" />
           </div>
-          <p className="text-sm text-gray-600 dark:text-slate-300 text-center leading-snug" dir="auto">{t('shareQrHint')}</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400 text-center leading-snug" dir="auto">{t('shareQrHint')}</p>
           {/* `dir="ltr"` próprio: em árabe o algoritmo bidi reordenaria os
               pedaços da URL e ela viraria um endereço que não existe. */}
           <p className="url-mono text-gray-500 dark:text-slate-400 text-center select-all break-all" dir="ltr">{SHARE_URL}</p>

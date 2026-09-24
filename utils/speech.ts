@@ -67,67 +67,6 @@ export const pickVoice = <V extends VoiceLike>(voices: readonly V[], lang: strin
 export const TTS_MAX_CHARS = 200;
 
 /**
- * Tamanho de cada pedaço quando a frase é longa demais para um pedido só.
- *
- * Abaixo do limite do endpoint, com folga: acima de 200 caracteres ele recusa, e
- * a recusa aparecia para a pessoa como "sem internet" — mentira. A Maquiagem com
- * todas as escolhas e as frases de emergência passam disso.
- */
-export const PEDACO_TTS = 180;
-
-/** Junta pedaços vizinhos enquanto couberem: menos pedidos, menos pausas. */
-const juntar = (partes: string[], max: number): string[] => {
-  const out: string[] = [];
-  let atual = '';
-  for (const p of partes) {
-    if (!atual) atual = p;
-    else if (atual.length + 1 + p.length <= max) atual = `${atual} ${p}`;
-    else { out.push(atual); atual = p; }
-  }
-  if (atual) out.push(atual);
-  return out;
-};
-
-/*
- * Onde cortar, do corte mais natural para o mais bruto: fim de frase, vírgula,
- * espaço. O corte exige espaço DEPOIS da pontuação, e isso não é detalhe: "4,20"
- * e "3.5" não podem virar dois pedaços.
- *
- * Sem lookbehind (`(?<=…)`) de propósito: iPhone com Safari anterior ao 16.4 não
- * o conhece, e uma regex que ele não entende derruba o arquivo inteiro na carga.
- */
-const CORTES: ((s: string) => string[])[] = [
-  (s) => s.replace(/([.!?…])\s+/g, '$1\u0000').split('\u0000'),
-  (s) => s.replace(/([,;:])\s+/g, '$1\u0000').split('\u0000'),
-  (s) => s.split(/\s+/),
-];
-
-const quebrar = (parte: string, max: number, nivel: number): string[] => {
-  if (parte.length <= max) return [parte];
-  if (nivel >= CORTES.length) {
-    // Uma "palavra" maior que o pedaço inteiro: só resta cortar no meio.
-    const r: string[] = [];
-    for (let i = 0; i < parte.length; i += max) r.push(parte.slice(i, i + max));
-    return r;
-  }
-  const pedacos = CORTES[nivel](parte)
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .flatMap((s) => quebrar(s, max, nivel + 1));
-  return juntar(pedacos, max);
-};
-
-/**
- * Parte a frase em pedaços que o endpoint aceita, para tocar um atrás do outro.
- * Frase curta volta inteira, num pedaço só — que é o caso de quase todas.
- */
-export const partirParaTts = (texto: string, max = PEDACO_TTS): string[] => {
-  const limpo = texto.trim().replace(/\s+/g, ' ');
-  if (!limpo) return [];
-  return quebrar(limpo, max, 0);
-};
-
-/**
  * Endpoint **não oficial** do Google Translate. Sem contrato: pode ser
  * bloqueado ou mudar sem aviso, e por isso quem chama precisa tratar a falha.
  *

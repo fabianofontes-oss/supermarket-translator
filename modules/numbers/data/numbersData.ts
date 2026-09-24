@@ -2,19 +2,10 @@
 // Módulo "Números" — números por extenso, hora, preço e data.
 // Tudo é gerado por regra: poucas listas de palavras cobrem milhares de frases.
 // Foco: espanhol da Espanha. uk e ar existem como idiomas de apoio.
-//
-// A MOEDA SAI DO PAÍS DE DESTINO, não do idioma. Os Estados Unidos são destino
-// aberto, e lá o preço é "$4.20", dito "four dollars and twenty cents". Antes o
-// módulo inteiro era em euro, e quem escolhia EUA via "4,20 €" e ouvia "four
-// euros twenty" — moeda errada na primeira ida ao mercado, e aí ela deixa de
-// confiar no resto. `currencyForCountry` é o único lugar que decide isso.
 
 import type { LangCode } from '../../location/data/locationData';
 
 export type Text = Record<LangCode, string>;
-
-/** As abas do módulo. Mora aqui porque as perguntas dizem em que aba aparecem. */
-export type NumTab = 'time' | 'price' | 'date' | 'number';
 
 // ---------------------------------------------------------------------------
 // NÚMEROS POR EXTENSO
@@ -138,23 +129,6 @@ const ltPlural = (n: number, one: string, few: string, many: string): string => 
   return many;
 };
 
-/** Ucraniano: 1 → один/одна, 2-4 → few, 5+ e 11-14 → many. */
-const ukPlural = (n: number, one: string, few: string, many: string): string => {
-  const last2 = n % 100, last = n % 10;
-  if (last2 >= 11 && last2 <= 14) return many;
-  if (last === 1) return one;
-  if (last >= 2 && last <= 4) return few;
-  return many;
-};
-
-/**
- * Espanhol: "uno" perde o "o" antes de substantivo masculino e de "mil" —
- * "veintiún euros", "treinta y un mil", "un céntimo". Sem isto saía
- * "veintiuno euros", que nenhum caixa diz.
- */
-const esApocope = (words: string): string =>
-  words.replace(/veintiuno$/, 'veintiún').replace(/(^|\s)uno$/, '$1un');
-
 const BELOW_1000: Record<LangCode, (n: number) => string> = {
   es: es1000, pt: pt1000, en: en1000, fr: fr1000, it: it1000, uk: uk1000, ar: ar1000, lt: lt1000,
 };
@@ -167,21 +141,12 @@ export const numberToWords = (lang: LangCode, n: number): string => {
   const t = Math.floor(n / 1000), r = n % 1000;
   let head: string;
   switch (lang) {
-    case 'es': head = t === 1 ? 'mil' : `${esApocope(below(t))} mil`; break;
+    case 'es': head = t === 1 ? 'mil' : `${below(t)} mil`; break;
     case 'pt': head = t === 1 ? 'mil' : `${below(t)} mil`; break;
     case 'en': head = `${below(t)} thousand`; break;
-    // "quatre-vingt mille", "deux cent mille": o "s" do plural cai antes de "mille".
-    case 'fr': head = t === 1 ? 'mille' : `${below(t).replace(/(vingt|cent)s$/, '$1')} mille`; break;
-    // "ventunmila", "trentunmila": a dezena terminada em "uno" perde o "o".
-    case 'it': head = t === 1 ? 'mille' : `${below(t).replace(/tuno$/, 'tun')}mila`; break;
-    case 'uk': {
-      // "тисяча" é feminino: 21 000 é "двадцять одна тисяча", 22 000 "двадцять дві тисячі".
-      if (t === 1) { head = 'тисяча'; break; }
-      const last2 = t % 100;
-      const num = last2 >= 11 && last2 <= 19 ? below(t) : below(t).replace(/один$/, 'одна').replace(/два$/, 'дві');
-      head = `${num} ${ukPlural(t, 'тисяча', 'тисячі', 'тисяч')}`;
-      break;
-    }
+    case 'fr': head = t === 1 ? 'mille' : `${below(t)} mille`; break;
+    case 'it': head = t === 1 ? 'mille' : `${below(t)}mila`; break;
+    case 'uk': head = t === 1 ? 'тисяча' : t === 2 ? 'дві тисячі' : t < 5 ? `${below(t)} тисячі` : `${below(t)} тисяч`; break;
     case 'lt': head = t === 1 ? 'tūkstantis' : `${below(t)} ${ltPlural(t, 'tūkstantis', 'tūkstančiai', 'tūkstančių')}`; break;
     default:   head = t === 1 ? 'ألف' : t === 2 ? 'ألفان' : `${below(t)} آلاف`; break;
   }
@@ -342,151 +307,78 @@ export const withPeriod = (sentence: string, periodPhrase: string): string =>
   sentence.replace(/[.．]$/, ` ${periodPhrase}.`);
 
 // ---------------------------------------------------------------------------
-// PREÇO (em centavos da moeda do destino)
+// PREÇO (em centavos de euro)
 // ---------------------------------------------------------------------------
-
-/** A moeda do país onde ela está. */
-export type Currency = 'eur' | 'usd';
-
-/**
- * O ÚNICO lugar que decide a moeda. Estados Unidos → dólar; Espanha e França,
- * os outros dois destinos abertos → euro.
- *
- * Chile, Argentina e Reino Unido também caem no euro, e para eles isso está
- * ERRADO (peso, peso, libra). Hoje não aparece porque os três estão fechados no
- * recorte do lançamento. Quem abrir um deles precisa ensinar a moeda dele aqui
- * antes — senão volta exatamente o defeito que este arquivo corrigiu nos EUA.
- */
-export const currencyForCountry = (countryCode: string): Currency =>
-  countryCode === 'us' ? 'usd' : 'eur';
-
-/**
- * Árabe: o substantivo contado muda com o número. 1 e 2 têm forma própria
- * (singular e dual), 3 a 10 pedem plural, 11 a 99 pedem singular acusativo, e
- * as centenas redondas voltam ao singular — "مئة دولار".
- */
-const arCounted = (
-  n: number,
-  w: { one: string; two: string; few: string; acc: string; bare: string },
-): string => {
-  if (n === 1) return w.one;
-  if (n === 2) return w.two;
-  const num = numberToWords('ar', n);
-  const last2 = n % 100;
-  if (last2 >= 3 && last2 <= 10) return `${num} ${w.few}`;
-  if (last2 >= 11) return `${num} ${w.acc}`;
-  return `${num} ${w.bare}`;
-};
-const AR_CENT = { one: 'سنت واحد', two: 'سنتان', few: 'سنتات', acc: 'سنتًا', bare: 'سنت' };
-const AR_DOLLAR = { one: 'دولار واحد', two: 'دولاران', few: 'دولارات', acc: 'دولارًا', bare: 'دولار' };
-
-/**
- * O preço por extenso. `totalCents` vai até 999.999 (9.999,99), e por isso a
- * parte inteira passa por `numberToWords`: os `*1000` só sabem até 999, e o
- * espanhol dizia "undefined cincuenta euros" para 1.250,00.
- *
- * A moeda é opcional e o padrão é o euro, que é o que o módulo sempre foi.
- * Com o euro o registro é o do caixa ("cuatro euros con veinte"); com o dólar
- * vem inteiro ("four dollars and twenty cents"), que é como se diz nos EUA.
- */
-export const buildPrice = (lang: LangCode, totalCents: number, currency: Currency = 'eur'): string => {
+export const buildPrice = (lang: LangCode, totalCents: number): string => {
   const e = Math.floor(totalCents / 100);
   const c = totalCents % 100;
-  const usd = currency === 'usd';
 
   switch (lang) {
     case 'es': {
-      // "céntimo" é o do euro na Espanha; o do dólar é "centavo". A apócope vale
-      // aqui também, porque vem substantivo depois: "veintiún céntimos".
-      const sub = c === 1 ? `un ${usd ? 'centavo' : 'céntimo'}` : `${esApocope(es100(c))} ${usd ? 'centavos' : 'céntimos'}`;
-      if (e === 0) return `${sub}.`;
-      // Apócope: "veintiún euros", "treinta y un dólares", nunca "veintiuno euros".
-      const main = e === 1 ? `un ${usd ? 'dólar' : 'euro'}` : `${esApocope(numberToWords('es', e))} ${usd ? 'dólares' : 'euros'}`;
-      if (!c) return `${main}.`;
-      return usd ? `${main} con ${sub}.` : `${main} con ${es100(c)}.`;
+      if (e === 0) return `${es1000(c)} céntimos.`;
+      const euros = `${e === 1 ? 'un euro' : `${es1000(e)} euros`}`;
+      return c ? `${euros} con ${es100(c)}.` : `${euros}.`;
     }
     case 'pt': {
-      const sub = c === 1 ? 'um centavo' : `${pt100(c)} centavos`;
-      if (e === 0) return `${sub}.`;
-      const main = e === 1 ? `um ${usd ? 'dólar' : 'euro'}` : `${numberToWords('pt', e)} ${usd ? 'dólares' : 'euros'}`;
-      if (!c) return `${main}.`;
-      return usd ? `${main} e ${sub}.` : `${main} e ${pt100(c)}.`;
+      if (e === 0) return `${pt1000(c)} centavos.`;
+      const euros = `${e === 1 ? 'um euro' : `${pt1000(e)} euros`}`;
+      return c ? `${euros} e ${pt100(c)}.` : `${euros}.`;
     }
     case 'en': {
-      const sub = c === 1 ? 'one cent' : `${en100(c)} cents`;
-      if (e === 0) return `${sub}.`;
-      const main = e === 1 ? `one ${usd ? 'dollar' : 'euro'}` : `${numberToWords('en', e)} ${usd ? 'dollars' : 'euros'}`;
-      if (!c) return `${main}.`;
-      return usd ? `${main} and ${sub}.` : `${main} ${en100(c)}.`;
+      if (e === 0) return `${en1000(c)} cents.`;
+      const euros = `${e === 1 ? 'one euro' : `${en1000(e)} euros`}`;
+      return c ? `${euros} ${en100(c)}.` : `${euros}.`;
     }
     case 'fr': {
-      const sub = c === 1 ? `un ${usd ? 'cent' : 'centime'}` : `${fr100(c)} ${usd ? 'cents' : 'centimes'}`;
-      if (e === 0) return `${sub}.`;
-      const main = e === 1 ? `un ${usd ? 'dollar' : 'euro'}` : `${numberToWords('fr', e)} ${usd ? 'dollars' : 'euros'}`;
-      return c ? `${main} ${fr100(c)}.` : `${main}.`;
+      if (e === 0) return `${fr1000(c)} centimes.`;
+      const euros = `${e === 1 ? 'un euro' : `${fr1000(e)} euros`}`;
+      return c ? `${euros} ${fr100(c)}.` : `${euros}.`;
     }
     case 'it': {
-      const sub = c === 1 ? 'un centesimo' : `${it100(c)} centesimi`;
-      if (e === 0) return `${sub}.`;
-      // "euro" é invariável; "dollaro" não.
-      const main = e === 1 ? `un ${usd ? 'dollaro' : 'euro'}` : `${numberToWords('it', e)} ${usd ? 'dollari' : 'euro'}`;
-      if (!c) return `${main}.`;
-      return usd ? `${main} e ${sub}.` : `${main} e ${it100(c)}.`;
+      if (e === 0) return `${it1000(c)} centesimi.`;
+      const euros = e === 1 ? 'un euro' : `${it1000(e)} euro`; // "euro" é invariável
+      return c ? `${euros} e ${it100(c)}.` : `${euros}.`;
     }
     case 'uk': {
-      const sub = `${uk100(c)} ${ukPlural(c, 'цент', 'центи', 'центів')}`;
-      if (e === 0) return `${sub}.`;
-      // "євро" é invariável; "долар" flexiona como o numeral pede.
-      const num = numberToWords('uk', e);
-      const main = usd ? `${num} ${ukPlural(e, 'долар', 'долари', 'доларів')}` : `${num} євро`;
-      if (!c) return `${main}.`;
-      return usd ? `${main} ${sub}.` : `${main} ${uk100(c)}.`;
+      if (e === 0) return `${uk1000(c)} центів.`;
+      const euros = `${uk1000(e)} євро`;
+      return c ? `${euros} ${uk100(c)}.` : `${euros}.`;
     }
     case 'lt': {
-      const sub = `${lt100(c)} ${ltPlural(c, 'centas', 'centai', 'centų')}`;
-      if (e === 0) return `${sub}.`;
-      const unit = usd ? ltPlural(e, 'doleris', 'doleriai', 'dolerių') : ltPlural(e, 'euras', 'eurai', 'eurų');
-      const main = `${numberToWords('lt', e)} ${unit}`;
-      return c ? `${main} ir ${sub}.` : `${main}.`;
+      const cents = `${lt1000(c)} ${ltPlural(c, 'centas', 'centai', 'centų')}`;
+      if (e === 0) return `${cents}.`;
+      const euros = `${lt1000(e)} ${ltPlural(e, 'euras', 'eurai', 'eurų')}`;
+      return c ? `${euros} ir ${cents}.` : `${euros}.`;
     }
 
     default: {
-      const sub = arCounted(c, AR_CENT);
-      if (e === 0) return `${sub}.`;
-      // "يورو" é empréstimo invariável; "دولار" segue a regra do numeral.
-      const main = usd ? arCounted(e, AR_DOLLAR) : e === 1 ? 'يورو واحد' : `${numberToWords('ar', e)} يورو`;
-      if (!c) return `${main}.`;
-      return usd ? `${main} و${sub}.` : `${main} و${ar100(c)}.`;
+      if (e === 0) return `${ar1000(c)} سنت.`;
+      const euros = e === 1 ? 'يورو واحد' : `${ar1000(e)} يورو`;
+      return c ? `${euros} و${ar100(c)}.` : `${euros}.`;
     }
   }
 };
 
 /**
  * Forma curta, que é como se fala no caixa: "dos con ochenta" (sem dizer "euros").
- * Só existe quando há a parte inteira e os centavos ao mesmo tempo.
- *
- * O FRANCÊS NÃO TEM FORMA CURTA, e devolve a forma inteira de propósito. Tirar a
- * moeda de "quatre euros vingt" deixa "quatre vingt", que no ouvido é
- * "quatre-vingts" — oitenta. No caixa francês a moeda fica na frase justamente
- * por isso. O módulo esconde a linha quando ela repete a frase de cima.
+ * Só existe quando há euros e centavos ao mesmo tempo.
  */
-export const buildPriceShort = (lang: LangCode, totalCents: number, currency: Currency = 'eur'): string | null => {
+export const buildPriceShort = (lang: LangCode, totalCents: number): string | null => {
   const e = Math.floor(totalCents / 100);
   const c = totalCents % 100;
   if (!e || !c) return null;
 
   switch (lang) {
-    case 'es': return `${numberToWords('es', e)} con ${es100(c)}.`;
-    case 'pt': return `${numberToWords('pt', e)} e ${pt100(c)}.`;
-    // "four oh five": abaixo de dez, o inglês fala o zero.
-    case 'en': return `${numberToWords('en', e)} ${c < 10 ? `oh ${EN_U[c]}` : en100(c)}.`;
-    case 'fr': return buildPrice('fr', totalCents, currency);
-    case 'it': return `${numberToWords('it', e)} e ${it100(c)}.`;
-    case 'uk': return `${numberToWords('uk', e)} ${uk100(c)}.`;
+    case 'es': return `${es1000(e)} con ${es100(c)}.`;
+    case 'pt': return `${pt1000(e)} e ${pt100(c)}.`;
+    case 'en': return `${en1000(e)} ${en100(c)}.`;
+    case 'fr': return `${fr1000(e)} ${fr100(c)}.`;
+    case 'it': return `${it1000(e)} e ${it100(c)}.`;
+    case 'uk': return `${uk1000(e)} ${uk100(c)}.`;
     // Sem este `case` o lituano caía no `default:`, que é árabe. A conjunção é
     // "ir", a mesma que `buildPrice` já usa para lituano.
-    case 'lt': return `${numberToWords('lt', e)} ir ${lt100(c)}.`;
-    default:   return `${numberToWords('ar', e)} و${ar100(c)}.`;
+    case 'lt': return `${lt1000(e)} ir ${lt1000(c)}.`;
+    default:   return `${ar1000(e)} و${ar100(c)}.`;
   }
 };
 
@@ -511,65 +403,9 @@ export const buildDecimal = (lang: LangCode, intPart: number, dec: string): stri
   return `${intWords} ${DECIMAL_WORD[lang]} ${decWords}.`;
 };
 
-/** "4,20 €" ou "$4.20" para mostrar na etiqueta, como está escrito no país. */
-export const formatPriceTag = (totalCents: number, currency: Currency = 'eur'): string => {
-  const int = Math.floor(totalCents / 100);
-  const cc = String(totalCents % 100).padStart(2, '0');
-  return currency === 'usd' ? `$${int}.${cc}` : `${int},${cc} €`;
-};
-
-/**
- * O separador decimal escrito no país: ponto nos EUA e no Reino Unido, vírgula
- * no resto. O módulo guarda o número sempre com vírgula ("37,5") e só troca na
- * hora de mostrar — a mesma tela que escreve "$4.20" não pode escrever "37,5".
- */
-export const decimalSeparatorFor = (countryCode: string): ',' | '.' =>
-  countryCode === 'us' || countryCode === 'gb' ? '.' : ',';
-
-// ---------------------------------------------------------------------------
-// NÚMERO SOLTO — exemplos com a situação escrita
-// ---------------------------------------------------------------------------
-// A aba "Número" abria com "21" e um teclado, sem dizer para que serve. Hora,
-// preço e data têm uma situação óbvia; número solto não. Cada exemplo diz
-// ONDE aquele número aparece na vida dela. O rótulo vai na língua de quem lê.
-export interface NumberExample {
-  /** Como o módulo guarda: sempre com vírgula. */
-  value: string;
-  label: Text;
-}
-
-const FEBRE: Text = { es: 'fiebre', pt: 'febre', en: 'fever', fr: 'fièvre', it: 'febbre', uk: 'температура', ar: 'حرارة', lt: 'temperatūra' };
-// "1,5 litro": em português, fração abaixo de dois fica no singular.
-const LITRO: NumberExample = { value: '1,5', label: { es: 'litros', pt: 'litro', en: 'liters', fr: 'litre', it: 'litri', uk: 'літра', ar: 'لتر', lt: 'litro' } };
-
-/** Os exemplos do sistema métrico, com a febre em graus Celsius. */
-export const NUMBER_EXAMPLES: NumberExample[] = [
-  { value: '37,5', label: FEBRE },
-  { value: '250', label: { es: 'gramos', pt: 'gramas', en: 'grams', fr: 'grammes', it: 'grammi', uk: 'грамів', ar: 'غرام', lt: 'gramų' } },
-  LITRO,
-];
-
-/**
- * Nos EUA, a febre é em Fahrenheit e o balcão pesa em onças. Quem dissesse
- * "thirty-seven point five" ao farmacêutico americano para falar de febre não
- * seria entendida: lá 37,5 °C é 99.5. O litro fica — garrafa de água e de
- * refrigerante se vende em litro também nos EUA.
- */
-export const NUMBER_EXAMPLES_US: NumberExample[] = [
-  { value: '99,5', label: FEBRE },
-  // 8: plural em todas. uk "унцій" (5 ou mais pede genitivo plural), lt
-  // "uncijos" (2 a 9 pedem nominativo plural), ar "أونصات" (3 a 10, plural).
-  { value: '8', label: { es: 'onzas', pt: 'onças', en: 'ounces', fr: 'onces', it: 'once', uk: 'унцій', ar: 'أونصات', lt: 'uncijos' } },
-  LITRO,
-];
-
-/**
- * Os exemplos do país onde ela está. Mesmo critério de `currencyForCountry`:
- * só os EUA fogem do métrico entre os destinos abertos. O Reino Unido, fechado
- * no recorte, pesa em gramas e mede febre em Celsius, e fica no padrão.
- */
-export const numberExamplesFor = (countryCode: string): NumberExample[] =>
-  countryCode === 'us' ? NUMBER_EXAMPLES_US : NUMBER_EXAMPLES;
+/** "4,20 €" para mostrar na etiqueta. */
+export const formatPriceTag = (totalCents: number): string =>
+  `${Math.floor(totalCents / 100)},${String(totalCents % 100).padStart(2, '0')} €`;
 
 // ---------------------------------------------------------------------------
 // DATA
@@ -586,22 +422,18 @@ export const MONTHS: Record<LangCode, string[]> = {
 
 const EN_ORD = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth', 'eighteenth', 'nineteenth', 'twentieth', 'twenty-first', 'twenty-second', 'twenty-third', 'twenty-fourth', 'twenty-fifth', 'twenty-sixth', 'twenty-seventh', 'twenty-eighth', 'twenty-ninth', 'thirtieth', 'thirty-first'];
 
+/** "el catorce de marzo" — month de 0 a 11. */
 /**
- * "El catorce de marzo."
- *
  * @param day   dia do mês, base 1
  * @param month índice do mês, **base ZERO** — igual a `Date.prototype.getMonth()`,
  *              que é de onde o módulo tira o valor. Passar 12 devolve `undefined`.
- * @param countryCode opcional, o país de destino. Só muda o inglês: nos EUA se
- *              diz "September twenty-third", e "the twenty-third of September"
- *              é o jeito britânico. Os EUA são destino aberto.
  */
-export const buildDate = (lang: LangCode, day: number, month: number, countryCode?: string): string => {
+export const buildDate = (lang: LangCode, day: number, month: number): string => {
   const M = MONTHS[lang][month];
   switch (lang) {
     case 'es': return `El ${es100(day)} de ${M}.`;
     case 'pt': return `${pt100(day)} de ${M}.`;
-    case 'en': return countryCode === 'us' ? `${M} ${EN_ORD[day]}.` : `The ${EN_ORD[day]} of ${M}.`;
+    case 'en': return `The ${EN_ORD[day]} of ${M}.`;
     case 'fr': return `Le ${day === 1 ? 'premier' : fr100(day)} ${M}.`;
     case 'it': return `Il ${day === 1 ? 'primo' : it100(day)} ${M}.`;
     case 'uk': return `${day} ${M}.`;
@@ -613,46 +445,16 @@ export const buildDate = (lang: LangCode, day: number, month: number, countryCod
 // ---------------------------------------------------------------------------
 // PERGUNTAS ÚTEIS
 // ---------------------------------------------------------------------------
-// Cada pergunta diz em que aba aparece. Antes a lista era a mesma nas quatro, e
-// a aba Data oferecia "¿Aceptan tarjeta?" e "¿Tiene cambio?".
-//
-// A ORDEM É A DA TELA. As duas primeiras valem em toda aba e vêm no topo de
-// propósito: são as que salvam no caixa quando ela não entende o número.
-export interface NumQuestion {
-  key: string;
-  tabs: NumTab[];
-  text: Text;
-}
-
-const EM_TODAS: NumTab[] = ['time', 'price', 'date', 'number'];
-
-export const NUM_QUESTIONS: NumQuestion[] = [
-  { key: 'repeatSlowly', tabs: EM_TODAS, text: { es: '¿Puede repetirlo más despacio?', pt: 'Pode repetir mais devagar?', en: 'Can you say it more slowly?', fr: 'Pouvez-vous répéter plus lentement ?', it: 'Può ripetere più lentamente?', uk: 'Можете повторити повільніше?', lt: 'Ar galite pakartoti lėčiau?', ar: 'هل يمكنك التكرار ببطء؟' } },
-  { key: 'writeDown', tabs: EM_TODAS, text: { es: '¿Me lo puede escribir?', pt: 'Pode escrever para mim?', en: 'Can you write it down?', fr: 'Pouvez-vous me l\'écrire ?', it: 'Me lo può scrivere?', uk: 'Можете написати?', lt: 'Ar galite užrašyti?', ar: 'هل يمكنك كتابته؟' } },
-  { key: 'whatTime', tabs: ['time'], text: { es: '¿Qué hora es?', pt: 'Que horas são?', en: 'What time is it?', fr: 'Quelle heure est-il ?', it: 'Che ore sono?', uk: 'Котра година?', lt: 'Kelinta valanda?', ar: 'كم الساعة؟' } },
-  { key: 'whenOpen', tabs: ['time'], text: { es: '¿A qué hora abren?', pt: 'A que horas abre?', en: 'What time do you open?', fr: 'À quelle heure ouvrez-vous ?', it: 'A che ora aprite?', uk: 'О котрій відкриваєте?', lt: 'Kada atidarote?', ar: 'في أي ساعة تفتحون؟' } },
-  { key: 'whenClose', tabs: ['time'], text: { es: '¿A qué hora cierran?', pt: 'A que horas fecha?', en: 'What time do you close?', fr: 'À quelle heure fermez-vous ?', it: 'A che ora chiudete?', uk: 'О котрій зачиняєте?', lt: 'Kada uždarote?', ar: 'في أي ساعة تغلقون؟' } },
-  { key: 'howMuch', tabs: ['price'], text: { es: '¿Cuánto cuesta?', pt: 'Quanto custa?', en: 'How much is it?', fr: 'Combien ça coûte ?', it: 'Quanto costa?', uk: 'Скільки коштує?', lt: 'Kiek kainuoja?', ar: 'كم الثمن؟' } },
-  { key: 'card', tabs: ['price'], text: { es: '¿Aceptan tarjeta?', pt: 'Aceitam cartão?', en: 'Do you take cards?', fr: 'Acceptez-vous la carte ?', it: 'Accettate la carta?', uk: 'Приймаєте картку?', lt: 'Ar priimate korteles?', ar: 'هل تقبلون البطاقة؟' } },
-  { key: 'change', tabs: ['price'], text: { es: '¿Tiene cambio?', pt: 'Tem troco?', en: 'Do you have change?', fr: 'Avez-vous de la monnaie ?', it: 'Ha da cambiare?', uk: 'У вас є решта?', lt: 'Ar turite grąžos?', ar: 'هل لديك فكة؟' } },
-  { key: 'whatDate', tabs: ['date'], text: { es: '¿Qué día es hoy?', pt: 'Que dia é hoje?', en: "What's the date today?", fr: 'Quelle est la date aujourd\'hui ?', it: 'Che giorno è oggi?', uk: 'Яке сьогодні число?', lt: 'Kokia šiandien data?', ar: 'ما تاريخ اليوم؟' } },
-  // Marcar médico, combinar com a patroa: é aqui que a data aparece na vida dela.
-  { key: 'whichDay', tabs: ['date'], text: { es: '¿Para qué día?', pt: 'Para que dia?', en: 'For which day?', fr: 'Pour quel jour ?', it: 'Per che giorno?', uk: 'На який день?', lt: 'Kuriai dienai?', ar: 'لأي يوم؟' } },
-  // A aba Número não tem pergunta própria: "¿Cuántos?" / "¿Cuántas?" concorda
-  // com a coisa contada, que a aba não conhece. Fica só com as duas de socorro.
+export const NUM_QUESTIONS: Text[] = [
+  { es: '¿Cuánto cuesta?', pt: 'Quanto custa?', en: 'How much is it?', fr: 'Combien ça coûte ?', it: 'Quanto costa?', uk: 'Скільки коштує?', lt: 'Kiek kainuoja?', ar: 'كم الثمن؟' },
+  { es: '¿Qué hora es?', pt: 'Que horas são?', en: 'What time is it?', fr: 'Quelle heure est-il ?', it: 'Che ore sono?', uk: 'Котра година?', lt: 'Kelinta valanda?', ar: 'كم الساعة؟' },
+  { es: '¿Puede repetirlo más despacio?', pt: 'Pode repetir mais devagar?', en: 'Can you say it more slowly?', fr: 'Pouvez-vous répéter plus lentement ?', it: 'Può ripetere più lentamente?', uk: 'Можете повторити повільніше?', lt: 'Ar galite pakartoti lėčiau?', ar: 'هل يمكنك التكرار ببطء؟' },
+  { es: '¿Me lo puede escribir?', pt: 'Pode escrever para mim?', en: 'Can you write it down?', fr: 'Pouvez-vous me l\'écrire ?', it: 'Me lo può scrivere?', uk: 'Можете написати?', lt: 'Ar galite užrašyti?', ar: 'هل يمكنك كتابته؟' },
+  { es: '¿A qué hora abren?', pt: 'A que horas abre?', en: 'What time do you open?', fr: 'À quelle heure ouvrez-vous ?', it: 'A che ora aprite?', uk: 'О котрій відкриваєте?', lt: 'Kada atidarote?', ar: 'في أي ساعة تفتحون؟' },
+  { es: '¿A qué hora cierran?', pt: 'A que horas fecha?', en: 'What time do you close?', fr: 'À quelle heure fermez-vous ?', it: 'A che ora chiudete?', uk: 'О котрій зачиняєте?', lt: 'Kada uždarote?', ar: 'في أي ساعة تغلقون؟' },
+  { es: '¿Aceptan tarjeta?', pt: 'Aceitam cartão?', en: 'Do you take cards?', fr: 'Acceptez-vous la carte ?', it: 'Accettate la carta?', uk: 'Приймаєте картку?', lt: 'Ar priimate korteles?', ar: 'هل تقبلون البطاقة؟' },
+  { es: '¿Tiene cambio?', pt: 'Tem troco?', en: 'Do you have change?', fr: 'Avez-vous de la monnaie ?', it: 'Ha da cambiare?', uk: 'У вас є решта?', lt: 'Ar turite grąžos?', ar: 'هل لديك فكة؟' },
 ];
 
-/** As perguntas de uma aba, na ordem da tela. */
-export const questionsFor = (tab: NumTab): NumQuestion[] =>
-  NUM_QUESTIONS.filter((q) => q.tabs.includes(tab));
-
-/** Chave inexistente estoura, em vez de abrir a tela com um buraco. */
-export const numQuestionByKey = (key: string): NumQuestion => {
-  const q = NUM_QUESTIONS.find((x) => x.key === key);
-  if (!q) throw new Error(`Pergunta desconhecida: ${key}`);
-  return q;
-};
-
-// Presets rápidos de preço, em centavos. Servem às duas moedas: "$4.99" e
-// "4,99 €" são preços de prateleira nos dois lados.
+// Presets rápidos de preço, em centavos.
 export const PRICE_PRESETS = [95, 150, 320, 499, 1250, 2000];

@@ -10,16 +10,7 @@ import { useEffect, useRef } from 'react';
  * vezes é como as três telas saem de sincronia.
  *
  * Devolve a ref que deve ir no elemento do painel: é ela que delimita o foco.
- *
- * **Só o diálogo de cima responde ao teclado.** Duas camadas abertas ao mesmo
- * tempo agora é caminho previsto, não acidente: na tela "Mostrar" o alto-falante
- * pode falhar e abrir a folha "Sem som agora" por cima. Sem a pilha, o Esc
- * fecharia as duas de uma vez e os dois traps de Tab disputariam o foco.
  */
-
-/** Diálogos abertos, do mais antigo para o mais novo. O último é o de cima. */
-const pilha: symbol[] = [];
-
 export const useDialog = (
   isOpen: boolean,
   onClose: () => void,
@@ -28,8 +19,6 @@ export const useDialog = (
 ) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const restoreFocusTo = useRef<HTMLElement | null>(null);
-  const idRef = useRef<symbol | null>(null);
-  if (!idRef.current) idRef.current = Symbol('dialogo');
   // `onClose` costuma ser recriada a cada render; guardar numa ref evita
   // religar o listener de teclado e perder o Esc entre renders.
   const onCloseRef = useRef(onClose);
@@ -55,11 +44,8 @@ export const useDialog = (
   // Esc fecha, e o Tab circula dentro do painel em vez de escapar para a página.
   useEffect(() => {
     if (!isOpen) return;
-    const id = idRef.current!;
-    pilha.push(id);
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (pilha[pilha.length - 1] !== id) return;
       if (e.key === 'Escape') { e.preventDefault(); onCloseRef.current(); return; }
       if (e.key !== 'Tab' || !panelRef.current) return;
 
@@ -73,11 +59,7 @@ export const useDialog = (
     };
 
     document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      const i = pilha.lastIndexOf(id);
-      if (i >= 0) pilha.splice(i, 1);
-    };
+    return () => document.removeEventListener('keydown', onKeyDown);
   }, [isOpen]);
 
   return panelRef;

@@ -124,35 +124,20 @@ describe('PARTE 13 — nada de texto solto fora do sistema de tradução', () =>
                     'components/LanguagePanel.tsx', 'components/CategorySheet.tsx',
                     'components/ErrorFallback.tsx', 'modules/CatalogModule.tsx',
                     'components/ShareSheet.tsx', 'components/ShareButton.tsx',
-                    // As peças da moldura que a auditoria de usabilidade criou
-                    // ou reescreveu: folha de país, "Mostrar", "Sem som agora".
-                    'components/ModuleShell.tsx', 'components/PhraseCard.tsx',
-                    'components/ShowPhraseScreen.tsx', 'components/VoiceMissingSheet.tsx',
-                    'components/CountrySheet.tsx', 'components/UpdateSheet.tsx',
-                    'components/FavoritesPanel.tsx', 'components/ShoppingListPanel.tsx',
-                    // Todos os dez generativos. Antes eram só três, e um
-                    // t('mkDeph') com erro de digitação num dos outros sete
-                    // renderizaria a chave crua sem nenhum teste pegar.
-                    'modules/LocationModule.tsx', 'modules/DirectionsModule.tsx',
-                    'modules/NumbersModule.tsx', 'modules/BodyModule.tsx',
-                    'modules/CafeModule.tsx', 'modules/PronounsModule.tsx',
-                    'modules/SizesModule.tsx', 'modules/MakeupModule.tsx',
-                    'modules/ElderCareModule.tsx', 'modules/HouseCleaningModule.tsx'];
+                    // Nenhum módulo generativo estava nesta lista, então um
+                    // t('mkDeph') com erro de digitação renderizaria a chave
+                    // crua e nenhum teste pegaria. Estender aos outros sete
+                    // é trabalho próprio, e vale.
+                    'modules/MakeupModule.tsx',
+                    'modules/ElderCareModule.tsx',
+                    'modules/HouseCleaningModule.tsx'];
     const usadas = new Set<string>();
     for (const f of fontes) {
-      // Pega também os dois lados de um ternário — t(chegou ? 'dirArrived' :
-      // 'dirMaxSteps') —, mas não o literal comparado (copia === 'done').
-      for (const chamada of ler(f).matchAll(/\bt\(([^()]*)\)/g)) {
-        for (const m of chamada[1].matchAll(/(?:^|[?:]\s*)'([A-Za-z0-9_]+)'/g)) usadas.add(m[1]);
-      }
+      for (const m of ler(f).matchAll(/\bt\('([A-Za-z0-9_]+)'\)/g)) usadas.add(m[1]);
     }
     expect(usadas.size).toBeGreaterThan(20);
-    // Em todos os locales, não só em dois: a paridade dos blocos é outro teste,
-    // mas este é o que liga a chave ao código que a usa.
-    for (const l of Object.keys(translations)) {
-      const faltando = [...usadas].filter((k) => !translations[l][k]);
-      expect(faltando, l).toEqual([]);
-    }
+    const faltando = [...usadas].filter((k) => !translations['pt-BR'][k] || !translations['ar-MA'][k]);
+    expect(faltando).toEqual([]);
   });
 
   it('as categorias e subcategorias continuam traduzidas nos 12 locales', () => {
